@@ -89,6 +89,11 @@ public enum AgentTerminationReason: String, Sendable, Codable {
     case timeout
     case failed
     case cancelled
+    /// Stopped by AppleBench for exceeding the task's token budget. Distinct
+    /// from `timeout` because it says which limit bound the run, and a reader
+    /// comparing two models needs to know a task was cut short on spend
+    /// rather than on the clock.
+    case budgetExceeded = "budget_exceeded"
 }
 
 public struct AgentRunResult: Sendable {

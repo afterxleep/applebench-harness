@@ -13,6 +13,14 @@
 #                           (minimal, low, medium, high, max), so the value
 #                           is passed through rather than validated. Recorded
 #                           on the run, since effort changes the number.
+#       --max-tokens <n>    Stop a task once it has spent this many tokens.
+#                           The wall clock is a poor proxy for spend: a model
+#                           can burn a budget in two minutes or idle for
+#                           twenty. Tightens each task's own limit, never
+#                           loosens it.
+#       --timeout-cap <s>   Ceiling on every task's wall-clock timeout, in
+#                           seconds. Also tightening only, so a task that
+#                           asks for less keeps what its author gave it.
 #       --agent-arg <arg>   Extra argument forwarded verbatim to the agent CLI
 #                           (repeatable). The escape hatch for anything the
 #                           flags above do not cover.
@@ -65,6 +73,8 @@ suite="gold"
 agent="opencode"
 model=""
 effort=""
+max_tokens=""
+timeout_cap=""
 agent_arg=()
 parallel="1"
 out=""
@@ -87,6 +97,8 @@ while [ $# -gt 0 ]; do
         -a|--agent) agent="$2"; shift 2 ;;
         -m|--model) model="$2"; shift 2 ;;
         -e|--effort) effort="$2"; shift 2 ;;
+        --max-tokens) max_tokens="$2"; shift 2 ;;
+        --timeout-cap) timeout_cap="$2"; shift 2 ;;
         --agent-arg) agent_arg+=(--agent-arg "$2"); shift 2 ;;
         -p|--parallel) parallel="$2"; shift 2 ;;
         -o|--out) out="$2"; shift 2 ;;
@@ -220,6 +232,7 @@ log="$out/run.log"
 if [ -f "$taskset_suites/$suite.yaml" ]; then suite="$taskset_suites/$suite.yaml"; fi
 
 echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} effort=${effort:-<default>} parallel=$parallel"
+echo "  caps:   tokens=${max_tokens:-<task>} timeout=${timeout_cap:-<task>}"
 echo "  runs:   $runs_dir"
 echo "  report: $out"
 if [ -n "$vm" ]; then
@@ -239,6 +252,8 @@ set +e
     --tasks-dir "$taskset_tasks" \
     ${model:+--model "$model"} \
     ${effort:+--effort "$effort"} \
+    ${max_tokens:+--max-tokens "$max_tokens"} \
+    ${timeout_cap:+--timeout-cap "$timeout_cap"} \
     ${agent_arg[@]+"${agent_arg[@]}"} \
     --parallel "$parallel" \
     --runs-dir "$runs_dir" \

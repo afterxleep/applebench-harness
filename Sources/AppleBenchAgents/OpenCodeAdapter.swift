@@ -214,7 +214,7 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
                 version: version,
                 configuration: configuration
             ),
-            terminationReason: CLIAgentSession.terminationReason(for: outcome.processResult),
+            terminationReason: CLIAgentSession.terminationReason(for: outcome),
             exitCode: outcome.processResult.exitCode,
             usage: outcome.usage,
             finalResponse: outcome.finalResponse

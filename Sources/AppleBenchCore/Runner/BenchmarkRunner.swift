@@ -17,6 +17,8 @@ public struct RunnerOptions: Sendable {
     public var stripWrapperCLIs: Bool
     /// Root directory beneath which run directories are created.
     public var runsRoot: URL
+    /// Ceilings applied to every task's own limits. Tightening only.
+    public var limitCaps: LimitCaps
 
     public init(
         model: String? = nil,
@@ -24,7 +26,8 @@ public struct RunnerOptions: Sendable {
         keepWorkspace: Bool = false,
         environmentAllowlist: [String] = [],
         stripWrapperCLIs: Bool = false,
-        runsRoot: URL
+        runsRoot: URL,
+        limitCaps: LimitCaps = LimitCaps()
     ) {
         self.model = model
         self.effort = effort
@@ -32,6 +35,7 @@ public struct RunnerOptions: Sendable {
         self.environmentAllowlist = environmentAllowlist
         self.stripWrapperCLIs = stripWrapperCLIs
         self.runsRoot = runsRoot
+        self.limitCaps = limitCaps
     }
 }
 
@@ -135,7 +139,7 @@ public struct BenchmarkRunner: Sendable {
             effort: options.effort,
             environmentAllowlist: options.environmentAllowlist,
             stripWrapperCLIs: options.stripWrapperCLIs,
-            limits: task.limits,
+            limits: task.limits.capped(by: options.limitCaps),
             environment: snapshot
         )
 

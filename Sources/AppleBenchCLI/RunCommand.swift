@@ -21,6 +21,12 @@ struct RunCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Reasoning effort passed to the agent when its CLI supports it (e.g. low, medium, high).")
     var effort: String?
 
+    @Option(name: .long, help: "Stop the task once it has spent this many tokens. Tightens the task's own budget, never loosens it.")
+    var maxTokens: Int?
+
+    @Option(name: .long, help: "Ceiling on the task's wall-clock timeout, in seconds. Tightens, never loosens.")
+    var timeoutCap: Int?
+
     @Option(name: .long, help: "Tart image to run the agent in (isolated VM, no internet). Omit to run locally.")
     var vm: String?
 
@@ -77,7 +83,8 @@ struct RunCommand: AsyncParsableCommand {
             keepWorkspace: keepWorkspace,
             environmentAllowlist: allowEnv,
             stripWrapperCLIs: stripWrapperCLIs,
-            runsRoot: runsDir.map { URL(fileURLWithPath: $0) } ?? Wiring.defaultRunsRoot()
+            runsRoot: runsDir.map { URL(fileURLWithPath: $0) } ?? Wiring.defaultRunsRoot(),
+            limitCaps: LimitCaps(timeoutSeconds: timeoutCap, maxTokens: maxTokens)
         )
 
         print("AppleBench · \(benchmarkTask.id)\n")

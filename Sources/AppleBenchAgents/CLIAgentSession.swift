@@ -25,6 +25,9 @@ enum CLIAgentSession {
         var usage: AgentUsage
         var finalResponse: String?
         var parsedEventCount: Int
+        /// True when the run was stopped for spending its token budget rather
+        /// than for running out of time or finishing.
+        var budgetExceeded: Bool = false
     }
 
     static func execute(
@@ -45,22 +48,48 @@ enum CLIAgentSession {
             "phase": .string("agent"),
         ]))
 
+        // A token budget needs the adapter's parser: without one there is no
+        // usage to count, and guessing from raw text would invent a number.
+        let budget: TokenBudget? = {
+            guard let cap = context.limits.maxTokens, cap > 0, let parser = invocation.parser else { return nil }
+            return TokenBudget(cap: cap, parser: parser)
+        }()
+
         let result: ProcessExecutionResult
         do {
-            result = try await processRunner.run(
-                command,
-                timeout: .seconds(context.limits.timeoutSeconds)
-            ) { stream, text in
-                // Live raw capture; structured extraction happens post-exit.
-                Task {
-                    await recorder.record(.agentOutput, payload: .object([
-                        "stream": .string(stream.rawValue),
-                        "text": .string(text),
-                    ]))
+            let runTask = Task { () -> ProcessExecutionResult in
+                try await processRunner.run(
+                    command,
+                    timeout: .seconds(context.limits.timeoutSeconds)
+                ) { stream, text in
+                    // Live raw capture; structured extraction happens post-exit.
+                    Task {
+                        await recorder.record(.agentOutput, payload: .object([
+                            "stream": .string(stream.rawValue),
+                            "text": .string(text),
+                        ]))
+                        if let budget, stream == .stdout {
+                            await budget.consume(text)
+                        }
+                    }
                 }
             }
+            await budget?.attach(runTask)
+            result = try await runTask.value
         } catch let error as ProcessRunnerError {
             throw BenchmarkFailure.agentLaunchFailure("\(error)")
+        } catch is CancellationError {
+            throw BenchmarkFailure.agentLaunchFailure("Agent run was cancelled")
+        }
+
+        let budgetExceeded = await budget?.isExceeded ?? false
+        if budgetExceeded {
+            await recorder.record(.commandFinished, payload: .object([
+                "phase": .string("agent"),
+                "stopped_by": .string("token_budget"),
+                "tokens_spent": .int(await budget?.spent ?? 0),
+                "token_budget": .int(context.limits.maxTokens ?? 0),
+            ]))
         }
 
         var payload: [String: JSONValue] = [
@@ -114,7 +143,8 @@ enum CLIAgentSession {
             processResult: result,
             usage: usage,
             finalResponse: finalResponse,
-            parsedEventCount: parsedCount
+            parsedEventCount: parsedCount,
+            budgetExceeded: budgetExceeded
         )
     }
 
@@ -122,6 +152,14 @@ enum CLIAgentSession {
         if result.timedOut { return .timeout }
         if result.exitCode == 0 { return .completed }
         return .failed
+    }
+
+    /// The budget check comes first: stopping an agent on spend kills the
+    /// process, so the raw result would otherwise read as an ordinary failure
+    /// and hide which limit actually ended the run.
+    static func terminationReason(for outcome: Outcome) -> AgentTerminationReason {
+        if outcome.budgetExceeded { return .budgetExceeded }
+        return terminationReason(for: outcome.processResult)
     }
 
     /// Usage events are per-step reports (OpenCode emits tokens and cost per

@@ -149,6 +149,33 @@ named `openrouter/<publisher>/<model>`.
   --strip-wrapper-clis
 ```
 
+### Bounding what a run costs
+
+Most of a suite's spend is in the tasks a model cannot solve, because those are
+the ones that run to their full limit. Two caps bound that from the command
+line, so the task files stay as their author wrote them:
+
+```bash
+./Scripts/run-benchmark.sh --suite gold --model <model> \
+  --max-tokens 150000 --timeout-cap 600
+```
+
+`--max-tokens` counts spend live from the agent's own usage reports and tears
+down the process when it crosses the budget. The run records
+`budget_exceeded` rather than `timeout`, so a reader can tell which limit ended
+it. Grading still runs against whatever the agent left, exactly as it does
+after a timeout.
+
+It is a step boundary, not a hard ceiling. OpenCode reports usage per completed
+step, so the earliest the harness can act is after the step that crossed the
+line; a cap of 500 against a first step of 20,000 stops after that step, not at
+500. It bounds how many steps a losing task gets, which is where the money goes,
+not the exact token count.
+
+`--timeout-cap` is the same idea for the clock. Both only ever tighten: a task
+asking for less than the cap keeps what its author gave it, because raising a
+limit would change what the task measures.
+
 ### Reasoning effort
 
 `--effort` sets how hard the model thinks, forwarded to OpenCode as the model
