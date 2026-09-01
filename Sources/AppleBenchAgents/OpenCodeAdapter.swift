@@ -75,22 +75,45 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
         return contents.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// The `opencode run` argument list for one task.
+    ///
+    /// Separate from `run` so what reaches the agent can be asserted without
+    /// launching one. Two things here change a published number: the variant,
+    /// which is how OpenCode names reasoning effort, and the prompt staying
+    /// last, since a prompt that drifted in front of a flag would be read as
+    /// that flag's value.
+    static func agentArguments(
+        model: String?,
+        effort: String?,
+        additionalArguments: [String],
+        prompt: String
+    ) -> [String] {
+        var arguments = ["run", "--format", "json", "--pure", "--auto"]
+        if let model {
+            arguments += ["--model", model]
+        }
+        if let effort {
+            // OpenCode calls reasoning effort a model "variant" (minimal,
+            // low, medium, high, max), and which of those exist is decided by
+            // the provider, so the value is forwarded rather than checked.
+            arguments += ["--variant", effort]
+        }
+        arguments += additionalArguments
+        arguments.append(prompt)
+        return arguments
+    }
+
     public func run(
         task: BenchmarkTask,
         context: RunContext,
         recorder: EventRecorder
     ) async throws -> AgentRunResult {
-        var arguments = ["run", "--format", "json", "--pure", "--auto"]
-        if let model = context.model {
-            arguments += ["--model", model]
-        }
-        if let effort = context.effort {
-            // OpenCode calls reasoning effort a model "variant" (e.g.
-            // minimal, high, max — provider-specific).
-            arguments += ["--variant", effort]
-        }
-        arguments += options.additionalArguments
-        arguments.append(task.prompt)
+        let arguments = Self.agentArguments(
+            model: context.model,
+            effort: context.effort,
+            additionalArguments: options.additionalArguments,
+            prompt: task.prompt
+        )
 
         var environment = context.agentEnvironment(
             extra: [

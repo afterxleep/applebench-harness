@@ -125,4 +125,40 @@ struct OpenCodeAdapterTests {
             try OpenCodeAdapter.resolveProviderJSON(from: "/nonexistent/applebench/provider.json")
         }
     }
+    @Test("Reasoning effort is passed to OpenCode as the model variant")
+    func effortBecomesVariant() {
+        let arguments = OpenCodeAdapter.agentArguments(
+            model: "openrouter/anthropic/claude-sonnet-4.5",
+            effort: "high",
+            additionalArguments: [],
+            prompt: "Fix it."
+        )
+        #expect(arguments.contains(["--variant", "high"]))
+        #expect(arguments.contains(["--model", "openrouter/anthropic/claude-sonnet-4.5"]))
+    }
+
+    @Test("No effort means no variant, so the provider default stands")
+    func absentEffortOmitsVariant() {
+        let arguments = OpenCodeAdapter.agentArguments(
+            model: "m",
+            effort: nil,
+            additionalArguments: [],
+            prompt: "Fix it."
+        )
+        #expect(!arguments.contains("--variant"))
+    }
+
+    @Test("The prompt stays last, after any forwarded agent arguments")
+    func promptIsLast() {
+        let arguments = OpenCodeAdapter.agentArguments(
+            model: "m",
+            effort: "low",
+            additionalArguments: ["--think", "hard"],
+            prompt: "Fix it."
+        )
+        // A prompt that drifted in front of a flag would be read as its value.
+        #expect(arguments.last == "Fix it.")
+        #expect(arguments.contains(["--think", "hard"]))
+    }
+
 }

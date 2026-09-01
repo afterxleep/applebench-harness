@@ -115,8 +115,10 @@ A pass rate is meaningless without its conditions. Every published run states:
 
 1. **Which suite.** Scores come from the private gold set. The sample tasks
    that ship with the harness are for reading and copying, never for scoring.
-2. **Which model, through which harness.** The harness is held constant so
-   the model is the only variable.
+2. **Which model, through which harness, at what reasoning effort.** The
+   harness is held constant so the model is the only variable, and effort is
+   stated because a model at high effort and the same model at low effort are
+   two different results.
 3. **Which environment.** Xcode version and build, macOS version, simulator
    model and runtime.
 4. **Which attempt counts.** When a task was re-run after an infrastructure

@@ -149,6 +149,24 @@ named `openrouter/<publisher>/<model>`.
   --strip-wrapper-clis
 ```
 
+### Reasoning effort
+
+`--effort` sets how hard the model thinks, forwarded to OpenCode as the model
+variant:
+
+```bash
+./Scripts/run-benchmark.sh --suite gold --model <model> --effort high ...
+```
+
+Which levels exist is up to the provider (`minimal`, `low`, `medium`, `high`,
+`max` are the usual set), so the value is passed through rather than validated.
+An unknown level fails at the agent, not silently.
+
+Effort changes the number, so it is part of a run's conditions rather than a
+detail: each run records it as `variant` in its metadata, and two runs at
+different efforts are not comparable. `--agent-arg` forwards anything else to
+the agent CLI verbatim, repeatably, for knobs `--effort` does not cover.
+
 `--api-key-file` reads the key, puts it in the environment as
 `OPENROUTER_API_KEY`, and allowlists it for the agent. `--api-key <key>` takes
 it inline instead, at the cost of putting a secret where `ps` and your shell

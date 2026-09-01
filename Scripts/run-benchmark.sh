@@ -8,6 +8,14 @@
 #   -s, --suite <id>        Suite to run (default: gold)
 #   -a, --agent <id>        Agent harness (default: opencode)
 #   -m, --model <id>        Model passed to the agent
+#   -e, --effort <level>    Reasoning effort, forwarded to OpenCode as the
+#                           model variant. Valid levels are per-provider
+#                           (minimal, low, medium, high, max), so the value
+#                           is passed through rather than validated. Recorded
+#                           on the run, since effort changes the number.
+#       --agent-arg <arg>   Extra argument forwarded verbatim to the agent CLI
+#                           (repeatable). The escape hatch for anything the
+#                           flags above do not cover.
 #   -p, --parallel <n>      Concurrent tasks (default: 1)
 #   -o, --out <dir>         Report directory (default: Reports/<suite>-<date>)
 #       --runs-dir <dir>    Run artifact root (default: .applebench/runs)
@@ -56,6 +64,8 @@ cd "$root"
 suite="gold"
 agent="opencode"
 model=""
+effort=""
+agent_arg=()
 parallel="1"
 out=""
 runs_dir="$root/.applebench/runs"
@@ -76,6 +86,8 @@ while [ $# -gt 0 ]; do
         -s|--suite) suite="$2"; shift 2 ;;
         -a|--agent) agent="$2"; shift 2 ;;
         -m|--model) model="$2"; shift 2 ;;
+        -e|--effort) effort="$2"; shift 2 ;;
+        --agent-arg) agent_arg+=(--agent-arg "$2"); shift 2 ;;
         -p|--parallel) parallel="$2"; shift 2 ;;
         -o|--out) out="$2"; shift 2 ;;
         --runs-dir) runs_dir="$2"; shift 2 ;;
@@ -89,7 +101,7 @@ while [ $# -gt 0 ]; do
         --vm-allow) vm_allow+=(--vm-allow "$2"); shift 2 ;;
         --vm-user) vm_user="$2"; shift 2 ;;
         --vm-password) vm_password="$2"; shift 2 ;;
-        -h|--help) sed -n '2,34p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '2,50p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "unknown option: $1" >&2; exit 2 ;;
     esac
 done
@@ -198,7 +210,7 @@ fi
 log="$out/run.log"
 if [ -f "$taskset_suites/$suite.yaml" ]; then suite="$taskset_suites/$suite.yaml"; fi
 
-echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} parallel=$parallel"
+echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} effort=${effort:-<default>} parallel=$parallel"
 echo "  runs:   $runs_dir"
 echo "  report: $out"
 if [ -n "$vm" ]; then
@@ -217,6 +229,8 @@ set +e
     --agent "$agent" \
     --tasks-dir "$taskset_tasks" \
     ${model:+--model "$model"} \
+    ${effort:+--effort "$effort"} \
+    ${agent_arg[@]+"${agent_arg[@]}"} \
     --parallel "$parallel" \
     --runs-dir "$runs_dir" \
     $strip_wrappers \
