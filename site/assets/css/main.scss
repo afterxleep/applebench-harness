@@ -285,27 +285,6 @@ main { flex: 1 0 auto; }
 .site-nav a:hover { color: var(--ink); background: var(--surface-2); text-decoration: none; }
 .site-nav a[aria-current="page"] { color: var(--ink); background: var(--surface-2); }
 
-/* Reads as an affordance rather than another nav word, without shouting: the
-   runs cost money and asking for help should be visible, not the loudest
-   thing on the page. */
-.site-nav a.nav-donate {
-  color: var(--ink);
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  padding: 0.34rem 0.8rem;
-  margin-left: 0.35rem;
-}
-.site-nav a.nav-donate:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-.site-nav a.nav-donate[aria-current="page"] {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-
 .icon-button {
   display: inline-grid;
   place-items: center;
