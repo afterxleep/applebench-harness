@@ -1,47 +1,76 @@
-# Public harness, private gold
+# Open harness, closed scoring set
 
-AppleBench splits in two so published scores stay honest.
+AppleBench is one public harness plus a task set you point it at. The split is
+what keeps a published score meaning something.
 
-## What is public
+## The harness is open
 
-The harness: grading engine, task schema, fixture-generation tooling, and
-the grader types (`build`, `xctest`, `xcuitest`, `runtime`, `file`,
-`xcodeproj`). Plus a small **dev** subset of 8 tasks that is expected to
-leak and is **never used for published scores**.
+Everything in this repository: the grading engine, the task schema, the fixture
+tooling, the isolation model, the graders (`build`, `xctest`, `xcuitest`,
+`runtime`, `file`, `xcodeproj`), and eight sample tasks with their fixtures.
 
-Export a publishable tree with:
+Read it, run it, disagree with it. That is the point of it being here.
+
+## The scoring tasks are not
+
+Published scores come from a separate, private task set: prompts, fixtures and
+expected outputs that are not on the internet. A benchmark whose answers are
+public stops measuring anything the moment somebody scrapes it, and no amount
+of sandboxing fixes a model that already saw the fix during pretraining.
+
+Keeping answers closed and sealing the run are two different defenses, and both
+are required. Runs are sandboxed either way: no internet, no search, the
+standard Apple toolchain and nothing else.
+
+## Pointing the harness at a task set
+
+`APPLEBENCH_TASKSET` is the only wiring. With nothing set the harness runs the
+bundled samples, so a fresh clone works with no arguments.
 
 ```bash
-./Scripts/export-public-tree.sh
+export APPLEBENCH_TASKSET=/path/to/task-set
+./Scripts/prepare-fixtures.sh
+./Scripts/run-benchmark.sh --suite gold --agent <agent> --model <model>
 ```
 
-The output under `dist/applebench-public/` contains no gold prompts,
-no gold fixtures, and no gold `solution.patch` files.
+A task set is a directory holding exactly three things:
 
-## What stays private
+```
+Examples/Tasks/     one YAML per task
+Examples/Suites/    gold.yaml or dev.yaml, plus any subsets
+Fixtures/           one Xcode project per fixture, with its .solution overlay
+```
 
-Task prompts, fixtures, and expected outputs for the **gold** scoring set
-(`Examples/Suites/gold.yaml`). Submissions run here, or through a hosted
-eval endpoint. The gold set is never handed out.
+Nothing is copied in either direction. Prepared fixtures, solutions, run
+artifacts and reports are all written under the harness clone's `.applebench/`,
+so the task set stays clean and a closed one never lands in a public checkout.
 
-Eval runs are sandboxed either way: no internet, no search, standard
-Apple toolchain only. Closed gold stops pretraining contamination;
-sandboxing stops in-run cheating. Both are required.
+## Which suite a score may come from
 
-## Scores
+`gold.yaml` marks a scoring set: everything in it is closed, and a published
+number may only come from it. `dev.yaml` marks an open one, and nothing in it
+is ever scored. A task set declares one or the other, never both, and
+`./Scripts/check-task-set.sh` fails if a task belongs to neither.
 
-Publish aggregate scores from `gold.yaml` only. `dev.yaml` is a demo.
-`all-benchmark.yaml` is local verification and includes the leakable
-subset: do not score it.
+## Writing your own
+
+`docs/AUTHORING.md` covers the task schema and fixture layout, `docs/GRADING.md`
+covers the graders. Start by copying a sample: each one is a single YAML file
+plus a fixture directory with a `.solution` overlay.
+
+Whatever you write has to hold the contract before it is worth running:
+
+```bash
+./Scripts/verify-tasks.sh <task-id>
+```
+
+`--agent fake`, which changes nothing, must FAIL. `--agent solution`, which
+applies the reference fix, must PASS. A task that fails either way is measuring
+your fixture, not the model.
 
 ## Rotation
 
-Fixtures are XcodeGen manifests with templated bugs. Periodically rotate
-the private set so leaked transcripts do not remain a valid key:
-
-```bash
-./Scripts/rotate-private-set.sh 2026-q4
-```
-
-That is the long-term defense. Keeping gold private buys time; rotation
-keeps the benchmark alive past year one.
+Fixtures are XcodeGen manifests with templated defects, so a closed set can be
+regenerated rather than retired. Keeping answers closed buys time against
+contamination; rotating the set is what keeps the benchmark alive past the first
+leak.
