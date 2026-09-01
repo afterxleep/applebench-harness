@@ -72,7 +72,7 @@ defaults write com.apple.CrashReporter DialogType none
 `run-benchmark.sh` checks this and says so rather than writing the preference
 itself, since it is a global user setting.
 
-Accept the licence and install the runtime before anything else:
+Accept the license and install the runtime before anything else:
 
 ```bash
 sudo xcodebuild -license accept

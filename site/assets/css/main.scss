@@ -302,9 +302,16 @@ main { flex: 1 0 auto; }
 :root[data-theme="light"] .icon-button .icon-sun { display: block; }
 :root[data-theme="light"] .icon-button .icon-moon { display: none; }
 
+/* The repository link is an icon so it survives the narrow layout, where the
+   nav words get dropped, and so it reads as "go to the code" rather than as
+   another section of this site. */
+.site-nav a.icon-button { color: var(--ink-2); }
+.site-nav a.icon-button:hover { color: var(--ink); border-color: var(--line-strong); background: var(--surface-1); }
+
 @media (max-width: 720px) {
   .site-nav a { padding: 0.42rem 0.5rem; font-size: 0.85rem; }
   .site-nav a[data-optional] { display: none; }
+  .site-nav a.icon-button { padding: 0; }
 }
 
 /* Footer */

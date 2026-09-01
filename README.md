@@ -50,8 +50,21 @@ export APPLEBENCH_SIMULATOR_RUNTIME="iOS 18.5"
 
 ## Bring your own tasks
 
-A fresh clone runs on the bundled samples with no arguments. Point at any
-other task set with `APPLEBENCH_TASKSET`:
+A fresh clone runs on the bundled samples with no arguments. To score a task
+set that lives in its own repository, name it and the run fetches, prepares and
+scores it in one command:
+
+```bash
+./Scripts/run-benchmark.sh --task-set-repo git@github.com:you/your-tasks.git \
+  --model <model> --api-key <key>
+```
+
+It clones into `.applebench/taskset`, fast-forwards on later runs, and refuses
+a clone that has diverged locally, because a merged task set is a different
+task set and would score different tasks than the number claims. Put the URL in
+`APPLEBENCH_TASKSET_REPO` to drop the flag.
+
+For a task set already on disk, point at it directly:
 
 ```bash
 export APPLEBENCH_TASKSET=/path/to/your/tasks
@@ -72,7 +85,6 @@ ever lands in this repository.
 ## Try it
 
 ```bash
-swift build
 ./Scripts/prepare-fixtures.sh
 
 # An agent that changes nothing. A sound task must FAIL.
@@ -87,10 +99,25 @@ swift run applebench run runtime-002 --model anthropic/claude-sonnet-5
 swift run applebench run runtime-002 --model openrouter/minimax/minimax-m3
 
 # A whole suite, with the wrapper CLIs hidden so the agent has to drive the
-# raw toolchain
+# raw toolchain. Fixtures are prepared as part of the run.
 ./Scripts/run-benchmark.sh --suite dev --model openrouter/minimax/minimax-m3 \
-  --allow-env OPENROUTER_API_KEY --strip-wrapper-clis
+  --api-key sk-or-... --strip-wrapper-clis
+
+# The same, sealed: the agent runs in a VM that denies every destination
+# except the one its provider needs.
+./Scripts/run-benchmark.sh --suite dev --model <model> --api-key <key> \
+  --vm applebench-runner:latest --vm-allow 203.0.113.0/24
 ```
+
+`--api-key` puts the key in the environment and allowlists it for the agent, so
+there is no separate export to remember; `--api-key-file` does the same from a
+file and is the one to prefer, since an argument is visible in `ps`. Use
+`--api-key-env` when the provider names something other than
+`OPENROUTER_API_KEY`.
+
+`--effort` sets reasoning effort where the model has it, forwarded as OpenCode's
+model variant. Effort changes the number, so it is recorded on the run and two
+runs at different efforts are not comparable.
 
 Those two agents are the contract every task has to satisfy before it earns a
 place in the set: fail for an agent that changes nothing, pass once the
@@ -123,7 +150,7 @@ report them. Never zero, never estimated.
 - [`docs/READINESS.md`](docs/READINESS.md): what has been verified, and on what
 - [`docs/PUBLIC.md`](docs/PUBLIC.md): what is open, what is closed, and why
 
-## Licence
+## License
 
 MIT.
 
