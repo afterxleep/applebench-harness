@@ -10,6 +10,9 @@
         <a href="{{ target }}"{% if page.url contains item.url %} aria-current="page"{% endif %}>{{ item.title }}</a>
       {%- endfor -%}
       {%- if site.github_url %}<a href="{{ site.github_url }}" data-optional>GitHub</a>{% endif -%}
+      {%- if site.donate_url or site.donate_paypal_url -%}
+        <a class="nav-donate" href="{{ '/donate/' | relative_url }}"{% if page.url contains '/donate/' %} aria-current="page"{% endif %}>Donate</a>
+      {%- endif -%}
       <button class="icon-button" type="button" data-theme-toggle aria-label="Switch between light and dark theme">
         <svg class="icon-moon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
           <path d="M13.5 9.6A5.8 5.8 0 0 1 6.4 2.5a.6.6 0 0 0-.8-.7 6.9 6.9 0 1 0 8.6 8.6.6.6 0 0 0-.7-.8Z"/>

@@ -13,6 +13,11 @@ baseurl: /applebench-harness
 # them all, which is what to do if the harness ever goes private again.
 github_url: https://github.com/afterxleep/applebench-harness
 
+# Where the Donate button points. Empty keys drop their button from the page,
+# and emptying both removes the nav item too.
+donate_url: https://github.com/sponsors/afterxleep
+donate_paypal_url:
+
 author:
   name: Daniel Bernal
 
