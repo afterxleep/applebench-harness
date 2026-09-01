@@ -22,8 +22,8 @@ cd "$root"
 binary=".build/debug/applebench"
 timeout_seconds="${TIMEOUT:-420}"
 
-if [ ! -x "$binary" ]; then
-    echo "error: $binary not built (swift build --product applebench)" >&2
+if ! swift build --product applebench >/dev/null; then
+    echo "error: swift build failed" >&2
     exit 1
 fi
 
