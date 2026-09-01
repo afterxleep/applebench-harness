@@ -122,14 +122,22 @@ The model identifier is passed through to OpenCode, so an OpenRouter model is
 named `openrouter/<publisher>/<model>`.
 
 ```bash
-export OPENROUTER_API_KEY=sk-or-...
-
 ./Scripts/run-benchmark.sh \
   --suite gold \
   --model openrouter/anthropic/claude-sonnet-4.5 \
-  --allow-env OPENROUTER_API_KEY \
+  --api-key-file ~/.config/applebench/openrouter.key \
   --strip-wrapper-clis
 ```
+
+`--api-key-file` reads the key, puts it in the environment as
+`OPENROUTER_API_KEY`, and allowlists it for the agent. `--api-key <key>` takes
+it inline instead, at the cost of putting a secret where `ps` and your shell
+history can see it. Either way you no longer have to remember to export the
+variable *and* pass `--allow-env` for it, which is the mistake that looks
+exactly like a bad model: the agent launches, cannot authenticate, and every
+task fails.
+
+Setting `OPENROUTER_API_KEY` yourself and passing `--allow-env` still works.
 
 `--strip-wrapper-clis` hides `flowdeck`, `tuist`, `fastlane`, `xcodegen` and
 friends from the agent's `PATH`. Use it: the benchmark is about driving the

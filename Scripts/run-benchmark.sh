@@ -12,6 +12,12 @@
 #   -o, --out <dir>         Report directory (default: Reports/<suite>-<date>)
 #       --runs-dir <dir>    Run artifact root (default: .applebench/runs)
 #       --strip-wrapper-clis  Hide wrapper CLIs from the agent's PATH
+#       --api-key <key>     OpenRouter key to run with. Exposed to the agent
+#                           as OPENROUTER_API_KEY; no need to export it or
+#                           pass --allow-env yourself.
+#       --api-key-file <p>  Read that key from a file instead. Prefer this:
+#                           an argument is visible in `ps` to every process
+#                           on the machine and lands in your shell history.
 #       --allow-env <NAME>  Expose an environment variable to the agent
 #                           (repeatable). Needed for an API key when
 #                           --strip-wrapper-clis is on, because that mode
@@ -52,6 +58,9 @@ out=""
 runs_dir="$root/.applebench/runs"
 strip_wrappers=""
 allow_env=()
+api_key=""
+api_key_file=""
+api_key_variable="OPENROUTER_API_KEY"
 vm=""
 vm_allow=()
 vm_user=""
@@ -67,6 +76,8 @@ while [ $# -gt 0 ]; do
         --runs-dir) runs_dir="$2"; shift 2 ;;
         --strip-wrapper-clis) strip_wrappers="--strip-wrapper-clis"; shift ;;
         --allow-env) allow_env+=(--allow-env "$2"); shift 2 ;;
+        --api-key) api_key="$2"; shift 2 ;;
+        --api-key-file) api_key_file="$2"; shift 2 ;;
         --vm) vm="$2"; shift 2 ;;
         --vm-allow) vm_allow+=(--vm-allow "$2"); shift 2 ;;
         --vm-user) vm_user="$2"; shift 2 ;;
@@ -75,6 +86,34 @@ while [ $# -gt 0 ]; do
         *) echo "unknown option: $1" >&2; exit 2 ;;
     esac
 done
+
+# A key given on the command line or in a file is put into the environment here
+# and allowlisted automatically, so the caller does not have to remember to do
+# both. Getting only one of the two right is the failure that looks like a bad
+# model: the agent launches, cannot authenticate, and every task fails.
+if [ -n "$api_key" ] && [ -n "$api_key_file" ]; then
+    echo "error: pass --api-key or --api-key-file, not both." >&2
+    exit 2
+fi
+if [ -n "$api_key_file" ]; then
+    if [ ! -r "$api_key_file" ]; then
+        echo "error: --api-key-file cannot be read: $api_key_file" >&2
+        exit 2
+    fi
+    api_key="$(tr -d '[:space:]' < "$api_key_file")"
+    if [ -z "$api_key" ]; then
+        echo "error: --api-key-file is empty: $api_key_file" >&2
+        exit 2
+    fi
+fi
+if [ -n "$api_key" ]; then
+    export "$api_key_variable=$api_key"
+    # Do not allowlist it twice if the caller also passed --allow-env for it.
+    case " ${allow_env[*]-} " in
+        *" $api_key_variable "*) ;;
+        *) allow_env+=(--allow-env "$api_key_variable") ;;
+    esac
+fi
 
 # --vm-allow without --vm reads as "isolated except for this range" and is in
 # fact a completely unisolated run, so refuse it rather than run the wrong thing.
