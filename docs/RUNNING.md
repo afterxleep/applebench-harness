@@ -83,20 +83,39 @@ xcrun simctl list devicetypes | grep "iPhone 17"
 
 ## Get the harness and a task set
 
-The harness is public. The tasks it runs are a separate directory you point it
-at, so a scoring run is two clones joined by one environment variable.
+The harness is public. The tasks it runs live in their own repository, so on a
+fresh machine a scoring run is:
 
 ```bash
 git clone https://github.com/afterxleep/applebench-harness.git
 cd applebench-harness
 
-# Omit this and the eight bundled sample tasks are what runs.
-export APPLEBENCH_TASKSET=/path/to/scoring-task-set
+./Scripts/run-benchmark.sh \
+  --task-set-repo git@github.com:you/your-scoring-set.git \
+  --model <model> \
+  --api-key-file ~/.config/applebench/openrouter.key \
+  --strip-wrapper-clis
 ```
 
-Nothing is copied in either direction. Prepared fixtures, run artifacts and
-reports are all written under this clone's `.applebench/`, so the task set stays
-clean and a closed one never lands in a public checkout.
+That clones the task set into `.applebench/taskset`, prepares its fixtures, and
+runs the `gold` suite. Later runs fast-forward the clone instead of re-cloning,
+and a task set that has diverged locally is an error rather than a merge, since
+a merged set is a different set and would score different tasks. Put the URL in
+`APPLEBENCH_TASKSET_REPO` and you can drop the flag.
+
+Run it with no `--task-set-repo` at all and the eight bundled sample tasks are
+what runs, so a fresh clone works with no arguments.
+
+For a task set already on disk, point at it directly and prepare it yourself:
+
+```bash
+export APPLEBENCH_TASKSET=/path/to/scoring-task-set
+./Scripts/prepare-fixtures.sh
+```
+
+Nothing is copied in either direction. The clone, prepared fixtures, run
+artifacts and reports all live under the harness's `.applebench/`, so the task
+set stays clean and a closed one never lands in a public checkout.
 
 ## Prepare
 
@@ -125,6 +144,7 @@ named `openrouter/<publisher>/<model>`.
 ./Scripts/run-benchmark.sh \
   --suite gold \
   --model openrouter/anthropic/claude-sonnet-4.5 \
+  --task-set-repo git@github.com:you/your-scoring-set.git \
   --api-key-file ~/.config/applebench/openrouter.key \
   --strip-wrapper-clis
 ```

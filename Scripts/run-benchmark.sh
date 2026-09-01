@@ -12,6 +12,12 @@
 #   -o, --out <dir>         Report directory (default: Reports/<suite>-<date>)
 #       --runs-dir <dir>    Run artifact root (default: .applebench/runs)
 #       --strip-wrapper-clis  Hide wrapper CLIs from the agent's PATH
+#       --task-set-repo <u> Git URL of the task set to score. Cloned on first
+#                           use and fast-forwarded after, then prepared. Also
+#                           read from APPLEBENCH_TASKSET_REPO, so a scoring
+#                           run is one command on a fresh machine.
+#       --task-set-dir <d>  Where that clone lives (default:
+#                           .applebench/taskset)
 #       --api-key <key>     OpenRouter key to run with. Exposed to the agent
 #                           as OPENROUTER_API_KEY; no need to export it or
 #                           pass --allow-env yourself.
@@ -47,9 +53,6 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 
-# shellcheck source=Scripts/taskset.sh
-. "$(dirname "$0")/taskset.sh"
-
 suite="gold"
 agent="opencode"
 model=""
@@ -61,6 +64,8 @@ allow_env=()
 api_key=""
 api_key_file=""
 api_key_variable="OPENROUTER_API_KEY"
+task_set_repo="${APPLEBENCH_TASKSET_REPO:-}"
+task_set_dir=""
 vm=""
 vm_allow=()
 vm_user=""
@@ -76,6 +81,8 @@ while [ $# -gt 0 ]; do
         --runs-dir) runs_dir="$2"; shift 2 ;;
         --strip-wrapper-clis) strip_wrappers="--strip-wrapper-clis"; shift ;;
         --allow-env) allow_env+=(--allow-env "$2"); shift 2 ;;
+        --task-set-repo) task_set_repo="$2"; shift 2 ;;
+        --task-set-dir) task_set_dir="$2"; shift 2 ;;
         --api-key) api_key="$2"; shift 2 ;;
         --api-key-file) api_key_file="$2"; shift 2 ;;
         --vm) vm="$2"; shift 2 ;;
@@ -86,6 +93,45 @@ while [ $# -gt 0 ]; do
         *) echo "unknown option: $1" >&2; exit 2 ;;
     esac
 done
+
+# Materialise the task set before anything reads it. The tasks live in their
+# own repository, so a scoring run on a fresh machine would otherwise be clone,
+# export, prepare, run, with three chances to point at the wrong directory.
+#
+# The clone lives inside the harness, never the other way round: nothing the
+# harness generates is written back to the task set.
+if [ -n "$task_set_repo" ]; then
+    task_set_dir="${task_set_dir:-$root/.applebench/taskset}"
+    if [ -d "$task_set_dir/.git" ]; then
+        echo "Updating task set in ${task_set_dir}…"
+        # Fast-forward only: a task set that has diverged locally is a
+        # different set, and silently merging it would score the wrong tasks.
+        if ! git -C "$task_set_dir" pull --ff-only --quiet; then
+            echo "error: $task_set_dir could not be fast-forwarded. Resolve it or delete the directory." >&2
+            exit 1
+        fi
+    else
+        echo "Cloning task set from ${task_set_repo}…"
+        mkdir -p "$(dirname "$task_set_dir")"
+        if ! git clone --quiet "$task_set_repo" "$task_set_dir"; then
+            echo "error: could not clone $task_set_repo (private task sets need your git credentials)." >&2
+            exit 1
+        fi
+    fi
+    APPLEBENCH_TASKSET="$(cd "$task_set_dir" && pwd)"
+    export APPLEBENCH_TASKSET
+elif [ -n "$task_set_dir" ]; then
+    echo "error: --task-set-dir needs --task-set-repo (or APPLEBENCH_TASKSET_REPO); to use a task set already on disk, set APPLEBENCH_TASKSET." >&2
+    exit 2
+fi
+
+# shellcheck source=Scripts/taskset.sh
+. "$(dirname "$0")/taskset.sh"
+
+if [ -n "$task_set_repo" ]; then
+    echo "Preparing fixtures…"
+    "$(dirname "$0")/prepare-fixtures.sh" >/dev/null
+fi
 
 # A key given on the command line or in a file is put into the environment here
 # and allowlisted automatically, so the caller does not have to remember to do
