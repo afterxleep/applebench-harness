@@ -195,6 +195,17 @@ public struct BenchmarkRunner: Sendable {
             progress(.gradingStarted)
 
             if task.environment.simulator != nil, taskNeedsSimulator(task) {
+                // Recover from whatever ended the last run. A kill, a CI
+                // timeout or a crash never reaches teardown, so its device is
+                // still here; sweeping before creating ours means a leak
+                // survives one run rather than accumulating across a suite.
+                let reaped = await simulatorManager.reapStaleDevices()
+                if reaped > 0 {
+                    await recorder.record(.simulatorReaped, payload: .object([
+                        "removed": .int(reaped),
+                        "reason": .string("left behind by an earlier run"),
+                    ]))
+                }
                 let udid = try await simulatorManager.createDevice(
                     name: "AppleBench-\(runID)",
                     requirement: task.environment.simulator!,
@@ -291,7 +302,8 @@ public struct BenchmarkRunner: Sendable {
                 workspace: workspace,
                 adapter: adapter,
                 context: context,
-                keepWorkspace: options.keepWorkspace
+                keepWorkspace: options.keepWorkspace,
+                recorder: recorder
             )
             progress(.finished(result))
             return result
@@ -301,7 +313,8 @@ public struct BenchmarkRunner: Sendable {
                 workspace: workspace,
                 adapter: adapter,
                 context: context,
-                keepWorkspace: true  // always keep evidence of a failed run
+                keepWorkspace: true,  // always keep evidence of a failed run
+                recorder: recorder
             )
             throw error
         }
@@ -458,11 +471,16 @@ public struct BenchmarkRunner: Sendable {
         workspace: WorkspaceManager.Workspace,
         adapter: any AgentAdapter,
         context: RunContext,
-        keepWorkspace: Bool
+        keepWorkspace: Bool,
+        recorder: EventRecorder
     ) async {
         if let simulatorUDID {
             await simulatorManager.shutdown(udid: simulatorUDID)
-            await simulatorManager.delete(udid: simulatorUDID)
+            let removed = await simulatorManager.deleteVerifying(udid: simulatorUDID)
+            await recorder.record(.simulatorReaped, payload: .object([
+                "udid": .string(simulatorUDID),
+                "removed": .bool(removed),
+            ]))
         }
         await adapter.cleanup(context: context)
         if !keepWorkspace {

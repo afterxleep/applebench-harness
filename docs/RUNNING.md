@@ -318,6 +318,11 @@ Then commit and push; the Pages workflow deploys on any change under
 - **Everything after a certain point timed out.** Almost always another
   simulator was up, or the disk filled. Check `xcrun simctl list devices
   booted` and `df -h`.
+- **Simulators piling up.** They should not. Each run creates one device named
+  `AppleBench-<run id>` and deletes it afterwards, verifying it is gone rather
+  than assuming, and sweeps any left by an earlier run before it creates its
+  own. That sweep is what recovers from a killed run, since nothing else does.
+  Devices without that prefix are never touched.
 - **A task failed before any test executed.** The grader retries a run whose
   app would not install or whose test runner never attached, and records a
   warning when it does. Two in a row is the host, not the model.

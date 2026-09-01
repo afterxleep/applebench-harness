@@ -42,12 +42,82 @@ public struct SimulatorManager: Sendable {
         _ = try? await simctl(["shutdown", udid], describe: "shutdown device")
     }
 
+    /// Prefix every device this benchmark creates carries, and the only thing
+    /// that makes one safe to delete. A developer's own simulators hold state
+    /// they care about and are never touched.
+    public static let deviceNamePrefix = "AppleBench-"
+
+    /// The devices this benchmark left behind, from `simctl list devices --json`.
+    ///
+    /// A booted leftover counts: an unexpected booted device is what makes the
+    /// next `xcodebuild test` hang against its own destination, so it is the
+    /// most important one to reap, not the one to skip.
+    public static func staleBenchmarkDeviceUDIDs(listJSON: String, excluding liveUDID: String?) throws -> [String] {
+        struct Listing: Decodable {
+            struct Device: Decodable {
+                let udid: String
+                let name: String
+            }
+            let devices: [String: [Device]]
+        }
+        guard let data = listJSON.data(using: .utf8) else {
+            throw BenchmarkFailure.infrastructureFailure("simctl list produced no readable output")
+        }
+        let listing = try JSONDecoder().decode(Listing.self, from: data)
+        return listing.devices.values
+            .flatMap { $0 }
+            .filter { $0.name.hasPrefix(deviceNamePrefix) && $0.udid != liveUDID }
+            .map(\.udid)
+    }
+
+    /// Deletes every simulator this benchmark left behind, apart from the one
+    /// a run is currently using.
+    ///
+    /// Runs are killed: by an operator, by a CI timeout, by a crash. None of
+    /// those paths reach teardown, so each one strands a device, and a suite
+    /// of a hundred-odd tasks strands a hundred-odd. Sweeping at the start of
+    /// a run recovers from every one of them, whatever ended the last run.
+    @discardableResult
+    public func reapStaleDevices(excluding liveUDID: String? = nil) async -> Int {
+        guard let json = try? await simctl(["list", "devices", "--json"], describe: "list devices"),
+              let stale = try? Self.staleBenchmarkDeviceUDIDs(listJSON: json, excluding: liveUDID)
+        else { return 0 }
+        var reaped = 0
+        for udid in stale {
+            await shutdown(udid: udid)
+            if await deleteVerifying(udid: udid) { reaped += 1 }
+        }
+        return reaped
+    }
+
+    /// Deletes a device and confirms it is gone, retrying once.
+    ///
+    /// `simctl shutdown` returns before the device has finished shutting down,
+    /// so a delete issued immediately after can fail on a busy device. The old
+    /// code discarded that failure, which is how a run that looked clean left
+    /// a simulator behind every time.
+    @discardableResult
+    public func deleteVerifying(udid: String) async -> Bool {
+        for attempt in 0..<2 {
+            if attempt > 0 {
+                try? await Task.sleep(for: .seconds(2))
+                await shutdown(udid: udid)
+            }
+            _ = try? await simctl(["delete", udid], describe: "delete device")
+            guard let json = try? await simctl(["list", "devices", "--json"], describe: "list devices") else {
+                return false
+            }
+            if !json.contains(udid) { return true }
+        }
+        return false
+    }
+
     public func erase(udid: String) async throws {
         try await simctl(["erase", udid], describe: "erase device")
     }
 
     public func delete(udid: String) async {
-        _ = try? await simctl(["delete", udid], describe: "delete device")
+        await deleteVerifying(udid: udid)
     }
 
     public func install(udid: String, appURL: URL) async throws {

@@ -30,6 +30,12 @@ public enum BenchmarkEventType: String, Sendable, Codable, Equatable {
     case environmentCaptured = "environment_captured"
     case workspaceCreated = "workspace_created"
     case simulatorPrepared = "simulator_prepared"
+    /// A simulator this benchmark created could not be removed, or a leftover
+    /// from an earlier run was. Recorded rather than discarded: a stray booted
+    /// device makes the next task hang against its own destination, and a
+    /// silent leak is what turns one interrupted run into a machine full of
+    /// simulators.
+    case simulatorReaped = "simulator_reaped"
     case agentStarted = "agent_started"
     case agentOutput = "agent_output"
     /// A structured event surfaced by the agent's own output stream
