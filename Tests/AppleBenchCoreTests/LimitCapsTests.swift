@@ -39,3 +39,30 @@ struct LimitCapsTests {
         #expect(limits.capped(by: LimitCaps()) == limits)
     }
 }
+
+@Suite("Default limit caps")
+struct DefaultLimitCapsTests {
+    @Test("Time is capped by default and tokens are not")
+    func defaultsCapTimeOnly() {
+        // A token default would have to be guessed: the only measurements are
+        // from one model on the easier sample suite, and one set too low
+        // truncates real work while reporting an ordinary failure.
+        #expect(LimitCaps.standard.timeoutSeconds == 1_200)
+        #expect(LimitCaps.standard.maxTokens == nil)
+    }
+
+    @Test("The default tightens the long outliers and leaves the rest alone")
+    func defaultTightensOutliersOnly() {
+        // The tasks written at 1500s and 1800s come down to 20 minutes; the
+        // 900s majority is untouched, so what those tasks measure is unchanged.
+        #expect(RunLimits(timeoutSeconds: 1_800).capped(by: .standard).timeoutSeconds == 1_200)
+        #expect(RunLimits(timeoutSeconds: 1_500).capped(by: .standard).timeoutSeconds == 1_200)
+        #expect(RunLimits(timeoutSeconds: 900).capped(by: .standard).timeoutSeconds == 900)
+    }
+
+    @Test("A task asking for less than the default keeps its own limit")
+    func defaultsOnlyTighten() {
+        let short = RunLimits(timeoutSeconds: 600, maxTokens: 5_000)
+        #expect(short.capped(by: .standard) == short)
+    }
+}

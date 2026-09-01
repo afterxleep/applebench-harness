@@ -19,8 +19,11 @@
 #                           twenty. Tightens each task's own limit, never
 #                           loosens it.
 #       --timeout-cap <s>   Ceiling on every task's wall-clock timeout, in
-#                           seconds. Also tightening only, so a task that
-#                           asks for less keeps what its author gave it.
+#                           seconds. Defaults to 1200, twenty minutes: far
+#                           more than any measured task needs, and enough to
+#                           bound one that has stopped making progress.
+#                           Tightening only: a task that asks for less keeps
+#                           what its author gave it.
 #       --agent-arg <arg>   Extra argument forwarded verbatim to the agent CLI
 #                           (repeatable). The escape hatch for anything the
 #                           flags above do not cover.
@@ -232,7 +235,7 @@ log="$out/run.log"
 if [ -f "$taskset_suites/$suite.yaml" ]; then suite="$taskset_suites/$suite.yaml"; fi
 
 echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} effort=${effort:-<default>} parallel=$parallel"
-echo "  caps:   tokens=${max_tokens:-<task>} timeout=${timeout_cap:-<task>}"
+echo "  caps:   tokens=${max_tokens:-unlimited} timeout=${timeout_cap:-1200}s"
 echo "  runs:   $runs_dir"
 echo "  report: $out"
 if [ -n "$vm" ]; then

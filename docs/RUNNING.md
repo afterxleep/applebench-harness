@@ -172,9 +172,20 @@ line; a cap of 500 against a first step of 20,000 stops after that step, not at
 500. It bounds how many steps a losing task gets, which is where the money goes,
 not the exact token count.
 
-`--timeout-cap` is the same idea for the clock. Both only ever tighten: a task
-asking for less than the cap keeps what its author gave it, because raising a
-limit would change what the task measures.
+`--timeout-cap` is the same idea for the clock, and it applies by default at
+**1200 seconds**, twenty minutes. Successful tasks have been measured finishing
+in one to two, so the default is far above anything real and exists to bound a
+task that has stopped making progress. It tightens only the tasks written at
+1500s and 1800s; the 900s majority is untouched.
+
+There is no default token cap. The only measurements available come from one
+model on the easier sample suite, and a token default guessed too low would
+truncate real work while reporting an ordinary failure, which is the kind of
+error a benchmark cannot see in its own numbers. Set `--max-tokens` once a run
+has measured what your tasks actually spend.
+
+Both caps only ever tighten: a task asking for less keeps what its author gave
+it, because raising a limit would change what the task measures.
 
 ### Reasoning effort
 
