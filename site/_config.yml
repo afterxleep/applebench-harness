@@ -8,10 +8,10 @@ description: >-
   XCUITest, and Simulator runtime checks.
 
 url: https://afterxleep.github.io
-baseurl: /AppleBench
-# The repository is private while the suite is being finished. Setting
-# github_url restores every link on the site; leaving it empty removes them.
-github_url:
+baseurl: /applebench-harness
+# github_url drives every repository link on the site. Emptying it removes
+# them all, which is what to do if the harness ever goes private again.
+github_url: https://github.com/afterxleep/applebench-harness
 
 author:
   name: Daniel Bernal

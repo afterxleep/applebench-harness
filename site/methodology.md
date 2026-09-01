@@ -113,8 +113,8 @@ repository in a working state; both things are true, and the record says both.
 
 A pass rate is meaningless without its conditions. Every published run states:
 
-1. **Which suite.** Scores come from the private gold set. The public dev
-   subset is a demo and is never scored.
+1. **Which suite.** Scores come from the private gold set. The sample tasks
+   that ship with the harness are for reading and copying, never for scoring.
 2. **Which model, through which harness.** The harness is held constant so
    the model is the only variable.
 3. **Which environment.** Xcode version and build, macOS version, simulator
