@@ -22,7 +22,7 @@ if ! command -v xcodegen >/dev/null 2>&1; then
 fi
 
 # Every directory under Fixtures/. Optional filter:
-#   ./Scripts/prepare-fixtures.sh BuildFixture CounterFixture
+#   ./Scripts/prepare-fixtures.sh BuildFixture StateFixture
 if [ "$#" -gt 0 ]; then
     fixtures=("$@")
 else

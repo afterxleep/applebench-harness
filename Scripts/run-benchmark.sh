@@ -17,6 +17,20 @@
 #                           --strip-wrapper-clis is on, because that mode
 #                           gives the agent a hermetic HOME and any
 #                           credentials stored under the real one go with it.
+#       --vm <image>        Run the agent inside a Tart VM instead of on this
+#                           host. Egress is denied at the network layer, the
+#                           guest sees only the workspace and the harness's
+#                           own OpenCode config, and grading still happens on
+#                           the host after the VM is stopped.
+#       --vm-allow <CIDR>   Range the VM may reach (repeatable). Omit for a
+#                           fully offline guest; a hosted model needs its
+#                           provider's range.
+#       --vm-user <name>    SSH user for the VM image (default: admin)
+#       --vm-password <pw>  SSH password for the VM image (default: admin)
+#
+# Without --vm the agent runs on this host, and "no network" means its
+# toolset: webfetch is denied and plugins are off, but nothing stops it
+# shelling out to curl. Only --vm enforces it.
 #
 # Everything machine-specific comes from the environment, never from this
 # file. To point runs at a self-hosted or proxied endpoint, export
@@ -38,6 +52,10 @@ out=""
 runs_dir="$root/.applebench/runs"
 strip_wrappers=""
 allow_env=()
+vm=""
+vm_allow=()
+vm_user=""
+vm_password=""
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -49,10 +67,38 @@ while [ $# -gt 0 ]; do
         --runs-dir) runs_dir="$2"; shift 2 ;;
         --strip-wrapper-clis) strip_wrappers="--strip-wrapper-clis"; shift ;;
         --allow-env) allow_env+=(--allow-env "$2"); shift 2 ;;
-        -h|--help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        --vm) vm="$2"; shift 2 ;;
+        --vm-allow) vm_allow+=(--vm-allow "$2"); shift 2 ;;
+        --vm-user) vm_user="$2"; shift 2 ;;
+        --vm-password) vm_password="$2"; shift 2 ;;
+        -h|--help) sed -n '2,34p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "unknown option: $1" >&2; exit 2 ;;
     esac
 done
+
+# --vm-allow without --vm reads as "isolated except for this range" and is in
+# fact a completely unisolated run, so refuse it rather than run the wrong thing.
+if [ -z "$vm" ] && { [ "${#vm_allow[@]}" -gt 0 ] || [ -n "$vm_user" ] || [ -n "$vm_password" ]; }; then
+    echo "error: --vm-allow/--vm-user/--vm-password need --vm; without it the agent runs on this host with no egress restriction at all." >&2
+    exit 2
+fi
+
+# Runtime tasks crash the app on purpose, and macOS puts a "quit unexpectedly"
+# dialog on screen for each one unless CrashReporter is told not to. Over a
+# suite that is one modal dialog per crashing task, on top of whatever else the
+# operator is doing. Warn rather than write the preference: it is a global user
+# setting and a benchmark script has no business changing one silently.
+crash_dialog_type="$(defaults read com.apple.CrashReporter DialogType 2>/dev/null || echo unset)"
+case "$crash_dialog_type" in
+    none|server) ;;
+    *)
+        echo "note: macOS will show a crash dialog for every task whose app crashes, and"
+        echo "      several tasks crash by design. Silence them with:"
+        echo "        defaults write com.apple.CrashReporter DialogType none"
+        echo "      Undo later with: defaults delete com.apple.CrashReporter DialogType"
+        echo
+        ;;
+esac
 
 stamp="$(date -u +%Y-%m-%d)"
 out="${out:-$root/Reports/$suite-$stamp}"
@@ -70,6 +116,15 @@ if [ -f "$taskset_suites/$suite.yaml" ]; then suite="$taskset_suites/$suite.yaml
 echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} parallel=$parallel"
 echo "  runs:   $runs_dir"
 echo "  report: $out"
+if [ -n "$vm" ]; then
+    if [ "${#vm_allow[@]}" -gt 0 ]; then
+        echo "  vm:     $vm, egress denied except ${vm_allow[*]//--vm-allow/}"
+    else
+        echo "  vm:     $vm, all egress denied"
+    fi
+else
+    echo "  vm:     none, agent runs on this host and its egress is not restricted"
+fi
 echo
 
 set +e
@@ -81,6 +136,10 @@ set +e
     --runs-dir "$runs_dir" \
     $strip_wrappers \
     ${allow_env[@]+"${allow_env[@]}"} \
+    ${vm:+--vm "$vm"} \
+    ${vm_allow[@]+"${vm_allow[@]}"} \
+    ${vm_user:+--vm-user "$vm_user"} \
+    ${vm_password:+--vm-password "$vm_password"} \
     2>&1 | tee "$log"
 suite_status=${PIPESTATUS[0]}
 set -e

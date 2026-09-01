@@ -16,8 +16,12 @@ import Foundation
 /// - `--pure` disables external plugins.
 /// - `--auto` approves the remaining (explicitly allowed) permissions so runs
 ///   never block on prompts.
-/// OpenCode exposes no OS filesystem sandbox; folder confinement relies on
-/// the isolated workspace plus AppleBench's deferred evaluator metadata.
+/// What this does not do is isolate the process. OpenCode exposes no OS
+/// sandbox, so folder confinement relies on the isolated workspace plus
+/// AppleBench's deferred evaluator metadata, and denying `webfetch` removes
+/// the agent's network tool without stopping it shelling out to `curl`.
+/// `TartOpenCodeAdapter` is the mode where both are enforced rather than
+/// configured, and a published run should say which one it used.
 ///
 /// Telemetry: structured. `--format json` emits raw JSON events which are
 /// preserved verbatim; tool events, per-step token usage, and cost are
@@ -166,6 +170,13 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
         let version = await CLIAgentSession.toolVersion(executable: executable)
         var configuration = [
             "mode": "run --format json --pure --auto",
+            "isolation": "none (host process)",
+            // Denying webfetch takes away the agent's network tool. It does
+            // not stop the process reaching the network, because bash is
+            // allowed and curl is on PATH. Only the VM adapter enforces
+            // egress, so saying so here stops a local run's own record from
+            // reading as a stronger claim than it is.
+            "network": "unrestricted (host egress; --vm denies it)",
             "web_access": "disabled (webfetch denied)",
             "plugins": "disabled (--pure)",
             "user_config": "ignored (OPENCODE_CONFIG)",

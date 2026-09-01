@@ -147,8 +147,10 @@ The set is partitioned:
 These defend against different threats. Keeping the answers off the internet
 is the only thing that stops pretraining contamination, the slow leak
 measured in months. It does nothing about an agent that searches mid-run, so
-eval runs are sandboxed regardless: no internet, no search, standard Apple
-toolchain only.
+scoring runs are sandboxed too: the agent runs in a VM that default-denies
+every network destination and mounts only its workspace, leaving the standard
+Apple toolchain and nothing else. Each run records whether it was isolated
+that way.
 
 Neither substitutes for the other, and both have a shelf life. Rotation is the
 actual long-term defense: fixtures are XcodeGen manifests with templated

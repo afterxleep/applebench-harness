@@ -11,7 +11,7 @@ struct TestSummaryDecodingTests {
     func realSummary() throws {
         let json = """
         {
-          "environmentDescription" : "CounterFixture · Built with macOS 26.5.1",
+          "environmentDescription" : "StateFixture · Built with macOS 26.5.1",
           "expectedFailures" : 0,
           "failedTests" : 1,
           "finishTime" : 1786182095.327,
@@ -22,13 +22,13 @@ struct TestSummaryDecodingTests {
           "testFailures" : [
             {
               "failureText" : "XCTAssertEqual failed: (\\"0\\") is not equal to (\\"3\\")",
-              "targetName" : "CounterFixtureTests",
+              "targetName" : "StateFixtureTests",
               "testIdentifier" : 1,
               "testIdentifierString" : "CounterPersistenceTests/testCountSurvivesStoreRecreation()",
               "testName" : "testCountSurvivesStoreRecreation()"
             }
           ],
-          "title" : "Test - CounterFixture",
+          "title" : "Test - StateFixture",
           "totalTestCount" : 2
         }
         """

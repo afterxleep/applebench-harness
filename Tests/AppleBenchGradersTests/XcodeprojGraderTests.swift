@@ -239,8 +239,8 @@ struct XcodeprojGraderTests {
         let json = """
         {
           "type": "xcodeproj",
-          "project": "InfoPlistFixture.xcodeproj",
-          "scheme": "InfoPlistFixture",
+          "project": "TargetMembershipFixture.xcodeproj",
+          "scheme": "TargetMembershipFixture",
           "build_settings": [
             {"key": "IPHONEOS_DEPLOYMENT_TARGET", "equals": "18.0"},
             {"key": "SWIFT_VERSION", "matches": "^6"}
@@ -254,7 +254,7 @@ struct XcodeprojGraderTests {
             Issue.record("expected an xcodeproj grader")
             return
         }
-        #expect(configuration.scheme == "InfoPlistFixture")
+        #expect(configuration.scheme == "TargetMembershipFixture")
         #expect(configuration.buildSettings.count == 2)
         #expect(configuration.buildSettings[1].matches == "^6")
         #expect(configuration.infoPlist.first?.exists == true)

@@ -23,8 +23,12 @@ private task set, because a benchmark whose answers are on the internet stops
 measuring anything the moment somebody scrapes it.
 
 Keeping answers closed and sealing the run solve two different problems, so
-runs are sandboxed either way: no internet, no search, the standard Apple
-toolchain and nothing else.
+a scoring run is sandboxed: `--vm` puts the agent in a VM that default-denies
+every network destination and mounts nothing of the host but the workspace,
+with the standard Apple toolchain and nothing else. Run without it and the
+agent's web tools are off but its process is not confined, which is fine for
+development and is not a number to publish. Each run records which of the two
+it was.
 
 ## Requirements
 
@@ -109,8 +113,15 @@ report them. Never zero, never estimated.
 
 ## Documentation
 
-- `docs/GRADING.md`: what each grader asserts and how a verdict is reached
-- `docs/PUBLIC.md`: what is open, what is private, and why
+- [`docs/RUNNING.md`](docs/RUNNING.md): running a suite end to end, and how to isolate the agent
+- [`docs/AUTHORING.md`](docs/AUTHORING.md): the task schema and fixture layout
+- [`docs/GRADING.md`](docs/GRADING.md): what each grader asserts and how a verdict is reached
+- [`docs/AGENTS.md`](docs/AGENTS.md): the agent adapters and what each one controls
+- [`docs/RESULTS.md`](docs/RESULTS.md): the run artifacts and the exported schema
+- [`docs/TESTING.md`](docs/TESTING.md): how the harness itself is tested
+- [`docs/SAFETY.md`](docs/SAFETY.md): run limits and what is enforced
+- [`docs/READINESS.md`](docs/READINESS.md): what has been verified, and on what
+- [`docs/PUBLIC.md`](docs/PUBLIC.md): what is open, what is closed, and why
 
 ## Licence
 

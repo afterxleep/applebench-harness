@@ -30,8 +30,15 @@ the web can find *something*, and an agent that can reach the internet during
 an evaluation is not being evaluated under controlled conditions at all.
 
 The fix for the fast threat is sandboxing the run: no internet, no search,
-standard toolchain only. AppleBench does this regardless of what is published,
+standard toolchain only. AppleBench does this with a VM that default-denies
+every network destination and mounts nothing of the host but the workspace,
 and it would need to whether or not the repository were open.
+
+Worth being precise about, because it is the kind of claim people repeat
+without checking: that is a mode, not a default. Run the agent on your own
+machine and its web tools are denied but its process is not confined, since
+it still has a shell and `curl`. Every run records which of the two it was,
+so a published number can be checked rather than taken on trust.
 
 So the marginal value of going fully closed is lower than it feels. It buys
 you the slow-leak defense and nothing else, at the cost of a benchmark

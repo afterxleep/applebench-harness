@@ -47,23 +47,43 @@ actor TartVM {
         self.processRunner = processRunner
     }
 
-    /// Boots the image with the two benchmark mounts and waits until SSH is
-    /// accepting commands.
-    func start(workspaceURL: URL, configDirectoryURL: URL) async throws {
+    /// The `tart run` arguments that define the guest's isolation: what it can
+    /// reach on the network and what it can see of this host.
+    ///
+    /// Separate from `start` so the isolation is assertable without booting a
+    /// VM. The properties a published run depends on are all decided here.
+    static func runArguments(
+        configuration: TartConfiguration,
+        workspaceURL: URL,
+        configDirectoryURL: URL
+    ) -> [String] {
         var arguments = [
             "run", configuration.image,
             "--no-graphics",
             "--net-softnet",
-            // No internet: default-deny all destinations…
+            // No internet: default-deny every destination…
             "--net-softnet-block=0.0.0.0/0",
         ]
-        // …then allow only what the operator explicitly opened.
+        // …then allow only what the operator explicitly opened. The block
+        // stays in place, so an allow narrows the denial rather than lifting it.
         if !configuration.allowedCIDRs.isEmpty {
             arguments.append("--net-softnet-allow=\(configuration.allowedCIDRs.joined(separator: ","))")
         }
+        // The only two paths on this host the guest can see. The harness, the
+        // graders and the rest of the filesystem stay unreachable.
         arguments.append("--dir=workspace:\(workspaceURL.path)")
         arguments.append("--dir=benchconfig:\(configDirectoryURL.path):ro")
+        return arguments
+    }
 
+    /// Boots the image with the two benchmark mounts and waits until SSH is
+    /// accepting commands.
+    func start(workspaceURL: URL, configDirectoryURL: URL) async throws {
+        let arguments = Self.runArguments(
+            configuration: configuration,
+            workspaceURL: workspaceURL,
+            configDirectoryURL: configDirectoryURL
+        )
         let command = ProcessCommand(executable: "tart", arguments: arguments)
         let runner = processRunner
         runTask = Task {

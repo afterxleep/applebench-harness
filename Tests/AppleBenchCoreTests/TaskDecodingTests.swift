@@ -21,7 +21,7 @@ struct TaskDecodingTests {
         tags: [navigation, swiftui]
 
         repository:
-          url: https://github.com/applebench/NavigationFixture.git
+          url: https://github.com/applebench/AsyncLoadFixture.git
           commit: 4a91abc
 
         prompt: |
@@ -42,21 +42,21 @@ struct TaskDecodingTests {
 
         graders:
           - type: build
-            scheme: NavigationFixture
+            scheme: AsyncLoadFixture
 
           - type: xctest
-            scheme: NavigationFixture
+            scheme: AsyncLoadFixture
             test_plan: BenchmarkTests
 
           - type: xcuitest
-            scheme: NavigationFixtureUITests
+            scheme: AsyncLoadFixtureUITests
             tests:
               - SettingsNavigationTests/testOpeningSettings
 
           - type: runtime
-            scheme: NavigationFixture
+            scheme: AsyncLoadFixture
             launch:
-              bundle_identifier: com.applebench.NavigationFixture
+              bundle_identifier: com.applebench.AsyncLoadFixture
             must_not_crash: true
 
           - type: file
@@ -79,7 +79,7 @@ struct TaskDecodingTests {
         #expect(task.graders.count == 5)
 
         guard case .build(let build) = task.graders[0] else { Issue.record("expected build"); return }
-        #expect(build.scheme == "NavigationFixture")
+        #expect(build.scheme == "AsyncLoadFixture")
 
         guard case .xctest(let xctest) = task.graders[1] else { Issue.record("expected xctest"); return }
         #expect(xctest.testPlan == "BenchmarkTests")
@@ -88,7 +88,7 @@ struct TaskDecodingTests {
         #expect(ui.tests == ["SettingsNavigationTests/testOpeningSettings"])
 
         guard case .runtime(let runtime) = task.graders[3] else { Issue.record("expected runtime"); return }
-        #expect(runtime.launch.bundleIdentifier == "com.applebench.NavigationFixture")
+        #expect(runtime.launch.bundleIdentifier == "com.applebench.AsyncLoadFixture")
         #expect(runtime.mustNotCrash)
         #expect(runtime.observationSeconds == 5)
 
@@ -254,8 +254,8 @@ struct TaskDecodingTests {
           simulator: {device: "iPhone 17", runtime: "iOS 26.5"}
         graders:
           - type: xcodeproj
-            project: InfoPlistFixture.xcodeproj
-            scheme: InfoPlistFixture
+            project: TargetMembershipFixture.xcodeproj
+            scheme: TargetMembershipFixture
             build_settings:
               - key: IPHONEOS_DEPLOYMENT_TARGET
                 equals: "18.0"
@@ -270,7 +270,7 @@ struct TaskDecodingTests {
             Issue.record("expected an xcodeproj grader")
             return
         }
-        #expect(configuration.scheme == "InfoPlistFixture")
+        #expect(configuration.scheme == "TargetMembershipFixture")
         #expect(configuration.buildSettings.first?.equals == "18.0")
         #expect(configuration.infoPlist.first?.key == "NSCameraUsageDescription")
         #expect(configuration.bundleContains == ["Assets.car"])

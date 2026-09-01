@@ -39,14 +39,50 @@ struct TartAdapterTests {
         #expect(command.hasSuffix("'Fix the crash; don'\\''t touch tests. Use `xcodebuild`.'"))
     }
 
-    @Test("VM run invocation denies all egress by default")
-    func defaultEgressDenied() {
+    @Test("SSH invocation targets the guest with host-key checking off")
+    func sshInvocation() {
         let vm = TartVM(configuration: TartConfiguration(image: "bench-image"))
         let invocation = vm.sshInvocation(remoteCommand: "true", ip: "192.168.64.5")
         #expect(invocation.executable == "sshpass")
         #expect(invocation.arguments.contains("admin@192.168.64.5"))
         #expect(invocation.arguments.contains("StrictHostKeyChecking=no"))
         #expect(invocation.arguments.last == "true")
+    }
+
+    @Test("Booting the VM denies every destination when nothing is allowed")
+    func defaultEgressDenied() {
+        let arguments = TartVM.runArguments(
+            configuration: TartConfiguration(image: "bench-image"),
+            workspaceURL: URL(fileURLWithPath: "/tmp/ws"),
+            configDirectoryURL: URL(fileURLWithPath: "/tmp/cfg")
+        )
+        #expect(arguments.contains("--net-softnet"))
+        #expect(arguments.contains("--net-softnet-block=0.0.0.0/0"))
+        #expect(!arguments.contains { $0.hasPrefix("--net-softnet-allow") })
+    }
+
+    @Test("An allowed range opens only itself and never lifts the block")
+    func allowedRangeNarrowsTheDenial() {
+        let arguments = TartVM.runArguments(
+            configuration: TartConfiguration(image: "img", allowedCIDRs: ["10.0.0.0/8", "192.0.2.1/32"]),
+            workspaceURL: URL(fileURLWithPath: "/tmp/ws"),
+            configDirectoryURL: URL(fileURLWithPath: "/tmp/cfg")
+        )
+        #expect(arguments.contains("--net-softnet-block=0.0.0.0/0"))
+        #expect(arguments.contains("--net-softnet-allow=10.0.0.0/8,192.0.2.1/32"))
+    }
+
+    @Test("The guest mounts the workspace writable and the harness config read-only")
+    func mountsAreScoped() {
+        let arguments = TartVM.runArguments(
+            configuration: TartConfiguration(image: "img"),
+            workspaceURL: URL(fileURLWithPath: "/tmp/ws"),
+            configDirectoryURL: URL(fileURLWithPath: "/tmp/cfg")
+        )
+        #expect(arguments.contains("--dir=workspace:/tmp/ws"))
+        #expect(arguments.contains("--dir=benchconfig:/tmp/cfg:ro"))
+        // Anything else on the host would be reachable if it were mounted.
+        #expect(arguments.filter { $0.hasPrefix("--dir=") }.count == 2)
     }
 
     @Test("Allowed CIDRs are optional and default empty")

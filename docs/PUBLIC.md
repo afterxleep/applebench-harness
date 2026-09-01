@@ -19,8 +19,14 @@ public stops measuring anything the moment somebody scrapes it, and no amount
 of sandboxing fixes a model that already saw the fix during pretraining.
 
 Keeping answers closed and sealing the run are two different defenses, and both
-are required. Runs are sandboxed either way: no internet, no search, the
-standard Apple toolchain and nothing else.
+are required.
+
+Sandboxing is a mode, not a default. `--vm` runs the agent in a Tart guest that
+default-denies every destination and mounts only the workspace and the harness
+config, so the toolchain is all it has. Without it the agent's web tools are
+denied but its process is not confined, since `bash` is allowed and `curl` is
+on `PATH`. Every run records which mode produced it, and a published score
+should come from the first.
 
 ## Pointing the harness at a task set
 

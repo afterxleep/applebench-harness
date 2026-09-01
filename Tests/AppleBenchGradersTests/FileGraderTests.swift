@@ -160,7 +160,7 @@ struct FileGraderTests {
     func isJSON() async throws {
         let (context, workspace) = try makeContext()
         defer { try? FileManager.default.removeItem(at: workspace) }
-        try #"{"action":"build","target":"ConcurrencyFixture"}"#.write(
+        try #"{"action":"build","target":"CellReuseFixture"}"#.write(
             to: workspace.appendingPathComponent("build-settings.json"),
             atomically: true, encoding: .utf8
         )

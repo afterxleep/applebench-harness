@@ -110,10 +110,11 @@ description: >-
       <div class="card">
         <h3>The answers stay private</h3>
         <p>
-          The 123 scoring tasks are private and rotated. A small subset ships
-          with the open harness so anyone can run it, and those tasks are never
-          scored. Runs are sandboxed either way, because keeping answers closed
-          and sealing the run solve two different problems.
+          The 123 scoring tasks are private and rotated. Eight samples ship
+          with the open harness so anyone can run it, and those are never
+          scored. A scoring run is also sealed in a VM that denies network
+          egress, because keeping answers closed and sealing the run solve two
+          different problems.
         </p>
       </div>
     </div>
@@ -174,8 +175,12 @@ description: >-
         from that private set.
       </p>
       <p>
-        Neither half works alone, so runs are sandboxed regardless: no
-        internet, no search, the standard Apple toolchain and nothing else.
+        Neither half works alone, so a scoring run is sandboxed too. The
+        agent runs in a VM that default-denies every network destination and
+        mounts nothing of the host except the workspace it was given: the
+        standard Apple toolchain and nothing else. Every run records whether
+        it was isolated that way, because a number from an unconfined run is
+        a different claim.
       </p>
     </div>
 
