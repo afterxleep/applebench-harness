@@ -1,0 +1,35 @@
+id: tests-003
+title: Avatars appear on the wrong contacts
+category: tests
+difficulty: 3
+
+repository:
+  url: ./.applebench/fixtures/CellReuseFixture
+  commit: HEAD
+
+prompt: |
+  When scrolling quickly through Contacts, people's avatars show up on the
+  wrong rows, and sometimes a row briefly shows the previous person's photo.
+  Fix it.
+
+environment:
+  platform: ios
+  simulator:
+    device: "iPhone 17"
+    runtime: "iOS 26.5"
+
+limits:
+  timeout_seconds: 1200
+
+tags:
+  - uikit
+  - cell-reuse
+
+graders:
+  - type: build
+    project: CellReuseFixture.xcodeproj
+    scheme: CellReuseFixture
+
+  - type: xctest
+    project: CellReuseFixture.xcodeproj
+    scheme: CellReuseFixture

@@ -1,0 +1,99 @@
+{%- comment -%}
+Cost against wall-clock time, one mark per task, split by outcome.
+
+Two categories only, so they are encoded twice · color *and* shape · and both
+are named in the legend. A reader who cannot separate the hues still reads the
+chart. Params: rows.
+{%- endcomment -%}
+
+{%- assign max_cost = 0 -%}
+{%- assign max_time = 0 -%}
+{%- for row in include.rows -%}
+  {%- assign c = row.cost_usd | times: 1.0 -%}
+  {%- assign t = row.duration_seconds | times: 1.0 -%}
+  {%- if c > max_cost %}{% assign max_cost = c %}{% endif -%}
+  {%- if t > max_time %}{% assign max_time = t %}{% endif -%}
+{%- endfor -%}
+{%- if max_cost <= 0 %}{% assign max_cost = 1 %}{% endif -%}
+{%- if max_time <= 0 %}{% assign max_time = 1 %}{% endif -%}
+
+{%- assign x0 = 64 -%}
+{%- assign x1 = 636 -%}
+{%- assign y0 = 24 -%}
+{%- assign y1 = 330 -%}
+{%- assign span_x = x1 | minus: x0 -%}
+{%- assign span_y = y1 | minus: y0 -%}
+
+<figure class="figure">
+  <figcaption>
+    <h3 class="figure__title">Cost against wall-clock time</h3>
+    <p class="figure__subtitle">
+      One mark per task. The interesting region is bottom-left: solved cheaply
+      and quickly. A failure far to the right is a model that spent the budget
+      and still did not land a verified result.
+    </p>
+  </figcaption>
+
+  <ul class="legend">
+    <li><span class="legend__swatch" style="--swatch: var(--pass)"></span> Passed · filled circle</li>
+    <li><span class="legend__swatch" style="--swatch: var(--fail); border-radius: 0"></span> Failed · hollow square</li>
+  </ul>
+
+  <svg viewBox="0 0 660 382" role="img"
+       aria-label="Scatter plot of task cost in US dollars against wall-clock duration, one point per task, split into passed and failed. The full data is in the table below this page's charts.">
+    <text class="scatter__axis-title" x="0" y="14">Cost (USD)</text>
+
+    {%- comment -%} Recessive grid: five horizontal rules, labelled. {%- endcomment -%}
+    {%- for i in (0..4) -%}
+      {%- assign gy = span_y | times: i | divided_by: 4 | plus: y0 -%}
+      <line class="scatter__grid" x1="{{ x0 }}" y1="{{ gy }}" x2="{{ x1 }}" y2="{{ gy }}"/>
+      {%- assign gv = 4 | minus: i | times: max_cost | divided_by: 4 -%}
+      <text class="scatter__tick" x="{{ x0 | minus: 10 }}" y="{{ gy | plus: 4 }}" text-anchor="end">{% include money.html value=gv %}</text>
+    {%- endfor -%}
+
+    <line class="scatter__axis" x1="{{ x0 }}" y1="{{ y1 }}" x2="{{ x1 }}" y2="{{ y1 }}"/>
+
+    {%- for i in (0..4) -%}
+      {%- assign tx = span_x | times: i | divided_by: 4 | plus: x0 -%}
+      {%- assign tv = max_time | times: i | divided_by: 4 | divided_by: 60 | round -%}
+      <line class="scatter__grid" x1="{{ tx }}" y1="{{ y1 }}" x2="{{ tx }}" y2="{{ y1 | plus: 5 }}"/>
+      <text class="scatter__tick" x="{{ tx }}" y="{{ y1 | plus: 20 }}" text-anchor="middle">{{ tv }} min</text>
+    {%- endfor -%}
+
+    <text class="scatter__axis-title" x="{{ x0 }}" y="{{ y1 | plus: 42 }}">Wall-clock time</text>
+
+    {%- comment -%} Failures first so a passing mark is never hidden underneath one. {%- endcomment -%}
+    {%- for row in include.rows -%}
+      {%- if row.passed != "true" -%}
+        {%- assign px = row.duration_seconds | times: 1.0 | divided_by: max_time | times: span_x | plus: x0 -%}
+        {%- assign cost = row.cost_usd | default: 0 | times: 1.0 -%}
+        {%- assign py = cost | divided_by: max_cost | times: span_y -%}
+        {%- assign py = y1 | minus: py -%}
+        <rect x="{{ px | minus: 4.5 }}" y="{{ py | minus: 4.5 }}" width="9" height="9"
+              fill="none" stroke="var(--fail)" stroke-width="1.8">
+          <title>{{ row.task }} · FAILED · {{ row.duration_seconds | divided_by: 60 | round }} min · {% include money.html value=cost places=3 %}</title>
+        </rect>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- for row in include.rows -%}
+      {%- if row.passed == "true" -%}
+        {%- assign px = row.duration_seconds | times: 1.0 | divided_by: max_time | times: span_x | plus: x0 -%}
+        {%- assign cost = row.cost_usd | default: 0 | times: 1.0 -%}
+        {%- assign py = cost | divided_by: max_cost | times: span_y -%}
+        {%- assign py = y1 | minus: py -%}
+        <circle class="scatter__dot" cx="{{ px }}" cy="{{ py }}" r="5.5" fill="var(--pass)">
+          <title>{{ row.task }} · PASSED · {{ row.duration_seconds | divided_by: 60 | round }} min · {% include money.html value=cost places=3 %}</title>
+        </circle>
+      {%- endif -%}
+    {%- endfor -%}
+  </svg>
+
+  <p class="figure__note">
+    Linear on both axes, so the two expensive outliers compress everything
+    else toward the floor · that compression is the finding, not a rendering
+    problem. A cost of $0.00 means the agent CLI reported no usage for that
+    run, not that the run was free; absent data is left absent rather than
+    filled with a zero.
+  </p>
+</figure>

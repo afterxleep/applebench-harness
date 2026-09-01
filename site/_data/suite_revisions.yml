@@ -1,0 +1,30 @@
+# What the suite was, when. A published number only means something against a
+# stated set of tasks, so every run records the revision it was measured on
+# and results are only comparable within one.
+
+- id: "2026-08-31"
+  name: "2026-08-31"
+  gold_tasks: 123
+  current: true
+  summary: >-
+    Every task in the suite now fails for an agent that changes nothing and
+    passes once the reference fix is applied, 123 of 123. Before this
+    revision that had never been established for the ops family or for
+    ui-auto, and 47 tasks could not pass their own solvability check.
+  changes:
+    - "The 50 frameworks tasks were re-authored against the real APIs. They had tested String and Bool constants standing in for the frameworks they were named after."
+    - "Prompts state the symptom only. Titles and prompts used to state the diagnosis, and often the fix."
+    - "59 fixtures now ship with no test target at all. The graded tests were being handed to the agent alongside the defect."
+    - "Comments naming the planted defect were removed from every shipped source, and a check now blocks them in CI."
+    - "Seven harness defects were fixed, four of which made tasks impossible to pass for any agent."
+    - "visual-006 left the scoring suite: an agent that changes nothing passes it."
+
+- id: "2026-08-27"
+  name: "2026-08-27 (superseded)"
+  gold_tasks: 72
+  current: false
+  summary: >-
+    The suite as it stood for the MiniMax M2.7 and M3 runs. Its ops and
+    ui-auto tasks had never been shown to be solvable, several were
+    unpassable by construction, and fixtures shipped their own graded tests
+    and comments naming the defect.

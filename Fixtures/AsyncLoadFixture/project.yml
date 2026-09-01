@@ -1,0 +1,31 @@
+name: AsyncLoadFixture
+options:
+  bundleIdPrefix: com.applebench
+  deploymentTarget:
+    iOS: "18.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    CODE_SIGNING_ALLOWED: "NO"
+    GENERATE_INFOPLIST_FILE: "YES"
+    INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+targets:
+  AsyncLoadFixture:
+    type: application
+    platform: iOS
+    sources: [Sources]
+  AsyncLoadFixtureUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: AsyncLoadFixture
+schemes:
+  AsyncLoadFixture:
+    build:
+      targets:
+        AsyncLoadFixture: all
+        AsyncLoadFixtureUITests: [test]
+    test:
+      targets:
+        - AsyncLoadFixtureUITests

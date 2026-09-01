@@ -1,0 +1,38 @@
+{%- comment -%}
+Every task as one cell, grouped by category. Not a heatmap · a per-task
+outcome grid, so a reader can see *which* tasks failed rather than only how
+many. Params: rows.
+{%- endcomment -%}
+<figure class="figure">
+  <figcaption>
+    <h3 class="figure__title">Every task, one cell</h3>
+    <p class="figure__subtitle">
+      The whole run at a glance. Hover any cell for the task id, its graders,
+      and what they reported.
+    </p>
+  </figcaption>
+
+  <ul class="legend">
+    <li><span class="legend__swatch" style="--swatch: var(--pass)"></span> Passed</li>
+    <li><span class="legend__swatch" style="--swatch: color-mix(in srgb, var(--fail) 55%, var(--surface-2))"></span> Failed</li>
+  </ul>
+
+  {%- assign groups = include.rows | group_by: "category" | sort: "name" -%}
+  {%- for group in groups -%}
+    {%- assign hits = group.items | where: "passed", "true" -%}
+    <h4 style="margin:1.2rem 0 .5rem; font-size:.8rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3)">
+      {{ group.name }} <span style="color:var(--ink-2); font-weight:500">{{ hits.size }}/{{ group.items.size }}</span>
+    </h4>
+    <div class="matrix">
+      {%- assign sorted = group.items | sort: "task" -%}
+      {%- for row in sorted -%}
+        <span class="matrix__cell"
+              data-passed="{{ row.passed }}"
+              tabindex="0"
+              role="img"
+              aria-label="{{ row.task }}: {% if row.passed == 'true' %}passed{% else %}failed{% endif %}"
+              title="{{ row.task }} (d{{ row.difficulty }}) · {% if row.passed == 'true' %}PASS{% else %}FAIL{% endif %}&#10;{{ row.graders }}"></span>
+      {%- endfor -%}
+    </div>
+  {%- endfor -%}
+</figure>

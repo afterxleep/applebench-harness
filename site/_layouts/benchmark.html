@@ -1,0 +1,174 @@
+---
+layout: default
+---
+{%- assign rows = site.data.benchmarks[page.data] -%}
+{%- assign passed = rows | where: "passed", "true" -%}
+{%- assign total = rows.size -%}
+{%- assign rate = 0 -%}
+{%- if total > 0 %}{% assign rate = passed.size | times: 1000 | divided_by: total | times: 0.1 %}{% endif -%}
+
+{%- assign cost = 0 -%}
+{%- assign tokens = 0 -%}
+{%- assign seconds = 0 -%}
+{%- for row in rows -%}
+  {%- assign cost = cost | plus: row.cost_usd -%}
+  {%- assign tokens = tokens | plus: row.total_tokens -%}
+  {%- assign seconds = seconds | plus: row.duration_seconds -%}
+{%- endfor -%}
+
+<div class="wrap">
+  <div class="article-header">
+    <p class="entry__meta">
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
+      <span>{{ page.suite }} suite</span>
+      <span>{{ total }} tasks</span>
+      {%- if page.suite_revision %}<span>suite {{ page.suite_revision }}</span>{% endif -%}
+    </p>
+    <h1>{{ page.title }}</h1>
+    {%- if page.lede %}<p class="article-header__lede">{{ page.lede }}</p>{% endif -%}
+
+    {%- assign revision = site.data.suite_revisions | where: "id", page.suite_revision | first -%}
+    {%- if revision and revision.current != true %}
+    <div class="callout callout--warning">
+      <p><strong>Measured on suite {{ revision.name }}.</strong> {{ revision.summary }}</p>
+      <p>Numbers here are not comparable with runs on the current suite. See
+        <a href="{{ '/methodology/#suite-revisions' | relative_url }}">suite revisions</a>.</p>
+    </div>
+    {%- endif -%}
+  </div>
+
+  <div class="stats" style="margin-bottom:2.5rem">
+    <div class="stat">
+      <div class="stat__value">{{ rate | round: 1 }}%</div>
+      <div class="stat__label">Pass rate</div>
+      <p class="stat__note">{{ passed.size }} of {{ total }} tasks</p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{% include money.html value=cost %}</div>
+      <div class="stat__label">Total cost</div>
+      <p class="stat__note">
+        {%- if passed.size > 0 -%}
+          {%- assign per_solve = cost | divided_by: passed.size -%}
+          {% include money.html value=per_solve places=3 %} per solved task
+        {%- else -%}
+          no solved tasks
+        {%- endif -%}
+      </p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{{ tokens | divided_by: 1000 | round }}k</div>
+      <div class="stat__label">Tokens</div>
+      <p class="stat__note">as reported by the agent CLI</p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{{ seconds | divided_by: 3600 | round: 1 }}h</div>
+      <div class="stat__label">Wall clock</div>
+      <p class="stat__note">agent phase plus grading</p>
+    </div>
+  </div>
+
+  {%- comment -%}
+    Conditions come from the run's own export, not from anything typed into
+    the page, so they cannot drift from the data the charts below read.
+  {%- endcomment -%}
+  {%- assign report = site.data.reports[page.data] -%}
+  {%- assign first = report.runs | first -%}
+  {%- if first -%}
+  <div class="figure" style="margin-bottom:2.5rem">
+    <table style="margin:0">
+      <tbody>
+        <tr><th scope="row">Suite</th><td><code>{{ page.suite }}</code>, {{ total }} tasks{% if page.suite_revision %}, revision {{ page.suite_revision }}{% endif %}</td></tr>
+        <tr><th scope="row">Model</th><td><code>{{ page.model }}</code></td></tr>
+        <tr><th scope="row">Harness</th><td>{{ page.harness }}{% for pair in first.agent.configuration %}, {{ pair[0] | replace: "_", " " }}: {{ pair[1] }}{% endfor %}</td></tr>
+        <tr><th scope="row">Host</th><td>Xcode {{ first.environment.xcode }}{% if first.environment.xcode_build %} ({{ first.environment.xcode_build }}){% endif %}, macOS {{ first.environment.macos }}, {{ first.environment.architecture }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  {%- endif -%}
+
+  {%- if report.configurations.size > 1 -%}
+  <div class="figure" style="margin-bottom:2.5rem">
+    <p style="margin-top:0"><strong>More than one configuration ran here.</strong>
+      A pass rate over the whole directory mixes them, so each is broken out.</p>
+    <table style="margin:0">
+      <thead><tr><th scope="col">Configuration</th><th scope="col">Passed</th><th scope="col">Rate</th></tr></thead>
+      <tbody>
+        {%- for configuration in report.configurations -%}
+        <tr>
+          <td><code>{{ configuration.label }}</code></td>
+          <td>{{ configuration.passed }} / {{ configuration.total }}</td>
+          <td>{{ configuration.completion_rate | times: 100 | round: 1 }}%</td>
+        </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </div>
+  {%- endif -%}
+
+  <div class="grid grid--2" style="margin-bottom:1.5rem">
+    {%- include chart-pass-by-category.html rows=rows -%}
+    {%- include chart-pass-by-difficulty.html rows=rows -%}
+  </div>
+
+  {%- include chart-cost-vs-time.html rows=rows -%}
+  {%- include chart-task-matrix.html rows=rows -%}
+</div>
+
+<div class="wrap wrap--narrow">
+  <article class="prose" style="margin-top:3rem">
+    {{ content }}
+  </article>
+
+  <h2>Every run</h2>
+  <p>
+    Each row is one <code>result.json</code>. The run id is the directory it
+    came from, so every number on this page traces back to the artifacts that
+    produced it.
+  </p>
+</div>
+
+<div class="wrap">
+  <div class="figure" style="padding:0; overflow-x:auto">
+    <table style="margin:0; min-width:760px">
+      <thead>
+        <tr>
+          <th scope="col">Task</th>
+          <th scope="col">Category</th>
+          <th scope="col">D</th>
+          <th scope="col">Result</th>
+          <th scope="col">Time</th>
+          <th scope="col">Tokens</th>
+          <th scope="col">Cost</th>
+          <th scope="col">Graders</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%- assign sorted = rows | sort: "task" -%}
+        {%- for row in sorted -%}
+          <tr>
+            <td><code>{{ row.task }}</code></td>
+            <td>{{ row.category }}</td>
+            <td>{{ row.difficulty }}</td>
+            <td>
+              {%- if row.passed == "true" -%}
+                <span class="pill pill--pass">Pass</span>
+              {%- else -%}
+                <span class="pill pill--fail">Fail</span>
+              {%- endif -%}
+            </td>
+            <td>{{ row.duration_seconds | divided_by: 60 | round }}m</td>
+            <td>{% if row.total_tokens != "" %}{{ row.total_tokens }}{% else %}n/a{% endif %}</td>
+            <td>{% if row.cost_usd != "" %}${{ row.cost_usd }}{% else %}n/a{% endif %}</td>
+            <td><code style="font-size:.76rem">{{ row.graders }}</code></td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </div>
+
+  <p style="color:var(--ink-3); font-size:.88rem">
+    Source data: <code>{{ page.data }}.csv</code>, the same file the charts
+    above read.{% if site.github_url %}
+    <a href="{{ site.github_url }}/blob/main/site/_data/benchmarks/{{ page.data }}.csv">View it</a>.{% endif %}
+  </p>
+</div>

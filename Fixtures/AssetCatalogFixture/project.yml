@@ -1,0 +1,35 @@
+name: AssetCatalogFixture
+options:
+  bundleIdPrefix: com.applebench
+  deploymentTarget:
+    iOS: "18.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    CODE_SIGNING_ALLOWED: "NO"
+    GENERATE_INFOPLIST_FILE: "YES"
+    INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+targets:
+  AssetCatalogFixture:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+      - path: Resources
+        excludes:
+          - Assets.xcassets
+  AssetCatalogFixtureUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: AssetCatalogFixture
+schemes:
+  AssetCatalogFixture:
+    build:
+      targets:
+        AssetCatalogFixture: all
+        AssetCatalogFixtureUITests: [test]
+    test:
+      targets:
+        - AssetCatalogFixtureUITests

@@ -1,0 +1,29 @@
+{%- comment -%}
+One horizontal bar. Params: label, value, total, color (a CSS custom-property
+name without the leading dashes), suffix (optional right-hand annotation).
+The number is always printed beside the bar, so the reading never depends on
+color or on estimating a length.
+{%- endcomment -%}
+{%- comment -%}
+`value` and `total` arrive as strings when the caller built them from a split,
+so coerce before comparing · Liquid will not order a String against 0.
+{%- endcomment -%}
+{%- assign bar_value = include.value | plus: 0 -%}
+{%- assign bar_total = include.total | plus: 0 -%}
+{%- assign pct = 0 -%}
+{%- if bar_total > 0 -%}
+  {%- assign pct = bar_value | times: 1.0 | divided_by: bar_total | times: 100 -%}
+{%- endif -%}
+<div class="bar-row">
+  <div class="bar-row__label" title="{{ include.label }}">{{ include.label }}</div>
+  <div class="bar-row__track"
+       role="img"
+       aria-label="{{ include.label }}: {{ bar_value }} of {{ bar_total }}, {{ pct | round: 1 }} percent">
+    <div class="bar-row__fill"
+         style="width: {{ pct | round: 2 }}%; --bar-color: var(--{{ include.color | default: 'series-1' }});"></div>
+  </div>
+  <div class="bar-row__value">
+    {{ pct | round: 1 }}%
+    <span>{{ bar_value }}/{{ bar_total }}</span>
+  </div>
+</div>

@@ -1,0 +1,51 @@
+---
+layout: default
+title: Results
+permalink: /benchmarks/
+description: Published AppleBench runs, with full per-task data and charts.
+---
+
+<div class="wrap wrap--narrow">
+  <div class="article-header">
+    <h1>Results</h1>
+    <p class="article-header__lede">
+      Every published run, with its charts and its full per-task data. There is
+      no composite score and no leaderboard. Each run reports raw numbers and
+      states the conditions it was measured under.
+    </p>
+  </div>
+</div>
+
+<div class="wrap wrap--narrow">
+  <ul class="entry-list">
+    {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
+    {%- for run in runs -%}
+      {%- assign rows = site.data.benchmarks[run.data] -%}
+      {%- assign hits = rows | where: "passed", "true" -%}
+      <li>
+        <a class="entry" href="{{ run.url | relative_url }}">
+          <p class="entry__meta">
+            <time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time>
+            <span>{{ run.suite }} suite</span>
+            {%- if rows -%}
+              <span class="entry__score">{{ hits.size }}/{{ rows.size }} · {{ hits.size | times: 1000 | divided_by: rows.size | times: 0.1 | round: 1 }}%</span>
+            {%- endif -%}
+          </p>
+          <h2 class="entry__title">{{ run.title }}</h2>
+          <p class="entry__excerpt">{{ run.lede | default: run.excerpt | strip_html | truncate: 220 }}</p>
+        </a>
+      </li>
+    {%- else -%}
+      <li><p style="color:var(--ink-2)">No runs published yet.</p></li>
+    {%- endfor -%}
+  </ul>
+
+  <div class="callout" style="margin-top:2.5rem">
+    <p>
+      <strong>Reading these numbers.</strong> A pass rate only means something
+      alongside the conditions: which suite, which model, which harness, which
+      Xcode, and, when a task was attempted more than once, which attempt
+      counts. Every run page states all five.
+    </p>
+  </div>
+</div>

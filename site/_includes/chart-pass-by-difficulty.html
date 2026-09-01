@@ -1,0 +1,31 @@
+{%- comment -%}
+Pass rate by authored difficulty. Difficulty is comparative within a category,
+not an absolute scale, so this reads as a gradient check · does the set get
+harder in the direction it claims to? Params: rows.
+{%- endcomment -%}
+<figure class="figure">
+  <figcaption>
+    <h3 class="figure__title">Pass rate by difficulty</h3>
+    <p class="figure__subtitle">
+      Difficulty is authored, comparative within a category, and not an
+      absolute scale. A monotonic decline here is evidence the ratings are
+      calibrated; a flat line would mean they are not.
+    </p>
+  </figcaption>
+
+  {%- assign groups = include.rows | group_by: "difficulty" | sort: "name" -%}
+  <div class="bars">
+    {%- for group in groups -%}
+      {%- assign hits = group.items | where: "passed", "true" -%}
+      {%- include bar-row.html
+          label=group.name
+          value=hits.size
+          total=group.items.size
+          color="series-3" -%}
+    {%- endfor -%}
+  </div>
+  <p class="figure__note">
+    Bars are labelled with the authored difficulty (1–10). Each row shows how
+    many of that difficulty's tasks reached a verified pass.
+  </p>
+</figure>

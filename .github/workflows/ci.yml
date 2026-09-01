@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  harness:
+    name: Build and test the harness
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: swift --version
+
+      - name: Build
+        run: swift build -c release
+
+      - name: Test
+        run: swift test
+
+  taskset:
+    name: Validate the task set
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      # The partition between the private gold set and the leakable public-dev
+      # subset is what keeps published scores meaningful, so it is checked on
+      # every change rather than by convention.
+      - name: Check task-set shape
+        run: ./Scripts/check-task-set.sh
+
+      # A fixture that names its own defect in shipped source turns a
+      # diagnosis task into a reading-comprehension one, and no amount of
+      # care at authoring time catches it reliably.
+      - name: Check no fixture discloses its defect
+        run: ./Scripts/check-fixture-leaks.sh --sources-only
+
+  site:
+    name: Build the site
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: site
+
+      - name: Build
+        run: bundle exec jekyll build --trace

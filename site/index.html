@@ -1,0 +1,186 @@
+---
+layout: default
+title: AppleBench
+description: >-
+  A benchmark that asks whether an AI coding agent can take an Apple-development
+  task from request to a verified working result. Graded with fresh xcodebuild,
+  XCTest, XCUITest and Simulator checks, after the agent has exited.
+---
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow"><span class="eyebrow__dot"></span> 123 scoring tasks · 8 categories · graded by Xcode</p>
+    <h1>Can an agent ship Apple code without you?</h1>
+    <p class="hero__lede">
+      AppleBench hands an agent an isolated checkout of a real Xcode project
+      with something genuinely wrong in it. It records everything the agent
+      does. Then, <strong>once the agent has exited</strong>, it grades the
+      workspace that was left behind: fresh <code>xcodebuild</code>, XCTest,
+      XCUITest, resolved build settings, and the app running on a simulator.
+    </p>
+    <p class="hero__lede" style="margin-top:.8rem"><strong>Agents do not grade themselves.</strong></p>
+    <div class="button-row">
+      <a class="button button--primary" href="{{ '/benchmarks/' | relative_url }}">See the results</a>
+      <a class="button button--ghost" href="{{ '/benchmark/' | relative_url }}">How it works</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section__head">
+      <h2>Why another benchmark</h2>
+      <p>
+        Most coding benchmarks measure whether a model can produce a diff.
+        Apple development is mostly what happens after the diff.
+      </p>
+    </div>
+
+<pre><code>understand → edit → build → diagnose → run → inspect → interact → test → verify</code></pre>
+
+    <p style="color:var(--ink-2); max-width:64ch">
+      The edit is one step out of nine. AppleBench grades the end of that
+      loop, not the middle of it. Everything except the model is held still:
+      same harness, same prompt, same commit, same Xcode, same simulator, same
+      limits. Most capable models get the easy tasks. What separates them is
+      the eight steps after the edit, and what each solved task <em>cost</em>.
+    </p>
+  </div>
+</section>
+
+<section class="section section--tinted">
+  <div class="wrap">
+    <div class="section__head">
+      <h2>What it measures</h2>
+      <p>
+        Operational Apple-platform work. Plain Swift and language-level
+        concurrency are covered well elsewhere, so they are out of scope here.
+      </p>
+    </div>
+    <div class="grid">
+      <div class="card"><span class="card__tag">build</span><h3>Build failures</h3><p>Compiler failures specific to the Apple SDK: availability, linking, module resolution.</p></div>
+      <div class="card"><span class="card__tag">tests</span><h3>Failing tests</h3><p>Diagnose, fix, and rerun against tests the agent did not write and cannot rewrite.</p></div>
+      <div class="card"><span class="card__tag">runtime</span><h3>Runtime defects</h3><p>Crashes and misbehavior that compile perfectly and only appear when the app runs.</p></div>
+      <div class="card"><span class="card__tag">visual</span><h3>Layout and spec</h3><p>Read a design spec, fix the layout, and satisfy structural UI assertions.</p></div>
+      <div class="card"><span class="card__tag">interaction</span><h3>Driving the app</h3><p>Run it on a simulator, interact with it, and write XCUITests that hold.</p></div>
+      <div class="card"><span class="card__tag">project</span><h3>Project configuration</h3><p>Target membership, Info.plist, asset catalogs, schemes, Swift packages.</p></div>
+      <div class="card"><span class="card__tag">frameworks</span><h3>Apple frameworks</h3><p>SwiftData, Core Data, WidgetKit, App Intents, where the API contract is the task.</p></div>
+      <div class="card"><span class="card__tag">ops</span><h3>Raw toolchain</h3><p>Operational loops through <code>xcodebuild</code>, <code>simctl</code>, and <code>devicectl</code>, with no wrapper CLI on the path.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section__head">
+      <h2>How a run is graded</h2>
+      <p>
+        The grading is the product. The rest is plumbing that keeps it
+        honest.
+      </p>
+    </div>
+    <div class="grid grid--2">
+      <div class="card">
+        <h3>Grading starts after the agent is gone</h3>
+        <p>
+          Fresh derived data, fresh <code>xcodebuild</code>, run against the
+          workspace the agent left. Its own successful build never counts, and
+          nothing describing how it will be graded is written near the
+          workspace until it has exited.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Every task is proven solvable</h3>
+        <p>
+          An agent that changes nothing must <strong>fail</strong> a task, and
+          the reference fix must <strong>pass</strong> it. Both halves run
+          against real <code>xcodebuild</code> before a task is allowed into
+          the set. All 123 currently hold.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Nothing is guessed</h3>
+        <p>
+          Token counts and cost come from the agent CLI, and stay
+          <code>null</code> when it did not report them. Never zero, never
+          estimated. A timeout and a passing workspace are two separate facts
+          and are recorded that way.
+        </p>
+      </div>
+      <div class="card">
+        <h3>The answers stay private</h3>
+        <p>
+          The 123 scoring tasks are private and rotated. A small subset ships
+          with the open harness so anyone can run it, and those tasks are never
+          scored. Runs are sandboxed either way, because keeping answers closed
+          and sealing the run solve two different problems.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tinted">
+  <div class="wrap">
+    <div class="section__head">
+      <h2>Latest results</h2>
+      <p>Every published run, with its full per-task data.</p>
+    </div>
+    {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
+    <ul class="entry-list">
+      {%- for run in runs limit: 3 -%}
+        {%- assign rows = site.data.benchmarks[run.data] -%}
+        {%- assign hits = rows | where: "passed", "true" -%}
+        <li>
+          <a class="entry" href="{{ run.url | relative_url }}">
+            <p class="entry__meta">
+              <time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time>
+              <span>{{ run.suite }}</span>
+              {%- if rows -%}
+                <span class="entry__score">{{ hits.size }}/{{ rows.size }} · {{ hits.size | times: 1000 | divided_by: rows.size | times: 0.1 | round: 1 }}%</span>
+              {%- endif -%}
+            </p>
+            <h3 class="entry__title">{{ run.title }}</h3>
+            <p class="entry__excerpt">{{ run.lede | default: run.excerpt | strip_html | truncate: 190 }}</p>
+          </a>
+        </li>
+      {%- else -%}
+        <li><p style="color:var(--ink-2)">No runs published yet.</p></li>
+      {%- endfor -%}
+    </ul>
+    <p style="margin-top:1.6rem"><a href="{{ '/benchmarks/' | relative_url }}">All results →</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section__head">
+      <h2>Open harness, private answers</h2>
+      <p>You can run it. You cannot see the scoring set.</p>
+    </div>
+
+    <div class="wrap wrap--narrow" style="padding:0">
+      <p>
+        The harness is open: the grading engine, the task schema, the fixture
+        tooling, the isolation model, and a small subset of tasks that are
+        meant to leak and are never scored. Enough to run it, audit it, and
+        disagree with it.
+      </p>
+      <p>
+        The 123 scoring tasks stay private. Not because they are precious, but
+        because a benchmark whose answers are on the internet stops measuring
+        anything the moment somebody scrapes it. Every published number comes
+        from that private set.
+      </p>
+      <p>
+        Neither half works alone, so runs are sandboxed regardless: no
+        internet, no search, the standard Apple toolchain and nothing else.
+      </p>
+    </div>
+
+    <div class="button-row">
+      <a class="button button--primary" href="{{ '/methodology/' | relative_url }}">How it grades</a>
+      <a class="button button--ghost" href="{{ '/benchmarks/' | relative_url }}">Results</a>
+    </div>
+  </div>
+</section>

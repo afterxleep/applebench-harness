@@ -1,0 +1,35 @@
+diff --git a/Sources/ContactCell.swift b/Sources/ContactCell.swift
+index d7c8523..a000216 100644
+--- a/Sources/ContactCell.swift
++++ b/Sources/ContactCell.swift
+@@ -6,6 +6,11 @@ final class ContactCell: UITableViewCell {
+     private let nameLabel = UILabel()
+     private let avatarView = UIImageView()
+ 
++    /// The contact this cell currently represents. Avatar loads that finish
++    /// after the cell has been reused belong to a different contact and are
++    /// dropped.
++    private var displayedContactID: Int?
++
+     /// The avatar currently displayed (exposed for verification).
+     var avatarImage: UIImage? { avatarView.image }
+ 
+@@ -32,7 +37,9 @@ final class ContactCell: UITableViewCell {
+ 
+     func configure(with contact: Contact, loader: any AvatarLoading) {
+         nameLabel.text = contact.name
+-        loader.loadAvatar(for: contact.id) { image in
++        displayedContactID = contact.id
++        loader.loadAvatar(for: contact.id) { [weak self] image in
++            guard let self, self.displayedContactID == contact.id else { return }
+             self.avatarView.image = image
+         }
+     }
+@@ -40,5 +47,7 @@ final class ContactCell: UITableViewCell {
+     override func prepareForReuse() {
+         super.prepareForReuse()
+         nameLabel.text = nil
++        avatarView.image = nil
++        displayedContactID = nil
+     }
+ }

@@ -1,0 +1,68 @@
+title: AppleBench
+tagline: A benchmark for agentic Apple-platform engineering
+description: >-
+  AppleBench asks whether an AI coding agent can take an Apple-development task
+  from request to verified working result without a human stepping in. It hands
+  the agent an isolated checkout of a real, intentionally broken Xcode project,
+  then grades the final workspace itself with fresh xcodebuild, XCTest,
+  XCUITest, and Simulator runtime checks.
+
+url: https://afterxleep.github.io
+baseurl: /AppleBench
+# The repository is private while the suite is being finished. Setting
+# github_url restores every link on the site; leaving it empty removes them.
+github_url:
+
+author:
+  name: Daniel Bernal
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+collections:
+  benchmarks:
+    output: true
+    permalink: /benchmarks/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: benchmarks
+    values:
+      layout: benchmark
+  - scope:
+      path: ""
+    values:
+      layout: page
+
+permalink: /blog/:year/:month/:title/
+paginate: false
+
+sass:
+  style: compressed
+  sass_dir: _sass
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - README.md
+
+# Ordered navigation. `benchmarks` and `blog` are index pages, not collections
+# being enumerated here.
+nav:
+  - title: Benchmark
+    url: /benchmark/
+  - title: Results
+    url: /benchmarks/
+  - title: Blog
+    url: /blog/
+  - title: Methodology
+    url: /methodology/

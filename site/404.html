@@ -1,0 +1,20 @@
+---
+layout: default
+title: Not found
+permalink: /404.html
+sitemap: false
+---
+
+<div class="wrap wrap--narrow" style="padding:6rem 1.5rem">
+  <p class="eyebrow">404</p>
+  <h1>That page did not build.</h1>
+  <p style="color:var(--ink-2); max-width:52ch">
+    Nothing at this address. The pages that do exist:
+  </p>
+  <div class="button-row">
+    <a class="button button--primary" href="{{ '/' | relative_url }}">Home</a>
+    <a class="button button--ghost" href="{{ '/benchmarks/' | relative_url }}">Results</a>
+    <a class="button button--ghost" href="{{ '/blog/' | relative_url }}">Blog</a>
+    <a class="button button--ghost" href="{{ '/benchmark/' | relative_url }}">The benchmark</a>
+  </div>
+</div>
