@@ -93,7 +93,7 @@ def main() -> int:
         if existing.startswith("---"):
             body = existing.split("---", 2)[2].lstrip("\n")
 
-    title = f"{model or harness or slug} — {suite} suite, {rate:.1f}%"
+    title = f"{model or harness or slug}, {suite} suite, {rate:.1f}%"
     front = [
         "---",
         f'title: "{title}"',

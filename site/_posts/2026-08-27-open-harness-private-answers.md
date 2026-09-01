@@ -46,12 +46,19 @@ benchmark is hiding weak results.
   number is honest.
 - **Private:** the gold set. 123 scoring tasks: prompts, fixtures, expected
   outputs. Published scores come from these and only these.
-- **Public and never scored:** a small leakable subset that ships with the harness so
-  it can be run, demonstrated, and tested end-to-end without touching gold.
+- **Public and never scored:** eight sample tasks with their fixtures, shipped
+  with the harness so a fresh clone runs end-to-end without touching gold, and
+  so anyone writing a task has a working one to copy.
 
-`./Scripts/check-task-set.sh` fails the build if gold and dev ever overlap, if
-a task lands in neither, or if a referenced fixture goes missing. The
-partition is enforced, not maintained by discipline.
+The two live in separate repositories and are joined by a single environment
+variable, `APPLEBENCH_TASKSET`. Nothing is copied in either direction: prepared
+fixtures, run artifacts and reports are all written inside the harness clone,
+so a closed task set never lands in a public checkout and the harness never has
+to be forked to run one.
+
+`./Scripts/check-task-set.sh` fails the build if a task set claims to be both
+scored and open, if a task belongs to no suite at all, or if a referenced
+fixture goes missing. The partition is enforced, not maintained by discipline.
 
 ## Secrecy is a delay, not a defense
 
@@ -68,7 +75,7 @@ identifiers, new defect placements, regenerated projects. A leaked transcript
 from last quarter stops being a valid key.
 
 ```bash
-./Scripts/rotate-private-set.sh 2026-q4
+APPLEBENCH_TASKSET=/path/to/scoring-set ./Scripts/rotate-private-set.sh 2026-q4
 ```
 
 Closed answers buy time. Rotation is what keeps a benchmark alive past its

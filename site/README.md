@@ -37,7 +37,7 @@ That writes `Reports/<slug>.csv`, `Reports/<slug>.json`, and
 
 ```yaml
 ---
-title: "Model name — N tasks, X%"
+title: "Model name, N tasks, X%"
 date: 2026-09-01
 suite: gold
 data: 2026-09-01-sonnet-5      # must match the CSV filename
@@ -58,7 +58,7 @@ sentence changes the headline and a reader cannot infer it from the data.
 ## Charts
 
 Server-rendered CSS and inline SVG. No chart library, no client-side data
-fetch, and no chart that depends on JavaScript having run — the only script on
+fetch, and no chart that depends on JavaScript having run. The only script on
 the site is the theme toggle.
 
 Series colors come from a CVD-validated categorical palette defined as custom

@@ -162,9 +162,10 @@ description: >-
     <div class="wrap wrap--narrow" style="padding:0">
       <p>
         The harness is open: the grading engine, the task schema, the fixture
-        tooling, the isolation model, and a small subset of tasks that are
-        meant to leak and are never scored. Enough to run it, audit it, and
-        disagree with it.
+        tooling, the isolation model, and eight sample tasks with their
+        fixtures. Clone it and it runs on those with no arguments. They are
+        real tasks, meant to be read and copied from when you write your own,
+        and no published score ever comes from them.
       </p>
       <p>
         The 123 scoring tasks stay private. Not because they are precious, but
@@ -179,8 +180,13 @@ description: >-
     </div>
 
     <div class="button-row">
+      {%- if site.github_url -%}
+      <a class="button button--primary" href="{{ site.github_url }}">Get the harness</a>
+      <a class="button button--ghost" href="{{ '/methodology/' | relative_url }}">How it grades</a>
+      {%- else -%}
       <a class="button button--primary" href="{{ '/methodology/' | relative_url }}">How it grades</a>
       <a class="button button--ghost" href="{{ '/benchmarks/' | relative_url }}">Results</a>
+      {%- endif -%}
     </div>
   </div>
 </section>
