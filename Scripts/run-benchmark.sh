@@ -140,10 +140,6 @@ fi
 # shellcheck source=Scripts/taskset.sh
 . "$(dirname "$0")/taskset.sh"
 
-if [ -n "$task_set_repo" ]; then
-    echo "Preparing fixtures…"
-    "$(dirname "$0")/prepare-fixtures.sh" >/dev/null
-fi
 
 # A key given on the command line or in a file is put into the environment here
 # and allowlisted automatically, so the caller does not have to remember to do
@@ -200,6 +196,19 @@ esac
 stamp="$(date -u +%Y-%m-%d)"
 out="${out:-$root/Reports/$suite-$stamp}"
 mkdir -p "$out"
+
+# Fixtures are prepared before every run, not only when the task set was just
+# cloned. A suite run against unprepared fixtures does not fail once: it fails
+# per task, as a wall of "repository does not exist" errors that read like a
+# broken task set rather than a missing setup step.
+#
+# prepare-fixtures.sh is idempotent, so the cost of doing this every time is a
+# few seconds against never being able to run the wrong thing.
+echo "Preparing fixtures…"
+if ! "$(dirname "$0")/prepare-fixtures.sh" >"$out/prepare.log" 2>&1; then
+    echo "error: preparing fixtures failed. See $out/prepare.log" >&2
+    exit 1
+fi
 
 binary="$root/.build/release/applebench"
 if [ ! -x "$binary" ]; then
