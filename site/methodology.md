@@ -177,6 +177,55 @@ specifications, and they are not a dollar figure. Cost and wall-clock time are
 reported separately and unweighted, because provider pricing changes and a
 score that moved with it would be measuring the wrong thing.
 
+## Grading against the device
+
+Every grader described above asks `xcodebuild` a question, which means the
+suite only ever sees an app in one state: portrait, English, light, default
+text size, hardware keyboard attached. That is the state the people who wrote
+the app were in. A defect that only appears outside it is invisible to the
+whole apparatus, and that covers a great deal of what users actually report —
+a layout that breaks when the phone turns, a list that files two names wrongly
+in Swedish, a button the keyboard sits on top of.
+
+A second kind of grader asks the device instead. It builds and installs the
+app, puts the simulator into a named state, drives the app, and judges the
+accessibility tree it leaves.
+
+**Why this needs the device and not a test target.** Appearance, Dynamic Type
+and contrast have `simctl` equivalents. Orientation and system language do
+not: rotation is a GSEvent plus a poll of the device's own preferences until
+the physical orientation actually matches, and language is a write to the
+global preferences plist followed by a reboot. Hardware buttons — Home, lock,
+the app switcher — have no `simctl` verb at all.
+
+**The assertions live outside the workspace.** They are written in the task
+file, not in a test target, so a fixture graded this way ships with no tests
+at all. The agent receives an app with nothing in it describing how it will be
+judged. What can be asserted is deliberately small and entirely mechanical:
+text present or absent, rows in a given order reading down the screen, an
+element inside the window, a minimum size, two elements not overlapping, one
+element clear of another, the device's physical orientation.
+
+**Colour is the exception, and it is answered by comparison rather than by a
+reference image.** An accessibility tree carries labels, values and frames; it
+carries nothing about how anything looks, so a hardcoded palette used to be
+ungradeable here. It does not need a golden file or a tolerance anyone has to
+tune. A screen reading semantic colours **renders differently** in light and
+dark. A screen with its colours written in renders the same picture twice, and
+that is the check.
+
+**Each task is graded in both states.** The state the defect appears in, and
+the default one it was written in. A fix that works rotated and breaks upright
+fails, and so does a fix that pins the behaviour to one language instead of
+following the reader's.
+
+**The data is pinned separately.** Driving the app proves what it does; it
+cannot prove *why* it does it. An agent can make a name fit by shortening the
+name, make a count right by deleting the row that made it wrong, or make a
+Turkish casing bug irrelevant by upper-casing the data it operates on. Where
+that is possible the task also asserts, as text, that the data the defect
+depends on is still there.
+
 ## Reading a published number
 
 A score is meaningless without its conditions. Every published run states:
