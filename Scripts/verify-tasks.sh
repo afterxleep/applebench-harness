@@ -54,7 +54,6 @@ if ! mkdir "$lock" 2>/dev/null; then
     fi
 fi
 echo $$ > "$lock/pid"
-trap 'rm -rf "$lock"' EXIT INT TERM
 
 # Removes the per-run simulators the benchmark creates. Named devices belonging
 # to the user are matched by neither pattern and are left alone.
@@ -68,9 +67,58 @@ cleanup_leftovers() {
         done
 }
 
+# Interrupting a sweep used to leave its simulator booted: the trap released
+# the lock and nothing reaped the device. A stray booted simulator makes the
+# next `xcodebuild test` hang against its own destination.
+#
+# The run has to die *before* the reap. Reaping first deletes a device the
+# still-running child immediately recreates, which is exactly what happened:
+# the lock was released, the sweep exited, and the simulator was left booted
+# anyway.
+on_exit() {
+    if [ -n "${run_pid:-}" ] && kill -0 "$run_pid" 2>/dev/null; then
+        kill -TERM "$run_pid" 2>/dev/null
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
+            kill -0 "$run_pid" 2>/dev/null || break
+            sleep 1
+        done
+        kill -KILL "$run_pid" 2>/dev/null
+    fi
+    cleanup_leftovers
+    rm -rf "$lock"
+}
+trap on_exit EXIT INT TERM
+
+# A run reports PASS/FAIL on its own line. Anything else is a run that could
+# not execute credibly: the harness prints those as `error: ...`, which the
+# verdict grep does not match, and an unmatched verdict used to be reported as
+# TIMEOUT — sending anyone debugging it after a wall-clock problem that was
+# never there.
 verdict_of() {
-    timeout "$timeout_seconds" "$binary" run "$1" --agent "$2" --tasks-dir "$taskset_tasks" 2>&1 \
-        | grep -E "^(PASS|FAIL|ERROR)" | head -1 | cut -d' ' -f1
+    local output
+    local log
+    log="$(mktemp)"
+    # `-k` matters: xcodebuild can wedge against a simulator and ignore the
+    # SIGTERM `timeout` sends at the deadline, and a plain `timeout` then waits
+    # on it forever. One such run sat for two hours past its own limit. The
+    # follow-up SIGKILL is what actually bounds the sweep.
+    timeout -k 60 "$timeout_seconds" "$binary" run "$1" --agent "$2" --tasks-dir "$taskset_tasks" >"$log" 2>&1 &
+    run_pid=$!
+    wait "$run_pid"
+    local status=$?
+    run_pid=""
+    output="$(cat "$log")"
+    rm -f "$log"
+    local verdict
+    verdict="$(printf '%s\n' "$output" | grep -E "^(PASS|FAIL)" | head -1 | cut -d' ' -f1)"
+    if [ -n "$verdict" ]; then
+        printf '%s' "$verdict"
+    elif [ "$status" -eq 124 ]; then
+        printf 'TIMEOUT'
+    else
+        printf 'ERROR'
+        printf '%s\n' "$output" | grep -E "^error:" | head -1 >&2
+    fi
 }
 
 # Each run keeps its own derived data as evidence. Across a full sweep that is

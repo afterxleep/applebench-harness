@@ -453,6 +453,14 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
     /// Steps passed verbatim to `flowdeck ui simulator batch --steps`. Carried
     /// rather than modeled, so a new CLI action needs no harness change.
     public var steps: [JSONValue]
+    /// Steps run once `after_state` is in place.
+    ///
+    /// Tapping a control while the device is rotated is a different act from
+    /// tapping it upright: the element's frame is in display space and the HID
+    /// event has to be delivered in the portrait-shaped buffer, so the
+    /// coordinates are transformed by orientation on the way. `steps` cannot
+    /// express that, because they run before the device has turned.
+    public var afterSteps: [JSONValue]
     /// Hardware buttons pressed after the steps, over the Indigo HID path:
     /// `home`, `lock`, `app-switcher`, `siri`, `volumeup`, `volumedown`.
     public var buttons: [String]
@@ -460,6 +468,40 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
     public var assertions: [UIFlowAssertion]
     /// Seconds to let the UI settle after the buttons before the final read.
     public var settleSeconds: Int
+    /// Require the screen to render differently in light and dark appearance.
+    ///
+    /// The accessibility tree carries no colour, so a hardcoded palette used to
+    /// be ungradeable. It does not need a reference image either: a screen
+    /// reading semantic colours **looks different** in the two appearances, and
+    /// one with its colours written in looks identical. The check is whether
+    /// the two renderings differ at all.
+    public var appearanceMustDiffer: Bool
+    /// Precise drags run after the steps: swipe-to-delete on a particular row,
+    /// or a drag-to-reorder, which needs a hold before it engages.
+    public var gestures: [UIFlowGesture]
+    /// Permission changes applied after the app is installed and before it is
+    /// launched. `simctl privacy` needs the app on the device to name it.
+    public var privacy: [UIFlowPrivacyChange]
+    /// Wipe the app's container before launch, so it starts as a first run.
+    public var clearState: Bool
+    /// A deep link opened once the app is running.
+    public var openURL: String?
+    /// A push payload, workspace-relative, delivered after the steps.
+    public var push: String?
+    /// Send the app a memory warning after the steps.
+    public var memoryWarning: Bool
+    /// Uninstall and install again before the final read.
+    ///
+    /// The upgrade path. `relaunch` proves data survived a cold start on the
+    /// same install; this proves it survived the app being replaced, which is
+    /// where migration defects live.
+    public var reinstall: Bool
+    /// Terminate and launch the app again before the final read.
+    ///
+    /// The only way to ask whether something survived. A draft still on screen
+    /// after the Home button proves nothing — the process is still alive and
+    /// the value is still in memory. It has to come back from a cold start.
+    public var relaunch: Bool
 
     public init(
         project: String? = nil,
@@ -469,9 +511,19 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         deviceState: SimulatorDeviceState? = nil,
         afterState: SimulatorDeviceState? = nil,
         steps: [JSONValue] = [],
+        afterSteps: [JSONValue] = [],
         buttons: [String] = [],
         assertions: [UIFlowAssertion] = [],
-        settleSeconds: Int = 2
+        settleSeconds: Int = 2,
+        relaunch: Bool = false,
+        gestures: [UIFlowGesture] = [],
+        appearanceMustDiffer: Bool = false,
+        privacy: [UIFlowPrivacyChange] = [],
+        clearState: Bool = false,
+        openURL: String? = nil,
+        push: String? = nil,
+        memoryWarning: Bool = false,
+        reinstall: Bool = false
     ) {
         self.project = project
         self.workspace = workspace
@@ -480,13 +532,29 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         self.deviceState = deviceState
         self.afterState = afterState
         self.steps = steps
+        self.afterSteps = afterSteps
         self.buttons = buttons
         self.assertions = assertions
         self.settleSeconds = settleSeconds
+        self.relaunch = relaunch
+        self.gestures = gestures
+        self.appearanceMustDiffer = appearanceMustDiffer
+        self.privacy = privacy
+        self.clearState = clearState
+        self.openURL = openURL
+        self.push = push
+        self.memoryWarning = memoryWarning
+        self.reinstall = reinstall
     }
 
     enum CodingKeys: String, CodingKey {
-        case project, workspace, scheme, steps, buttons, assertions
+        case project, workspace, scheme, steps, buttons, assertions, relaunch
+        case privacy, push, reinstall, gestures
+        case afterSteps = "after_steps"
+        case clearState = "clear_state"
+        case appearanceMustDiffer = "appearance_must_differ"
+        case openURL = "open_url"
+        case memoryWarning = "memory_warning"
         case bundleIdentifier = "bundle_id"
         case deviceState = "device_state"
         case afterState = "after_state"
@@ -502,13 +570,25 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         deviceState = try container.decodeIfPresent(SimulatorDeviceState.self, forKey: .deviceState)
         afterState = try container.decodeIfPresent(SimulatorDeviceState.self, forKey: .afterState)
         steps = try container.decodeIfPresent([JSONValue].self, forKey: .steps) ?? []
+        afterSteps = try container.decodeIfPresent([JSONValue].self, forKey: .afterSteps) ?? []
         buttons = try container.decodeIfPresent([String].self, forKey: .buttons) ?? []
         assertions = try container.decodeIfPresent([UIFlowAssertion].self, forKey: .assertions) ?? []
         settleSeconds = try container.decodeIfPresent(Int.self, forKey: .settleSeconds) ?? 2
+        relaunch = try container.decodeIfPresent(Bool.self, forKey: .relaunch) ?? false
+        privacy = try container.decodeIfPresent([UIFlowPrivacyChange].self, forKey: .privacy) ?? []
+        gestures = try container.decodeIfPresent([UIFlowGesture].self, forKey: .gestures) ?? []
+        appearanceMustDiffer = try container.decodeIfPresent(
+            Bool.self, forKey: .appearanceMustDiffer
+        ) ?? false
+        clearState = try container.decodeIfPresent(Bool.self, forKey: .clearState) ?? false
+        openURL = try container.decodeIfPresent(String.self, forKey: .openURL)
+        push = try container.decodeIfPresent(String.self, forKey: .push)
+        memoryWarning = try container.decodeIfPresent(Bool.self, forKey: .memoryWarning) ?? false
+        reinstall = try container.decodeIfPresent(Bool.self, forKey: .reinstall) ?? false
     }
 
     public func validate() throws {
-        guard !assertions.isEmpty else {
+        guard !assertions.isEmpty || appearanceMustDiffer else {
             throw BenchmarkFailure.invalidTask(
                 "A uiflow grader with no assertions cannot fail, so it grades nothing"
             )
@@ -516,6 +596,8 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         for assertion in assertions { try assertion.validate() }
         try deviceState?.validate()
         try afterState?.validate()
+        try UIFlowCommands.validate(privacy: privacy)
+        try UIFlowCommands.validate(gestures: gestures)
         let known: Set<String> = ["home", "lock", "side-button", "app-switcher", "siri", "volumeup", "volumedown"]
         for button in buttons where !known.contains(button) {
             throw BenchmarkFailure.invalidTask(

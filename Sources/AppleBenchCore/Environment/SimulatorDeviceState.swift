@@ -46,6 +46,12 @@ public struct SimulatorDeviceState: Sendable, Codable, Equatable {
     /// Status bar overrides, keyed by the CLI's kebab-case flag name without
     /// the leading dashes — `battery-level`, `operator-name`, `cellular-mode`.
     public var statusBar: [String: String]?
+    /// Text placed on the device pasteboard before the flow runs.
+    ///
+    /// Carried verbatim, whitespace and all: what a link copied out of an
+    /// email actually holds — a trailing newline, a leading space — is usually
+    /// the thing a paste handler gets wrong.
+    public var pasteboard: String?
 
     public init(
         orientation: String? = nil,
@@ -55,7 +61,8 @@ public struct SimulatorDeviceState: Sendable, Codable, Equatable {
         contentSize: String? = nil,
         increaseContrast: String? = nil,
         hardwareKeyboard: String? = nil,
-        statusBar: [String: String]? = nil
+        statusBar: [String: String]? = nil,
+        pasteboard: String? = nil
     ) {
         self.orientation = orientation
         self.language = language
@@ -65,6 +72,7 @@ public struct SimulatorDeviceState: Sendable, Codable, Equatable {
         self.increaseContrast = increaseContrast
         self.hardwareKeyboard = hardwareKeyboard
         self.statusBar = statusBar
+        self.pasteboard = pasteboard
     }
 
     enum CodingKeys: String, CodingKey {
@@ -73,6 +81,7 @@ public struct SimulatorDeviceState: Sendable, Codable, Equatable {
         case increaseContrast = "increase_contrast"
         case hardwareKeyboard = "hardware_keyboard"
         case statusBar = "status_bar"
+        case pasteboard
     }
 
     /// The flag names `flowdeck simulator status-bar override` accepts. An
@@ -89,6 +98,14 @@ public struct SimulatorDeviceState: Sendable, Codable, Equatable {
         applyCommands(udid: "").isEmpty
     }
 
+    /// Whether applying this state restarts the device.
+    ///
+    /// There is no `simctl` primitive for the system language, so setting it
+    /// means writing `.GlobalPreferences.plist` and rebooting for the change to
+    /// take. Anything that installs or launches afterwards has to wait for the
+    /// device to come back, or it fails against a booting simulator.
+    public var reboots: Bool { language != nil }
+
     /// Names every setting this state changes, for the grader's summary. A run
     /// that does not say which state it graded in cannot be read later.
     public var summary: String {
@@ -103,6 +120,7 @@ public struct SimulatorDeviceState: Sendable, Codable, Equatable {
         if let statusBar, !statusBar.isEmpty {
             parts.append("status-bar=[" + statusBar.keys.sorted().joined(separator: ",") + "]")
         }
+        if pasteboard != nil { parts.append("pasteboard=set") }
         return parts.isEmpty ? "default" : parts.joined(separator: " ")
     }
 
@@ -151,6 +169,9 @@ public struct SimulatorDeviceState: Sendable, Codable, Equatable {
             }
             commands.append(flowdeck(arguments, udid))
         }
+        if let pasteboard {
+            commands.append(flowdeck(["simulator", "pasteboard", "set", pasteboard], udid))
+        }
         return commands
     }
 
@@ -176,6 +197,9 @@ public struct SimulatorDeviceState: Sendable, Codable, Equatable {
         }
         if let statusBar, !statusBar.isEmpty {
             commands.append(flowdeck(["simulator", "status-bar", "clear"], udid))
+        }
+        if pasteboard != nil {
+            commands.append(flowdeck(["simulator", "pasteboard", "clear"], udid))
         }
         return commands
     }
@@ -217,7 +241,7 @@ public struct SimulatorDeviceStateApplier: Sendable {
         }
 
         for command in state.applyCommands(udid: udid) {
-            let result = try await context.runRecorded(command, timeout: .seconds(180))
+            let result = try await context.runRecorded(command, timeout: .seconds(300))
             guard result.exitCode == 0 else {
                 throw BenchmarkFailure.graderFailure(
                     grader: grader,
@@ -226,16 +250,46 @@ public struct SimulatorDeviceStateApplier: Sendable {
                 )
             }
         }
-
-        defer {
-            let reset = state.resetCommands(udid: udid)
-            Task { [context] in
-                for command in reset {
-                    _ = try? await context.runRecorded(command, timeout: .seconds(180))
-                }
-            }
+        if state.reboots {
+            try await waitForBoot(udid: udid)
         }
-        return try await body()
+
+        // Reset is awaited, not detached. A detached reset raced the next
+        // grader: the language write reboots, and a reboot landing in the
+        // middle of the following install is an infrastructure failure with no
+        // obvious cause.
+        do {
+            let value = try await body()
+            await reset(state, udid: udid)
+            return value
+        } catch {
+            await reset(state, udid: udid)
+            throw error
+        }
+    }
+
+    private func reset(_ state: SimulatorDeviceState, udid: String) async {
+        for command in state.resetCommands(udid: udid) {
+            _ = try? await context.runRecorded(command, timeout: .seconds(300))
+        }
+        if state.reboots {
+            try? await waitForBoot(udid: udid)
+        }
+    }
+
+    /// Blocks until CoreSimulator reports the device fully booted.
+    private func waitForBoot(udid: String) async throws {
+        let result = try await context.runRecorded(
+            ProcessCommand(executable: "xcrun", arguments: ["simctl", "bootstatus", udid, "-b"]),
+            timeout: .seconds(600)
+        )
+        guard result.exitCode == 0 else {
+            throw BenchmarkFailure.graderFailure(
+                grader: grader,
+                message: "The simulator did not come back after the state change: "
+                    + result.standardError.trimmed()
+            )
+        }
     }
 }
 

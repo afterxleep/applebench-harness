@@ -29,6 +29,13 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
     public var minHeight: Int?
     /// The addressed element's frame does not intersect this other element's.
     public var notOverlapping: String?
+    /// The addressed element sits entirely above this other element.
+    ///
+    /// The claim keyboard avoidance actually makes. A field covered by the
+    /// software keyboard has not left the window — the keyboard is drawn over
+    /// the top and the frame never moves — so `inside_window` cannot see it.
+    /// What a working layout guarantees is that the control stays clear.
+    public var above: String?
 
     /// The device's physical orientation. Asserting it proves the graded state
     /// was actually applied, rather than grading an upright screen and calling
@@ -45,6 +52,7 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
         minWidth: Int? = nil,
         minHeight: Int? = nil,
         notOverlapping: String? = nil,
+        above: String? = nil,
         orientation: String? = nil
     ) {
         self.text = text
@@ -56,11 +64,12 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
         self.minWidth = minWidth
         self.minHeight = minHeight
         self.notOverlapping = notOverlapping
+        self.above = above
         self.orientation = orientation
     }
 
     enum CodingKeys: String, CodingKey {
-        case text, absent, order, id, label, orientation
+        case text, absent, order, id, label, orientation, above
         case insideWindow = "inside_window"
         case minWidth = "min_width"
         case minHeight = "min_height"
@@ -70,10 +79,12 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
     public func validate() throws {
         let hasClause = text != nil || absent != nil || order != nil || orientation != nil
             || insideWindow != nil || minWidth != nil || minHeight != nil || notOverlapping != nil
+            || above != nil
         guard hasClause else {
             throw BenchmarkFailure.invalidTask("A uiflow assertion states nothing")
         }
-        let geometric = insideWindow != nil || minWidth != nil || minHeight != nil || notOverlapping != nil
+        let geometric = insideWindow != nil || minWidth != nil || minHeight != nil
+            || notOverlapping != nil || above != nil
         guard !geometric || id != nil || label != nil else {
             throw BenchmarkFailure.invalidTask(
                 "A uiflow assertion about geometry needs an 'id' or 'label' to address an element"
@@ -96,7 +107,8 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
             return "the device is \(snapshot.orientation), not \(orientation)"
         }
 
-        let needsElement = insideWindow != nil || minWidth != nil || minHeight != nil || notOverlapping != nil
+        let needsElement = insideWindow != nil || minWidth != nil || minHeight != nil
+            || notOverlapping != nil || above != nil
         guard needsElement else { return nil }
 
         let address = id ?? label ?? "?"
@@ -123,6 +135,15 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
             if element.frame.intersects(other.frame) {
                 return "\"\(address)\" at \(describe(element.frame)) overlaps "
                     + "\"\(notOverlapping)\" at \(describe(other.frame))"
+            }
+        }
+        if let above {
+            guard let other = snapshot.element(id: above, label: above) else {
+                return "no element \"\(above)\" on screen to sit above"
+            }
+            if element.frame.maxY > other.frame.y {
+                return "\"\(address)\" at \(describe(element.frame)) is not clear of "
+                    + "\"\(above)\" at \(describe(other.frame))"
             }
         }
         return nil

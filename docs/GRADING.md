@@ -43,6 +43,7 @@ Three concrete consequences fall out of that:
 | `file`     | A deliverable file exists, is non-trivial, and meets the assertions the prompt actually required. | Report / config / log / artifact deliverables. |
 | `runtime`  | The app launches, survives an observation window, and does not crash. | Tasks that exercise the app on the simulator. |
 | `xcodeproj`| The resolved project configuration matches the prompt's requirement (build settings, Info.plist, bundle contents). | Tasks about project wiring.        |
+| `uiflow`   | The app, driven through FlowDeck on a device put into a named state, leaves the screen the task requires. | Defects that only appear rotated, in another language, at accessibility text sizes, or after the app has been put away. |
 
 ## File grader, in detail
 

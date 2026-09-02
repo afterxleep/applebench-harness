@@ -120,8 +120,36 @@ public struct SimulatorManager: Sendable {
         await deleteVerifying(udid: udid)
     }
 
+    /// Installs the app, re-booting and retrying when CoreSimulator is not
+    /// ready for it yet.
+    ///
+    /// A benchmark sweep creates and destroys a simulator per run, and under
+    /// that churn `simctl install` intermittently reports `Invalid device`,
+    /// `Unable to lookup in current state: Shutdown`, or a `Failed to create
+    /// promise` from the installer — none of which say anything about the app
+    /// being installed. Treating those as a verdict turns an unstable service
+    /// into a suite full of broken fixtures, which is exactly how they first
+    /// showed up here.
     public func install(udid: String, appURL: URL) async throws {
-        try await simctl(["install", udid, appURL.path], describe: "install app")
+        var lastError: Error?
+        for attempt in 0..<3 {
+            do {
+                try await simctl(["install", udid, appURL.path], describe: "install app")
+                return
+            } catch {
+                lastError = error
+                guard attempt < 2 else { break }
+                // The device is the thing that is usually wrong, so make sure
+                // it is actually up before spending the next attempt.
+                _ = try? await simctl(
+                    ["bootstatus", udid, "-b"],
+                    describe: "wait for device",
+                    timeout: .seconds(300)
+                )
+                try? await Task.sleep(for: .seconds(3))
+            }
+        }
+        throw lastError ?? BenchmarkFailure.infrastructureFailure("install app failed")
     }
 
     /// Launches the app and returns the host-visible process identifier.

@@ -71,16 +71,22 @@ for path in files:
         if "fixtures/" in line:
             fixture_names.add(line.split("fixtures/")[-1].strip())
 
+# A scoring set may be split across several gold suites — gold-02 adds tasks
+# that grade under a device state the original set never used. They are one
+# scoring set for every purpose here: disjoint from dev, closed, and scored.
+gold_paths = sorted(
+    p for p in (root / "Examples/Suites").glob("gold*.yaml") if p.exists()
+)
 gold_path = root / "Examples/Suites/gold.yaml"
 dev_path = root / "Examples/Suites/dev.yaml"
-gold = suite_ids(gold_path) if gold_path.exists() else []
+gold = [identifier for path in gold_paths for identifier in suite_ids(path)]
 dev = suite_ids(dev_path) if dev_path.exists() else []
 gold_set, dev_set, all_set = set(gold), set(dev), set(task_ids)
 
-if not gold_path.exists() and not dev_path.exists():
+if not gold_paths and not dev_path.exists():
     problems.append("task set declares neither Examples/Suites/gold.yaml nor Examples/Suites/dev.yaml")
 else:
-    for path, ids in ((gold_path, gold_set), (dev_path, dev_set)):
+    for path, ids in ([(p, set(suite_ids(p))) for p in gold_paths] + [(dev_path, dev_set)]):
         if not path.exists():
             continue
         unknown = sorted(ids - all_set)
@@ -91,9 +97,9 @@ else:
         problems.append(f"gold and dev both contain: {', '.join(overlap)}")
     unclaimed = sorted(all_set - gold_set - dev_set)
     if unclaimed:
-        named = " or ".join(p.name for p in (gold_path, dev_path) if p.exists())
+        named = " or ".join(p.name for p in (gold_paths + [dev_path]) if p.exists())
         problems.append(f"tasks in no suite, so never run or verified: {', '.join(unclaimed)} (add to {named})")
-    if not gold_path.exists():
+    if not gold_paths:
         print("No gold suite here, so this is an open task set and nothing in it is scored.\n")
     elif not dev_path.exists():
         print("Scoring task set: every task here is gold, so treat prompts and fixtures as closed.\n")

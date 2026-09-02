@@ -135,6 +135,30 @@ struct UIFlowAssertionTests {
         #expect(throws: Never.self) { try UIFlowAssertion(text: "x").validate() }
     }
 
+    @Test("Above catches a control the keyboard has covered")
+    func above() {
+        // Keyboard avoidance is not visible as an element leaving the window —
+        // the keyboard draws over the top and the button's frame never moves.
+        // What changes is whether the button still sits clear of it.
+        var snapshot = rows(["Email", "Create account"], startY: 100, step: 400)
+        snapshot.elements.append(.init(
+            role: "keyboard", id: "keyboard", label: nil, value: nil,
+            frame: .init(x: 0, y: 560, width: 390, height: 284)
+        ))
+        #expect(UIFlowAssertion(id: "row-1", above: "keyboard").failure(against: snapshot) == nil)
+
+        snapshot.elements[2].frame.y = 600
+        let failure = UIFlowAssertion(id: "row-1", above: "keyboard").failure(against: snapshot)
+        #expect(try! #require(failure).contains("keyboard"))
+    }
+
+    @Test("Above fails when either element is missing rather than passing vacuously")
+    func aboveNeedsBothElements() {
+        let snapshot = rows(["Email"])
+        #expect(UIFlowAssertion(id: "row-0", above: "keyboard").failure(against: snapshot) != nil)
+        #expect(UIFlowAssertion(id: "nope", above: "row-0").failure(against: snapshot) != nil)
+    }
+
     @Test("An element may be addressed by label when it has no identifier")
     func addressableByLabel() {
         let snapshot = rows(["Alpha"])

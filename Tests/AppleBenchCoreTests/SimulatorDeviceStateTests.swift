@@ -112,6 +112,17 @@ struct SimulatorDeviceStateTests {
         #expect(throws: BenchmarkFailure.self) { try state.validate() }
     }
 
+    @Test("Pasteboard contents are placed on the device and cleared afterwards")
+    func pasteboard() {
+        let state = SimulatorDeviceState(pasteboard: "https://example.com/report\n")
+        #expect(argv(state.applyCommands(udid: udid)) == [
+            ["flowdeck", "simulator", "pasteboard", "set", "https://example.com/report\n", "-S", udid]
+        ])
+        #expect(argv(state.resetCommands(udid: udid)) == [
+            ["flowdeck", "simulator", "pasteboard", "clear", "-S", udid]
+        ])
+    }
+
     @Test("Reset undoes only what was applied")
     func resetIsScopedToWhatWasSet() {
         let state = SimulatorDeviceState(orientation: "landscape-right")

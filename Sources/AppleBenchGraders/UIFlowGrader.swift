@@ -77,11 +77,59 @@ public struct UIFlowGrader: Grader {
                 udid: udid,
                 bundleIdentifier: configuration.bundleIdentifier
             )
+            // Both need the app on the device: one wipes its container, the
+            // other names it in a permission database.
+            if configuration.clearState {
+                try await require(
+                    UIFlowCommands.clearState(
+                        bundleIdentifier: configuration.bundleIdentifier, udid: udid
+                    ),
+                    context: context
+                )
+            }
+            for change in configuration.privacy {
+                try await require(
+                    UIFlowCommands.privacy(
+                        change, bundleIdentifier: configuration.bundleIdentifier, udid: udid
+                    ),
+                    context: context
+                )
+            }
             _ = try await simulatorManager.launch(
                 udid: udid,
                 bundleIdentifier: configuration.bundleIdentifier
             )
             try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+
+            // A state change that reboots the device leaves SpringBoard racing
+            // the launch: `simctl launch` reports a pid, SpringBoard finishes
+            // coming up, and the app is behind the home screen. Grading that
+            // reads the home screen's icons as the app's UI and reports a
+            // sound task as passing unfixed. Confirm the app is actually in
+            // front, and relaunch once if it is not.
+            if state.reboots {
+                for attempt in 0..<3 {
+                    let screen = try await readScreen(udid: udid, context: context)
+                    if !Self.looksLikeHomeScreen(screen) { break }
+                    guard attempt < 2 else {
+                        throw BenchmarkFailure.graderFailure(
+                            grader: identifier,
+                            message: "The app never came to the front after the device restarted; "
+                                + "the home screen was still showing after three launches."
+                        )
+                    }
+                    _ = try? await simulatorManager.launch(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds + 3))
+                }
+            }
+
+            if let openURL = configuration.openURL {
+                try await require(UIFlowCommands.openURL(openURL, udid: udid), context: context)
+                try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+            }
 
             var stepFailure: String?
             var snapshot: UIFlowSnapshot
@@ -89,7 +137,7 @@ public struct UIFlowGrader: Grader {
             if configuration.steps.isEmpty {
                 snapshot = try await readScreen(udid: udid, context: context)
             } else {
-                let response = try await runBatch(udid: udid, context: context)
+                let response = try await runBatch(configuration.steps, udid: udid, context: context)
                 stepFailure = response.stepFailure
                 snapshot = response.snapshot
             }
@@ -107,24 +155,74 @@ public struct UIFlowGrader: Grader {
                     try? await Task.sleep(for: .seconds(configuration.settleSeconds))
                     snapshot = try await readScreen(udid: udid, context: context)
                 }
-                for button in configuration.buttons {
-                    let command = ProcessCommand(
-                        executable: "flowdeck",
-                        arguments: ["simulator", "button", button, "-S", udid]
+                if !configuration.afterSteps.isEmpty {
+                    let response = try await runBatch(
+                        configuration.afterSteps, udid: udid, context: context
                     )
-                    let result = try await context.runRecorded(command, timeout: .seconds(60))
-                    guard result.exitCode == 0 else {
-                        throw BenchmarkFailure.graderFailure(
-                            grader: identifier,
-                            message: "Could not press \(button): \(result.standardError.trimmed())"
-                        )
+                    if let failure = response.stepFailure {
+                        return Outcome(stepFailure: failure, snapshot: response.snapshot)
                     }
+                    snapshot = response.snapshot
                 }
-                if !configuration.buttons.isEmpty {
+                for gesture in configuration.gestures {
+                    try await require(UIFlowCommands.swipe(gesture, udid: udid), context: context)
+                    try? await Task.sleep(for: .seconds(1))
+                }
+                for button in configuration.buttons {
+                    try await require(UIFlowCommands.button(button, udid: udid), context: context)
+                }
+                if let push = configuration.push {
+                    let payload = context.workspaceURL.appendingPathComponent(push).path
+                    try await require(
+                        UIFlowCommands.push(
+                            payload: payload,
+                            bundleIdentifier: configuration.bundleIdentifier,
+                            udid: udid
+                        ),
+                        context: context
+                    )
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                }
+                if configuration.memoryWarning {
+                    try await require(UIFlowCommands.memoryWarning(udid: udid), context: context)
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                }
+                if configuration.reinstall {
+                    await simulatorManager.terminate(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                    try await simulatorManager.install(udid: udid, appURL: appURL)
+                    _ = try await simulatorManager.launch(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                }
+                if configuration.relaunch {
+                    await simulatorManager.terminate(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                    try? await Task.sleep(for: .seconds(1))
+                    _ = try await simulatorManager.launch(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                }
+                if !configuration.buttons.isEmpty || !configuration.gestures.isEmpty
+                    || configuration.relaunch
+                    || configuration.reinstall || configuration.push != nil
+                    || configuration.memoryWarning {
                     try? await Task.sleep(for: .seconds(configuration.settleSeconds))
                     snapshot = try await readScreen(udid: udid, context: context)
                 }
-                return Outcome(stepFailure: nil, snapshot: snapshot)
+                var appearance: String?
+                if configuration.appearanceMustDiffer {
+                    appearance = try await appearanceFailure(udid: udid, context: context)
+                }
+                return Outcome(
+                    stepFailure: nil, snapshot: snapshot, appearanceFailure: appearance
+                )
             }
         }
 
@@ -152,7 +250,8 @@ public struct UIFlowGrader: Grader {
             )
         }
 
-        let failures = configuration.assertions.compactMap { $0.failure(against: outcome.snapshot) }
+        var failures = configuration.assertions.compactMap { $0.failure(against: outcome.snapshot) }
+        if let appearance = outcome.appearanceFailure { failures.append(appearance) }
         return GradingResult(
             grader: identifier,
             passed: failures.isEmpty,
@@ -165,13 +264,77 @@ public struct UIFlowGrader: Grader {
         )
     }
 
+    /// SpringBoard, rather than the app under test. Identified by the icons it
+    /// always carries — an app's own screen does not show Files next to Watch.
+    static func looksLikeHomeScreen(_ snapshot: UIFlowSnapshot) -> Bool {
+        let labels = Set(snapshot.elements.compactMap(\.label))
+        return labels.contains("Files") && labels.contains("Contacts")
+    }
+
+    /// Runs a command the flow depends on. A device instruction that did not
+    /// take is a broken grader, not a failing app: the task asked to be judged
+    /// with the permission revoked, and judging it granted answers a different
+    /// question.
+    private func require(_ command: ProcessCommand, context: GradingContext) async throws {
+        let result = try await context.runRecorded(command, timeout: .seconds(120))
+        guard result.exitCode == 0 else {
+            throw BenchmarkFailure.graderFailure(
+                grader: identifier,
+                message: "\(command.displayString) failed: \(result.standardError.trimmed())"
+            )
+        }
+    }
+
     private struct Outcome {
         var stepFailure: String?
         var snapshot: UIFlowSnapshot
+        var appearanceFailure: String?
     }
 
-    private func runBatch(udid: String, context: GradingContext) async throws -> UIFlowBatchResponse {
-        let steps = try JSONEncoder().encode(configuration.steps)
+    /// Captures the screen in light and again in dark, and reports when the two
+    /// are the same picture.
+    private func appearanceFailure(udid: String, context: GradingContext) async throws -> String? {
+        let applier = SimulatorDeviceStateApplier(grader: identifier, context: context)
+        let light = context.artifactsDirectoryURL.appendingPathComponent("appearance-light.png")
+        let dark = context.artifactsDirectoryURL.appendingPathComponent("appearance-dark.png")
+
+        try await applier.withState(SimulatorDeviceState(appearance: "light")) {
+            try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+            try await capture(to: light, udid: udid, context: context)
+        }
+        try await applier.withState(SimulatorDeviceState(appearance: "dark")) {
+            try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+            try await capture(to: dark, udid: udid, context: context)
+        }
+
+        let difference = try ScreenshotComparison.difference(light, dark)
+        // A screen that adapts turns over most of its area. The floor is set
+        // well below that and well above the few percent a status bar clock or
+        // a caret can move on its own.
+        guard difference < 0.08 else { return nil }
+        return String(
+            format: "the screen renders the same in light and dark (%.1f%% different); "
+                + "its colours do not follow the appearance",
+            difference * 100
+        )
+    }
+
+    private func capture(to url: URL, udid: String, context: GradingContext) async throws {
+        try await require(
+            ProcessCommand(
+                executable: "flowdeck",
+                arguments: ["ui", "simulator", "screen", "-o", url.path, "-S", udid, "--json"]
+            ),
+            context: context
+        )
+    }
+
+    private func runBatch(
+        _ steps: [JSONValue],
+        udid: String,
+        context: GradingContext
+    ) async throws -> UIFlowBatchResponse {
+        let steps = try JSONEncoder().encode(steps)
         let command = ProcessCommand(
             executable: "flowdeck",
             arguments: [

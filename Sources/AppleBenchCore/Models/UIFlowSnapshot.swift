@@ -71,9 +71,16 @@ public struct UIFlowSnapshot: Sendable, Equatable {
         elements.map(\.frame).max { ($0.width * $0.height) < ($1.width * $1.height) }
     }
 
+    /// Addresses one element by identifier, then label, then role.
+    ///
+    /// Role is the fallback because some things on screen have neither of the
+    /// first two — the software keyboard carries no identifier and no label,
+    /// and it is exactly what a keyboard-avoidance claim needs to name.
     func element(id: String?, label: String?) -> Element? {
-        if let id { return elements.first { $0.id == id } }
-        if let label { return elements.first { $0.label == label } }
+        if let id, let match = elements.first(where: { $0.id == id }) { return match }
+        if let label, let match = elements.first(where: { $0.label == label }) { return match }
+        let wanted = id ?? label
+        if let wanted { return elements.first { $0.role.caseInsensitiveCompare(wanted) == .orderedSame } }
         return nil
     }
 }

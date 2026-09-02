@@ -73,6 +73,8 @@ the task.
   a final screenshot as evidence.
 - **`xcodeproj`**, project configuration as it *resolves*, never as
   `project.pbxproj` text.
+- **`uiflow`**, drives the running app through FlowDeck against a device put
+  into a named state, and judges the accessibility tree it leaves.
 
 #### The `xcodeproj` grader
 
@@ -100,6 +102,65 @@ looking line pasted into `project.pbxproj` that does not actually take effect
 cannot pass. Everything else about project configuration, target membership,
 scheme test wiring, package linkage, is graded by consequence, through the
 build, test, or runtime grader.
+
+#### The `uiflow` grader
+
+Every other grader asks `xcodebuild` a question. This one asks the device, and
+it exists for defects that are invisible in the one state a benchmark normally
+grades in: portrait, English, light, default text size, hardware keyboard
+attached.
+
+```yaml
+- type: uiflow
+  project: CollationFixture.xcodeproj
+  scheme: CollationFixture
+  bundle_id: com.applebench.CollationFixture
+  device_state:                 # applied before launch, reset afterwards
+    language: sv
+    locale: sv_SE
+  steps:                        # flowdeck ui simulator batch --steps
+    - { action: tap, target: "sort-button", by_id: true }
+  after_state:                  # applied to the *running* app
+    orientation: landscape-left
+  after_steps:                  # run once after_state is in place
+    - { action: tap, target: "seat-3C", by_id: true }
+  buttons: [home]               # Indigo HID hardware buttons
+  relaunch: true                # cold start before the final read
+  assertions:
+    - order: ["Bengtsson", "Olsen", "Zetterlund", "Åberg", "Öhlin"]
+```
+
+**Why FlowDeck and not `xcrun`.** Appearance, content size and contrast have
+`simctl ui` equivalents. Orientation and system language do not — rotation is a
+GSEvent plus a poll of `com.apple.backboardd.plist` until the physical
+orientation actually matches, and language is a write to
+`.GlobalPreferences.plist` followed by a reboot. Hardware buttons have no
+`simctl` verb at all; they go over Apple's Indigo HID path.
+
+`device_state` fields: `orientation`, `language`, `locale`, `appearance`,
+`content_size`, `increase_contrast`, `hardware_keyboard`, `status_bar`,
+`pasteboard`.
+
+Flow fields, in the order they run: `clear_state` and `privacy` (after the
+install, because both name the app on the device), `open_url`, `steps`,
+`after_state`, `after_steps`, `buttons`, `push`, `memory_warning`, `reinstall`,
+`relaunch`.
+
+Assertions are deliberately few and all pure functions over the tree: `text`,
+`absent`, `order` (geometric, top to bottom), `inside_window`, `min_width`,
+`min_height`, `not_overlapping`, `above`, `orientation`.
+
+Three things worth knowing before writing one:
+
+- **State the control's language.** A simulator's default locale is not
+  `en_US`. A grader meant to represent "the state everyone tests in" has to say
+  so, or it grades something else.
+- **Orientation goes in `after_state` on iPhone.** iOS refuses a rotation the
+  foreground app does not support, and before launch the foreground is
+  SpringBoard, which is portrait-only. Only an iPad can launch already rotated.
+- **The assertions are the only thing that grades.** They live in the task
+  file, so a `uiflow` fixture ships with no test target at all and the agent
+  receives an app with nothing describing how it will be judged.
 
 ### Hidden evaluation
 
