@@ -12,6 +12,7 @@ public enum GraderSpecification: Sendable, Equatable {
     case file(FileGraderConfiguration)
     case runtime(RuntimeGraderConfiguration)
     case xcodeproj(XcodeprojGraderConfiguration)
+    case uiflow(UIFlowGraderConfiguration)
 
     /// The `type` discriminator value for this grader.
     public var type: GraderType {
@@ -22,6 +23,7 @@ public enum GraderSpecification: Sendable, Equatable {
         case .file: .file
         case .runtime: .runtime
         case .xcodeproj: .xcodeproj
+        case .uiflow: .uiflow
         }
     }
 }
@@ -33,6 +35,7 @@ public enum GraderType: String, Sendable, Codable, CaseIterable {
     case file
     case runtime
     case xcodeproj
+    case uiflow
 }
 
 extension GraderSpecification: Codable {
@@ -56,6 +59,8 @@ extension GraderSpecification: Codable {
             self = .runtime(try RuntimeGraderConfiguration(from: decoder))
         case .xcodeproj:
             self = .xcodeproj(try XcodeprojGraderConfiguration(from: decoder))
+        case .uiflow:
+            self = .uiflow(try UIFlowGraderConfiguration(from: decoder))
         }
     }
 
@@ -74,6 +79,8 @@ extension GraderSpecification: Codable {
         case .runtime(let configuration):
             try configuration.encode(to: encoder)
         case .xcodeproj(let configuration):
+            try configuration.encode(to: encoder)
+        case .uiflow(let configuration):
             try configuration.encode(to: encoder)
         }
     }
@@ -408,5 +415,112 @@ public struct InfoPlistAssertion: Sendable, Codable, Equatable {
         self.equals = equals
         self.matches = matches
         self.exists = exists
+    }
+}
+
+// MARK: - UI flow
+
+/// Drives the running app through FlowDeck and judges the screen it leaves.
+///
+/// The other graders ask `xcodebuild` a question. This one asks the device.
+/// That is the point: rotation, system language, hardware buttons and the
+/// accessibility tree of a live app are either awkward or impossible to reach
+/// from an XCUITest, and two of them — orientation and language — have no
+/// `simctl` primitive at all.
+///
+/// Verification stays deliberately plain. Run a batch of steps, optionally
+/// press some hardware buttons, then make a handful of deterministic claims
+/// about the resulting accessibility tree. No pixel comparison, no test target
+/// for the agent to discover, and nothing describing the assertions anywhere
+/// inside the workspace — they live here, in the task file, which the agent
+/// never sees.
+public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
+    public var project: String?
+    public var workspace: String?
+    /// Scheme built and installed before the flow runs.
+    public var scheme: String
+    /// Bundle identifier used to launch and terminate the app.
+    public var bundleIdentifier: String
+    /// Device state applied before launch and reset afterwards.
+    public var deviceState: SimulatorDeviceState?
+    /// Device state applied *after* the steps have run, before the final read.
+    ///
+    /// Rotating before launch and rotating a running app are different tests.
+    /// A layout constant captured once at start-up is correct either way if the
+    /// app is launched already rotated; it only goes wrong when the device
+    /// turns underneath it. That second case is the one users hit.
+    public var afterState: SimulatorDeviceState?
+    /// Steps passed verbatim to `flowdeck ui simulator batch --steps`. Carried
+    /// rather than modeled, so a new CLI action needs no harness change.
+    public var steps: [JSONValue]
+    /// Hardware buttons pressed after the steps, over the Indigo HID path:
+    /// `home`, `lock`, `app-switcher`, `siri`, `volumeup`, `volumedown`.
+    public var buttons: [String]
+    /// What must be true of the screen once the flow has finished.
+    public var assertions: [UIFlowAssertion]
+    /// Seconds to let the UI settle after the buttons before the final read.
+    public var settleSeconds: Int
+
+    public init(
+        project: String? = nil,
+        workspace: String? = nil,
+        scheme: String,
+        bundleIdentifier: String,
+        deviceState: SimulatorDeviceState? = nil,
+        afterState: SimulatorDeviceState? = nil,
+        steps: [JSONValue] = [],
+        buttons: [String] = [],
+        assertions: [UIFlowAssertion] = [],
+        settleSeconds: Int = 2
+    ) {
+        self.project = project
+        self.workspace = workspace
+        self.scheme = scheme
+        self.bundleIdentifier = bundleIdentifier
+        self.deviceState = deviceState
+        self.afterState = afterState
+        self.steps = steps
+        self.buttons = buttons
+        self.assertions = assertions
+        self.settleSeconds = settleSeconds
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case project, workspace, scheme, steps, buttons, assertions
+        case bundleIdentifier = "bundle_id"
+        case deviceState = "device_state"
+        case afterState = "after_state"
+        case settleSeconds = "settle_seconds"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        project = try container.decodeIfPresent(String.self, forKey: .project)
+        workspace = try container.decodeIfPresent(String.self, forKey: .workspace)
+        scheme = try container.decode(String.self, forKey: .scheme)
+        bundleIdentifier = try container.decode(String.self, forKey: .bundleIdentifier)
+        deviceState = try container.decodeIfPresent(SimulatorDeviceState.self, forKey: .deviceState)
+        afterState = try container.decodeIfPresent(SimulatorDeviceState.self, forKey: .afterState)
+        steps = try container.decodeIfPresent([JSONValue].self, forKey: .steps) ?? []
+        buttons = try container.decodeIfPresent([String].self, forKey: .buttons) ?? []
+        assertions = try container.decodeIfPresent([UIFlowAssertion].self, forKey: .assertions) ?? []
+        settleSeconds = try container.decodeIfPresent(Int.self, forKey: .settleSeconds) ?? 2
+    }
+
+    public func validate() throws {
+        guard !assertions.isEmpty else {
+            throw BenchmarkFailure.invalidTask(
+                "A uiflow grader with no assertions cannot fail, so it grades nothing"
+            )
+        }
+        for assertion in assertions { try assertion.validate() }
+        try deviceState?.validate()
+        try afterState?.validate()
+        let known: Set<String> = ["home", "lock", "side-button", "app-switcher", "siri", "volumeup", "volumedown"]
+        for button in buttons where !known.contains(button) {
+            throw BenchmarkFailure.invalidTask(
+                "uiflow has no hardware button '\(button)'. Valid: " + known.sorted().joined(separator: ", ")
+            )
+        }
     }
 }

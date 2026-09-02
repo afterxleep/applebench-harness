@@ -109,12 +109,81 @@ Similarly, an agent timing out and the final workspace passing are recorded as
 two separate facts. An agent can exceed its budget and still have left the
 repository in a working state; both things are true, and the record says both.
 
+## Scoring
+
+A pass rate answers one question — how many did it get right — and then stops.
+Two models can complete the same task and be nothing alike. One reads the build
+log and edits two lines. The other rebuilds the project eleven times, argues
+with `simctl`, and burns three quarters of a million tokens arriving at the same
+diff. A pass rate gives them the same tick.
+
+So the headline number is **points**, and the pass rate stays beside it.
+
+```text
+face value  = 10 × difficulty                     difficulty 1–10 → 10–100 points
+budget      = 50,000 total tokens                 flat, the same for every task
+efficiency  = clamp(budget / tokens, 0.25, 1.0)   unreported tokens → 0.25
+points      = passed ? face value × efficiency : 0
+
+score       = Σ points          available = Σ face value
+```
+
+**Difficulty scales the reward, not the allowance.** The obvious move is to give
+harder tasks a bigger token budget. The data does not support it: across the
+first scored run the median solve cost between 14k and 26k tokens at every
+difficulty from 1 to 7. Spend does not track authored difficulty, so scaling
+the allowance by difficulty would encode a relationship that is not there.
+Difficulty decides what a task is worth; every task gets the same allowance.
+
+**A failure earns nothing and still counts its face value.** The denominator is
+a property of the suite, not of the model, so it does not move as a model gets
+better or worse.
+
+**A wasteful solve still beats a failure.** The 0.25 floor is there because
+doing the work badly is not the same as not doing it.
+
+**Unreported tokens take the floor.** For the same reason a missing cost is left
+blank rather than written as `$0.00`: if absence took the favourable value, a
+model would score better the worse its telemetry was. The count of solves
+scored this way is published on the run's page.
+
+### The constants are authored, and frozen
+
+50,000 tokens and the 0.25 floor are judgment, not measurement, chosen so an
+ordinary solve is not penalized and genuine overspend is. They are frozen under
+a specification id — currently `points-v1` — and every published run records
+which one it was scored under. Changing a constant is a scoring revision, and
+every published number is recomputed from its stored export. That does not
+require re-running any benchmark.
+
+### Why the score is a plain sum
+
+Every term depends only on the task it belongs to: its authored difficulty, its
+verdict, and what that run spent. Nothing is normalized against the rest of the
+set, against other models, or against how many tasks the suite happens to hold.
+
+That is deliberate, and it is what makes the suite extensible. When a task set
+is added, the existing models are run **against the new tasks only**, and their
+points are added to what is already published. Nothing already measured is
+re-run, and no previously published per-task number changes. A model that has
+not been run against the new set is not silently penalized either — it is
+reported against the set it was actually measured on, which is what the suite
+revision has always recorded.
+
+### What points do not tell you
+
+They do not compare across suite revisions, they do not compare across scoring
+specifications, and they are not a dollar figure. Cost and wall-clock time are
+reported separately and unweighted, because provider pricing changes and a
+score that moved with it would be measuring the wrong thing.
+
 ## Reading a published number
 
-A pass rate is meaningless without its conditions. Every published run states:
+A score is meaningless without its conditions. Every published run states:
 
-1. **Which suite.** Scores come from the private gold set. The sample tasks
-   that ship with the harness are for reading and copying, never for scoring.
+1. **Which suite, and which scoring specification.** Scores come from the
+   private gold set. The sample tasks that ship with the harness are for
+   reading and copying, never for scoring.
 2. **Which model, through which harness, at what reasoning effort.** The
    harness is held constant so the model is the only variable, and effort is
    stated because a model at high effort and the same model at low effort are

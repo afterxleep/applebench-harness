@@ -1,0 +1,85 @@
+{%- comment -%}
+Points earned against points available, by task category. One measure, one
+series · magnitude by length, so a single sequential hue and no legend.
+
+This is the pass-rate chart's harder sibling: a category can pass most of its
+tasks and still score badly here, which is the whole reason the score exists.
+Params: rows (the run rows).
+{%- endcomment -%}
+<figure class="figure">
+  <figcaption>
+    <h3 class="figure__title">Points by category</h3>
+    <p class="figure__subtitle">
+      Points earned against points available. Ordered worst to best, so the
+      weakest capability is the first thing read rather than something averaged
+      away. A category well below its pass rate is one the model solved
+      expensively.
+    </p>
+  </figcaption>
+
+  {%- assign groups = include.rows | group_by: "category" -%}
+  {%- assign ranked = "" | split: "" -%}
+  {%- for group in groups -%}
+    {%- assign earned = 0 -%}
+    {%- assign available = 0 -%}
+    {%- for row in group.items -%}
+      {%- assign earned = earned | plus: row.points -%}
+      {%- assign available = available | plus: row.face_value -%}
+    {%- endfor -%}
+    {%- assign share = 0 -%}
+    {%- if available > 0 %}{% assign share = earned | times: 10000 | divided_by: available %}{% endif -%}
+    {%- comment -%}
+      The bar keeps one decimal of the earned points. Rounding to whole points
+      before dividing would shift a category's share by a tenth of a percent
+      against the export the table below reads.
+    {%- endcomment -%}
+    {%- capture packed -%}{{ share | round | prepend: "00000" | slice: -5, 5 }}|{{ group.name }}|{{ earned | round: 1 }}|{{ available }}{%- endcapture -%}
+    {%- assign ranked = ranked | push: packed -%}
+  {%- endfor -%}
+  {%- assign ranked = ranked | sort -%}
+
+  <div class="bars">
+    {%- for packed in ranked -%}
+      {%- assign parts = packed | split: "|" -%}
+      {%- assign bar_label = parts[1] -%}
+      {%- assign bar_value = parts[2] -%}
+      {%- assign bar_total = parts[3] -%}
+      {%- assign bar_whole = bar_value | plus: 0 | round -%}
+      {%- capture bar_printed %}{{ bar_whole }}/{{ bar_total }}{% endcapture -%}
+      {%- include bar-row.html
+          label=bar_label
+          value=bar_value
+          total=bar_total
+          value_label=bar_printed
+          color="series-2" -%}
+    {%- endfor -%}
+  </div>
+
+  <p class="figure__note">
+    A task's face value is ten points per step of authored difficulty, and a
+    solve keeps all of it only if it stayed inside the token allowance. A
+    failure earns nothing and still counts its face value here, so a category's
+    ceiling does not move with the model. See
+    <a href="{{ '/methodology/#scoring' | relative_url }}">scoring</a>.
+  </p>
+
+  <details class="data-table">
+    <summary>View as a table</summary>
+    <table>
+      <thead>
+        <tr><th scope="col">Category</th><th scope="col">Points</th><th scope="col">Available</th><th scope="col">Share</th></tr>
+      </thead>
+      <tbody>
+        {%- for packed in ranked -%}
+          {%- assign parts = packed | split: "|" -%}
+          <tr>
+            <td>{{ parts[1] }}</td>
+            <td>{{ parts[2] | plus: 0 | round }}</td>
+            <td>{{ parts[3] }}</td>
+            <td>{{ parts[2] | times: 1000 | divided_by: parts[3] | times: 0.1 | round: 1 }}%</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </details>
+</figure>

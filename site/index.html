@@ -108,6 +108,16 @@ description: >-
         </p>
       </div>
       <div class="card">
+        <h3>Solving it is half the score</h3>
+        <p>
+          A task is worth ten points per step of authored difficulty, and a
+          solve keeps all of them only if the agent stayed inside its token
+          allowance. Beyond that the points fall in proportion. Two models can
+          land the same diff and score nothing alike, which is the point.
+          <a href="{{ '/methodology/#scoring' | relative_url }}">How scoring works</a>.
+        </p>
+      </div>
+      <div class="card">
         <h3>The answers stay private</h3>
         <p>
           The 123 scoring tasks are private and rotated. Eight samples ship
@@ -132,13 +142,20 @@ description: >-
       {%- for run in runs limit: 3 -%}
         {%- assign rows = site.data.benchmarks[run.data] -%}
         {%- assign hits = rows | where: "passed", "true" -%}
+        {%- assign points = 0 -%}
+        {%- assign available = 0 -%}
+        {%- for row in rows -%}
+          {%- assign points = points | plus: row.points -%}
+          {%- assign available = available | plus: row.face_value -%}
+        {%- endfor -%}
         <li>
           <a class="entry" href="{{ run.url | relative_url }}">
             <p class="entry__meta">
               <time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time>
               <span>{{ run.suite }}</span>
               {%- if rows -%}
-                <span class="entry__score">{{ hits.size }}/{{ rows.size }} · {{ hits.size | times: 1000 | divided_by: rows.size | times: 0.1 | round: 1 }}%</span>
+                <span class="entry__score">{{ points | round }}/{{ available }} points</span>
+                <span>{{ hits.size }}/{{ rows.size }} passed</span>
               {%- endif -%}
             </p>
             <h3 class="entry__title">{{ run.title }}</h3>

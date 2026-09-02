@@ -104,6 +104,68 @@ struct ResultsExportTests {
         #expect(configurations.map { $0["label"] as? String } == ["opencode · a/model", "opencode · z/model"])
     }
 
+    @Test("CSV carries the points a row earned and the face value it was worth")
+    func csvCarriesPoints() throws {
+        // A difficulty-3 task solved inside the allowance: full face value.
+        let csv = ResultsExport.csv(for: [makeResult(task: "build-002", difficulty: 3, tokens: 1500)])
+        let rows = try #require(CSVProbe.parse(csv))
+        let header = rows[0]
+        let row = rows[1]
+        let faceValue = try #require(header.firstIndex(of: "face_value"))
+        let efficiency = try #require(header.firstIndex(of: "efficiency"))
+        let points = try #require(header.firstIndex(of: "points"))
+        #expect(row[faceValue] == "30")
+        #expect(row[efficiency] == "1.00")
+        #expect(row[points] == "30.0")
+    }
+
+    @Test("A failed row still states the face value it did not earn")
+    func csvFailedRowKeepsFaceValue() throws {
+        let csv = ResultsExport.csv(for: [makeResult(task: "ops-004", difficulty: 6, passed: false)])
+        let rows = try #require(CSVProbe.parse(csv))
+        let faceValue = try #require(rows[0].firstIndex(of: "face_value"))
+        let points = try #require(rows[0].firstIndex(of: "points"))
+        #expect(rows[1][faceValue] == "60")
+        #expect(rows[1][points] == "0.0")
+    }
+
+    @Test("JSON export carries the score, per category and per configuration")
+    func jsonCarriesScore() throws {
+        let results = [
+            makeResult(task: "build-002", category: .build, difficulty: 4, passed: true, tokens: 10_000),
+            makeResult(task: "ops-004", category: .ops, difficulty: 6, passed: false, tokens: 10_000),
+        ]
+        let root = try #require(
+            try JSONSerialization.jsonObject(with: ResultsExport.json(for: results)) as? [String: Any]
+        )
+
+        let score = try #require(root["score"] as? [String: Any])
+        #expect(score["specification"] as? String == AppleBenchScore.specification)
+        #expect(abs((score["points"] as? Double ?? 0) - 40) < 0.0001)
+        #expect(score["available"] as? Int == 100)
+
+        let categories = try #require(root["categories"] as? [[String: Any]])
+        let build = try #require(categories.first { $0["category"] as? String == "build" })
+        let buildScore = try #require(build["score"] as? [String: Any])
+        #expect(abs((buildScore["points"] as? Double ?? 0) - 40) < 0.0001)
+
+        let configurations = try #require(root["configurations"] as? [[String: Any]])
+        let configurationScore = try #require(configurations.first?["score"] as? [String: Any])
+        #expect(configurationScore["available"] as? Int == 100)
+    }
+
+    @Test("A solve with no reported tokens is scored at the floor and counted")
+    func jsonCountsBlindSolves() throws {
+        let root = try #require(
+            try JSONSerialization.jsonObject(
+                with: ResultsExport.json(for: [makeResult(task: "ops-010", difficulty: 5, tokens: nil)])
+            ) as? [String: Any]
+        )
+        let score = try #require(root["score"] as? [String: Any])
+        #expect(score["solves_with_unreported_tokens"] as? Int == 1)
+        #expect(abs((score["points"] as? Double ?? 0) - 12.5) < 0.0001)
+    }
+
     @Test("Runs without a category are reported, not dropped")
     func uncategorizedRunsSurvive() throws {
         let results = [makeResult(task: "adhoc-001", category: nil)]

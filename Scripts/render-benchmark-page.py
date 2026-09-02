@@ -2,9 +2,10 @@
 """Writes the site page for a published run, entirely from its exported data.
 
 A run's numbers and conditions are already recorded — the model, the harness
-and how it was configured, the host, the per-task results. Restating them by
-hand is how a published page comes to disagree with the data it links to, so
-the page is generated and the layout reads the rest at build time.
+and how it was configured, the host, the score and the specification it was
+computed under, the attempt rule, the per-task results. Restating them by hand
+is how a published page comes to disagree with the data it links to, so the
+page is generated and the layout reads the rest at build time.
 
 Only commentary is left to a person, and the page is complete without it. An
 existing body is preserved: re-publishing a run refreshes the facts in the
@@ -86,34 +87,57 @@ def main() -> int:
     rate = report.get("completion_rate", 0) * 100
     model, harness = describe(report)
 
+    score = report.get("score", {})
+    points = round(score.get("points", 0))
+    available = score.get("available", 0)
+    specification = score.get("specification", "")
+    attempt = report.get("attempt", "all")
+
     page = ROOT / f"site/_benchmarks/{slug}.md"
     body = ""
+    lede = ""
     if page.exists():
         existing = page.read_text()
         if existing.startswith("---"):
-            body = existing.split("---", 2)[2].lstrip("\n")
+            front_matter, body = existing.split("---", 2)[1:]
+            body = body.lstrip("\n")
+            # The lede is commentary that happens to live in the front matter,
+            # so it survives a re-publish for the same reason the body does.
+            if found := re.search(
+                r"^lede: >-\n((?:[ \t]+\S.*\n?)+)", front_matter, re.MULTILINE
+            ):
+                lede = found.group(1).rstrip("\n")
 
-    title = f"{model or harness or slug}, {suite} suite, {rate:.1f}%"
+    title = f"{model or harness or slug}, {suite} suite, {points} points"
     front = [
         "---",
         f'title: "{title}"',
         f"date: {date_from(slug, report)}",
         f"suite: {suite}",
         f'suite_revision: "{current_suite_revision()}"',
+        f'score_spec: "{specification}"',
+        f'attempt: "{attempt}"',
         f"data: {slug}",
         f'model: "{model}"',
         f'harness: "{harness}"',
         f"tasks: {total}",
         f"passed: {passed}",
+        f"points: {points}",
+        f"points_available: {available}",
         "description: >-",
         f"  AppleBench results for {model or harness or slug} on the {suite} suite:",
-        f"  {passed} of {total} tasks completed to a verified result, with",
-        "  per-category pass rates, cost against wall-clock time, and every task.",
+        f"  {points} of {available} points and {passed} of {total} tasks completed to a",
+        "  verified result, with per-category points, cost against wall-clock time,",
+        "  and every task.",
+    ]
+    if lede:
+        front += ["lede: >-", lede]
+    front += [
         "---",
         "",
     ]
     page.write_text("\n".join(front) + body)
-    print(f"  wrote site/_benchmarks/{slug}.md ({passed}/{total}, {rate:.1f}%)")
+    print(f"  wrote site/_benchmarks/{slug}.md ({points}/{available} points, {passed}/{total}, {rate:.1f}%)")
     return 0
 
 

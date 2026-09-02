@@ -9,9 +9,9 @@ description: Published AppleBench runs, with full per-task data and charts.
   <div class="article-header">
     <h1>Results</h1>
     <p class="article-header__lede">
-      Every published run, with its charts and its full per-task data. There is
-      no composite score and no leaderboard. Each run reports raw numbers and
-      states the conditions it was measured under.
+      Every published run, with its charts and its full per-task data. Each run
+      reports its AppleBench points, its pass rate, and the raw numbers behind
+      both, and states the conditions it was measured under.
     </p>
   </div>
 </div>
@@ -22,13 +22,20 @@ description: Published AppleBench runs, with full per-task data and charts.
     {%- for run in runs -%}
       {%- assign rows = site.data.benchmarks[run.data] -%}
       {%- assign hits = rows | where: "passed", "true" -%}
+      {%- assign points = 0 -%}
+      {%- assign available = 0 -%}
+      {%- for row in rows -%}
+        {%- assign points = points | plus: row.points -%}
+        {%- assign available = available | plus: row.face_value -%}
+      {%- endfor -%}
       <li>
         <a class="entry" href="{{ run.url | relative_url }}">
           <p class="entry__meta">
             <time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time>
             <span>{{ run.suite }} suite</span>
             {%- if rows -%}
-              <span class="entry__score">{{ hits.size }}/{{ rows.size }} · {{ hits.size | times: 1000 | divided_by: rows.size | times: 0.1 | round: 1 }}%</span>
+              <span class="entry__score">{{ points | round }}/{{ available }} points</span>
+              <span>{{ hits.size }}/{{ rows.size }} passed</span>
             {%- endif -%}
           </p>
           <h2 class="entry__title">{{ run.title }}</h2>
@@ -42,10 +49,12 @@ description: Published AppleBench runs, with full per-task data and charts.
 
   <div class="callout" style="margin-top:2.5rem">
     <p>
-      <strong>Reading these numbers.</strong> A pass rate only means something
+      <strong>Reading these numbers.</strong> A score only means something
       alongside the conditions: which suite, which model, which harness, which
       Xcode, and, when a task was attempted more than once, which attempt
-      counts. Every run page states all five.
+      counts. Every run page states all five, plus the
+      <a href="{{ '/methodology/#scoring' | relative_url }}">scoring
+      specification</a> the points were computed under.
     </p>
   </div>
 </div>

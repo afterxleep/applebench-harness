@@ -2,6 +2,10 @@ import AppleBenchCore
 import ArgumentParser
 import Foundation
 
+// The rule is a Core concept; parsing it from a flag is a CLI concern, so the
+// conformance lives here rather than making Core depend on ArgumentParser.
+extension AttemptSelection: ExpressibleByArgument {}
+
 /// Reads machine-readable results from disk and prints a summary — the same
 /// aggregation a leaderboard would compute from `result.json` files.
 struct ResultsCommand: AsyncParsableCommand {
@@ -25,20 +29,39 @@ struct ResultsCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Write the output to this file instead of stdout.")
     var output: String?
 
+    @Option(
+        name: .long,
+        help: """
+        Which attempt counts when a task was run more than once, per configuration: \
+        all (default), first, latest, or best.
+        """
+    )
+    var attempt: AttemptSelection = .all
+
+    @Option(name: .long, help: "Only include runs from this model id.")
+    var model: String?
+
     func run() async throws {
         let root = URL(fileURLWithPath: path ?? Wiring.defaultRunsRoot().path)
-        let results = Self.collectResults(under: root)
-        guard !results.isEmpty else {
+        let collected = Self.collectResults(under: root)
+        guard !collected.isEmpty else {
             FileHandle.standardError.write(Data("No result.json files found under \(root.path)\n".utf8))
             throw ExitCode.failure
         }
+
+        let matching = model.map { wanted in collected.filter { $0.agent.model == wanted } } ?? collected
+        guard !matching.isEmpty else {
+            FileHandle.standardError.write(Data("No runs under \(root.path) used model \(model ?? "")\n".utf8))
+            throw ExitCode.failure
+        }
+        let results = attempt.apply(to: matching)
 
         switch format {
         case .csv:
             try emit(Data(ResultsExport.csv(for: results.sorted { $0.task < $1.task }).utf8))
             return
         case .json:
-            try emit(try ResultsExport.json(for: results))
+            try emit(try ResultsExport.json(for: results, attempt: attempt))
             return
         case .table:
             break
@@ -80,14 +103,15 @@ struct ResultsCommand: AsyncParsableCommand {
             print("")
         }
 
-        // Aggregate raw variables per agent+model configuration, so model
-        // comparisons through a single harness stay separated. Scoring is
-        // downstream work; these are sums and rates, not a composite score.
+        // Aggregate per agent+model configuration, so model comparisons through
+        // a single harness stay separated. Everything but the score column is a
+        // raw sum or rate; the score is `points-v1`, computed per run.
         let byAgent = Dictionary(grouping: results, by: { configurationLabel(of: $0) })
         let nameWidth = max(14, (byAgent.keys.map(\.count).max() ?? 0) + 2)
-        print("\(Format.pad("", nameWidth))\(Format.pad("Passed", 9))\(Format.pad("Completion", 12))\(Format.pad("Tokens", 10))\(Format.pad("Cost", 10))Cost/solve")
+        print("\(Format.pad("", nameWidth))\(Format.pad("Points", 14))\(Format.pad("Passed", 9))\(Format.pad("Completion", 12))\(Format.pad("Tokens", 10))\(Format.pad("Cost", 10))Cost/solve")
         for (agent, agentResults) in byAgent.sorted(by: { $0.key < $1.key }) {
             let passed = agentResults.count { $0.result.passed }
+            let score = AppleBenchScore.total(for: agentResults)
             let tokens = agentResults.compactMap(\.usage.totalTokens).reduce(into: nil as Int?) { $0 = ($0 ?? 0) + $1 }
             let cost = agentResults.compactMap(\.usage.estimatedCostUSD).reduce(into: nil as Double?) { $0 = ($0 ?? 0) + $1 }
             let perSolve: String = {
@@ -96,6 +120,7 @@ struct ResultsCommand: AsyncParsableCommand {
             }()
             print(
                 Format.pad(agent, nameWidth)
+                + Format.pad("\(Int(score.points.rounded()))/\(score.available)", 14)
                 + Format.pad("\(passed)/\(agentResults.count)", 9)
                 + Format.pad(Format.percent(Double(passed) / Double(agentResults.count)), 12)
                 + Format.pad(tokens.map(String.init) ?? "-", 10)
@@ -103,6 +128,8 @@ struct ResultsCommand: AsyncParsableCommand {
                 + perSolve
             )
         }
+
+        print("\nScore: \(AppleBenchScore.specification), attempt rule: \(attempt.rawValue).")
     }
 
     private func emit(_ data: Data) throws {

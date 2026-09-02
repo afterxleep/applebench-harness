@@ -7,14 +7,21 @@ import Foundation
 /// benchmark pages on the site — so the numbers published anywhere trace back
 /// to `result.json` files rather than to a hand-maintained copy.
 ///
-/// Nothing here scores or weights. Absent data stays absent: a run that
-/// reported no token usage exports an empty cell, never a zero.
+/// Raw variables stay raw. Absent data stays absent: a run that reported no
+/// token usage exports an empty `total_tokens` cell, never a zero.
+///
+/// The one derived quantity here is the AppleBench score, and it is derived
+/// *here* on purpose. The site's charts and tables read these exports and sum
+/// them; if points were computed in the page template instead, the published
+/// number and the data it links to could disagree. See ``AppleBenchScore`` for
+/// the formula and why its terms are independent of the rest of the set.
 public enum ResultsExport {
     /// Column order for `csv(for:)`, also used as the header row.
     static let csvColumns = [
         "task", "category", "difficulty", "agent", "model", "passed",
         "duration_seconds", "agent_termination", "input_tokens", "output_tokens",
         "total_tokens", "cost_usd", "files_changed", "insertions", "deletions",
+        "face_value", "efficiency", "points",
         "graders", "grader_summaries", "run_id",
     ]
 
@@ -38,6 +45,9 @@ public enum ResultsExport {
                 String(result.git.filesChanged),
                 String(result.git.insertions),
                 String(result.git.deletions),
+                String(AppleBenchScore.faceValue(difficulty: result.difficulty)),
+                String(format: "%.2f", AppleBenchScore.efficiency(totalTokens: result.usage.totalTokens)),
+                String(format: "%.1f", AppleBenchScore.points(for: result)),
                 result.graders.map { "\($0.name)=\($0.passed ? "P" : "F")" }.joined(separator: ";"),
                 result.graders.map { "\($0.name):\($0.summary)" }.joined(separator: " | "),
                 result.runID,
@@ -59,8 +69,11 @@ public enum ResultsExport {
 
     /// Aggregate JSON: headline totals, per-category totals, per-configuration
     /// totals, and every run. Suitable to commit alongside a published report.
-    public static func json(for results: [BenchmarkRunResult]) throws -> Data {
-        let document = Summary(results: results)
+    public static func json(
+        for results: [BenchmarkRunResult],
+        attempt: AttemptSelection = .all
+    ) throws -> Data {
+        let document = Summary(results: results, attempt: attempt)
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
         return try encoder.encode(document)
@@ -72,19 +85,25 @@ public enum ResultsExport {
         public var total: Int
         public var passed: Int
         public var completionRate: Double
+        public var score: AppleBenchScore.Total
+        /// Which attempt counted, when a task was run more than once. Recorded
+        /// because the headline moves with it and the runs cannot say it.
+        public var attempt: String
         public var categories: [CategoryTotals]
         public var configurations: [ConfigurationTotals]
         public var runs: [BenchmarkRunResult]
 
         enum CodingKeys: String, CodingKey {
-            case total, passed, categories, configurations, runs
+            case total, passed, score, attempt, categories, configurations, runs
             case completionRate = "completion_rate"
         }
 
-        public init(results: [BenchmarkRunResult]) {
+        public init(results: [BenchmarkRunResult], attempt: AttemptSelection = .all) {
             total = results.count
             passed = results.count { $0.result.passed }
             completionRate = results.isEmpty ? 0 : Double(passed) / Double(results.count)
+            score = AppleBenchScore.total(for: results)
+            self.attempt = attempt.rawValue
 
             // `uncategorized` is an explicit bucket rather than a silent drop:
             // a run whose task predates the category schema still counts.
@@ -109,9 +128,10 @@ public enum ResultsExport {
         public var total: Int
         public var passed: Int
         public var completionRate: Double
+        public var score: AppleBenchScore.Total
 
         enum CodingKeys: String, CodingKey {
-            case category, total, passed
+            case category, total, passed, score
             case completionRate = "completion_rate"
         }
 
@@ -120,6 +140,7 @@ public enum ResultsExport {
             total = results.count
             passed = results.count { $0.result.passed }
             completionRate = results.isEmpty ? 0 : Double(passed) / Double(results.count)
+            score = AppleBenchScore.total(for: results)
         }
     }
 
@@ -130,6 +151,7 @@ public enum ResultsExport {
         public var total: Int
         public var passed: Int
         public var completionRate: Double
+        public var score: AppleBenchScore.Total
         public var medianDurationSeconds: Double?
         /// Summed only over runs that reported the value; `nil` when none did.
         public var totalTokens: Int?
@@ -137,7 +159,7 @@ public enum ResultsExport {
         public var costPerSolvedTaskUSD: Double?
 
         enum CodingKeys: String, CodingKey {
-            case label, agent, model, total, passed
+            case label, agent, model, total, passed, score
             case completionRate = "completion_rate"
             case medianDurationSeconds = "median_duration_seconds"
             case totalTokens = "total_tokens"
@@ -152,6 +174,7 @@ public enum ResultsExport {
             total = results.count
             passed = results.count { $0.result.passed }
             completionRate = results.isEmpty ? 0 : Double(passed) / Double(results.count)
+            score = AppleBenchScore.total(for: results)
             medianDurationSeconds = Self.median(results.map(\.result.durationSeconds))
 
             let tokens = results.compactMap(\.usage.totalTokens)

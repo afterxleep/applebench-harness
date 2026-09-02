@@ -11,6 +11,14 @@ a simulator.
 
 Agents do not grade themselves.
 
+Results are scored in points, not as a pass rate. A task is worth ten points per
+step of authored difficulty, and a solve keeps all of them only if the agent
+stayed inside a flat 50,000-token allowance; beyond that the points fall in
+proportion, floored at a quarter. A failure earns nothing and still counts its
+face value. Every term depends only on its own task, so scores add: a task set
+added later is scored by running the new tasks alone. See
+[docs/RESULTS.md](docs/RESULTS.md#scoring-applebench-points).
+
 ## What is in this repository
 
 Everything needed to run the benchmark: the grading engine, the task schema,

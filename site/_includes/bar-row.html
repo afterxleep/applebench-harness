@@ -1,6 +1,8 @@
 {%- comment -%}
 One horizontal bar. Params: label, value, total, color (a CSS custom-property
-name without the leading dashes), suffix (optional right-hand annotation).
+name without the leading dashes), suffix (optional right-hand annotation),
+value_label (optional replacement for the printed "value/total", for callers
+whose numbers are fractional and want them rounded).
 The number is always printed beside the bar, so the reading never depends on
 color or on estimating a length.
 {%- endcomment -%}
@@ -14,16 +16,18 @@ so coerce before comparing · Liquid will not order a String against 0.
 {%- if bar_total > 0 -%}
   {%- assign pct = bar_value | times: 1.0 | divided_by: bar_total | times: 100 -%}
 {%- endif -%}
+{%- capture printed -%}{{ bar_value }}/{{ bar_total }}{%- endcapture -%}
+{%- assign printed = include.value_label | default: printed -%}
 <div class="bar-row">
   <div class="bar-row__label" title="{{ include.label }}">{{ include.label }}</div>
   <div class="bar-row__track"
        role="img"
-       aria-label="{{ include.label }}: {{ bar_value }} of {{ bar_total }}, {{ pct | round: 1 }} percent">
+       aria-label="{{ include.label }}: {{ printed | replace: '/', ' of ' }}, {{ pct | round: 1 }} percent">
     <div class="bar-row__fill"
          style="width: {{ pct | round: 2 }}%; --bar-color: var(--{{ include.color | default: 'series-1' }});"></div>
   </div>
   <div class="bar-row__value">
     {{ pct | round: 1 }}%
-    <span>{{ bar_value }}/{{ bar_total }}</span>
+    <span>{{ printed }}</span>
   </div>
 </div>
