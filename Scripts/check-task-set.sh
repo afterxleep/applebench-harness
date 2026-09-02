@@ -79,6 +79,9 @@ gold_paths = sorted(
 )
 gold_path = root / "Examples/Suites/gold.yaml"
 dev_path = root / "Examples/Suites/dev.yaml"
+# A third bucket: authored but not yet proven. Not scored and not public, so it
+# belongs to neither set, and a task sitting here is not "unclaimed".
+incubating_path = root / "Examples/Suites/incubating.yaml"
 gold = [identifier for path in gold_paths for identifier in suite_ids(path)]
 dev = suite_ids(dev_path) if dev_path.exists() else []
 gold_set, dev_set, all_set = set(gold), set(dev), set(task_ids)
@@ -95,7 +98,8 @@ else:
     overlap = sorted(gold_set & dev_set)
     if overlap:
         problems.append(f"gold and dev both contain: {', '.join(overlap)}")
-    unclaimed = sorted(all_set - gold_set - dev_set)
+    incubating = set(suite_ids(incubating_path)) if incubating_path.exists() else set()
+    unclaimed = sorted(all_set - gold_set - dev_set - incubating)
     if unclaimed:
         named = " or ".join(p.name for p in (gold_paths + [dev_path]) if p.exists())
         problems.append(f"tasks in no suite, so never run or verified: {', '.join(unclaimed)} (add to {named})")

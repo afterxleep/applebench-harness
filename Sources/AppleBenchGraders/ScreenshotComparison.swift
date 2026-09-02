@@ -20,9 +20,21 @@ enum ScreenshotComparison {
     static let sampleEdge = 32
 
     /// Mean absolute per-channel difference, 0 (identical) to 1 (inverted).
-    static func difference(_ first: URL, _ second: URL) throws -> Double {
-        let a = try samples(of: first)
-        let b = try samples(of: second)
+    ///
+    /// `crop` limits the comparison to one element's frame. Without it the
+    /// answer is dominated by the chrome around the subject: a navigation bar
+    /// and a page background adapt to dark mode whatever the view in the
+    /// middle does, so a card with its colours hardcoded still moves most of
+    /// the screen and reads as adapting. The question is whether *this thing*
+    /// changed, so the comparison is limited to this thing.
+    static func difference(
+        _ first: URL,
+        _ second: URL,
+        crop: CGRect? = nil,
+        screenSize: CGSize? = nil
+    ) throws -> Double {
+        let a = try samples(of: first, crop: crop, screenSize: screenSize)
+        let b = try samples(of: second, crop: crop, screenSize: screenSize)
         guard a.count == b.count, !a.isEmpty else {
             throw BenchmarkFailure.graderFailure(
                 grader: "uiflow",
@@ -37,15 +49,32 @@ enum ScreenshotComparison {
     }
 
     /// Draws the image into a fixed-size RGB grid and returns the raw channels.
-    static func samples(of url: URL) throws -> [UInt8] {
+    static func samples(of url: URL, crop: CGRect? = nil, screenSize: CGSize? = nil) throws -> [UInt8] {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let image = CGImageSourceCreateImageAtIndex(source, 0, nil)
+              let loaded = CGImageSourceCreateImageAtIndex(source, 0, nil)
         else {
             throw BenchmarkFailure.graderFailure(
                 grader: "uiflow",
                 message: "Could not read the screenshot at \(url.lastPathComponent)"
             )
         }
+        // Frames are in points and the screenshot may be in pixels, so the
+        // crop is expressed as a fraction of the screen rather than absolutely.
+        var subject = loaded
+        if let crop, let screenSize, screenSize.width > 0, screenSize.height > 0 {
+            let scaleX = CGFloat(loaded.width) / screenSize.width
+            let scaleY = CGFloat(loaded.height) / screenSize.height
+            let rect = CGRect(
+                x: (crop.minX * scaleX).rounded(.down),
+                y: (crop.minY * scaleY).rounded(.down),
+                width: max(1, (crop.width * scaleX).rounded()),
+                height: max(1, (crop.height * scaleY).rounded())
+            ).intersection(CGRect(x: 0, y: 0, width: loaded.width, height: loaded.height))
+            if !rect.isNull, rect.width > 1, rect.height > 1, let cropped = loaded.cropping(to: rect) {
+                subject = cropped
+            }
+        }
+        let image = subject
         let edge = sampleEdge
         var pixels = [UInt8](repeating: 0, count: edge * edge * 4)
         guard let context = CGContext(

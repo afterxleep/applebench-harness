@@ -218,7 +218,9 @@ public struct UIFlowGrader: Grader {
                 }
                 var appearance: String?
                 if configuration.appearanceMustDiffer {
-                    appearance = try await appearanceFailure(udid: udid, context: context)
+                    appearance = try await appearanceFailure(
+                        udid: udid, context: context, snapshot: snapshot
+                    )
                 }
                 return Outcome(
                     stepFailure: nil, snapshot: snapshot, appearanceFailure: appearance
@@ -293,7 +295,11 @@ public struct UIFlowGrader: Grader {
 
     /// Captures the screen in light and again in dark, and reports when the two
     /// are the same picture.
-    private func appearanceFailure(udid: String, context: GradingContext) async throws -> String? {
+    private func appearanceFailure(
+        udid: String,
+        context: GradingContext,
+        snapshot: UIFlowSnapshot
+    ) async throws -> String? {
         let applier = SimulatorDeviceStateApplier(grader: identifier, context: context)
         let light = context.artifactsDirectoryURL.appendingPathComponent("appearance-light.png")
         let dark = context.artifactsDirectoryURL.appendingPathComponent("appearance-dark.png")
@@ -307,14 +313,32 @@ public struct UIFlowGrader: Grader {
             try await capture(to: dark, udid: udid, context: context)
         }
 
-        let difference = try ScreenshotComparison.difference(light, dark)
+        // Limited to the element under test when the task names one.
+        var crop: CGRect?
+        var screen: CGSize?
+        if let region = configuration.appearanceRegion {
+            guard let element = snapshot.element(id: region, label: region) else {
+                return "no element \"\(region)\" on screen to compare appearances of"
+            }
+            crop = CGRect(
+                x: CGFloat(element.frame.x), y: CGFloat(element.frame.y),
+                width: CGFloat(element.frame.width), height: CGFloat(element.frame.height)
+            )
+            if let root = snapshot.root {
+                screen = CGSize(width: CGFloat(root.width), height: CGFloat(root.height))
+            }
+        }
+        let difference = try ScreenshotComparison.difference(
+            light, dark, crop: crop, screenSize: screen
+        )
         // A screen that adapts turns over most of its area. The floor is set
         // well below that and well above the few percent a status bar clock or
         // a caret can move on its own.
         guard difference < 0.08 else { return nil }
         return String(
-            format: "the screen renders the same in light and dark (%.1f%% different); "
+            format: "%@ renders the same in light and dark (%.1f%% different); "
                 + "its colours do not follow the appearance",
+            configuration.appearanceRegion.map { "\"\($0)\"" } ?? "the screen",
             difference * 100
         )
     }

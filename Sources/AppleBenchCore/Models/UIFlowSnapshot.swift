@@ -67,7 +67,7 @@ public struct UIFlowSnapshot: Sendable, Equatable {
     /// The largest element, treated as the window for containment checks. Using
     /// the biggest frame rather than looking for a `window` role keeps this
     /// working across the roles different iOS versions report for the root.
-    var root: Frame? {
+    public var root: Frame? {
         elements.map(\.frame).max { ($0.width * $0.height) < ($1.width * $1.height) }
     }
 
@@ -76,7 +76,7 @@ public struct UIFlowSnapshot: Sendable, Equatable {
     /// Role is the fallback because some things on screen have neither of the
     /// first two — the software keyboard carries no identifier and no label,
     /// and it is exactly what a keyboard-avoidance claim needs to name.
-    func element(id: String?, label: String?) -> Element? {
+    public func element(id: String?, label: String?) -> Element? {
         if let id, let match = elements.first(where: { $0.id == id }) { return match }
         if let label, let match = elements.first(where: { $0.label == label }) { return match }
         let wanted = id ?? label

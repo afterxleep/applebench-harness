@@ -476,6 +476,12 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
     /// one with its colours written in looks identical. The check is whether
     /// the two renderings differ at all.
     public var appearanceMustDiffer: Bool
+    /// Element whose frame the appearance comparison is limited to.
+    ///
+    /// Without one the answer is dominated by the chrome around the subject: a
+    /// navigation bar and page background adapt whatever the view in the middle
+    /// does, so a hardcoded card still moves most of the screen.
+    public var appearanceRegion: String?
     /// Precise drags run after the steps: swipe-to-delete on a particular row,
     /// or a drag-to-reorder, which needs a hold before it engages.
     public var gestures: [UIFlowGesture]
@@ -518,6 +524,7 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         relaunch: Bool = false,
         gestures: [UIFlowGesture] = [],
         appearanceMustDiffer: Bool = false,
+        appearanceRegion: String? = nil,
         privacy: [UIFlowPrivacyChange] = [],
         clearState: Bool = false,
         openURL: String? = nil,
@@ -539,6 +546,7 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         self.relaunch = relaunch
         self.gestures = gestures
         self.appearanceMustDiffer = appearanceMustDiffer
+        self.appearanceRegion = appearanceRegion
         self.privacy = privacy
         self.clearState = clearState
         self.openURL = openURL
@@ -553,6 +561,7 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         case afterSteps = "after_steps"
         case clearState = "clear_state"
         case appearanceMustDiffer = "appearance_must_differ"
+        case appearanceRegion = "appearance_region"
         case openURL = "open_url"
         case memoryWarning = "memory_warning"
         case bundleIdentifier = "bundle_id"
