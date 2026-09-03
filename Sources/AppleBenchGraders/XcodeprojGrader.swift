@@ -7,7 +7,7 @@ import Foundation
 /// keys and bundle contents come from a product built into this run's fresh
 /// derived data. Nothing here reads `project.pbxproj` text, so an agent cannot
 /// satisfy a `project` task by pasting a plausible-looking line into the
-/// project file — the configuration has to actually take effect.
+/// project file: the configuration has to actually take effect.
 public struct XcodeprojGrader: Grader {
     public let identifier = "xcodeproj"
     private let configuration: XcodeprojGraderConfiguration
@@ -245,7 +245,7 @@ public struct XcodeprojGrader: Grader {
         let passed = failures.isEmpty
         let summary = passed
             ? "\(checked) project assertion(s) hold in the resolved configuration"
-            : "\(failures.count) of \(checked) project assertion(s) failed — " + failures.joined(separator: "; ")
+            : "\(failures.count) of \(checked) project assertion(s) failed: " + failures.joined(separator: "; ")
         return GradingResult(
             grader: identifier,
             passed: passed,

@@ -21,39 +21,22 @@ lede: >-
   123 tasks on suite revision 2026-08-31, at the provider's default reasoning.
   103 passed; 4354 of 5940 points.
 ---
-## Which attempt counts
+## Conditions
 
-**The first attempt per task**, over **the gold suite only**. The run directory
-holds more than the scored set: 19 tasks were attempted more than once while
-the harness was being fixed, and four of the public sample tasks — `build-002`,
-`ops-004`, `project-001`, `tests-003` — were run alongside gold. Those four are
-excluded. They ship with the open harness, their answers are public, and a
-score that included them would be measuring something else.
+| | |
+|---|---|
+| Attempt rule | First per task, gold suite only. 19 tasks were attempted more than once while the harness was being fixed. |
+| Reasoning | Provider default. This model exposes no selectable effort level. |
+| Isolation | Not sandboxed. Web tools off, hermetic config, host egress open. |
 
-An earlier version of this page reported 106 of 127 because it counted them.
-The export is now filtered by the suite file rather than trusted to contain
-only the suite, so this cannot recur.
+## Excluded from the score
 
-Eight further runs are excluded, under the model ids `minimax/minimax-m3` and
-`openrouter/minimax/minimax-m3`. Both are mistyped; OpenCode could not resolve
-either, and all eight died in under five seconds without an agent ever starting.
-They are launch failures, not attempts, and counting them as failed tasks would
-have deflated the score with a typo.
+| | |
+|---|---|
+| Public sample tasks | `build-002`, `ops-004`, `project-001`, `tests-003`. They ship with the open harness and are never scored. |
+| Launch failures | 8 runs under the model ids `minimax/minimax-m3` and `openrouter/minimax/minimax-m3`. Both mistyped; all 8 ended in under 5 seconds with no agent started. |
 
-## Two solves scored at the floor
+## Scored at the efficiency floor
 
-`ops-010` and `ui-auto-005` hit the wall-clock limit, and the agent was
-terminated before it reported any token usage. Both workspaces graded clean
-afterwards, so both are passes — a timeout and a passing workspace are two
-separate facts here and neither is collapsed into the other.
-
-With no usage to read, the harness cannot verify what they cost, so it awards
-them the 0.25 floor rather than full marks. In these two cases that is also
-close to accurate: an agent that ran out its wall clock did not do it cheaply.
-
-## Isolation
-
-This run was **not** sandboxed. The agent's web tools were off and its
-configuration was replaced with a hermetic one, but the process was not confined
-to a VM and host egress was open. That is stated on every run and it matters
-here: it is a development-grade number, not a sealed one.
+`ops-010` and `ui-auto-005` hit the wall-clock limit and reported no token
+usage. Both workspaces graded clean, so both are passes at the 0.25 floor.

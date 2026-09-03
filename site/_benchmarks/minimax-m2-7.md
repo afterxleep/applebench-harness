@@ -18,20 +18,13 @@ description: >-
   verified result, with per-category points, cost against wall-clock time,
   and every task.
 lede: >-
-  The first run measured against the hardened suite: 134 tasks, including 11
-  that require driving the device itself, and 25 rewritten so that a test which
-  asserts nothing no longer passes. 53.5% of the points, 59.0% of the tasks.
+  134 tasks on suite revision 2026-09-03, at the provider's default reasoning.
+  79 passed; 3657 of 6840 points.
 ---
-## Which attempt counts
+## Conditions
 
-**The latest attempt per task.** Twenty-five of these tasks were rewritten
-after this model first ran them, so the earlier attempt scored a version that
-no longer exists; letting it win would credit the model with passes on tasks it
-was never asked to solve. Where a task has not changed, there is only one
-attempt to choose from.
-
-## Isolation
-
-Not sandboxed. The agent's web tools were off and its configuration replaced
-with a hermetic one, but the process was not confined to a VM and host egress
-was open. A development-grade number, not a sealed one.
+| | |
+|---|---|
+| Attempt rule | Latest per task. 25 tasks were rewritten after this model first ran them. |
+| Reasoning | Provider default. This model exposes no selectable effort level. |
+| Isolation | Not sandboxed. Web tools off, hermetic config, host egress open. |

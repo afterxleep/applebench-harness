@@ -85,10 +85,10 @@ public struct XCTestGrader: Grader {
             var text = "\(executed) executed, \(summaryData.passedTests ?? 0) passed, \(failed) failed, \(skipped) skipped"
             let failures = (summaryData.testFailures ?? []).compactMap { $0.testIdentifierString ?? $0.testName }
             if !failures.isEmpty {
-                text += " — failing: \(failures.joined(separator: ", "))"
+                text += ". Failing: \(failures.joined(separator: ", "))"
             }
             if executed == 0 {
-                text += " — no tests executed"
+                text += ". No tests executed"
             }
             summaryText = text
         } else {
