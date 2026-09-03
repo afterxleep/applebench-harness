@@ -56,7 +56,8 @@ def suite_tasks(path: pathlib.Path) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", required=True)
-    parser.add_argument("--report")
+    parser.add_argument("--report", help="Report to compare against. Defaults to the newest one that scored this model.")
+    parser.add_argument("--reports-dir", default=None)
     parser.add_argument("--suite")
     parser.add_argument("--mode", default="both", choices=["both", "new", "changed"])
     args = parser.parse_args()
@@ -77,9 +78,26 @@ def main() -> int:
 
     current = load_fingerprints()
 
+    # Picking the newest report outright would compare a model against another
+    # model's run and report every task as new. The default is the newest report
+    # that actually scored *this* model.
+    report_path = pathlib.Path(args.report) if args.report else None
+    if report_path is None:
+        directory = pathlib.Path(args.reports_dir or (root / "Reports"))
+        candidates = sorted(directory.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        for candidate in candidates:
+            try:
+                document = json.loads(candidate.read_text())
+            except (ValueError, OSError):
+                continue
+            if any(r.get("agent", {}).get("model") == args.model for r in document.get("runs", [])):
+                report_path = candidate
+                break
+
     scored_before: dict[str, str] = {}
-    if args.report and pathlib.Path(args.report).exists():
-        report = json.loads(pathlib.Path(args.report).read_text())
+    if report_path and report_path.exists():
+        print(f"comparing against {report_path.name}", file=sys.stderr)
+        report = json.loads(report_path.read_text())
         recorded = report.get("task_fingerprints") or {}
         for run in report.get("runs", []):
             if run.get("agent", {}).get("model") != args.model:

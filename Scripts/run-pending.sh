@@ -52,13 +52,12 @@ if [ -z "$model" ]; then
     exit 2
 fi
 
-if [ -z "$report" ]; then
-    report="$(ls -t "$root"/Reports/*.json 2>/dev/null | head -1 || true)"
-    [ -n "$report" ] && report="$(basename "$report" .json)"
-fi
-
+# With no --report, the comparison picks the newest report that actually
+# scored this model. Taking the newest report outright would compare a model
+# against a different model's run and call every task new.
 pending="$(APPLEBENCH_TASKSET="$taskset_root" python3 "$root/Scripts/pending-tasks.py" \
     --model "$model" \
+    --reports-dir "$root/Reports" \
     ${report:+--report "$root/Reports/$report.json"} \
     ${suite:+--suite "$taskset_suites/$suite.yaml"} \
     --mode "$mode")"
@@ -69,7 +68,7 @@ if [ -z "$pending" ]; then
 fi
 
 count="$(echo "$pending" | wc -w | tr -d ' ')"
-echo "Pending for $model ($count task(s), against ${report:-no report}):"
+echo "Pending for $model ($count task(s)):"
 echo "  $pending"
 echo
 
