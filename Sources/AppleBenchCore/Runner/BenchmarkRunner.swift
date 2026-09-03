@@ -29,6 +29,11 @@ public struct RunnerOptions: Sendable {
     /// Where the task set lives, so the seal can deny it. The runner does not
     /// otherwise need to know.
     public var taskSetRoot: URL?
+    /// Where to write a readable transcript per task. `nil` writes none.
+    ///
+    /// The transcript is a convenience over `events.jsonl`, which already has
+    /// everything in it and is unreadable by design.
+    public var transcriptsRoot: URL?
 
     public init(
         model: String? = nil,
@@ -40,7 +45,8 @@ public struct RunnerOptions: Sendable {
         limitCaps: LimitCaps = LimitCaps(),
         eventObserver: (@Sendable (BenchmarkEvent) -> Void)? = nil,
         sealAnswers: Bool = false,
-        taskSetRoot: URL? = nil
+        taskSetRoot: URL? = nil,
+        transcriptsRoot: URL? = nil
     ) {
         self.model = model
         self.effort = effort
@@ -52,6 +58,7 @@ public struct RunnerOptions: Sendable {
         self.eventObserver = eventObserver
         self.sealAnswers = sealAnswers
         self.taskSetRoot = taskSetRoot
+        self.transcriptsRoot = transcriptsRoot
     }
 }
 
@@ -327,6 +334,23 @@ public struct BenchmarkRunner: Sendable {
                 artifacts: .init(events: "events.jsonl", diff: "diff.patch", logs: "logs")
             )
             try result.write(to: runDirectoryURL.appendingPathComponent("result.json"))
+
+            // Best effort: a transcript that could not be written is a lost
+            // convenience, not a lost result. events.jsonl still holds it all.
+            if let transcriptsRoot = options.transcriptsRoot {
+                do {
+                    let url = try RunTranscript.write(
+                        task: task, result: result, events: events, root: transcriptsRoot
+                    )
+                    await recorder.record(.artifactCreated, payload: .object([
+                        "path": .string(url.path), "kind": .string("transcript"),
+                    ]))
+                } catch {
+                    await recorder.record(.warning, payload: .object([
+                        "message": .string("Could not write the transcript: \(error)")
+                    ]))
+                }
+            }
 
             await teardown(
                 simulatorUDID: simulatorUDID,

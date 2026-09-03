@@ -21,6 +21,17 @@ struct RunCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Reasoning effort passed to the agent when its CLI supports it (e.g. low, medium, high).")
     var effort: String?
 
+    @Option(name: .long, help: "Write a readable transcript per task under this directory, one folder per model (default: Transcripts).")
+    var transcripts: String?
+
+    @Flag(name: .long, help: "Do not write transcripts.")
+    var noTranscripts = false
+
+    /// Where transcripts go, or nil when they are switched off.
+    var transcriptsRoot: URL? {
+        noTranscripts ? nil : URL(fileURLWithPath: transcripts ?? "Transcripts")
+    }
+
     @Flag(name: .long, help: "Seal the agent away from reference solutions, task files, other runs, and any executable outside the Apple toolchain. On for scoring runs.")
     var sealAnswers = false
 
@@ -102,7 +113,8 @@ struct RunCommand: AsyncParsableCommand {
             eventObserver: liveLog.observer(),
             sealAnswers: sealAnswers,
             taskSetRoot: ProcessInfo.processInfo.environment["APPLEBENCH_TASKSET"]
-                .map { URL(fileURLWithPath: $0) }
+                .map { URL(fileURLWithPath: $0) },
+            transcriptsRoot: transcriptsRoot
         )
 
         print("AppleBench · \(benchmarkTask.id)\n")
