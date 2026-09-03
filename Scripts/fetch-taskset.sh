@@ -23,10 +23,10 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 dir="${dir:-$root/.applebench/taskset}"
 
 if [ -d "$dir/.git" ]; then
-    echo "Updating task set in ${dir}…" >&2
+    echo "Updating task set in ${dir}..." >&2
     git -C "$dir" fetch --quiet --all --prune
 else
-    echo "Cloning task set from ${repo}…" >&2
+    echo "Cloning task set from ${repo}..." >&2
     mkdir -p "$(dirname "$dir")"
     if ! git clone --quiet "$repo" "$dir"; then
         echo "error: could not clone $repo (private task sets need your git credentials)." >&2

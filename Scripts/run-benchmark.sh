@@ -137,6 +137,40 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+# No model named: offer the catalogue rather than guess one. Everything in it
+# is reachable and priced, so a pick cannot land on a name the gateway does not
+# have, and the effort comes from the model's own ladder rather than the
+# person choosing. Only when there is a terminal to draw on — a scripted run
+# with no --model is an error, not a prompt nobody will see.
+if [ -z "$model" ] && [ -t 0 ]; then
+    if picked="$("$root/Scripts/pick-model.py" --prefix openrouter/ </dev/tty)"; then
+        model="${picked%%$'\t'*}"
+        effort="${picked#*$'\t'}"
+        echo "Selected $model${effort:+ at effort $effort}"
+    else
+        echo "error: no model selected." >&2
+        exit 1
+    fi
+fi
+
+# Check the model before spending an hour on it. A name the agent cannot reach
+# produces a suite of failures that read as the model being bad at Swift; a
+# model missing from the catalog publishes a report with no cost in it, and
+# the gap is invisible next to models that have one. Both are cheap to catch
+# here and expensive to notice afterwards.
+#
+# The same check resolves the effort: every model runs at the strongest
+# reasoning it exposes, and since the ladders differ — and some models have
+# none — the level comes from the catalog rather than a hardcoded word.
+if [ -n "$model" ]; then
+    echo "Checking ${model}..."
+    if ! resolved_effort="$("$root/Scripts/validate-model.py" "$model" --agent "$agent" ${effort:+--effort "$effort"})"; then
+        echo "error: refusing to start; fix the above or pass --effort explicitly." >&2
+        exit 1
+    fi
+    effort="$resolved_effort"
+fi
+
 # Materialise the task set before anything reads it. The tasks live in their
 # own repository, so a scoring run on a fresh machine would otherwise be clone,
 # export, prepare, run, with three chances to point at the wrong directory.
@@ -264,39 +298,6 @@ if [ -n "$pending_mode" ]; then
     suite="$pending_suite"
 fi
 
-# No model named: offer the catalogue rather than guess one. Everything in it
-# is reachable and priced, so a pick cannot land on a name the gateway does not
-# have, and the effort comes from the model's own ladder rather than the
-# person choosing. Only when there is a terminal to draw on — a scripted run
-# with no --model is an error, not a prompt nobody will see.
-if [ -z "$model" ] && [ -t 0 ]; then
-    if picked="$("$root/Scripts/pick-model.py" --prefix openrouter/ </dev/tty)"; then
-        model="${picked%%$'\t'*}"
-        effort="${picked#*$'\t'}"
-        echo "Selected $model${effort:+ at effort $effort}"
-    else
-        echo "error: no model selected." >&2
-        exit 1
-    fi
-fi
-
-# Check the model before spending an hour on it. A name the agent cannot reach
-# produces a suite of failures that read as the model being bad at Swift; a
-# model missing from the catalog publishes a report with no cost in it, and
-# the gap is invisible next to models that have one. Both are cheap to catch
-# here and expensive to notice afterwards.
-#
-# The same check resolves the effort: every model runs at the strongest
-# reasoning it exposes, and since the ladders differ — and some models have
-# none — the level comes from the catalog rather than a hardcoded word.
-if [ -n "$model" ]; then
-    echo "Checking $model…"
-    if ! resolved_effort="$("$root/Scripts/validate-model.py" "$model" --agent "$agent" ${effort:+--effort "$effort"})"; then
-        echo "error: refusing to start; fix the above or pass --effort explicitly." >&2
-        exit 1
-    fi
-    effort="$resolved_effort"
-fi
 
 echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} effort=${effort:-<default>} parallel=$parallel"
 echo "  caps:   tokens=${max_tokens:-unlimited} timeout=${timeout_cap:-1200}s"
@@ -365,7 +366,7 @@ if [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" !=
             [ -e "$file" ] && suite_args+=(--suite-file "$file")
         done
         echo
-        echo "Publishing $slug from ${runs_dir}…"
+        echo "Publishing $slug from ${runs_dir}..."
         # Latest, not first. `first` is the honest rule when the same task is
         # attempted twice, because it stops a weak score being retried away.
         # But a re-run here means the *task* changed, and the earlier attempt
