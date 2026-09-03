@@ -201,6 +201,10 @@ public struct RunDirectoryLayout: Sendable {
         // complain about an existing directory — the second run would quietly
         // overwrite the first's result.json and events.jsonl. Claim the
         // directory exclusively instead, and take a suffix when it is taken.
+        // The exclusive create below makes only the leaf, so the root it goes
+        // in has to exist first.
+        try FileManager.default.createDirectory(at: resolvedRoot, withIntermediateDirectories: true)
+
         var uniqueID = runID
         var uniqueURL = runURL
         var attempt = 2
