@@ -13,12 +13,14 @@ layout: default
 {%- if total > 0 %}{% assign rate = passed.size | times: 10000 | divided_by: total | times: 0.01 %}{% endif -%}
 
 {%- assign cost = 0 -%}
+{%- assign list_cost = 0 -%}
 {%- assign tokens = 0 -%}
 {%- assign seconds = 0 -%}
 {%- assign points = 0 -%}
 {%- assign available = 0 -%}
 {%- for row in rows -%}
   {%- assign cost = cost | plus: row.cost_usd -%}
+  {%- assign list_cost = list_cost | plus: row.list_cost_usd -%}
   {%- assign tokens = tokens | plus: row.total_tokens -%}
   {%- assign seconds = seconds | plus: row.duration_seconds -%}
   {%- assign points = points | plus: row.points -%}
@@ -59,12 +61,19 @@ layout: default
       <div class="stat__label">Pass rate</div>
       <p class="stat__note">{{ passed.size }} of {{ total }} tasks</p>
     </div>
+    {%- comment -%}
+      List price, not the agent CLI's figure. What the CLI reports is what the
+      caller was billed, which moves with their provider, plan and discounts —
+      for these runs it overstates the list price by 5x for one model and 2.3x
+      for another, so it cannot be compared between two models. Cost here is
+      the run's own tokens at the model owner's published rate.
+    {%- endcomment -%}
     <div class="stat">
-      <div class="stat__value">{% include money.html value=cost %}</div>
-      <div class="stat__label">Total cost</div>
+      <div class="stat__value">{% include money.html value=list_cost %}</div>
+      <div class="stat__label">Cost at list price</div>
       <p class="stat__note">
         {%- if passed.size > 0 -%}
-          {%- assign per_solve = cost | divided_by: passed.size -%}
+          {%- assign per_solve = list_cost | divided_by: passed.size -%}
           {% include money.html value=per_solve places=3 %} per solved task
         {%- else -%}
           no solved tasks
@@ -104,6 +113,41 @@ layout: default
       <tbody>
         <tr><th scope="row">Suite</th><td><code>{{ page.suite }}</code>, {{ total }} tasks{% if page.suite_revision %}, revision {{ page.suite_revision }}{% endif %}</td></tr>
         <tr><th scope="row">Model</th><td><code>{{ page.model }}</code></td></tr>
+        {%- comment -%}
+          Effort changes both what a model scores and what it costs, so a run
+          that does not state it cannot be reproduced or compared. Every model
+          is benchmarked at the strongest reasoning it offers; where a model
+          offers no effort ladder at all, that is said rather than dressed up
+          as a setting that was chosen.
+        {%- endcomment -%}
+        {%- assign reasoning = report.reasoning | first -%}
+        {%- if reasoning -%}
+        <tr>
+          <th scope="row">Reasoning</th>
+          <td>
+            {%- if reasoning.effort -%}
+              effort <code>{{ reasoning.effort }}</code>
+              {%- if reasoning.at_maximum_effort %}, the strongest this model exposes
+              {%- elsif reasoning.maximum_effort %}, of a maximum of <code>{{ reasoning.maximum_effort }}</code>{% endif -%}
+            {%- elsif reasoning.maximum_effort -%}
+              provider default; this model exposes up to <code>{{ reasoning.maximum_effort }}</code> and it was not requested
+            {%- else -%}
+              provider default &mdash; this model exposes no selectable effort level, so there is no stronger setting to ask for
+            {%- endif -%}
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Pricing</th>
+          <td>
+            list price from <a href="{{ reasoning.price_source }}">models.dev</a>,
+            retrieved {{ reasoning.price_retrieved }}.
+            {%- if reasoning.reported_cost_usd %}
+              The agent CLI reported ${{ reasoning.reported_cost_usd | times: 100 | round | divided_by: 100.0 }}
+              for the same tokens, which is what <em>this</em> caller was billed rather than what the model costs.
+            {%- endif %}
+          </td>
+        </tr>
+        {%- endif -%}
         <tr><th scope="row">Harness</th><td>{{ page.harness }}{% for pair in first.agent.configuration %}, {{ pair[0] | replace: "_", " " }}: {{ pair[1] }}{% endfor %}</td></tr>
         <tr><th scope="row">Host</th><td>Xcode {{ first.environment.xcode }}{% if first.environment.xcode_build %} ({{ first.environment.xcode_build }}){% endif %}, macOS {{ first.environment.macos }}, {{ first.environment.architecture }}</td></tr>
         <tr><th scope="row">Scoring</th><td><code>{{ report.score.specification }}</code>, attempt rule <code>{{ report.attempt }}</code>{% if report.score.solves_with_unreported_tokens > 0 %}, {{ report.score.solves_with_unreported_tokens }} solve(s) scored at the floor for want of reported tokens{% endif %}</td></tr>

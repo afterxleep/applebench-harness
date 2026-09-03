@@ -165,6 +165,19 @@
     }
   ],
   "passed" : 103,
+  "reasoning" : [
+    {
+      "at_maximum_effort" : false,
+      "input_tokens" : 4121129,
+      "list_cost_usd" : 2.2379847000000006,
+      "model" : "minimax/MiniMax-M3",
+      "output_tokens" : 834705,
+      "price_retrieved" : "2026-09-03",
+      "price_source" : "https://models.dev/api.json",
+      "reported_cost_usd" : 5.257758899999999,
+      "runs" : 123
+    }
+  ],
   "runs" : [
     {
       "agent" : {

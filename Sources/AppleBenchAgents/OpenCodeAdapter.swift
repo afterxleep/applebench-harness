@@ -205,7 +205,7 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
             "user_config": "ignored (OPENCODE_CONFIG)",
         ]
         if let effort = context.effort {
-            configuration["variant"] = effort
+            configuration["effort"] = effort
         }
         return AgentRunResult(
             metadata: AgentMetadata(

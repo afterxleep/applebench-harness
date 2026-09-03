@@ -36,8 +36,10 @@ struct ResultsExportTests {
         let csv = ResultsExport.csv(for: [makeResult(task: "build-002"), makeResult(task: "ops-004")])
         let lines = csv.split(separator: "\n", omittingEmptySubsequences: false).filter { !$0.isEmpty }
         #expect(lines.count == 3)
-        #expect(lines[0].hasPrefix("task,category,difficulty,agent,model,passed"))
-        #expect(lines[1].hasPrefix("build-002,build,3,opencode,vendor/model-1,true"))
+        #expect(lines[0].hasPrefix("task,category,difficulty,agent,model,effort,passed"))
+        // The empty field is the effort: this run asked for none, and an
+        // absent setting exports blank rather than a stand-in value.
+        #expect(lines[1].hasPrefix("build-002,build,3,opencode,vendor/model-1,,true"))
     }
 
     @Test("CSV quotes fields containing commas, quotes, and newlines")

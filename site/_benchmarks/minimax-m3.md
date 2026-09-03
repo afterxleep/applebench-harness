@@ -2,7 +2,7 @@
 title: "minimax/MiniMax-M3, gold suite, 4354 points"
 date: 2026-09-02
 suite: gold
-suite_revision: "2026-08-31"
+suite_revision: "2026-09-03"
 score_spec: "points-v1"
 attempt: "latest"
 data: minimax-m3

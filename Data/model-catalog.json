@@ -1,0 +1,35 @@
+{
+  "models": {
+    "minimax/MiniMax-M2.7": {
+      "cost_per_million": {
+        "cache_read": 0.06,
+        "input": 0.3,
+        "output": 1.2
+      },
+      "max_effort": null,
+      "name": "MiniMax-M2.7",
+      "reasoning": true,
+      "reasoning_options": [],
+      "source_id": "minimax/MiniMax-M2.7"
+    },
+    "minimax/MiniMax-M3": {
+      "cost_per_million": {
+        "cache_read": 0.06,
+        "input": 0.3,
+        "output": 1.2
+      },
+      "max_effort": null,
+      "name": "MiniMax-M3",
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        }
+      ],
+      "source_id": "minimax/MiniMax-M3"
+    }
+  },
+  "retrieved": "2026-09-03",
+  "source": "https://models.dev/api.json",
+  "source_note": "Model owners' list prices, in USD per million tokens."
+}

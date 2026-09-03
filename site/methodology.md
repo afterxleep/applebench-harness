@@ -247,6 +247,45 @@ That fourth one is the easiest to get wrong and the least visible. "Latest
 attempt," "best attempt," and "first attempt" produce materially different
 numbers from the same set of runs.
 
+### Reasoning effort
+
+**Every model is run at the strongest reasoning it exposes.** The point is to
+measure what a model can do, not which setting it happened to be given, and a
+model held at a lower effort than a rival is not being compared with it.
+
+The ladder is not the same everywhere — some models take `low` through `max`,
+some only toggle reasoning on and off, and some expose no selectable level at
+all — so the level comes from a pinned catalog of what each model actually
+offers rather than from a hardcoded word. Asking a model for an effort it does
+not have is not a stronger run; it is an invalid request.
+
+Where a model exposes no ladder, the run page says so. It does not report
+"maximum", because there is no such setting to have chosen, and a report that
+claimed one would be describing a decision nobody made.
+
+### Cost
+
+**Cost is computed from tokens at the model owner's list price**, taken from a
+pinned snapshot of [models.dev](https://models.dev) — the same registry the
+agent CLI reads. Every run page states the retrieval date.
+
+It is deliberately *not* the number the agent CLI reports. That number is what
+the caller was billed, which moves with their provider, plan and negotiated
+rates, so it describes an account rather than a model. On the runs published
+here it overstates list price by 5x for one model and 2.3x for another: fitting
+a per-token rate to it yields a *negative* input price, which no real tariff
+has. Two numbers distorted by different multipliers cannot be compared, which
+is the whole job.
+
+The CLI's figure is still recorded and shown beside the list price, because the
+gap between what a model costs and what a caller pays is worth seeing.
+
+Two honest limits. The price is pinned, so a published score does not move when
+a provider changes its rates — refreshing it is a deliberate act that shows up
+as a diff. And it is an upper bound: providers discount cached input, and the
+adapters do not record how much of the input was a cache hit, so all input is
+priced at the full rate.
+
 ## Suite revisions
 
 A pass rate is a fraction of a particular set of tasks. Change the set and the

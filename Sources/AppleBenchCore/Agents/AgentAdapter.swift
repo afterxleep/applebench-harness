@@ -53,6 +53,18 @@ public struct AgentMetadata: Sendable, Codable, Equatable {
         self.version = version
         self.configuration = configuration
     }
+
+    /// The reasoning effort this run asked for, or `nil` when it asked for
+    /// none and took the provider's default.
+    ///
+    /// Effort changes both what a model scores and what it costs, so a report
+    /// that omits it is not reproducible. It lives inside `configuration`
+    /// because that is what the adapters already record and what existing
+    /// `result.json` files already contain; `variant` is read as well as
+    /// `effort` so runs recorded before the key was named stay readable.
+    public var effort: String? {
+        configuration["effort"] ?? configuration["variant"]
+    }
 }
 
 /// Token/cost usage as observed by the adapter. All fields are optional:

@@ -264,6 +264,32 @@ if [ -n "$pending_mode" ]; then
     suite="$pending_suite"
 fi
 
+# Every model is benchmarked at the strongest reasoning it offers, so a score
+# reflects what the model can do rather than which setting it happened to get.
+# The ladder differs per model and some expose none at all, so the level comes
+# from the pinned catalog rather than a hardcoded word: asking a model for an
+# effort it does not have is not a stronger run, it is an invalid flag.
+if [ -z "$effort" ] && [ -n "$model" ]; then
+    effort="$(python3 - "$model" <<'PY' 2>/dev/null || true
+import json, pathlib, sys
+catalog = pathlib.Path("Data/model-catalog.json")
+if catalog.exists():
+    models = json.loads(catalog.read_text()).get("models", {})
+    entry = models.get(sys.argv[1])
+    if entry is None:
+        wanted = sys.argv[1].split("/")[-1].lower()
+        entry = next((v for k, v in models.items() if k.split("/")[-1].lower() == wanted), None)
+    if entry and entry.get("max_effort"):
+        print(entry["max_effort"])
+PY
+)"
+    if [ -n "$effort" ]; then
+        echo "  effort: $effort (the strongest $model exposes, per Data/model-catalog.json)"
+    else
+        echo "  effort: provider default ($model exposes no effort ladder)"
+    fi
+fi
+
 echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} effort=${effort:-<default>} parallel=$parallel"
 echo "  caps:   tokens=${max_tokens:-unlimited} timeout=${timeout_cap:-1200}s"
 echo "  runs:   $runs_dir"

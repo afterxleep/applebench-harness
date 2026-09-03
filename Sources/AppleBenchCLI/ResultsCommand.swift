@@ -47,6 +47,30 @@ struct ResultsCommand: AsyncParsableCommand {
     )
     var suite: [String] = []
 
+    @Option(
+        name: .long,
+        help: "Path to the pinned model catalog (default: Data/model-catalog.json). Supplies the list prices cost is computed from and the effort ladder each model exposes."
+    )
+    var catalog: String?
+
+    /// Loads the pinned catalog, or `nil` when there is none to load.
+    ///
+    /// A missing catalog is not fatal: the export simply omits list cost
+    /// rather than inventing a price. An *unreadable* one is fatal, because
+    /// silently falling back would publish a report that looks complete and
+    /// has quietly dropped the only comparable cost figure in it.
+    func loadCatalog() throws -> ModelCatalog? {
+        let path = catalog ?? "Data/model-catalog.json"
+        let url = URL(fileURLWithPath: path)
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            if catalog != nil {
+                throw ValidationError("No model catalog at \(path).")
+            }
+            return nil
+        }
+        return try ModelCatalog.load(from: url)
+    }
+
     func run() async throws {
         let root = URL(fileURLWithPath: path ?? Wiring.defaultRunsRoot().path)
         let collected = Self.collectResults(under: root)
@@ -80,12 +104,17 @@ struct ResultsCommand: AsyncParsableCommand {
         }
         let results = attempt.apply(to: matching)
 
+        let prices = try loadCatalog()
+
         switch format {
         case .csv:
-            try emit(Data(ResultsExport.csv(for: results.sorted { $0.task < $1.task }).utf8))
+            try emit(Data(ResultsExport.csv(
+                for: results.sorted { $0.task < $1.task },
+                catalog: prices
+            ).utf8))
             return
         case .json:
-            try emit(try ResultsExport.json(for: results, attempt: attempt))
+            try emit(try ResultsExport.json(for: results, attempt: attempt, catalog: prices))
             return
         case .table:
             break
