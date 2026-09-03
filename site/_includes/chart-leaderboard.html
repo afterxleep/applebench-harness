@@ -50,11 +50,13 @@ Params: runs (site.benchmarks).
       {%- assign bar_total = parts[3] -%}
       {%- capture bar_label %}{{ parts[1] }} · {{ parts[5] }} tasks{% endcapture -%}
       {%- capture bar_printed %}{{ parts[2] }}/{{ parts[3] }}{% endcapture -%}
+      {%- assign bar_link = parts[6] | relative_url -%}
       {%- include bar-row.html
           label=bar_label
           value=bar_value
           total=bar_total
           value_label=bar_printed
+          link=bar_link
           color="series-1" -%}
     {%- endfor -%}
   </div>

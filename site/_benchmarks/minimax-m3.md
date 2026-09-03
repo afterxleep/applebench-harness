@@ -18,9 +18,8 @@ description: >-
   verified result, with per-category points, cost against wall-clock time,
   and every task.
 lede: >-
-  The first run scored in points. M3 passes four tasks in five and earns just
-  under three quarters of the points available, and almost all of the shortfall
-  that is not an outright failure comes from one family of tasks.
+  123 tasks on suite revision 2026-08-31, at the provider's default reasoning.
+  103 passed; 4354 of 5940 points.
 ---
 ## Which attempt counts
 
@@ -51,20 +50,6 @@ separate facts here and neither is collapsed into the other.
 With no usage to read, the harness cannot verify what they cost, so it awards
 them the 0.25 floor rather than full marks. In these two cases that is also
 close to accurate: an agent that ran out its wall clock did not do it cheaply.
-
-## Where the points went
-
-Of the points not earned, the larger share belongs to outright failures and the
-rest to solves that went over the token allowance.
-
-The concentration is in `interaction`, which passed 82.6% of its tasks and
-earned 53.5% of its points — a gap nothing else in the suite comes near. Six of
-the ten largest single-task losses are `ui-auto` tasks. The two largest losses
-overall are `coredata-003`, a difficulty-8 solve that cost 392,767 tokens, and
-`ops-009`, a difficulty-6 solve that cost 724,975. Both are at the floor.
-
-`build` reads badly at 20 of 70 points, and the sample is two tasks. One passed,
-one did not. Nothing should be concluded from it.
 
 ## Isolation
 

@@ -30,31 +30,6 @@ no longer exists; letting it win would credit the model with passes on tasks it
 was never asked to solve. Where a task has not changed, there is only one
 attempt to choose from.
 
-## What changed under the model
-
-Twenty-five previously-passed tasks were hardened against tests that pass
-without asserting anything, and eleven tasks were added that need the device
-driven — rotation, a language change, hardware buttons, list ordering,
-accessibility sizing.
-
-|                     | before | after |
-|---------------------|--------|-------|
-| The 25 hardened     | 11     | 10    |
-| The 11 new tasks    | —      | 5     |
-
-The hardened tasks moved by one, but that number is quieter than the data. Of
-the 25, **seven flipped** — four to failing and three to passing — and nothing
-was made easier, so three tasks going green on a harder version is variance
-rather than improvement. A one-point delta on a single attempt per task is
-inside the noise, and these results should be read as such until a model is run
-more than once.
-
-## What this is not comparable to
-
-The M3 run on this page's sibling was measured on 123 tasks, before any of the
-above. It is not a like-for-like comparison and the difference between the two
-headline numbers is mostly the suite, not the model.
-
 ## Isolation
 
 Not sandboxed. The agent's web tools were off and its configuration replaced

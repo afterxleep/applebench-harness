@@ -558,6 +558,8 @@ main { flex: 1 0 auto; }
   align-items: center;
   gap: 0.85rem;
 }
+.bar-row__label a { color: inherit; }
+.bar-row__label a:hover { color: var(--accent); }
 .bar-row__label {
   font-size: 0.86rem;
   color: var(--ink-2);
