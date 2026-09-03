@@ -265,26 +265,29 @@ claimed one would be describing a decision nobody made.
 
 ### Cost
 
-**Cost is computed from tokens at the model owner's list price**, taken from a
-pinned snapshot of [models.dev](https://models.dev) — the same registry the
-agent CLI reads. Every run page states the retrieval date.
+**Cost is the model owner's list price**, from a pinned snapshot of
+[models.dev](https://models.dev) — the same registry the agent CLI reads. Every
+run page states the retrieval date. The price is pinned rather than fetched, so
+a published score does not move when a provider changes its rates; refreshing
+it is a deliberate act that shows up as a diff.
 
-It is deliberately *not* the number the agent CLI reports. That number is what
-the caller was billed, which moves with their provider, plan and negotiated
-rates, so it describes an account rather than a model. On the runs published
-here it overstates list price by 5x for one model and 2.3x for another: fitting
-a per-token rate to it yields a *negative* input price, which no real tariff
-has. Two numbers distorted by different multipliers cannot be compared, which
-is the whole job.
+Two token categories, because they bill differently. Fresh input and output are
+charged at the headline rate. **Cached prompt tokens** — the conversation an
+agent re-sends on every step — are charged at a much lower cached rate, and
+they are the majority of what an agentic run reads: roughly seven cached tokens
+for every fresh one here.
 
-The CLI's figure is still recorded and shown beside the list price, because the
-gap between what a model costs and what a caller pays is worth seeing.
+That ratio is why the token figure on a run page is input and output only, and
+excludes cache. It is the number the points score's efficiency multiplier is
+measured against, and it means "what the model produced and was newly given"
+rather than "how long the conversation got".
 
-Two honest limits. The price is pinned, so a published score does not move when
-a provider changes its rates — refreshing it is a deliberate act that shows up
-as a diff. And it is an upper bound: providers discount cached input, and the
-adapters do not record how much of the input was a cache hit, so all input is
-priced at the full rate.
+A caution learned the hard way: a cost computed from a token count that is
+missing a category is wrong by multiples, not by rounding. This benchmark
+published one for a few hours that was five times too low, because cached
+tokens were being dropped. The check that catches it is comparing the computed
+figure against what the agent CLI independently reports — they should agree to
+the cent, and a gap means a category is missing.
 
 ## Suite revisions
 

@@ -177,6 +177,8 @@ enum CLIAgentSession {
         return AgentUsage(
             inputTokens: add(current.inputTokens, update.inputTokens),
             outputTokens: add(current.outputTokens, update.outputTokens),
+            cacheReadTokens: add(current.cacheReadTokens, update.cacheReadTokens),
+            cacheWriteTokens: add(current.cacheWriteTokens, update.cacheWriteTokens),
             totalTokens: add(current.totalTokens, update.totalTokens),
             estimatedCostUSD: add(current.estimatedCostUSD, update.estimatedCostUSD)
         )

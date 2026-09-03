@@ -2,23 +2,30 @@ import Foundation
 
 /// List prices and reasoning settings for the models the benchmark scores.
 ///
-/// The agent CLI reports what the *caller* was billed, which moves with their
-/// provider, plan and discounts. Fitting a price to the costs opencode reported
-/// for the MiniMax runs gives a negative input rate, which no real tariff has,
-/// so those numbers cannot be compared between two models — let alone
-/// published as a property of the model.
+/// Cost is computed from the tokens a run actually spent and the model owner's
+/// list price, taken from a pinned snapshot of models.dev. Pinned, not fetched:
+/// a published score must not move because a provider changed its prices after
+/// the run. `Scripts/update-model-catalog.py` refreshes it, and `retrieved`
+/// records when the prices were true.
 ///
-/// Cost is therefore computed from tokens the harness counted and the model
-/// owner's list price, taken from a pinned snapshot of models.dev. Pinned, not
-/// fetched: a published score must not move because a provider changed its
-/// prices after the run. `Scripts/update-model-catalog.py` refreshes it, and
-/// `retrieved` records when the prices were true.
+/// Computing it here rather than trusting the agent CLI keeps one definition
+/// of cost across agents — the Claude Code adapter reports none at all — and
+/// means a run can be re-priced from its recorded tokens. On the runs measured
+/// so far it agrees with what OpenCode reported to the cent, which is the
+/// check worth running whenever an adapter changes: a mismatch means a token
+/// category is being missed, as cached prompt tokens were before they were
+/// counted here.
 public struct ModelCatalog: Sendable, Equatable {
     public struct Entry: Sendable, Equatable {
         public let sourceID: String
         /// USD per million tokens, as the model's owner charges.
         public let inputCostPerMillion: Double
         public let outputCostPerMillion: Double
+        /// Rate for prompt tokens served from cache. Zero when the model has
+        /// no cached tier, which prices them at nothing rather than dropping
+        /// them from the count.
+        public let cacheReadCostPerMillion: Double
+        public let cacheWriteCostPerMillion: Double
         public let reasoning: Bool
         /// The strongest effort setting the model exposes, or `nil` when it
         /// exposes no effort ladder at all. `nil` is not "low": it means the
@@ -30,12 +37,16 @@ public struct ModelCatalog: Sendable, Equatable {
             sourceID: String,
             inputCostPerMillion: Double,
             outputCostPerMillion: Double,
+            cacheReadCostPerMillion: Double = 0,
+            cacheWriteCostPerMillion: Double = 0,
             reasoning: Bool,
             maximumEffort: String?
         ) {
             self.sourceID = sourceID
             self.inputCostPerMillion = inputCostPerMillion
             self.outputCostPerMillion = outputCostPerMillion
+            self.cacheReadCostPerMillion = cacheReadCostPerMillion
+            self.cacheWriteCostPerMillion = cacheWriteCostPerMillion
             self.reasoning = reasoning
             self.maximumEffort = maximumEffort
         }
@@ -62,6 +73,8 @@ public struct ModelCatalog: Sendable, Equatable {
                     sourceID: model.sourceID,
                     inputCostPerMillion: model.costPerMillion.input,
                     outputCostPerMillion: model.costPerMillion.output,
+                    cacheReadCostPerMillion: model.costPerMillion.cacheRead ?? 0,
+                    cacheWriteCostPerMillion: model.costPerMillion.cacheWrite ?? 0,
                     reasoning: model.reasoning,
                     maximumEffort: model.maxEffort
                 )
@@ -92,14 +105,34 @@ public struct ModelCatalog: Sendable, Equatable {
     /// nothing, we simply cannot say, and a zero would sum into a total that
     /// reads as fact.
     ///
-    /// This is an upper bound. Providers discount cached input — models.dev
-    /// carries a `cache_read` rate — but the adapters do not record how much
-    /// of the input was a cache hit, so all input is priced at the full rate.
-    public func listCostUSD(model: String?, inputTokens: Int?, outputTokens: Int?) -> Double? {
+    /// Cached prompt tokens are priced at their own, much lower rate. They are
+    /// most of an agentic run — every step re-sends the conversation — so
+    /// pricing them as fresh input, or leaving them out, both give a number
+    /// that is wrong by multiples rather than by a rounding error.
+    public func listCostUSD(
+        model: String?,
+        inputTokens: Int?,
+        outputTokens: Int?,
+        cacheReadTokens: Int? = nil,
+        cacheWriteTokens: Int? = nil
+    ) -> Double? {
         guard let entry = entry(for: model), let inputTokens, let outputTokens else { return nil }
         let million = 1_000_000.0
         return Double(inputTokens) / million * entry.inputCostPerMillion
             + Double(outputTokens) / million * entry.outputCostPerMillion
+            + Double(cacheReadTokens ?? 0) / million * entry.cacheReadCostPerMillion
+            + Double(cacheWriteTokens ?? 0) / million * entry.cacheWriteCostPerMillion
+    }
+
+    /// Convenience for the common case: price a run from its own usage.
+    public func listCostUSD(model: String?, usage: AgentUsage) -> Double? {
+        listCostUSD(
+            model: model,
+            inputTokens: usage.inputTokens,
+            outputTokens: usage.outputTokens,
+            cacheReadTokens: usage.cacheReadTokens,
+            cacheWriteTokens: usage.cacheWriteTokens
+        )
     }
 
     // MARK: - On-disk shape
@@ -126,6 +159,14 @@ public struct ModelCatalog: Sendable, Equatable {
         struct Rates: Decodable {
             let input: Double
             let output: Double
+            let cacheRead: Double?
+            let cacheWrite: Double?
+
+            enum CodingKeys: String, CodingKey {
+                case input, output
+                case cacheRead = "cache_read"
+                case cacheWrite = "cache_write"
+            }
         }
     }
 }

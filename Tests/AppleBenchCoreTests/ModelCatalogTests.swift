@@ -15,6 +15,8 @@ struct ModelCatalogTests {
                     sourceID: "vendor/Model-One",
                     inputCostPerMillion: 0.3,
                     outputCostPerMillion: 1.2,
+                    cacheReadCostPerMillion: 0.06,
+                    cacheWriteCostPerMillion: 0.375,
                     reasoning: true,
                     maximumEffort: maximumEffort
                 )
@@ -221,5 +223,70 @@ struct ModelCatalogTests {
         #expect(only["effort"] is NSNull)
         #expect(only.keys.contains("maximum_effort"))
         #expect(only["maximum_effort"] is NSNull)
+    }
+
+    // MARK: - Cached prompt tokens
+
+    @Test("Cached prompt tokens are priced at the cached rate, not the input rate")
+    func pricesCacheSeparately() throws {
+        let cost = try #require(makeCatalog().listCostUSD(
+            model: "vendor/Model-One",
+            inputTokens: 1_000_000,
+            outputTokens: 0,
+            cacheReadTokens: 1_000_000
+        ))
+        // 0.3 for the fresh million, 0.06 for the cached one — not 0.6.
+        #expect(abs(cost - 0.36) < 1e-9)
+    }
+
+    @Test("Ignoring cache understates an agentic run by multiples")
+    func cacheDominatesAnAgenticRun() throws {
+        // The ratio measured on real runs: roughly seven cached prompt tokens
+        // for every fresh one. This is the bug that published a cost five
+        // times too low, so it is pinned.
+        let catalog = makeCatalog()
+        let withCache = try #require(catalog.listCostUSD(
+            model: "vendor/Model-One",
+            inputTokens: 100_000, outputTokens: 20_000, cacheReadTokens: 700_000
+        ))
+        let ignoringCache = try #require(catalog.listCostUSD(
+            model: "vendor/Model-One", inputTokens: 100_000, outputTokens: 20_000
+        ))
+        #expect(withCache > ignoringCache)
+        #expect(ignoringCache / withCache < 0.8)
+    }
+
+    @Test("A run's usage prices itself, cache included")
+    func pricesFromUsage() throws {
+        let usage = AgentUsage(
+            inputTokens: 1_000_000,
+            outputTokens: 0,
+            cacheReadTokens: 1_000_000,
+            cacheWriteTokens: 1_000_000,
+            totalTokens: 1_000_000
+        )
+        let cost = try #require(makeCatalog().listCostUSD(model: "vendor/Model-One", usage: usage))
+        #expect(abs(cost - (0.3 + 0.06 + 0.375)) < 1e-9)
+    }
+
+    @Test("Prompt tokens count every token the model read")
+    func promptTokensIncludeCache() {
+        let usage = AgentUsage(inputTokens: 10, outputTokens: 99, cacheReadTokens: 70, cacheWriteTokens: 20)
+        #expect(usage.promptTokens == 100)
+        // Output is not a prompt token, and a run with no usage reports none.
+        #expect(AgentUsage().promptTokens == nil)
+    }
+
+    @Test("The score-bearing total excludes cache, so scoring stays comparable")
+    func totalTokensExcludeCache() {
+        // total feeds the points efficiency multiplier. Folding cache into it
+        // would rescore future runs against a different definition than every
+        // published one.
+        let usage = AgentUsage(
+            inputTokens: 10_000, outputTokens: 2_000,
+            cacheReadTokens: 500_000, totalTokens: 12_000
+        )
+        #expect(usage.totalTokens == 12_000)
+        #expect(AppleBenchScore.efficiency(totalTokens: usage.totalTokens) == 1.0)
     }
 }

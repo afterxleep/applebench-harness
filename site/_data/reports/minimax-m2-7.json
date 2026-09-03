@@ -168,8 +168,10 @@
   "reasoning" : [
     {
       "at_maximum_effort" : false,
+      "effort" : null,
       "input_tokens" : 974352,
       "list_cost_usd" : 0.9895859999999997,
+      "maximum_effort" : null,
       "model" : "minimax/MiniMax-M2.7",
       "output_tokens" : 581067,
       "price_retrieved" : "2026-09-03",

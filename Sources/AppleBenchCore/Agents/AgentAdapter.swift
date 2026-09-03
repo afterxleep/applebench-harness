@@ -71,26 +71,52 @@ public struct AgentMetadata: Sendable, Codable, Equatable {
 /// adapters record what their agent actually reports and leave the rest
 /// `nil` — never guessed values.
 public struct AgentUsage: Sendable, Codable, Equatable {
+    /// Fresh input tokens — the part of the prompt that was not served from
+    /// the provider's cache, and is billed at the full input rate.
     public var inputTokens: Int?
     public var outputTokens: Int?
+    /// Prompt tokens served from cache, billed at the (much lower) cache-read
+    /// rate.
+    ///
+    /// These dominate an agentic run: each step re-sends the whole
+    /// conversation, so cache reads outnumber fresh input roughly seven to one
+    /// here. Leaving them out does not merely lose a rounding error — it
+    /// understates what the model was actually asked to read by most of it,
+    /// and any cost computed from the remainder is far too low.
+    public var cacheReadTokens: Int?
+    /// Prompt tokens written into the cache, billed at the cache-write rate.
+    public var cacheWriteTokens: Int?
     public var totalTokens: Int?
     public var estimatedCostUSD: Double?
 
     public init(
         inputTokens: Int? = nil,
         outputTokens: Int? = nil,
+        cacheReadTokens: Int? = nil,
+        cacheWriteTokens: Int? = nil,
         totalTokens: Int? = nil,
         estimatedCostUSD: Double? = nil
     ) {
         self.inputTokens = inputTokens
         self.outputTokens = outputTokens
+        self.cacheReadTokens = cacheReadTokens
+        self.cacheWriteTokens = cacheWriteTokens
         self.totalTokens = totalTokens
         self.estimatedCostUSD = estimatedCostUSD
+    }
+
+    /// Every prompt token the model read, cached or not. `nil` when nothing
+    /// was reported, because a run with no usage did not read nothing.
+    public var promptTokens: Int? {
+        let parts = [inputTokens, cacheReadTokens, cacheWriteTokens].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.reduce(0, +)
     }
 
     enum CodingKeys: String, CodingKey {
         case inputTokens = "input_tokens"
         case outputTokens = "output_tokens"
+        case cacheReadTokens = "cache_read_tokens"
+        case cacheWriteTokens = "cache_write_tokens"
         case totalTokens = "total_tokens"
         case estimatedCostUSD = "estimated_cost_usd"
     }

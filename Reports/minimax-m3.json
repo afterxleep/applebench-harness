@@ -168,8 +168,10 @@
   "reasoning" : [
     {
       "at_maximum_effort" : false,
+      "effort" : null,
       "input_tokens" : 4121129,
       "list_cost_usd" : 2.2379847000000006,
+      "maximum_effort" : null,
       "model" : "minimax/MiniMax-M3",
       "output_tokens" : 834705,
       "price_retrieved" : "2026-09-03",

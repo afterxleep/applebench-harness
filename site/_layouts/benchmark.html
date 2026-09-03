@@ -62,18 +62,18 @@ layout: default
       <p class="stat__note">{{ passed.size }} of {{ total }} tasks</p>
     </div>
     {%- comment -%}
-      List price, not the agent CLI's figure. What the CLI reports is what the
-      caller was billed, which moves with their provider, plan and discounts —
-      for these runs it overstates the list price by 5x for one model and 2.3x
-      for another, so it cannot be compared between two models. Cost here is
-      the run's own tokens at the model owner's published rate.
+      The agent CLI's figure, which is the model owner's list price: it agrees
+      to the cent with the same tokens priced from models.dev. Earlier this
+      page showed a figure computed here instead, and it was far too low —
+      cached prompt tokens were not being counted, and on an agentic run they
+      are most of the prompt.
     {%- endcomment -%}
     <div class="stat">
-      <div class="stat__value">{% include money.html value=list_cost %}</div>
+      <div class="stat__value">{% include money.html value=cost %}</div>
       <div class="stat__label">Cost at list price</div>
       <p class="stat__note">
         {%- if passed.size > 0 -%}
-          {%- assign per_solve = list_cost | divided_by: passed.size -%}
+          {%- assign per_solve = cost | divided_by: passed.size -%}
           {% include money.html value=per_solve places=3 %} per solved task
         {%- else -%}
           no solved tasks
@@ -81,9 +81,9 @@ layout: default
       </p>
     </div>
     <div class="stat">
-      <div class="stat__value">{{ tokens | divided_by: 1000 | round }}k</div>
+      <div class="stat__value">{{ tokens | times: 1.0 | divided_by: 1000000 | round: 2 }}M</div>
       <div class="stat__label">Tokens</div>
-      <p class="stat__note">as reported by the agent CLI</p>
+      <p class="stat__note">input and output, excluding cached prompt reads</p>
     </div>
     <div class="stat">
       <div class="stat__value">{{ seconds | divided_by: 3600 | round: 1 }}h</div>
@@ -139,12 +139,11 @@ layout: default
         <tr>
           <th scope="row">Pricing</th>
           <td>
-            list price from <a href="{{ reasoning.price_source }}">models.dev</a>,
-            retrieved {{ reasoning.price_retrieved }}.
-            {%- if reasoning.reported_cost_usd %}
-              The agent CLI reported ${{ reasoning.reported_cost_usd | times: 100 | round | divided_by: 100.0 }}
-              for the same tokens, which is what <em>this</em> caller was billed rather than what the model costs.
-            {%- endif %}
+            the model owner's list price, per
+            <a href="{{ reasoning.price_source }}">models.dev</a>, retrieved
+            {{ reasoning.price_retrieved }}. Cached prompt tokens are billed at
+            their own lower rate and are counted separately from the token
+            figure above, which is input and output only.
           </td>
         </tr>
         {%- endif -%}

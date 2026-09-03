@@ -25,6 +25,7 @@ public enum ResultsExport {
     static let csvColumns = [
         "task", "category", "difficulty", "agent", "model", "effort", "passed",
         "duration_seconds", "agent_termination", "input_tokens", "output_tokens",
+        "cache_read_tokens", "cache_write_tokens", "prompt_tokens",
         "total_tokens", "cost_usd", "list_cost_usd", "files_changed", "insertions", "deletions",
         "face_value", "efficiency", "points",
         "graders", "grader_summaries", "run_id",
@@ -49,13 +50,13 @@ public enum ResultsExport {
                 result.result.agentTermination.rawValue,
                 result.usage.inputTokens.map(String.init) ?? "",
                 result.usage.outputTokens.map(String.init) ?? "",
+                result.usage.cacheReadTokens.map(String.init) ?? "",
+                result.usage.cacheWriteTokens.map(String.init) ?? "",
+                result.usage.promptTokens.map(String.init) ?? "",
                 result.usage.totalTokens.map(String.init) ?? "",
                 result.usage.estimatedCostUSD.map { String(format: "%.4f", $0) } ?? "",
-                catalog?.listCostUSD(
-                    model: result.agent.model,
-                    inputTokens: result.usage.inputTokens,
-                    outputTokens: result.usage.outputTokens
-                ).map { String(format: "%.4f", $0) } ?? "",
+                catalog?.listCostUSD(model: result.agent.model, usage: result.usage)
+                    .map { String(format: "%.4f", $0) } ?? "",
                 String(result.git.filesChanged),
                 String(result.git.insertions),
                 String(result.git.deletions),
@@ -170,9 +171,12 @@ public enum ResultsExport {
         public var runs: Int
         public var inputTokens: Int?
         public var outputTokens: Int?
-        /// Priced from tokens at the model owner's list rate. An upper bound:
-        /// cached input is discounted by providers and the adapters do not
-        /// record the cache split, so all input is charged in full.
+        /// Prompt tokens served from cache. Most of an agentic run's prompt,
+        /// and priced at their own much lower rate.
+        public var cacheReadTokens: Int?
+        public var cacheWriteTokens: Int?
+        /// Priced from tokens at the model owner's list rate, cached prompt
+        /// tokens included at the cached rate.
         public var listCostUSD: Double?
         /// What the agent CLI said the caller was billed. Kept beside the list
         /// price rather than replaced by it, because the difference between
@@ -187,6 +191,8 @@ public enum ResultsExport {
             case atMaximumEffort = "at_maximum_effort"
             case inputTokens = "input_tokens"
             case outputTokens = "output_tokens"
+            case cacheReadTokens = "cache_read_tokens"
+            case cacheWriteTokens = "cache_write_tokens"
             case listCostUSD = "list_cost_usd"
             case reportedCostUSD = "reported_cost_usd"
             case priceSource = "price_source"
@@ -207,6 +213,8 @@ public enum ResultsExport {
             try container.encode(runs, forKey: .runs)
             try container.encodeIfPresent(inputTokens, forKey: .inputTokens)
             try container.encodeIfPresent(outputTokens, forKey: .outputTokens)
+            try container.encodeIfPresent(cacheReadTokens, forKey: .cacheReadTokens)
+            try container.encodeIfPresent(cacheWriteTokens, forKey: .cacheWriteTokens)
             try container.encodeIfPresent(listCostUSD, forKey: .listCostUSD)
             try container.encodeIfPresent(reportedCostUSD, forKey: .reportedCostUSD)
             try container.encode(priceSource, forKey: .priceSource)
@@ -228,12 +236,10 @@ public enum ResultsExport {
                 let input = runs.compactMap(\.usage.inputTokens)
                 let output = runs.compactMap(\.usage.outputTokens)
                 let reported = runs.compactMap(\.usage.estimatedCostUSD)
+                let cacheRead = runs.compactMap(\.usage.cacheReadTokens)
+                let cacheWrite = runs.compactMap(\.usage.cacheWriteTokens)
                 let listed = runs.compactMap {
-                    catalog.listCostUSD(
-                        model: $0.agent.model,
-                        inputTokens: $0.usage.inputTokens,
-                        outputTokens: $0.usage.outputTokens
-                    )
+                    catalog.listCostUSD(model: $0.agent.model, usage: $0.usage)
                 }
                 return ReasoningTotals(
                     model: key.model,
@@ -243,6 +249,8 @@ public enum ResultsExport {
                     runs: runs.count,
                     inputTokens: input.isEmpty ? nil : input.reduce(0, +),
                     outputTokens: output.isEmpty ? nil : output.reduce(0, +),
+                    cacheReadTokens: cacheRead.isEmpty ? nil : cacheRead.reduce(0, +),
+                    cacheWriteTokens: cacheWrite.isEmpty ? nil : cacheWrite.reduce(0, +),
                     listCostUSD: listed.isEmpty ? nil : listed.reduce(0, +),
                     reportedCostUSD: reported.isEmpty ? nil : reported.reduce(0, +),
                     priceSource: catalog.source,
