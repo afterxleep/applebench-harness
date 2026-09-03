@@ -195,8 +195,10 @@ struct ModelCatalogTests {
         #expect(!catalog.models.isEmpty)
         #expect(catalog.source.contains("models.dev"))
         for (identifier, entry) in catalog.models {
-            #expect(entry.inputCostPerMillion > 0, "\(identifier) has no input rate")
-            #expect(entry.outputCostPerMillion > 0, "\(identifier) has no output rate")
+            // Zero is a real rate: free tiers exist, and a model priced at
+            // zero must stay in the catalog rather than be read as unpriced.
+            #expect(entry.inputCostPerMillion >= 0, "\(identifier) has no input rate")
+            #expect(entry.outputCostPerMillion >= 0, "\(identifier) has no output rate")
             #expect(catalog.listCostUSD(model: identifier, inputTokens: 1_000, outputTokens: 1_000) != nil)
         }
     }

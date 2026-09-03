@@ -109,7 +109,11 @@ def main() -> int:
             continue
         source_id, entry = found
         cost = entry.get("cost") or {}
-        if not cost.get("input") or not cost.get("output"):
+        # `is None`, not falsiness: a free tier is priced at 0, and 0 is a
+        # real price. Treating it as missing would drop the model from the
+        # catalog entirely, and the run would then publish no cost at all
+        # rather than the zero it actually cost.
+        if cost.get("input") is None or cost.get("output") is None:
             missing.append(model)
             continue
         models[model] = {
