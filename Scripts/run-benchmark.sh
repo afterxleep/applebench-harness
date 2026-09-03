@@ -224,11 +224,13 @@ if ! "$(dirname "$0")/prepare-fixtures.sh" >"$out/prepare.log" 2>&1; then
     exit 1
 fi
 
+# Always build, never only when the binary is missing. A machine that pulls a
+# harness change and still has last week's binary runs the old grader against
+# the new tasks, and the failure it produces — "invalid String value uiflow" —
+# looks like a broken task set rather than a stale build.
 binary="$root/.build/release/applebench"
-if [ ! -x "$binary" ]; then
-    echo "Building applebench (release)…"
-    swift build -c release
-fi
+echo "Building applebench (release)…"
+swift build -c release
 
 log="$out/run.log"
 if [ -f "$taskset_suites/$suite.yaml" ]; then suite="$taskset_suites/$suite.yaml"; fi
@@ -329,7 +331,7 @@ if [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" !=
             [ -e "$file" ] && suite_args+=(--suite-file "$file")
         done
         echo
-        echo "Publishing $slug from $runs_dir…"
+        echo "Publishing $slug from ${runs_dir}…"
         "$root/Scripts/publish-report.sh" "$slug" "$runs_dir" gold \
             --attempt first --model "$model" "${suite_args[@]+"${suite_args[@]}"}" \
             || echo "note: publish failed; the run itself is intact in $out" >&2
