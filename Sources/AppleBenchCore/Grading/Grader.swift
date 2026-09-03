@@ -25,6 +25,14 @@ public struct GradingContext: Sendable {
     public let derivedDataURL: URL
     /// UDID of the simulator provisioned for this run, when the task needs one.
     public let simulatorUDID: String?
+    /// Which agent produced this workspace.
+    ///
+    /// Almost nothing should consult this — a grader judges the workspace, not
+    /// who made it. The exception is a grader that judges the *process*: the
+    /// reference agents are not agents doing work, they are fixtures for
+    /// proving a task is sound, and `solution` reaches its result by applying a
+    /// patch rather than by running anything.
+    public let agent: String
     /// Explicit `-destination` derived from the task configuration, if any.
     public let destination: String?
     /// The diff produced by the agent, for change-based assertions.
@@ -39,6 +47,7 @@ public struct GradingContext: Sendable {
         artifactsDirectoryURL: URL,
         derivedDataURL: URL,
         simulatorUDID: String?,
+        agent: String = "",
         destination: String?,
         changedFiles: [String],
         processRunner: any ProcessRunning,
@@ -50,6 +59,7 @@ public struct GradingContext: Sendable {
         self.artifactsDirectoryURL = artifactsDirectoryURL
         self.derivedDataURL = derivedDataURL
         self.simulatorUDID = simulatorUDID
+        self.agent = agent
         self.destination = destination
         self.changedFiles = changedFiles
         self.processRunner = processRunner

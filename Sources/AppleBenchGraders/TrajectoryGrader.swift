@@ -20,6 +20,21 @@ public struct TrajectoryGrader: Grader {
         let start = ContinuousClock.now
         try configuration.validate()
 
+        // The reference agents have no process to judge. `fake` changes
+        // nothing and `solution` applies a patch, so neither runs the commands
+        // a real agent would — and failing them here would report every sound
+        // task as broken. The task still fails for `fake` on the deliverable
+        // itself, which is what the solvability check actually rests on.
+        guard !Self.referenceAgents.contains(context.agent) else {
+            return GradingResult(
+                grader: identifier,
+                passed: true,
+                duration: start.duration(to: .now),
+                summary: "Not applicable to the \(context.agent) agent, which reaches its result without running the work",
+                evidence: []
+            )
+        }
+
         let log = context.runDirectoryURL.appendingPathComponent("events.jsonl")
         guard let text = try? String(contentsOf: log, encoding: .utf8) else {
             throw BenchmarkFailure.graderFailure(
@@ -68,6 +83,9 @@ public struct TrajectoryGrader: Grader {
             evidence: []
         )
     }
+
+    /// Agents that stand in for a person rather than doing the work.
+    static let referenceAgents: Set<String> = ["fake", "solution"]
 
     /// Every command the harness observed the agent finish.
     static func commands(in log: String) -> [String] {

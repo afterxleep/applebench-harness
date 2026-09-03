@@ -233,6 +233,7 @@ public struct BenchmarkRunner: Sendable {
                 artifactsDirectoryURL: context.logsDirectoryURL,
                 derivedDataURL: runDirectoryURL.appendingPathComponent("DerivedData", isDirectory: true),
                 simulatorUDID: simulatorUDID,
+                agent: adapter.identifier,
                 destination: destination(for: task, snapshot: snapshot, simulatorUDID: simulatorUDID),
                 changedFiles: diff.changedFiles,
                 processRunner: processRunner,

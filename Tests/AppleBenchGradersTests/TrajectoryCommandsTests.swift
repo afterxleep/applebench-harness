@@ -24,3 +24,15 @@ struct TrajectoryCommandsTests {
         #expect(TrajectoryGrader.commands(in: "").isEmpty)
     }
 }
+
+@Suite("Trajectory and the reference agents")
+struct TrajectoryReferenceAgentTests {
+    @Test("fake and solution are the only agents exempt from a process check")
+    func referenceAgents() {
+        // They exist to prove a task is sound, and neither reaches its result
+        // by doing the work: one changes nothing, the other applies a patch.
+        #expect(TrajectoryGrader.referenceAgents == ["fake", "solution"])
+        #expect(!TrajectoryGrader.referenceAgents.contains("opencode"))
+        #expect(!TrajectoryGrader.referenceAgents.contains("claude"))
+    }
+}
