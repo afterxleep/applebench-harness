@@ -37,6 +37,18 @@ def load_fingerprints() -> dict[str, str]:
     return json.loads(output)
 
 
+def modified_dates() -> dict[str, str]:
+    """`modified:` from each task file, as an ISO date."""
+    import os, re
+    taskset = pathlib.Path(os.environ.get("APPLEBENCH_TASKSET") or pathlib.Path(__file__).resolve().parents[1])
+    dates = {}
+    for path in sorted((taskset / "Examples/Tasks").glob("*.yaml")):
+        found = re.search(r"^modified:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})", path.read_text(), re.MULTILINE)
+        if found:
+            dates[path.stem] = found.group(1)
+    return dates
+
+
 def suite_tasks(path: pathlib.Path) -> list[str]:
     tasks, in_tasks = [], False
     for line in path.read_text().splitlines():
@@ -84,7 +96,15 @@ def main() -> int:
     report_path = pathlib.Path(args.report) if args.report else None
     if report_path is None:
         directory = pathlib.Path(args.reports_dir or (root / "Reports"))
-        candidates = sorted(directory.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        # Both shapes count: a published report (Reports/<slug>.json) and a
+        # raw run (Reports/<suite>-<date>/summary.json). A run that has not
+        # been published is still a run, and treating it as absent would
+        # re-run everything it already covered.
+        candidates = sorted(
+            list(directory.glob("*.json")) + list(directory.glob("*/summary.json")),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
         for candidate in candidates:
             try:
                 document = json.loads(candidate.read_text())
@@ -94,6 +114,9 @@ def main() -> int:
                 report_path = candidate
                 break
 
+    # When each task was last run for this model. A run id starts with its UTC
+    # timestamp, so the date is the first ten characters.
+    last_run: dict[str, str] = {}
     scored_before: dict[str, str] = {}
     if report_path and report_path.exists():
         print(f"comparing against {report_path.name}", file=sys.stderr)
@@ -106,12 +129,24 @@ def main() -> int:
             # No recorded fingerprint means the report predates them. Treat the
             # task as unchanged so adopting this does not re-run everything.
             scored_before[task] = recorded.get(task, current.get(task, ""))
+            when = str(run.get("run_id", ""))[:10]
+            if when and when > last_run.get(task, ""):
+                last_run[task] = when
 
     new = sorted(t for t in scored if t not in scored_before)
-    changed = sorted(
-        t for t in scored
-        if t in scored_before and current.get(t, "") != scored_before[t]
-    )
+    # A task with a `modified:` date is compared on dates: it needs re-running
+    # when it changed after it was last run. One without falls back to the
+    # content fingerprint, so an unstamped task is still covered.
+    modified = modified_dates()
+    changed = []
+    for task in sorted(scored):
+        if task not in scored_before:
+            continue
+        if task in modified:
+            if modified[task] > last_run.get(task, ""):
+                changed.append(task)
+        elif current.get(task, "") != scored_before[task]:
+            changed.append(task)
 
     wanted = {"both": new + changed, "new": new, "changed": changed}[args.mode]
     print(" ".join(sorted(set(wanted))))

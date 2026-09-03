@@ -3,7 +3,7 @@ title: "Points, not percentages"
 date: 2026-09-02 06:00:00 -0500
 tags: [scoring, results]
 lede: >-
-  MiniMax M3 passed 83.5% of the gold suite and earned 72.9% of the points
+  MiniMax M3 passed 82.9% of the gold suite and earned 72.5% of the points
   available. The gap between those two numbers is the reason AppleBench now
   scores in points.
 ---
@@ -59,15 +59,14 @@ re-run anything.
 
 ## What it does to MiniMax M3
 
-**4,394 of 6,030 points. 106 of 127 tasks.** First attempt per task, gold suite,
-revision 2026-08-31, through OpenCode 1.18.25 on Xcode 26.6.
+**4,304 of 5,940 points. 102 of 123 tasks.** First attempt per task, gold suite
+only, revision 2026-08-31, through OpenCode 1.18.25 on Xcode 26.6.
 
-Of the 1,636 points it did not earn, 1,090 went to the 21 tasks it failed and
-546 went to solves it paid too much for. Eighty-one of its 106 solves cleared
-the allowance and scored full marks. The remaining twenty-five are the interesting
-ones.
+Of the points it did not earn, the larger share went to tasks it failed outright
+and the rest to solves it paid too much for. Most solves cleared the allowance
+and scored full marks; the ones that did not are the interesting ones.
 
-{% assign rows = site.data.benchmarks['gold-2026-09-02'] %}
+{% assign rows = site.data.benchmarks['minimax-m3'] %}
 {% include chart-points-by-category.html rows=rows %}
 
 Read that against the pass rates and one category separates:
@@ -87,7 +86,7 @@ attempts to find out what is on screen. A pass rate had no way to say that.
 {% include chart-cost-vs-time.html rows=rows %}
 
 The full per-task table, every grader outcome, and the exported data are on the
-[run's page]({{ '/benchmarks/gold-2026-09-02/' | relative_url }}).
+[run's page]({{ '/benchmarks/minimax-m3/' | relative_url }}).
 
 ## The part that matters for later
 
@@ -100,7 +99,7 @@ That is not an aesthetic preference. It is what makes the suite extensible.
 When a second scoring set lands, the models already measured are run **against
 the new tasks only**, and their points are added to what is published. No
 previously measured task is re-run and no previously published per-task number
-moves. A score computed over 127 tasks and a score computed over 40 more are the
+moves. A score computed over 123 tasks and a score computed over 20 more are the
 same kind of thing, and they add.
 
 The alternative — any score normalized across a cohort — means every model in

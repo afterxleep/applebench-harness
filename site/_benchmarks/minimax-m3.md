@@ -5,7 +5,7 @@ suite: gold
 suite_revision: "2026-08-31"
 score_spec: "points-v1"
 attempt: "first"
-data: gold-2026-09-02
+data: minimax-m3
 model: "minimax/MiniMax-M3"
 harness: "opencode, opencode 1.18.25"
 tasks: 123

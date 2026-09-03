@@ -43,13 +43,13 @@ runs_dir=""
 suite=""
 attempt="first"
 model=""
-suite_file=""
+suite_files=()
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --attempt) attempt="$2"; shift 2 ;;
         --model)   model="$2";   shift 2 ;;
-        --suite-file) suite_file="$2"; shift 2 ;;
+        --suite-file) suite_files+=("$2"); shift 2 ;;
         -*)        echo "unknown option: $1" >&2; exit 2 ;;
         *)
             if   [ -z "$slug" ];     then slug="$1"
@@ -84,7 +84,7 @@ selection=(--attempt "$attempt")
 # A published score is a fraction of a stated set of tasks, and a run
 # directory holds whatever was run in it. Naming the suite is what keeps the
 # public sample tasks — which are never scored — out of a published number.
-[ -n "$suite_file" ] && selection+=(--suite "$suite_file")
+for file in "${suite_files[@]+"${suite_files[@]}"}"; do selection+=(--suite "$file"); done
 
 "$binary" results "$runs_dir" "${selection[@]}" --format csv  --output "$root/Reports/$slug.csv"
 "$binary" results "$runs_dir" "${selection[@]}" --format json --output "$root/Reports/$slug.json"

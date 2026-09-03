@@ -6,6 +6,15 @@
 #
 # Options:
 #   -s, --suite <id>        Suite to run (default: gold)
+#       --pending           Run only what this model still owes: tasks it has
+#                           never been scored on, plus tasks that have changed
+#                           since it was. Needs --model. Nothing is marked by
+#                           hand — a task is its prompt, its graders and its
+#                           fixture, so what changed is decided by hashing those
+#                           and comparing against what the model's last report
+#                           recorded. Exits without running when nothing is due.
+#       --new-only          --pending, restricted to tasks never scored
+#       --changed-only      --pending, restricted to tasks that changed
 #   -a, --agent <id>        Agent harness (default: opencode)
 #   -m, --model <id>        Model passed to the agent
 #   -e, --effort <level>    Reasoning effort, forwarded to OpenCode as the
@@ -31,6 +40,10 @@
 #   -o, --out <dir>         Report directory (default: Reports/<suite>-<date>)
 #       --runs-dir <dir>    Run artifact root (default: .applebench/runs)
 #       --strip-wrapper-clis  Hide wrapper CLIs from the agent's PATH
+#       --task-set-ref <r>  Branch, tag or sha to score. Without it the default
+#                           branch is used, which silently scores the wrong set
+#                           whenever a suite is prepared on a branch. Also read
+#                           from APPLEBENCH_TASKSET_REF.
 #       --task-set-repo <u> Git URL of the task set to score. Cloned on first
 #                           use and fast-forwarded after, then prepared. Also
 #                           read from APPLEBENCH_TASKSET_REPO, so a scoring
@@ -73,6 +86,7 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 
 suite="gold"
+pending_mode=""
 agent="opencode"
 model=""
 effort=""
@@ -88,6 +102,7 @@ api_key=""
 api_key_file=""
 api_key_variable="OPENROUTER_API_KEY"
 task_set_repo="${APPLEBENCH_TASKSET_REPO:-}"
+task_set_ref="${APPLEBENCH_TASKSET_REF:-}"
 task_set_dir=""
 vm=""
 vm_allow=()
@@ -97,6 +112,9 @@ vm_password=""
 while [ $# -gt 0 ]; do
     case "$1" in
         -s|--suite) suite="$2"; shift 2 ;;
+        --pending)      pending_mode="both"; shift ;;
+        --new-only)     pending_mode="new"; shift ;;
+        --changed-only) pending_mode="changed"; shift ;;
         -a|--agent) agent="$2"; shift 2 ;;
         -m|--model) model="$2"; shift 2 ;;
         -e|--effort) effort="$2"; shift 2 ;;
@@ -109,6 +127,7 @@ while [ $# -gt 0 ]; do
         --strip-wrapper-clis) strip_wrappers="--strip-wrapper-clis"; shift ;;
         --allow-env) allow_env+=(--allow-env "$2"); shift 2 ;;
         --task-set-repo) task_set_repo="$2"; shift 2 ;;
+        --task-set-ref)  task_set_ref="$2";  shift 2 ;;
         --task-set-dir) task_set_dir="$2"; shift 2 ;;
         --api-key) api_key="$2"; shift 2 ;;
         --api-key-file) api_key_file="$2"; shift 2 ;;
@@ -128,24 +147,7 @@ done
 # The clone lives inside the harness, never the other way round: nothing the
 # harness generates is written back to the task set.
 if [ -n "$task_set_repo" ]; then
-    task_set_dir="${task_set_dir:-$root/.applebench/taskset}"
-    if [ -d "$task_set_dir/.git" ]; then
-        echo "Updating task set in ${task_set_dir}…"
-        # Fast-forward only: a task set that has diverged locally is a
-        # different set, and silently merging it would score the wrong tasks.
-        if ! git -C "$task_set_dir" pull --ff-only --quiet; then
-            echo "error: $task_set_dir could not be fast-forwarded. Resolve it or delete the directory." >&2
-            exit 1
-        fi
-    else
-        echo "Cloning task set from ${task_set_repo}…"
-        mkdir -p "$(dirname "$task_set_dir")"
-        if ! git clone --quiet "$task_set_repo" "$task_set_dir"; then
-            echo "error: could not clone $task_set_repo (private task sets need your git credentials)." >&2
-            exit 1
-        fi
-    fi
-    APPLEBENCH_TASKSET="$(cd "$task_set_dir" && pwd)"
+    APPLEBENCH_TASKSET="$("$root/Scripts/fetch-taskset.sh" "$task_set_repo" "$task_set_ref" "${task_set_dir:-}")"
     export APPLEBENCH_TASKSET
 elif [ -n "$task_set_dir" ]; then
     echo "error: --task-set-dir needs --task-set-repo (or APPLEBENCH_TASKSET_REPO); to use a task set already on disk, set APPLEBENCH_TASKSET." >&2
@@ -234,6 +236,35 @@ fi
 log="$out/run.log"
 if [ -f "$taskset_suites/$suite.yaml" ]; then suite="$taskset_suites/$suite.yaml"; fi
 
+# Pending mode narrows the suite to the tasks this model actually owes. The
+# selection is written out as a suite of its own rather than filtered inside
+# the runner, so the run records exactly which tasks it was given.
+if [ -n "$pending_mode" ]; then
+    if [ -z "$model" ]; then
+        echo "error: --pending needs --model: what is outstanding is per model." >&2
+        exit 2
+    fi
+    pending="$(APPLEBENCH_TASKSET="$taskset_root" python3 "$root/Scripts/pending-tasks.py" \
+        --model "$model" --reports-dir "$root/Reports" \
+        --suite "$suite" --mode "$pending_mode")"
+    if [ -z "$pending" ]; then
+        echo "Nothing pending: $model is up to date with every task in $(basename "$suite" .yaml)."
+        exit 0
+    fi
+    count="$(echo "$pending" | wc -w | tr -d " ")"
+    echo "Pending for $model ($count task(s)):"
+    echo "  $pending"
+    echo
+    pending_suite="$out/pending-suite.yaml"
+    {
+        echo "id: pending"
+        echo "name: \"Pending for $model\""
+        echo "tasks:"
+        for task in $pending; do echo "  - $task"; done
+    } > "$pending_suite"
+    suite="$pending_suite"
+fi
+
 echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} effort=${effort:-<default>} parallel=$parallel"
 echo "  caps:   tokens=${max_tokens:-unlimited} timeout=${timeout_cap:-1200}s"
 echo "  runs:   $runs_dir"
@@ -276,6 +307,22 @@ set -e
 "$binary" results "$runs_dir" --format csv  --output "$out/summary.csv"
 "$binary" results "$runs_dir" --format json --output "$out/summary.json"
 
+
+# A run is only a useful record of *currency* if it also says what each task
+# was at the time. Recording it here rather than at publish time means an
+# unpublished run still counts as covered, so `--pending` does not re-run work
+# that has already been done.
+APPLEBENCH_TASKSET="$taskset_root" python3 "$root/Scripts/task-fingerprints.py" > "$out/fingerprints.json"
+python3 - "$out/summary.json" "$out/fingerprints.json" <<'PYTHON'
+import json, sys
+with open(sys.argv[1]) as handle:
+    document = json.load(handle)
+with open(sys.argv[2]) as handle:
+    document["task_fingerprints"] = json.load(handle)
+with open(sys.argv[1], "w") as handle:
+    json.dump(document, handle, indent=2, sort_keys=True)
+PYTHON
+rm -f "$out/fingerprints.json"
 echo
 echo "Wrote:"
 echo "  $out/summary.csv"

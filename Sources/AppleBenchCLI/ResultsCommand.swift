@@ -43,9 +43,9 @@ struct ResultsCommand: AsyncParsableCommand {
 
     @Option(
         name: .long,
-        help: "Path to a suite YAML. Only tasks listed in it are included, so an export cannot quietly carry a run of something outside the scored set."
+        help: "Path to a suite YAML. Only tasks listed in it are included, so an export cannot quietly carry a run of something outside the scored set. Repeat it when a score spans several suites."
     )
-    var suite: String?
+    var suite: [String] = []
 
     func run() async throws {
         let root = URL(fileURLWithPath: path ?? Wiring.defaultRunsRoot().path)
@@ -56,12 +56,15 @@ struct ResultsCommand: AsyncParsableCommand {
         }
 
         var matching = model.map { wanted in collected.filter { $0.agent.model == wanted } } ?? collected
-        if let suite {
+        if !suite.isEmpty {
             // A published score is a fraction of a stated set of tasks. A run
             // directory accumulates whatever was run in it — including the
             // public sample tasks, which must never be scored — so the export
             // is filtered by the suite rather than trusted to contain only it.
-            let identifiers = try Self.taskIdentifiers(inSuiteAt: suite)
+            var identifiers: Set<String> = []
+            for path in suite {
+                identifiers.formUnion(try Self.taskIdentifiers(inSuiteAt: path))
+            }
             let dropped = Set(matching.map(\.task)).subtracting(identifiers).sorted()
             matching = matching.filter { identifiers.contains($0.task) }
             if !dropped.isEmpty {
