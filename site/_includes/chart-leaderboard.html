@@ -4,9 +4,7 @@ measure, one series · magnitude by length, so a single hue and no legend.
 
 Share rather than raw points, because runs are scored against different numbers
 of tasks as the suite grows, and a raw total would rank a model on how much of
-the suite it happened to be measured against. The task count rides along on
-every bar for the same reason: two runs on different task sets are not the
-same measurement, and the chart has to say so rather than imply otherwise.
+the suite it happened to be measured against. Each bar states its task count.
 
 Params: runs (site.benchmarks).
 {%- endcomment -%}
@@ -14,14 +12,12 @@ Params: runs (site.benchmarks).
   <figcaption>
     <h3 class="figure__title">Points earned, every published run</h3>
     <p class="figure__subtitle">
-      Share of the points available to each run, best first. A run is only
-      comparable with another measured on the same task set, so each bar states
-      how many tasks it was scored against.
+      Share of the points available to each run, best first, with the number of
+      tasks it was scored against.
     </p>
   </figcaption>
 
   {%- assign ranked = "" | split: "" -%}
-  {%- assign task_counts = "" | split: "" -%}
   {%- for run in include.runs -%}
     {%- assign rows = site.data.benchmarks[run.data] -%}
     {%- if rows -%}
@@ -37,11 +33,9 @@ Params: runs (site.benchmarks).
       {%- assign name = run.model | split: "/" | last -%}
       {%- capture packed -%}{{ share | round | prepend: "00000" | slice: -5, 5 }}|{{ name }}|{{ earned | round }}|{{ available }}|{{ hits.size }}|{{ rows.size }}|{{ run.url }}{%- endcapture -%}
       {%- assign ranked = ranked | push: packed -%}
-      {%- assign task_counts = task_counts | push: rows.size -%}
     {%- endif -%}
   {%- endfor -%}
   {%- assign ranked = ranked | sort | reverse -%}
-  {%- assign distinct_counts = task_counts | uniq -%}
 
   <div class="bars bars--leaderboard">
     {%- for packed in ranked -%}
@@ -60,17 +54,6 @@ Params: runs (site.benchmarks).
           color="series-1" -%}
     {%- endfor -%}
   </div>
-
-  {%- if distinct_counts.size > 1 -%}
-    <p class="figure__note">
-      <strong>These runs are not scored against the same tasks.</strong> The
-      suite has grown since the earliest run here, so the bars answer "how much
-      of what it was asked" and not "which model is better". A run measured on
-      an older, smaller suite has neither earned nor forfeited the points of the
-      tasks it never saw. Read two bars against each other only when their task
-      counts match.
-    </p>
-  {%- endif -%}
 
   <p class="figure__note">
     A task's face value is ten points per step of authored difficulty, and a
