@@ -180,7 +180,8 @@ fi
 if [ -n "$model" ]; then
     echo "Checking ${model}..."
     if ! resolved_effort="$("$root/Scripts/validate-model.py" "$model" --agent "$agent" ${effort:+--effort "$effort"})"; then
-        echo "error: refusing to start; fix the above or pass --effort explicitly." >&2
+        echo "error: refusing to start. Fix the problems above, or add the model with" >&2
+        echo "       ./Scripts/update-model-catalog.py <model-id>" >&2
         exit 1
     fi
     effort="$resolved_effort"

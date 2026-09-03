@@ -66,7 +66,12 @@ def agent_models(agent: str) -> list[str] | None:
         return None
     if result.returncode != 0:
         return None
-    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    listed = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    # An empty catalogue is not evidence that a model is missing. `opencode
+    # models` fetches its list, and a slow or failed fetch can exit zero with
+    # nothing on stdout — which read as "this model does not exist" and
+    # refused a run for a model that was there all along.
+    return listed or None
 
 
 def main() -> int:
@@ -84,7 +89,7 @@ def main() -> int:
     # 1. The agent CLI has to be able to reach it.
     available = agent_models(args.agent)
     if available is None:
-        note(f"?  could not ask {args.agent} which models it has; skipping that check")
+        note(f"?  {args.agent} returned no model list, so availability is unchecked")
     elif args.model in available:
         note(f"ok {args.model} is available to {args.agent}")
     else:
@@ -133,6 +138,7 @@ def main() -> int:
         for problem in problems:
             note(f"error: {problem}")
         return 1
+
 
     print(effort or "")
     return 0
