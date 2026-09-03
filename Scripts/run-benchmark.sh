@@ -47,6 +47,10 @@
 #                           silent for ten minutes otherwise, which looks
 #                           identical to a wedged simulator.
 #       --stream-output     That, plus the model's own messages. Noisy.
+#       --no-seal           Let the agent read the reference solutions, the
+#                           task files and other runs. They sit on the same
+#                           disk under the same user, so a scoring run must
+#                           not use this. Sealing is on by default.
 #       --task-set-repo <u> Git URL of the task set to score. Cloned on first
 #                           use and fast-forwarded after, then prepared. Also
 #                           read from APPLEBENCH_TASKSET_REPO, so a scoring
@@ -102,6 +106,7 @@ out=""
 runs_dir="$root/.applebench/runs"
 strip_wrappers=""
 stream=""
+seal="--seal-answers"
 allow_env=()
 api_key=""
 api_key_file=""
@@ -130,6 +135,7 @@ while [ $# -gt 0 ]; do
         --runs-dir) runs_dir="$2"; shift 2 ;;
         --strip-wrapper-clis) strip_wrappers="--strip-wrapper-clis"; shift ;;
         --stream) stream="--stream"; shift ;;
+        --no-seal) seal=""; shift ;;
         --stream-output) stream="--stream-output"; shift ;;
         --allow-env) allow_env+=(--allow-env "$2"); shift 2 ;;
         --task-set-repo) task_set_repo="$2"; shift 2 ;;
@@ -180,7 +186,8 @@ fi
 if [ -n "$model" ]; then
     echo "Checking ${model}..."
     if ! resolved_effort="$("$root/Scripts/validate-model.py" "$model" --agent "$agent" ${effort:+--effort "$effort"})"; then
-        echo "error: refusing to start; fix the above or pass --effort explicitly." >&2
+        echo "error: refusing to start. Fix the problems above, or add the model with" >&2
+        echo "       ./Scripts/update-model-catalog.py <model-id>" >&2
         exit 1
     fi
     effort="$resolved_effort"
@@ -257,8 +264,35 @@ case "$crash_dialog_type" in
 esac
 
 stamp="$(date -u +%Y-%m-%d)"
-out="${out:-$root/Reports/$suite-$stamp}"
+# The report directory carries the model, because comparing two models means
+# running two of these at once and the date alone gives them the same folder:
+# run.log, prepare.log, pending-suite.yaml and summary.json would each be
+# whichever process wrote last.
+model_slug="$(printf '%s' "${model##*/}" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]\{1,\}/-/g' -e 's/^-//' -e 's/-$//')"
+out="${out:-$root/Reports/$suite-$stamp${model_slug:+-$model_slug}}"
 mkdir -p "$out"
+
+# Fetching the task set, preparing fixtures and building the binary all write
+# to shared paths, so two runs starting together corrupt each other's setup.
+# They are also idempotent, so the second run can simply wait and then find the
+# work already done. mkdir is the atomic test-and-set every shell has.
+setup_lock="$root/.applebench/setup.lock"
+mkdir -p "$root/.applebench"
+setup_waited=0
+while ! mkdir "$setup_lock" 2>/dev/null; do
+    if [ "$setup_waited" -eq 0 ]; then
+        echo "Another benchmark is preparing the workspace; waiting for it..."
+        setup_waited=1
+    fi
+    # A lock left behind by a killed run would otherwise block every future
+    # one, so an old one is reclaimed rather than waited on forever.
+    if [ -n "$(find "$setup_lock" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then
+        echo "note: clearing a stale setup lock." >&2
+        rmdir "$setup_lock" 2>/dev/null || true
+    fi
+    sleep 2
+done
+trap 'rmdir "$setup_lock" 2>/dev/null || true' EXIT
 
 # Fixtures are prepared before every run, not only when the task set was just
 # cloned. A suite run against unprepared fixtures does not fail once: it fails
@@ -280,6 +314,11 @@ fi
 binary="$root/.build/release/applebench"
 echo "Building applebench (release)…"
 swift build -c release
+
+# Shared setup is finished; the run itself writes only to its own run
+# directories, so the next benchmark can start preparing while this one runs.
+rmdir "$setup_lock" 2>/dev/null || true
+trap - EXIT
 
 log="$out/run.log"
 if [ -f "$taskset_suites/$suite.yaml" ]; then suite="$taskset_suites/$suite.yaml"; fi
@@ -336,6 +375,7 @@ set +e
     ${model:+--model "$model"} \
     ${effort:+--effort "$effort"} \
     ${stream:+"$stream"} \
+    ${seal:+"$seal"} \
     ${max_tokens:+--max-tokens "$max_tokens"} \
     ${timeout_cap:+--timeout-cap "$timeout_cap"} \
     ${agent_arg[@]+"${agent_arg[@]}"} \

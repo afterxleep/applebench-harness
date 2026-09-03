@@ -111,7 +111,7 @@ repository in a working state; both things are true, and the record says both.
 
 ## Scoring
 
-A pass rate answers one question — how many did it get right — and then stops.
+A pass rate answers one question: how many did it get right. Then it stops.
 Two models can complete the same task and be nothing alike. One reads the build
 log and edits two lines. The other rebuilds the project eleven times, argues
 with `simctl`, and burns three quarters of a million tokens arriving at the same
@@ -120,7 +120,7 @@ diff. A pass rate gives them the same tick.
 So the headline number is **points**, and the pass rate stays beside it.
 
 ```text
-face value  = 10 × difficulty                     difficulty 1–10 → 10–100 points
+face value  = 10 × difficulty                     difficulty 1 to 10 gives 10 to 100 points
 budget      = 50,000 total tokens                 flat, the same for every task
 efficiency  = clamp(budget / tokens, 0.25, 1.0)   unreported tokens → 0.25
 points      = passed ? face value × efficiency : 0
@@ -151,8 +151,8 @@ scored this way is published on the run's page.
 
 50,000 tokens and the 0.25 floor are judgment, not measurement, chosen so an
 ordinary solve is not penalized and genuine overspend is. They are frozen under
-a specification id — currently `points-v1` — and every published run records
-which one it was scored under. Changing a constant is a scoring revision, and
+a specification id, currently `points-v1`. Every published run records which
+one it was scored under. Changing a constant is a scoring revision, and
 every published number is recomputed from its stored export. That does not
 require re-running any benchmark.
 
@@ -166,7 +166,7 @@ That is deliberate, and it is what makes the suite extensible. When a task set
 is added, the existing models are run **against the new tasks only**, and their
 points are added to what is already published. Nothing already measured is
 re-run, and no previously published per-task number changes. A model that has
-not been run against the new set is not silently penalized either — it is
+not been run against the new set is not silently penalized either. It is
 reported against the set it was actually measured on, which is what the suite
 revision has always recorded.
 
@@ -183,7 +183,7 @@ Every grader described above asks `xcodebuild` a question, which means the
 suite only ever sees an app in one state: portrait, English, light, default
 text size, hardware keyboard attached. That is the state the people who wrote
 the app were in. A defect that only appears outside it is invisible to the
-whole apparatus, and that covers a great deal of what users actually report —
+whole apparatus, and that covers a great deal of what users actually report:
 a layout that breaks when the phone turns, a list that files two names wrongly
 in Swedish, a button the keyboard sits on top of.
 
@@ -195,8 +195,8 @@ accessibility tree it leaves.
 and contrast have `simctl` equivalents. Orientation and system language do
 not: rotation is a GSEvent plus a poll of the device's own preferences until
 the physical orientation actually matches, and language is a write to the
-global preferences plist followed by a reboot. Hardware buttons — Home, lock,
-the app switcher — have no `simctl` verb at all.
+global preferences plist followed by a reboot. Hardware buttons have no
+`simctl` verb at all: Home, lock, the app switcher.
 
 **The assertions live outside the workspace.** They are written in the task
 file, not in a test target, so a fixture graded this way ships with no tests
@@ -253,9 +253,9 @@ numbers from the same set of runs.
 measure what a model can do, not which setting it happened to be given, and a
 model held at a lower effort than a rival is not being compared with it.
 
-The ladder is not the same everywhere — some models take `low` through `max`,
+The ladder is not the same everywhere. Some models take `low` through `max`,
 some only toggle reasoning on and off, and some expose no selectable level at
-all — so the level comes from a pinned catalog of what each model actually
+all. So the level comes from a pinned catalog of what each model actually
 offers rather than from a hardcoded word. Asking a model for an effort it does
 not have is not a stronger run; it is an invalid request.
 
@@ -266,14 +266,14 @@ claimed one would be describing a decision nobody made.
 ### Cost
 
 **Cost is the model owner's list price**, from a pinned snapshot of
-[models.dev](https://models.dev) — the same registry the agent CLI reads. Every
+[models.dev](https://models.dev), the same registry the agent CLI reads. Every
 run page states the retrieval date. The price is pinned rather than fetched, so
 a published score does not move when a provider changes its rates; refreshing
 it is a deliberate act that shows up as a diff.
 
 Two token categories, because they bill differently. Fresh input and output are
-charged at the headline rate. **Cached prompt tokens** — the conversation an
-agent re-sends on every step — are charged at a much lower cached rate, and
+charged at the headline rate. **Cached prompt tokens** are the conversation an
+agent re-sends on every step. They are charged at a much lower cached rate, and
 they are the majority of what an agentic run reads: roughly seven cached tokens
 for every fresh one here.
 
@@ -286,7 +286,7 @@ A caution learned the hard way: a cost computed from a token count that is
 missing a category is wrong by multiples, not by rounding. This benchmark
 published one for a few hours that was five times too low, because cached
 tokens were being dropped. The check that catches it is comparing the computed
-figure against what the agent CLI independently reports — they should agree to
+figure against what the agent CLI independently reports. They should agree to
 the cent, and a gap means a category is missing.
 
 ## Suite revisions

@@ -124,7 +124,26 @@ public struct SimulatorDeviceState: Sendable, Codable, Equatable {
         return parts.isEmpty ? "default" : parts.joined(separator: " ")
     }
 
+    /// What `flowdeck simulator orientation set` accepts.
+    ///
+    /// Deliberately not the same vocabulary the accessibility tree reports,
+    /// which answers "landscape" without a side. A task author reaching for
+    /// that word here got an empty runtime failure and no clue why, so the
+    /// mismatch is named at load time instead.
+    static let orientations: Set<String> = [
+        "portrait", "portrait-upside-down", "landscape-left", "landscape-right",
+    ]
+
     public func validate() throws {
+        if let orientation, !Self.orientations.contains(orientation) {
+            let hint = orientation == "landscape"
+                ? " \"landscape\" is what the accessibility tree reports; setting one needs a side."
+                : ""
+            throw BenchmarkFailure.invalidTask(
+                "device_state.orientation '\(orientation)' is not settable. Valid values: "
+                    + Self.orientations.sorted().joined(separator: ", ") + "." + hint
+            )
+        }
         if locale != nil, language == nil {
             throw BenchmarkFailure.invalidTask(
                 "device_state.locale needs a language; the CLI sets the locale as part of the language write"

@@ -39,6 +39,18 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
         self.options = options
     }
 
+    /// Resolved from PATH so the sandbox can allow the agent to run itself.
+    public var executableURL: URL? {
+        let path = ProcessInfo.processInfo.environment["PATH"] ?? ""
+        for directory in path.split(separator: ":").map(String.init) {
+            let candidate = "\(directory)/\(executable)"
+            if FileManager.default.isExecutableFile(atPath: candidate) {
+                return URL(fileURLWithPath: candidate)
+            }
+        }
+        return nil
+    }
+
     /// Environment variable naming an OpenCode `provider` block to merge into
     /// the hermetic config. The value is either inline JSON or a path to a
     /// JSON file. Use it to point runs at a self-hosted or proxied endpoint
@@ -179,10 +191,37 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
             }
         }
 
-        let outcome = try await CLIAgentSession.execute(
-            invocation: .init(
+        // Seal the agent inside its workspace. Hiding wrapper CLIs from PATH
+        // stops it reaching for a tool; it does nothing about reading the
+        // answer, which sits on the same disk under the same user. Applied to
+        // the agent only: the graders run afterwards and need the paths this
+        // denies.
+        var launchExecutable = executable
+        var launchArguments = arguments
+        var sandboxApplied = false
+        if let sandbox = context.sandbox {
+            guard let wrapped = try sandbox.wrap(
                 executable: executable,
                 arguments: arguments,
+                profileURL: context.runDirectoryURL.appendingPathComponent("agent.sb")
+            ) else {
+                throw BenchmarkFailure.agentLaunchFailure(
+                    "This run asked for a sealed agent but \(AgentSandbox.sandboxExec) is missing, "
+                        + "so the answers would be readable. Refusing rather than running unsealed."
+                )
+            }
+            launchExecutable = wrapped.executable
+            launchArguments = wrapped.arguments
+            sandboxApplied = true
+            await recorder.record(.warning, payload: .object([
+                "message": .string("Agent sealed: reference solutions, task files and other runs are unreadable.")
+            ]))
+        }
+
+        let outcome = try await CLIAgentSession.execute(
+            invocation: .init(
+                executable: launchExecutable,
+                arguments: launchArguments,
                 environment: environment,
                 parser: OpenCodeOutputParser()
             ),
@@ -207,6 +246,9 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
         if let effort = context.effort {
             configuration["effort"] = effort
         }
+        configuration["answer_isolation"] = sandboxApplied
+            ? "sealed (solutions, task files and other runs denied)"
+            : "none (answers readable on the host filesystem)"
         return AgentRunResult(
             metadata: AgentMetadata(
                 agent: identifier,

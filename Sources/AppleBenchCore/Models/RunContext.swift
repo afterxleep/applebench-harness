@@ -23,6 +23,10 @@ public struct RunContext: Sendable {
     /// Apple-toolchain wrapper CLIs. Set by the calibration runs; off
     /// by default.
     public let stripWrapperCLIs: Bool
+    /// Seals the agent away from the paths that hold the answers. `nil` leaves
+    /// them readable, which is only appropriate for a local run nobody is
+    /// scoring.
+    public let sandbox: AgentSandbox?
     public let limits: RunLimits
     public let environment: EnvironmentSnapshot
 
@@ -35,6 +39,7 @@ public struct RunContext: Sendable {
         effort: String? = nil,
         environmentAllowlist: [String] = [],
         stripWrapperCLIs: Bool = false,
+        sandbox: AgentSandbox? = nil,
         limits: RunLimits,
         environment: EnvironmentSnapshot
     ) {
@@ -46,6 +51,7 @@ public struct RunContext: Sendable {
         self.effort = effort
         self.environmentAllowlist = environmentAllowlist
         self.stripWrapperCLIs = stripWrapperCLIs
+        self.sandbox = sandbox
         self.limits = limits
         self.environment = environment
     }

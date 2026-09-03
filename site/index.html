@@ -2,21 +2,27 @@
 layout: default
 title: AppleBench
 description: >-
-  A benchmark that asks whether an AI coding agent can take an Apple-development
-  task from request to a verified working result. Graded with fresh xcodebuild,
-  XCTest, XCUITest and Simulator checks, after the agent has exited.
+  A benchmark that asks whether an AI agent can ship an Apple app without you:
+  build it, run it, drive it on a simulator, and leave it working. Graded with
+  fresh xcodebuild, XCTest, XCUITest and Simulator checks, after the agent has
+  exited.
 ---
 
 <section class="hero">
   <div class="wrap">
     <p class="eyebrow"><span class="eyebrow__dot"></span> 134 scoring tasks · 8 categories · graded by Xcode</p>
-    <h1>Can an agent ship Apple code without you?</h1>
+    <h1>Can an agent ship an Apple app without you?</h1>
     <p class="hero__lede">
-      AppleBench hands an agent an isolated checkout of a real Xcode project
-      with something genuinely wrong in it. It records everything the agent
-      does. Then, <strong>once the agent has exited</strong>, it grades the
-      workspace that was left behind: fresh <code>xcodebuild</code>, XCTest,
-      XCUITest, resolved build settings, and the app running on a simulator.
+      Not "can it write Swift". Can it take a real Xcode project with something
+      genuinely wrong in it and hand back a working app. Built, launched, driven
+      on a simulator, and still working when someone else checks.
+      <strong>One task in three cannot pass unless the app actually runs.</strong>
+    </p>
+    <p class="hero__lede" style="margin-top:.8rem">
+      AppleBench records everything the agent does. Then,
+      <strong>once it has exited</strong>, it grades the workspace left behind:
+      fresh <code>xcodebuild</code>, XCTest, XCUITest, resolved build settings,
+      and the app running on a device.
     </p>
     <p class="hero__lede" style="margin-top:.8rem"><strong>Agents do not grade themselves.</strong></p>
     <div class="button-row">
@@ -31,19 +37,24 @@ description: >-
     <div class="section__head">
       <h2>Why another benchmark</h2>
       <p>
-        Most coding benchmarks measure whether a model can produce a diff.
-        Apple development is mostly what happens after the diff.
+        Most coding benchmarks stop at the diff. Shipping on Apple platforms is
+        mostly what happens after it. That is where agents come apart.
       </p>
     </div>
 
 <pre><code>understand → edit → build → diagnose → run → inspect → interact → test → verify</code></pre>
 
     <p style="color:var(--ink-2); max-width:64ch">
-      The edit is one step out of nine. AppleBench grades the end of that
-      loop, not the middle of it. Everything except the model is held still:
-      same harness, same prompt, same commit, same Xcode, same simulator, same
-      limits. Most capable models get the easy tasks. What separates them is
-      the eight steps after the edit, and what each solved task <em>cost</em>.
+      The edit is one step out of nine, and it is the one every model can
+      already do. AppleBench grades the end of that loop, not the middle of it.
+      A patch that looks right and leaves the app crashing on launch scores
+      exactly nothing.
+    </p>
+    <p style="color:var(--ink-2); max-width:64ch">
+      Everything except the model is held still: same harness, same prompt,
+      same commit, same Xcode, same simulator, same limits. Most capable models
+      get the easy tasks. What separates them is the eight steps after the
+      edit, and what each solved task <em>cost</em>.
     </p>
   </div>
 </section>
@@ -53,8 +64,11 @@ description: >-
     <div class="section__head">
       <h2>What it measures</h2>
       <p>
-        Operational Apple-platform work. Plain Swift and language-level
-        concurrency are covered well elsewhere, so they are out of scope here.
+        Operational Apple-platform work: 46 tasks are tagged operational, 55
+        sit in the toolchain and interaction categories, and 45 are graded by
+        running the app rather than by reading the diff. Plain Swift and
+        language-level concurrency are covered well elsewhere, so they are out
+        of scope here.
       </p>
     </div>
     <div class="grid">

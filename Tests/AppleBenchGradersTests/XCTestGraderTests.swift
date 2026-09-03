@@ -76,7 +76,7 @@ struct XCTestGraderTests {
         #expect(result.summary.contains("1 failed"))
     }
 
-    @Test("Zero executed tests is a FAIL — a run that did not run proves nothing")
+    @Test("Zero executed tests is a FAIL: a run that did not run proves nothing")
     func zeroExecuted() async throws {
         let runner = FakeProcessRunner()
         runner.enqueue(exitCode: 0)
@@ -104,7 +104,7 @@ struct XCTestGraderTests {
         let result = try await grader.grade(task: defaultTask(), context: context)
 
         #expect(!result.passed)
-        #expect(result.summary.contains("no tests executed"))
+        #expect(result.summary.contains("No tests executed"))
     }
 
     @Test("Skipped tests are excluded from the executed count")

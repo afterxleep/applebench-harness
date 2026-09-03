@@ -35,7 +35,7 @@ and never the cause or the file. The diagnosis is the task.
 | `frameworks` | SwiftData, Core Data, WidgetKit, App Intents |
 | `ops` | Raw `xcodebuild` / `simctl` / `devicectl` operational loops |
 
-Difficulty runs 1–10 and is **comparative within a category**, not an absolute
+Difficulty runs 1 to 10 and is **comparative within a category**, not an absolute
 scale across the set. A `visual` 5 and an `ops` 5 are not the same amount of
 work; they are each the middle of their own ladder.
 

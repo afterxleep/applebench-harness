@@ -194,11 +194,43 @@ public struct RunDirectoryLayout: Sendable {
                 "Run directory escapes the runs root: \(runURL.path) is not inside \(rootURL.path)"
             )
         }
+        // A run id is a UTC timestamp to the second plus the task and agent,
+        // and two benchmark processes comparing different models use the same
+        // agent on the same tasks. Starting the same task in the same second is
+        // therefore not far-fetched, and `withIntermediateDirectories` does not
+        // complain about an existing directory — the second run would quietly
+        // overwrite the first's result.json and events.jsonl. Claim the
+        // directory exclusively instead, and take a suffix when it is taken.
+        // The exclusive create below makes only the leaf, so the root it goes
+        // in has to exist first.
+        try FileManager.default.createDirectory(at: resolvedRoot, withIntermediateDirectories: true)
+
+        var uniqueID = runID
+        var uniqueURL = runURL
+        var attempt = 2
+        while true {
+            do {
+                try FileManager.default.createDirectory(
+                    at: uniqueURL,
+                    withIntermediateDirectories: false
+                )
+                break
+            } catch let error as NSError where error.code == NSFileWriteFileExistsError {
+                guard attempt <= 50 else {
+                    throw BenchmarkFailure.infrastructureFailure(
+                        "Could not find a free run directory beside \(runURL.path)"
+                    )
+                }
+                uniqueID = "\(runID)-\(attempt)"
+                uniqueURL = resolvedRoot.appendingPathComponent(uniqueID, isDirectory: true)
+                attempt += 1
+            }
+        }
         try FileManager.default.createDirectory(
-            at: runURL.appendingPathComponent("logs", isDirectory: true),
+            at: uniqueURL.appendingPathComponent("logs", isDirectory: true),
             withIntermediateDirectories: true
         )
-        return (runID, runURL)
+        return (uniqueID, uniqueURL)
     }
 
     private func sanitize(_ component: String) -> String {
