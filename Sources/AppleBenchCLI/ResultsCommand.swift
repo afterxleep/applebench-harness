@@ -41,6 +41,12 @@ struct ResultsCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Only include runs from this model id.")
     var model: String?
 
+    @Option(
+        name: .long,
+        help: "Path to a suite YAML. Only tasks listed in it are included, so an export cannot quietly carry a run of something outside the scored set."
+    )
+    var suite: String?
+
     func run() async throws {
         let root = URL(fileURLWithPath: path ?? Wiring.defaultRunsRoot().path)
         let collected = Self.collectResults(under: root)
@@ -49,7 +55,22 @@ struct ResultsCommand: AsyncParsableCommand {
             throw ExitCode.failure
         }
 
-        let matching = model.map { wanted in collected.filter { $0.agent.model == wanted } } ?? collected
+        var matching = model.map { wanted in collected.filter { $0.agent.model == wanted } } ?? collected
+        if let suite {
+            // A published score is a fraction of a stated set of tasks. A run
+            // directory accumulates whatever was run in it — including the
+            // public sample tasks, which must never be scored — so the export
+            // is filtered by the suite rather than trusted to contain only it.
+            let identifiers = try Self.taskIdentifiers(inSuiteAt: suite)
+            let dropped = Set(matching.map(\.task)).subtracting(identifiers).sorted()
+            matching = matching.filter { identifiers.contains($0.task) }
+            if !dropped.isEmpty {
+                FileHandle.standardError.write(Data(
+                    ("Excluded \(dropped.count) task(s) not in the suite: "
+                        + dropped.joined(separator: ", ") + "\n").utf8
+                ))
+            }
+        }
         guard !matching.isEmpty else {
             FileHandle.standardError.write(Data("No runs under \(root.path) used model \(model ?? "")\n".utf8))
             throw ExitCode.failure
@@ -143,6 +164,30 @@ struct ResultsCommand: AsyncParsableCommand {
 
     private func configurationLabel(of result: BenchmarkRunResult) -> String {
         result.agent.model.map { "\(result.agent.agent) · \($0)" } ?? result.agent.agent
+    }
+
+    /// Task ids listed in a suite file. Parsed with a line reader because the
+    /// shape is fixed and the CLI layer carries no YAML dependency.
+    static func taskIdentifiers(inSuiteAt path: String) throws -> Set<String> {
+        guard let text = try? String(contentsOfFile: path, encoding: .utf8) else {
+            throw ValidationError("No suite file at \(path)")
+        }
+        var identifiers: Set<String> = []
+        var inTasks = false
+        for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("tasks:") { inTasks = true; continue }
+            guard inTasks else { continue }
+            if trimmed.hasPrefix("- ") {
+                identifiers.insert(String(trimmed.dropFirst(2)).trimmingCharacters(in: .whitespaces))
+            } else if !trimmed.isEmpty, !trimmed.hasPrefix("#") {
+                break
+            }
+        }
+        guard !identifiers.isEmpty else {
+            throw ValidationError("Suite at \(path) lists no tasks")
+        }
+        return identifiers
     }
 
     static func collectResults(under root: URL) -> [BenchmarkRunResult] {

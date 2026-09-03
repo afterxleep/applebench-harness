@@ -43,11 +43,13 @@ runs_dir=""
 suite=""
 attempt="first"
 model=""
+suite_file=""
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --attempt) attempt="$2"; shift 2 ;;
         --model)   model="$2";   shift 2 ;;
+        --suite-file) suite_file="$2"; shift 2 ;;
         -*)        echo "unknown option: $1" >&2; exit 2 ;;
         *)
             if   [ -z "$slug" ];     then slug="$1"
@@ -79,9 +81,29 @@ mkdir -p "$root/Reports" "$root/site/_data/benchmarks" "$root/site/_data/reports
 
 selection=(--attempt "$attempt")
 [ -n "$model" ] && selection+=(--model "$model")
+# A published score is a fraction of a stated set of tasks, and a run
+# directory holds whatever was run in it. Naming the suite is what keeps the
+# public sample tasks — which are never scored — out of a published number.
+[ -n "$suite_file" ] && selection+=(--suite "$suite_file")
 
 "$binary" results "$runs_dir" "${selection[@]}" --format csv  --output "$root/Reports/$slug.csv"
 "$binary" results "$runs_dir" "${selection[@]}" --format json --output "$root/Reports/$slug.json"
+# What each task *was* when it was scored. Without this the next run cannot
+# tell a task it has already covered from one that has been rewritten since.
+APPLEBENCH_TASKSET="${APPLEBENCH_TASKSET:-$root}" python3 "$root/Scripts/task-fingerprints.py" \
+    > "$root/Reports/$slug.fingerprints.json"
+python3 - "$root/Reports/$slug.json" "$root/Reports/$slug.fingerprints.json" <<'PYTHON'
+import json, sys
+report, prints = sys.argv[1], sys.argv[2]
+with open(report) as handle:
+    document = json.load(handle)
+with open(prints) as handle:
+    document["task_fingerprints"] = json.load(handle)
+with open(report, "w") as handle:
+    json.dump(document, handle, indent=2, sort_keys=True)
+PYTHON
+rm -f "$root/Reports/$slug.fingerprints.json"
+
 cp "$root/Reports/$slug.csv"  "$root/site/_data/benchmarks/$slug.csv"
 cp "$root/Reports/$slug.json" "$root/site/_data/reports/$slug.json"
 
