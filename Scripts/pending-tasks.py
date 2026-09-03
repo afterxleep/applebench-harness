@@ -71,7 +71,8 @@ def main() -> int:
     parser.add_argument("--report", help="Report to compare against. Defaults to the newest one that scored this model.")
     parser.add_argument("--reports-dir", default=None)
     parser.add_argument("--suite")
-    parser.add_argument("--mode", default="both", choices=["both", "new", "changed"])
+    parser.add_argument("--mode", default="both", choices=["both", "new", "changed"],
+                        help="Kept for inspection; the runner always asks for both.")
     args = parser.parse_args()
 
     root = pathlib.Path(__file__).resolve().parents[1]

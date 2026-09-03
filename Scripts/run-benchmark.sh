@@ -6,15 +6,17 @@
 #
 # Options:
 #   -s, --suite <id>        Suite to run (default: gold)
-#       --pending           Run only what this model still owes: tasks it has
-#                           never been scored on, plus tasks that have changed
-#                           since it was. Needs --model. Nothing is marked by
-#                           hand — a task is its prompt, its graders and its
-#                           fixture, so what changed is decided by hashing those
-#                           and comparing against what the model's last report
-#                           recorded. Exits without running when nothing is due.
-#       --new-only          --pending, restricted to tasks never scored
-#       --changed-only      --pending, restricted to tasks that changed
+#       --changed           Run only what this model still owes: tasks it has
+#                           never been scored on, and tasks whose `modified:`
+#                           date is newer than the day it last ran them. Needs
+#                           --model. Nothing is marked by hand. Exits without
+#                           running when nothing is due, so it is safe to use
+#                           every time.
+#       --publish           Rewrite this model's published report from every run
+#                           in the runs directory, and the site data with it.
+#                           On by default with --changed: the point of running
+#                           what is outstanding is to end up current.
+#       --no-publish        Skip that.
 #   -a, --agent <id>        Agent harness (default: opencode)
 #   -m, --model <id>        Model passed to the agent
 #   -e, --effort <level>    Reasoning effort, forwarded to OpenCode as the
@@ -87,6 +89,7 @@ cd "$root"
 
 suite="gold"
 pending_mode=""
+publish=""
 agent="opencode"
 model=""
 effort=""
@@ -112,9 +115,9 @@ vm_password=""
 while [ $# -gt 0 ]; do
     case "$1" in
         -s|--suite) suite="$2"; shift 2 ;;
-        --pending)      pending_mode="both"; shift ;;
-        --new-only)     pending_mode="new"; shift ;;
-        --changed-only) pending_mode="changed"; shift ;;
+        --changed|--changed-only) pending_mode="both"; shift ;;
+        --publish)      publish="yes"; shift ;;
+        --no-publish)   publish="no"; shift ;;
         -a|--agent) agent="$2"; shift 2 ;;
         -m|--model) model="$2"; shift 2 ;;
         -e|--effort) effort="$2"; shift 2 ;;
@@ -241,7 +244,7 @@ if [ -f "$taskset_suites/$suite.yaml" ]; then suite="$taskset_suites/$suite.yaml
 # the runner, so the run records exactly which tasks it was given.
 if [ -n "$pending_mode" ]; then
     if [ -z "$model" ]; then
-        echo "error: --pending needs --model: what is outstanding is per model." >&2
+        echo "error: --changed needs --model: what is outstanding is per model." >&2
         exit 2
     fi
     pending="$(APPLEBENCH_TASKSET="$taskset_root" python3 "$root/Scripts/pending-tasks.py" \
@@ -299,6 +302,7 @@ set +e
     ${vm_password:+--vm-password "$vm_password"} \
     2>&1 | tee "$log"
 suite_status=${PIPESTATUS[0]}
+
 set -e
 
 # Export regardless of the suite's exit status: a run with infrastructure
@@ -328,4 +332,29 @@ echo "Wrote:"
 echo "  $out/summary.csv"
 echo "  $out/summary.json"
 echo "  $log"
+# A run leaves its artifacts in the runs directory, which is cumulative: every
+# run this machine has ever done is in there. Publishing from it is therefore
+# how a model's score becomes *current* rather than a snapshot of one sitting —
+# the new tasks are added to what was already scored, because points are a
+# plain sum and the export walks the whole tree.
+#
+# Suites are all of them: a score that spans gold and gold-02 has to name both,
+# or half of what was just run is filtered straight back out.
+if [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" != "no" ]; }; then
+    if [ -z "$model" ]; then
+        echo "note: --publish needs --model to know which report to rewrite; skipping." >&2
+    else
+        slug="$(printf '%s' "${model##*/}" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]\{1,\}/-/g' -e 's/^-//' -e 's/-$//')"
+        suite_args=()
+        for file in "$taskset_suites"/gold*.yaml; do
+            [ -e "$file" ] && suite_args+=(--suite-file "$file")
+        done
+        echo
+        echo "Publishing $slug from $runs_dir…"
+        "$root/Scripts/publish-report.sh" "$slug" "$runs_dir" gold \
+            --attempt first --model "$model" "${suite_args[@]+"${suite_args[@]}"}" \
+            || echo "note: publish failed; the run itself is intact in $out" >&2
+    fi
+fi
+
 exit "$suite_status"
