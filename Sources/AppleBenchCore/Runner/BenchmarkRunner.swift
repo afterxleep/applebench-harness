@@ -19,6 +19,9 @@ public struct RunnerOptions: Sendable {
     public var runsRoot: URL
     /// Ceilings applied to every task's own limits. Tightening only.
     public var limitCaps: LimitCaps
+    /// Called for each recorded event, for a caller that wants to show the run
+    /// moving. Purely observational: the run behaves identically without it.
+    public var eventObserver: (@Sendable (BenchmarkEvent) -> Void)?
 
     public init(
         model: String? = nil,
@@ -27,7 +30,8 @@ public struct RunnerOptions: Sendable {
         environmentAllowlist: [String] = [],
         stripWrapperCLIs: Bool = false,
         runsRoot: URL,
-        limitCaps: LimitCaps = LimitCaps()
+        limitCaps: LimitCaps = LimitCaps(),
+        eventObserver: (@Sendable (BenchmarkEvent) -> Void)? = nil
     ) {
         self.model = model
         self.effort = effort
@@ -36,6 +40,7 @@ public struct RunnerOptions: Sendable {
         self.stripWrapperCLIs = stripWrapperCLIs
         self.runsRoot = runsRoot
         self.limitCaps = limitCaps
+        self.eventObserver = eventObserver
     }
 }
 
@@ -105,7 +110,11 @@ public struct BenchmarkRunner: Sendable {
         // Phase 2: run directory and event stream.
         let layout = RunDirectoryLayout(rootURL: options.runsRoot)
         let (runID, runDirectoryURL) = try layout.createRunDirectory(taskID: task.id, agentID: adapter.identifier)
-        let recorder = try EventRecorder(runID: runID, fileURL: runDirectoryURL.appendingPathComponent("events.jsonl"))
+        let recorder = try EventRecorder(
+            runID: runID,
+            fileURL: runDirectoryURL.appendingPathComponent("events.jsonl"),
+            observer: options.eventObserver
+        )
         defer { Task { await recorder.close() } }
 
         await recorder.record(.runStarted, payload: .object([

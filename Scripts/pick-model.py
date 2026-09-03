@@ -13,6 +13,11 @@ exposes no selectable level.
 Usage:
     pick-model.py [--prefix openrouter/] [--query <text>]
 """
+
+# Annotations are deferred so these run under the system python3 (3.9),
+# which has no `X | None` type syntax. The scripts are called by shebang, so
+# whichever python3 is first on PATH is the one that has to cope.
+from __future__ import annotations
 import argparse
 import curses
 import json
@@ -141,14 +146,28 @@ def main() -> int:
         print(f"error: no models matching {args.prefix!r} in the catalog.", file=sys.stderr)
         return 1
 
-    # The picker draws on the terminal, so it needs one. When stdout is a pipe
-    # — which is how the caller reads the choice — curses still has to talk to
-    # the tty directly.
-    if not sys.stdin.isatty():
+    # The caller reads the choice from stdout, so stdout is a pipe — and curses
+    # draws on stdout, which would paint the whole interface into that pipe and
+    # show the user nothing. So the terminal is opened directly and put on fd 1
+    # for as long as the picker runs, with the real stdout parked on a spare
+    # descriptor and restored before the answer is printed.
+    try:
+        terminal = open("/dev/tty", "rb+", buffering=0)
+    except OSError:
         print("error: no terminal to draw a picker on; pass --model instead.", file=sys.stderr)
         return 1
 
-    chosen = curses.wrapper(run, rows, args.query)
+    import os
+
+    saved_stdout = os.dup(1)
+    try:
+        os.dup2(terminal.fileno(), 1)
+        chosen = curses.wrapper(run, rows, args.query)
+    finally:
+        os.dup2(saved_stdout, 1)
+        os.close(saved_stdout)
+        terminal.close()
+
     if chosen is None:
         print("Cancelled.", file=sys.stderr)
         return 130

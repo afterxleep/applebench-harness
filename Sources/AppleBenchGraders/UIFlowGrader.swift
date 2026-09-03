@@ -73,7 +73,9 @@ public struct UIFlowGrader: Grader {
             // setting the system language reboots the device, which would drop
             // an install done first.
             try await simulatorManager.install(udid: udid, appURL: appURL)
-            _ = try? await simulatorManager.terminate(
+            // Terminating a process that is not running is the expected case
+            // here, not a failure, so the result is discarded either way.
+            _ = await simulatorManager.terminate(
                 udid: udid,
                 bundleIdentifier: configuration.bundleIdentifier
             )

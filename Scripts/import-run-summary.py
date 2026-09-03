@@ -15,6 +15,11 @@ files that no longer exist locally, which is the honest state of an archive.
 Usage:
     import-run-summary.py <summary.json> <destination-directory>
 """
+
+# Annotations are deferred so these run under the system python3 (3.9),
+# which has no `X | None` type syntax. The scripts are called by shebang, so
+# whichever python3 is first on PATH is the one that has to cope.
+from __future__ import annotations
 import json
 import pathlib
 import sys

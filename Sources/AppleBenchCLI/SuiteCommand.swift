@@ -25,6 +25,17 @@ struct SuiteCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Reasoning effort passed to the agent when its CLI supports it.")
     var effort: String?
 
+    @Flag(name: .long, help: "Show what the run is doing as it happens: commands, file edits, graders.")
+    var stream = false
+
+    @Flag(name: .long, help: "Show the model's own messages too. Implies --stream, and is much noisier.")
+    var streamOutput = false
+
+    /// The live log for this run, off unless asked for.
+    var liveLog: LiveEventLog {
+        LiveEventLog(level: streamOutput ? .output : (stream ? .activity : .off))
+    }
+
     @Option(name: .long, help: "Stop a task once it has spent this many tokens. Tightens each task's own budget, never loosens it.")
     var maxTokens: Int?
 
@@ -137,7 +148,8 @@ struct SuiteCommand: AsyncParsableCommand {
             environmentAllowlist: allowEnv,
             stripWrapperCLIs: stripWrapperCLIs,
             runsRoot: runsDir.map { URL(fileURLWithPath: $0) } ?? Wiring.defaultRunsRoot(),
-            limitCaps: LimitCaps(timeoutSeconds: timeoutCap ?? LimitCaps.standard.timeoutSeconds, maxTokens: maxTokens)
+            limitCaps: LimitCaps(timeoutSeconds: timeoutCap ?? LimitCaps.standard.timeoutSeconds, maxTokens: maxTokens),
+            eventObserver: liveLog.observer()
         )
 
         print("AppleBench · suite \(benchmarkSuite.id) · \(tasks.count) task(s) × \(entries.count) configuration(s) × \(runs) run(s)\n")
