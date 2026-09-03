@@ -308,10 +308,35 @@ main { flex: 1 0 auto; }
 .site-nav a.icon-button { color: var(--ink-2); }
 .site-nav a.icon-button:hover { color: var(--ink); border-color: var(--line-strong); background: var(--surface-1); }
 
+/* The header must never be what makes the document wider than the screen. It
+   was: the rule below hid `[data-optional]` links on narrow screens, but the
+   nav is generated from `site.nav` and nothing has ever carried that
+   attribute, so every link stayed and pushed the page out. Everything then
+   overflowed on every page, which reads as text and numbers running past the
+   edge of their cards.
+
+   Shrinking beats hiding here — a link the reader cannot reach is a worse
+   answer than one they scroll to — so the nav is allowed to scroll within the
+   header instead of widening it. */
+.site-header__inner { min-width: 0; }
+.site-nav {
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.site-nav::-webkit-scrollbar { display: none; }
+
 @media (max-width: 720px) {
   .site-nav a { padding: 0.42rem 0.5rem; font-size: 0.85rem; }
   .site-nav a[data-optional] { display: none; }
   .site-nav a.icon-button { padding: 0; }
+}
+
+@media (max-width: 560px) {
+  /* The mark alone still reads as the brand and still links home, and the
+     wordmark is the cheapest 110px to give back to the nav. */
+  .brand__name { display: none; }
+  .site-header__inner { gap: 0.75rem; }
 }
 
 /* Footer */
@@ -525,7 +550,11 @@ main { flex: 1 0 auto; }
 .bars { display: grid; gap: 0.55rem; }
 .bar-row {
   display: grid;
-  grid-template-columns: 108px 1fr 84px;
+  /* The value column sizes to its content rather than to a guess. It held a
+     fixed 84px, which fitted "50/50" and overflowed the card the moment a
+     total reached four digits ("1760/3150"); the number is the one thing on
+     the row that must not be clipped, so the bar gives up the width instead. */
+  grid-template-columns: 108px minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.85rem;
 }
@@ -577,14 +606,14 @@ main { flex: 1 0 auto; }
    the task count is the part that stops two unequal runs being read as a
    like-for-like comparison. It does not fit the 108px label column, and
    truncating it is what the caveat below the chart is there to prevent. */
-.bars--leaderboard .bar-row { grid-template-columns: 215px 1fr 84px; }
+.bars--leaderboard .bar-row { grid-template-columns: 215px minmax(0, 1fr) auto; }
 
 @media (max-width: 560px) {
-  .bar-row { grid-template-columns: 84px 1fr 68px; gap: 0.55rem; }
+  .bar-row { grid-template-columns: 84px minmax(0, 1fr) auto; gap: 0.55rem; }
   .bar-row__label { font-size: 0.78rem; }
   /* Narrow enough that the count has to wrap under the name rather than
      truncate; the label is the one thing here that must stay readable. */
-  .bars--leaderboard .bar-row { grid-template-columns: 116px 1fr 68px; }
+  .bars--leaderboard .bar-row { grid-template-columns: 116px minmax(0, 1fr) auto; }
   .bars--leaderboard .bar-row__label { white-space: normal; line-height: 1.25; }
 }
 
