@@ -20,7 +20,7 @@ the project configuration actually resolve the way it claims to.
 
 ## The shape of the set
 
-123 scoring tasks across eight categories. Each one is a small, self-contained Xcode
+134 scoring tasks across eight categories. Each one is a small, self-contained Xcode
 project with a single planted defect, and a prompt that states the **symptom**
 and never the cause or the file. The diagnosis is the task.
 
@@ -139,7 +139,7 @@ result; it exists only to prove the other half of the contract.
 
 The set is partitioned:
 
-- **`gold`**: 123 scoring tasks. Prompts, fixtures and expected outputs stay
+- **`gold`**: 134 scoring tasks. Prompts, fixtures and expected outputs stay
   unpublished. Published scores come from this suite only.
 - **`dev`**: a small leakable subset that ships with the open harness and is
   **never scored**.

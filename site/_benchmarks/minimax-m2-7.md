@@ -2,7 +2,7 @@
 title: "minimax/MiniMax-M2.7, gold suite, 3657 points"
 date: 2026-09-02
 suite: gold
-suite_revision: "2026-08-31"
+suite_revision: "2026-09-03"
 score_spec: "points-v1"
 attempt: "latest"
 data: minimax-m2-7
@@ -18,29 +18,42 @@ description: >-
   verified result, with per-category points, cost against wall-clock time,
   and every task.
 lede: >-
-  The previous MiniMax generation on the same suite, published for the
-  comparison it makes possible: 55.2% of the points against M3's 72.5%, on the
-  same 123 tasks, the same harness and the same host.
+  The first run measured against the hardened suite: 134 tasks, including 11
+  that require driving the device itself, and 25 rewritten so that a test which
+  asserts nothing no longer passes. 53.5% of the points, 59.0% of the tasks.
 ---
 ## Which attempt counts
 
-**The first attempt per task**, the same rule as the M3 run on this page's
-sibling, so the two are read the same way.
+**The latest attempt per task.** Twenty-five of these tasks were rewritten
+after this model first ran them, so the earlier attempt scored a version that
+no longer exists; letting it win would credit the model with passes on tasks it
+was never asked to solve. Where a task has not changed, there is only one
+attempt to choose from.
 
-## What the comparison is worth
+## What changed under the model
 
-Both models ran the same suite through the same harness on the same host, so
-the difference is the model.
+Twenty-five previously-passed tasks were hardened against tests that pass
+without asserting anything, and eleven tasks were added that need the device
+driven — rotation, a language change, hardware buttons, list ordering,
+accessibility sizing.
 
-|            | M2.7  | M3    |
-|------------|-------|-------|
-| Points     | 55.2% | 72.5% |
-| Pass rate  | 61.0% | 82.9% |
+|                     | before | after |
+|---------------------|--------|-------|
+| The 25 hardened     | 11     | 10    |
+| The 11 new tasks    | —      | 5     |
 
-Read the two rows together. M2.7 passes 61% of its tasks and earns 55.2% of
-its points, so the tasks it does solve, it solves expensively. That gap is the
-case for scoring in points at all: a pass rate counts the ticks, and the points
-also count what each tick cost.
+The hardened tasks moved by one, but that number is quieter than the data. Of
+the 25, **seven flipped** — four to failing and three to passing — and nothing
+was made easier, so three tasks going green on a harder version is variance
+rather than improvement. A one-point delta on a single attempt per task is
+inside the noise, and these results should be read as such until a model is run
+more than once.
+
+## What this is not comparable to
+
+The M3 run on this page's sibling was measured on 123 tasks, before any of the
+above. It is not a like-for-like comparison and the difference between the two
+headline numbers is mostly the suite, not the model.
 
 ## Isolation
 

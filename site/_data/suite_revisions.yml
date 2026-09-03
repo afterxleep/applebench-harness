@@ -2,10 +2,25 @@
 # stated set of tasks, so every run records the revision it was measured on
 # and results are only comparable within one.
 
-- id: "2026-08-31"
-  name: "2026-08-31"
-  gold_tasks: 123
+- id: "2026-09-03"
+  name: "2026-09-03"
+  gold_tasks: 134
   current: true
+  summary: >-
+    Eleven tasks added that cannot be solved without driving the device, and
+    twenty-five hardened so that a test asserting nothing no longer passes.
+    Every task in the suite still fails for an agent that changes nothing and
+    passes once the reference fix is applied, 134 of 134.
+  changes:
+    - "Eleven tasks require the device itself: rotation, a language change and reboot, hardware buttons over the Indigo HID path, coordinate taps under rotation, list ordering, and accessibility content sizes."
+    - "Twenty-five tasks whose deliverable is a test gained a mutation grader: the app is deliberately broken and the agent's own test has to fail. A test that launches the app and asserts nothing no longer passes."
+    - "Thirty tasks gained a trajectory grader, so a task cannot be answered by editing the expected output instead of doing the work."
+    - "Planted defects are camouflaged rather than obvious: the fixture behaves correctly everywhere except the case under test."
+
+- id: "2026-08-31"
+  name: "2026-08-31 (superseded)"
+  gold_tasks: 123
+  current: false
   summary: >-
     Every task in the suite now fails for an agent that changes nothing and
     passes once the reference fix is applied, 123 of 123. Before this

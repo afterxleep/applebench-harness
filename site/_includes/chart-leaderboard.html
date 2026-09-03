@@ -1,0 +1,114 @@
+{%- comment -%}
+Every published run, ranked by the share of available points it earned. One
+measure, one series · magnitude by length, so a single hue and no legend.
+
+Share rather than raw points, because runs are scored against different numbers
+of tasks as the suite grows, and a raw total would rank a model on how much of
+the suite it happened to be measured against. The task count rides along on
+every bar for the same reason: two runs on different task sets are not the
+same measurement, and the chart has to say so rather than imply otherwise.
+
+Params: runs (site.benchmarks).
+{%- endcomment -%}
+<figure class="figure">
+  <figcaption>
+    <h3 class="figure__title">Points earned, every published run</h3>
+    <p class="figure__subtitle">
+      Share of the points available to each run, best first. A run is only
+      comparable with another measured on the same task set, so each bar states
+      how many tasks it was scored against.
+    </p>
+  </figcaption>
+
+  {%- assign ranked = "" | split: "" -%}
+  {%- assign task_counts = "" | split: "" -%}
+  {%- for run in include.runs -%}
+    {%- assign rows = site.data.benchmarks[run.data] -%}
+    {%- if rows -%}
+      {%- assign earned = 0 -%}
+      {%- assign available = 0 -%}
+      {%- assign hits = rows | where: "passed", "true" -%}
+      {%- for row in rows -%}
+        {%- assign earned = earned | plus: row.points -%}
+        {%- assign available = available | plus: row.face_value -%}
+      {%- endfor -%}
+      {%- assign share = 0 -%}
+      {%- if available > 0 %}{% assign share = earned | times: 10000 | divided_by: available %}{% endif -%}
+      {%- assign name = run.model | split: "/" | last -%}
+      {%- capture packed -%}{{ share | round | prepend: "00000" | slice: -5, 5 }}|{{ name }}|{{ earned | round }}|{{ available }}|{{ hits.size }}|{{ rows.size }}|{{ run.url }}{%- endcapture -%}
+      {%- assign ranked = ranked | push: packed -%}
+      {%- assign task_counts = task_counts | push: rows.size -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- assign ranked = ranked | sort | reverse -%}
+  {%- assign distinct_counts = task_counts | uniq -%}
+
+  <div class="bars bars--leaderboard">
+    {%- for packed in ranked -%}
+      {%- assign parts = packed | split: "|" -%}
+      {%- assign bar_value = parts[2] -%}
+      {%- assign bar_total = parts[3] -%}
+      {%- capture bar_label %}{{ parts[1] }} · {{ parts[5] }} tasks{% endcapture -%}
+      {%- capture bar_printed %}{{ parts[2] }}/{{ parts[3] }}{% endcapture -%}
+      {%- include bar-row.html
+          label=bar_label
+          value=bar_value
+          total=bar_total
+          value_label=bar_printed
+          color="series-1" -%}
+    {%- endfor -%}
+  </div>
+
+  {%- if distinct_counts.size > 1 -%}
+    <p class="figure__note">
+      <strong>These runs are not scored against the same tasks.</strong> The
+      suite has grown since the earliest run here, so the bars answer "how much
+      of what it was asked" and not "which model is better". A run measured on
+      an older, smaller suite has neither earned nor forfeited the points of the
+      tasks it never saw. Read two bars against each other only when their task
+      counts match.
+    </p>
+  {%- endif -%}
+
+  <p class="figure__note">
+    A task's face value is ten points per step of authored difficulty, and a
+    solve keeps all of it only if it stayed inside the token allowance. A
+    failure earns nothing and still counts its face value, so a run's ceiling
+    does not move with the model. See
+    <a href="{{ '/methodology/#scoring' | relative_url }}">scoring</a>.
+  </p>
+
+  <details class="data-table">
+    <summary>View as a table</summary>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Run</th>
+          <th scope="col">Points</th>
+          <th scope="col">Available</th>
+          <th scope="col">Share</th>
+          <th scope="col">Passed</th>
+          <th scope="col">Tasks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%- for packed in ranked -%}
+          {%- assign parts = packed | split: "|" -%}
+          <tr>
+            <td><a href="{{ parts[6] | relative_url }}">{{ parts[1] }}</a></td>
+            <td>{{ parts[2] }}</td>
+            <td>{{ parts[3] }}</td>
+            {%- comment -%}
+              Float division, not integer. `times: 1000 | divided_by:` truncates
+              and prints a tenth below the bar beside it, which reads as two
+              different numbers for the same measure inside one figure.
+            {%- endcomment -%}
+            <td>{{ parts[2] | times: 1.0 | divided_by: parts[3] | times: 100 | round: 1 }}%</td>
+            <td>{{ parts[4] }}</td>
+            <td>{{ parts[5] }}</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </details>
+</figure>

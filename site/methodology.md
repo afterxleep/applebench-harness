@@ -279,7 +279,7 @@ checked against that bar before a scoring run.
   models actually fail. Treat it as a label, not a metric.
 - **Single-run results are noisy.** Agent behavior varies between runs on the
   same task. A single pass is weak evidence; `--runs N` exists for this reason.
-- **The set is small.** 123 tasks is enough to see capability gaps by category
+- **The set is small.** 134 tasks is enough to see capability gaps by category
   and nowhere near enough for a significance claim. None is made.
 - **Cost depends on the provider's reporting.** Two models are only cost-
   comparable if both report usage, through the same harness, in the same run.

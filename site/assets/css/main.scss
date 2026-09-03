@@ -573,9 +573,19 @@ main { flex: 1 0 auto; }
 }
 .bar-row__value span { color: var(--ink-3); font-size: 0.8rem; }
 
+/* The leaderboard names a model and the size of the set it was scored on, and
+   the task count is the part that stops two unequal runs being read as a
+   like-for-like comparison. It does not fit the 108px label column, and
+   truncating it is what the caveat below the chart is there to prevent. */
+.bars--leaderboard .bar-row { grid-template-columns: 215px 1fr 84px; }
+
 @media (max-width: 560px) {
   .bar-row { grid-template-columns: 84px 1fr 68px; gap: 0.55rem; }
   .bar-row__label { font-size: 0.78rem; }
+  /* Narrow enough that the count has to wrap under the name rather than
+     truncate; the label is the one thing here that must stay readable. */
+  .bars--leaderboard .bar-row { grid-template-columns: 116px 1fr 68px; }
+  .bars--leaderboard .bar-row__label { white-space: normal; line-height: 1.25; }
 }
 
 /* Task matrix */

@@ -17,6 +17,11 @@ description: Published AppleBench runs, with full per-task data and charts.
 </div>
 
 <div class="wrap wrap--narrow">
+  {%- assign ranked_runs = site.benchmarks | sort: "date" | reverse -%}
+  {%- include chart-leaderboard.html runs=ranked_runs -%}
+</div>
+
+<div class="wrap wrap--narrow">
   <ul class="entry-list">
     {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
     {%- for run in runs -%}
