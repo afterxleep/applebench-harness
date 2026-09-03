@@ -42,10 +42,6 @@
 #   -o, --out <dir>         Report directory (default: Reports/<suite>-<date>)
 #       --runs-dir <dir>    Run artifact root (default: .applebench/runs)
 #       --strip-wrapper-clis  Hide wrapper CLIs from the agent's PATH
-#       --task-set-ref <r>  Branch, tag or sha to score. Without it the default
-#                           branch is used, which silently scores the wrong set
-#                           whenever a suite is prepared on a branch. Also read
-#                           from APPLEBENCH_TASKSET_REF.
 #       --task-set-repo <u> Git URL of the task set to score. Cloned on first
 #                           use and fast-forwarded after, then prepared. Also
 #                           read from APPLEBENCH_TASKSET_REPO, so a scoring
@@ -105,7 +101,6 @@ api_key=""
 api_key_file=""
 api_key_variable="OPENROUTER_API_KEY"
 task_set_repo="${APPLEBENCH_TASKSET_REPO:-}"
-task_set_ref="${APPLEBENCH_TASKSET_REF:-}"
 task_set_dir=""
 vm=""
 vm_allow=()
@@ -130,7 +125,6 @@ while [ $# -gt 0 ]; do
         --strip-wrapper-clis) strip_wrappers="--strip-wrapper-clis"; shift ;;
         --allow-env) allow_env+=(--allow-env "$2"); shift 2 ;;
         --task-set-repo) task_set_repo="$2"; shift 2 ;;
-        --task-set-ref)  task_set_ref="$2";  shift 2 ;;
         --task-set-dir) task_set_dir="$2"; shift 2 ;;
         --api-key) api_key="$2"; shift 2 ;;
         --api-key-file) api_key_file="$2"; shift 2 ;;
@@ -150,7 +144,7 @@ done
 # The clone lives inside the harness, never the other way round: nothing the
 # harness generates is written back to the task set.
 if [ -n "$task_set_repo" ]; then
-    APPLEBENCH_TASKSET="$("$root/Scripts/fetch-taskset.sh" "$task_set_repo" "$task_set_ref" "${task_set_dir:-}")"
+    APPLEBENCH_TASKSET="$("$root/Scripts/fetch-taskset.sh" "$task_set_repo" "${task_set_dir:-}")"
     export APPLEBENCH_TASKSET
 elif [ -n "$task_set_dir" ]; then
     echo "error: --task-set-dir needs --task-set-repo (or APPLEBENCH_TASKSET_REPO); to use a task set already on disk, set APPLEBENCH_TASKSET." >&2
@@ -312,21 +306,6 @@ set -e
 "$binary" results "$runs_dir" --format json --output "$out/summary.json"
 
 
-# A run is only a useful record of *currency* if it also says what each task
-# was at the time. Recording it here rather than at publish time means an
-# unpublished run still counts as covered, so `--pending` does not re-run work
-# that has already been done.
-APPLEBENCH_TASKSET="$taskset_root" python3 "$root/Scripts/task-fingerprints.py" > "$out/fingerprints.json"
-python3 - "$out/summary.json" "$out/fingerprints.json" <<'PYTHON'
-import json, sys
-with open(sys.argv[1]) as handle:
-    document = json.load(handle)
-with open(sys.argv[2]) as handle:
-    document["task_fingerprints"] = json.load(handle)
-with open(sys.argv[1], "w") as handle:
-    json.dump(document, handle, indent=2, sort_keys=True)
-PYTHON
-rm -f "$out/fingerprints.json"
 echo
 echo "Wrote:"
 echo "  $out/summary.csv"

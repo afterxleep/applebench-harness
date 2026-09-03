@@ -6,15 +6,8 @@ Two kinds of debt, and both are answered without consulting git:
 **New** — the task is in the scored set and the report has no run of it for
 this model.
 
-**Changed** — the report has a run, but the task is not the same task any more.
-That is decided by hashing what the task actually is: its YAML, and the fixture
-it runs against. A branch name cannot answer this; content can, and content
-survives merges, rebases and renames.
-
-A report records the fingerprint of every task it scored, alongside the export.
-When the report predates fingerprints entirely, every task in it is treated as
-unchanged rather than as changed — otherwise adopting this would re-run the
-whole suite once, for nothing.
+**Changed** — the report has a run of it, but the task's `modified:` date is
+newer than the day that run happened.
 
 Usage:
     pending-tasks.py --model <id> [--report <path>] [--suite <path>]
@@ -25,16 +18,6 @@ import json
 import os
 import pathlib
 import sys
-
-def load_fingerprints() -> dict[str, str]:
-    """Current fingerprints, via the same code the publisher records with."""
-    import subprocess
-    here = pathlib.Path(__file__).resolve().parent
-    output = subprocess.run(
-        [sys.executable, str(here / "task-fingerprints.py")],
-        capture_output=True, text=True, check=True,
-    ).stdout
-    return json.loads(output)
 
 
 def modified_dates() -> dict[str, str]:
@@ -89,8 +72,6 @@ def main() -> int:
         print("error: no scored tasks found", file=sys.stderr)
         return 1
 
-    current = load_fingerprints()
-
     # Picking the newest report outright would compare a model against another
     # model's run and report every task as new. The default is the newest report
     # that actually scored *this* model.
@@ -118,36 +99,32 @@ def main() -> int:
     # When each task was last run for this model. A run id starts with its UTC
     # timestamp, so the date is the first ten characters.
     last_run: dict[str, str] = {}
-    scored_before: dict[str, str] = {}
+    scored_before: set[str] = set()
     if report_path and report_path.exists():
         print(f"comparing against {report_path.name}", file=sys.stderr)
         report = json.loads(report_path.read_text())
-        recorded = report.get("task_fingerprints") or {}
         for run in report.get("runs", []):
             if run.get("agent", {}).get("model") != args.model:
                 continue
             task = run.get("task")
             # No recorded fingerprint means the report predates them. Treat the
             # task as unchanged so adopting this does not re-run everything.
-            scored_before[task] = recorded.get(task, current.get(task, ""))
+            scored_before.add(task)
             when = str(run.get("run_id", ""))[:10]
             if when and when > last_run.get(task, ""):
                 last_run[task] = when
 
     new = sorted(t for t in scored if t not in scored_before)
-    # A task with a `modified:` date is compared on dates: it needs re-running
-    # when it changed after it was last run. One without falls back to the
-    # content fingerprint, so an unstamped task is still covered.
+    # A task states when it was created or last updated. It needs running again
+    # when that date is newer than the day this model last ran it. A task with
+    # no date has not been touched since it was written, so it is not changed.
     modified = modified_dates()
-    changed = []
-    for task in sorted(scored):
-        if task not in scored_before:
-            continue
-        if task in modified:
-            if modified[task] > last_run.get(task, ""):
-                changed.append(task)
-        elif current.get(task, "") != scored_before[task]:
-            changed.append(task)
+    changed = [
+        task for task in sorted(scored)
+        if task in scored_before
+        and task in modified
+        and modified[task] > last_run.get(task, "")
+    ]
 
     wanted = {"both": new + changed, "new": new, "changed": changed}[args.mode]
     print(" ".join(sorted(set(wanted))))

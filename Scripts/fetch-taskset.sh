@@ -2,24 +2,20 @@
 # Puts the task set on disk at a stated revision, and prints where.
 #
 # Usage (sourced or executed):
-#   ./Scripts/fetch-taskset.sh <repo-url> [ref] [dir]
+#   ./Scripts/fetch-taskset.sh <repo-url> [dir]
 #
 # The clone lives inside the harness, never the other way round: nothing the
 # harness generates is written back to the task set.
 #
-# The ref matters. A task set is fetched by URL alone only while everything
-# scored lives on the default branch, and the moment a suite is prepared on a
-# branch a run machine fetching by URL scores the wrong set — silently, because
-# the tasks it wanted simply are not there. Naming the revision is what makes a
-# run reproducible: the resolved commit is printed so it can be recorded.
+# Everything scored lives on the default branch, so there is nothing to name.
+# The resolved commit is printed so a run can record what it scored.
 set -euo pipefail
 
 repo="${1:-}"
-ref="${2:-}"
-dir="${3:-}"
+dir="${2:-}"
 
 if [ -z "$repo" ]; then
-    echo "usage: $0 <repo-url> [ref] [dir]" >&2
+    echo "usage: $0 <repo-url> [dir]" >&2
     exit 2
 fi
 
@@ -38,13 +34,6 @@ else
     fi
 fi
 
-if [ -n "$ref" ]; then
-    if ! git -C "$dir" checkout --quiet "$ref" 2>/dev/null \
-        && ! git -C "$dir" checkout --quiet -B "$ref" "origin/$ref" 2>/dev/null; then
-        echo "error: $repo has no ref '$ref'." >&2
-        exit 1
-    fi
-fi
 
 # Fast-forward only, and only when the checkout is on a branch: a task set that
 # has diverged locally is a different set, and silently merging it would score
@@ -60,5 +49,5 @@ if branch="$(git -C "$dir" symbolic-ref --quiet --short HEAD)"; then
 fi
 
 commit="$(git -C "$dir" rev-parse --short HEAD)"
-echo "Task set at ${ref:-$(git -C "$dir" rev-parse --abbrev-ref HEAD)} (${commit})" >&2
+echo "Task set at $(git -C "$dir" rev-parse --abbrev-ref HEAD) (${commit})" >&2
 echo "$dir"
