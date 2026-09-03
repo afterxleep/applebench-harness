@@ -1,0 +1,39 @@
+id: pending
+name: "Pending for minimax/MiniMax-M2.7"
+tasks:
+  - g2-a11y-001
+  - g2-a11y-002
+  - g2-flow-002
+  - g2-flow-003
+  - g2-lifecycle-002
+  - g2-locale-001
+  - g2-locale-002
+  - g2-locale-003
+  - g2-locale-004
+  - g2-order-001
+  - g2-order-002
+  - interaction-001
+  - interaction-002
+  - interaction-003
+  - interaction-004
+  - project-004
+  - project-005
+  - project-006
+  - ui-auto-001
+  - ui-auto-002
+  - ui-auto-003
+  - ui-auto-004
+  - ui-auto-005
+  - ui-auto-006
+  - ui-auto-007
+  - ui-auto-008
+  - ui-auto-009
+  - ui-auto-010
+  - ui-auto-011
+  - ui-auto-012
+  - ui-auto-014
+  - ui-auto-015
+  - ui-auto-016
+  - ui-auto-017
+  - ui-auto-018
+  - ui-auto-019

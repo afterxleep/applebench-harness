@@ -1,0 +1,6 @@
+Simulator Boot Confirmation
+============================
+UDID: DA3575D2-16D7-4330-B50D-0F1F16A1A486
+Device Name: Renamed iPhone 17
+Runtime: iOS 26.5
+State: Booted

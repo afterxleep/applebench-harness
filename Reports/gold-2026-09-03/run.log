@@ -1,0 +1,85 @@
+AppleBench · suite pending · 36 task(s) × 1 configuration(s) × 1 run(s)
+
+→ g2-a11y-001 · opencode
+  PASS · 2m 10s
+→ g2-a11y-002 · opencode
+  FAIL · 5m 42s
+→ g2-flow-002 · opencode
+  FAIL · 1m 55s
+→ g2-flow-003 · opencode
+  PASS · 1m 38s
+→ g2-lifecycle-002 · opencode
+  FAIL · 2m 54s
+→ g2-locale-001 · opencode
+  FAIL · 2m 53s
+→ g2-locale-002 · opencode
+  PASS · 3m 2s
+→ g2-locale-003 · opencode
+  PASS · 3m 14s
+→ g2-locale-004 · opencode
+  FAIL · 4m 44s
+→ g2-order-001 · opencode
+  PASS · 3m 8s
+→ g2-order-002 · opencode
+  FAIL · 2m 21s
+→ interaction-001 · opencode
+  PASS · 2m 51s
+→ interaction-002 · opencode
+  PASS · 2m 56s
+→ interaction-003 · opencode
+  PASS · 2m 30s
+→ interaction-004 · opencode
+  PASS · 5m 41s
+→ project-004 · opencode
+  FAIL · 9m 17s
+→ project-005 · opencode
+  PASS · 3m 20s
+→ project-006 · opencode
+  PASS · 1m 40s
+→ ui-auto-001 · opencode
+  PASS · 6m 46s
+→ ui-auto-002 · opencode
+  FAIL · 3m 31s
+→ ui-auto-003 · opencode
+  FAIL · 5m 25s
+→ ui-auto-004 · opencode
+  FAIL · 3m 1s
+→ ui-auto-005 · opencode
+  FAIL · 5m 24s
+→ ui-auto-006 · opencode
+  FAIL · 2m 25s
+→ ui-auto-007 · opencode
+  FAIL · 5m 53s
+→ ui-auto-008 · opencode
+  FAIL · 2m 3s
+→ ui-auto-009 · opencode
+  FAIL · 3m 48s
+→ ui-auto-010 · opencode
+  FAIL · 8m 41s
+→ ui-auto-011 · opencode
+  PASS · 5m 53s
+→ ui-auto-012 · opencode
+  FAIL · 1m 29s
+→ ui-auto-014 · opencode
+  FAIL · 2m 39s
+→ ui-auto-015 · opencode
+  PASS · 2m 14s
+→ ui-auto-016 · opencode
+  FAIL · 1m 51s
+→ ui-auto-017 · opencode
+  FAIL · 2m 28s
+→ ui-auto-018 · opencode
+  PASS · 3m 34s
+→ ui-auto-019 · opencode
+  FAIL · 1m 53s
+
+opencode · minimax/MiniMax-M2.7
+
+Tasks        36
+Passed       15
+Failed       21
+Completion   41.7%
+Median time  2m 58s
+Tokens       468373
+Cost         $1.0515
+Cost/solve   $0.0701
