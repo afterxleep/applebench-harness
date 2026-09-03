@@ -332,8 +332,14 @@ if [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" !=
         done
         echo
         echo "Publishing $slug from ${runs_dir}…"
+        # Latest, not first. `first` is the honest rule when the same task is
+        # attempted twice, because it stops a weak score being retried away.
+        # But a re-run here means the *task* changed, and the earlier attempt
+        # scored a version that no longer exists — keeping it would report a
+        # model against tasks it was never asked to solve, and would silently
+        # discard everything `--changed` just spent an hour running.
         "$root/Scripts/publish-report.sh" "$slug" "$runs_dir" gold \
-            --attempt first --model "$model" "${suite_args[@]+"${suite_args[@]}"}" \
+            --attempt latest --model "$model" "${suite_args[@]+"${suite_args[@]}"}" \
             || echo "note: publish failed; the run itself is intact in $out" >&2
     fi
 fi

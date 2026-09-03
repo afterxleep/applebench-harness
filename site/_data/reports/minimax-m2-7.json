@@ -1,5 +1,5 @@
 {
-  "attempt" : "first",
+  "attempt" : "latest",
   "categories" : [
     {
       "category" : "build",
@@ -37,13 +37,13 @@
     },
     {
       "category" : "interaction",
-      "completion_rate" : 0.4074074074074074,
-      "passed" : 11,
+      "completion_rate" : 0.37037037037037035,
+      "passed" : 10,
       "score" : {
         "available" : 1470,
-        "fraction_of_available" : 0.35778105365738294,
+        "fraction_of_available" : 0.3197278911564626,
         "minimum_efficiency" : 0.25,
-        "points" : 525.9381488763529,
+        "points" : 470,
         "reference_token_budget" : 50000,
         "scored_runs" : 27,
         "solves_with_unreported_tokens" : 0,
@@ -75,9 +75,9 @@
       "passed" : 3,
       "score" : {
         "available" : 170,
-        "fraction_of_available" : 0.579129843151731,
+        "fraction_of_available" : 0.7647058823529411,
         "minimum_efficiency" : 0.25,
-        "points" : 98.45207333579427,
+        "points" : 130,
         "reference_token_budget" : 50000,
         "scored_runs" : 4,
         "solves_with_unreported_tokens" : 0,
@@ -138,21 +138,21 @@
       "total" : 6
     }
   ],
-  "completion_rate" : 0.5970149253731343,
+  "completion_rate" : 0.5895522388059702,
   "configurations" : [
     {
       "agent" : "opencode",
-      "completion_rate" : 0.5970149253731343,
-      "cost_per_solved_task_usd" : 0.077838885375,
+      "completion_rate" : 0.5895522388059702,
+      "cost_per_solved_task_usd" : 0.0625452567721519,
       "label" : "opencode · minimax/MiniMax-M2.7",
-      "median_duration_seconds" : 95.591396,
+      "median_duration_seconds" : 98.136888833,
       "model" : "minimax/MiniMax-M2.7",
-      "passed" : 80,
+      "passed" : 79,
       "score" : {
         "available" : 6840,
-        "fraction_of_available" : 0.5381811307424615,
+        "fraction_of_available" : 0.5346153087816213,
         "minimum_efficiency" : 0.25,
-        "points" : 3681.1589342784373,
+        "points" : 3656.76871206629,
         "reference_token_budget" : 50000,
         "scored_runs" : 134,
         "solves_with_unreported_tokens" : 0,
@@ -160,11 +160,11 @@
         "unscored_runs" : 0
       },
       "total" : 134,
-      "total_cost_usd" : 6.22711083,
-      "total_tokens" : 1659273
+      "total_cost_usd" : 4.941075285,
+      "total_tokens" : 1555419
     }
   ],
-  "passed" : 80,
+  "passed" : 79,
   "runs" : [
     {
       "agent" : {
@@ -4168,14 +4168,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "9f2ecea35532355d1bd4c9d4833616f3b6806509",
+        "base_commit" : "b3520a60ecfc9c41389e90b34ff0260554fff21b",
         "deletions" : 2,
         "files_changed" : 2,
         "insertions" : 2
       },
       "graders" : [
         {
-          "duration_seconds" : 15.85822875,
+          "duration_seconds" : 15.026816834,
           "evidence" : [
             {
               "name" : "build.log",
@@ -4191,7 +4191,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'CartFixture'"
         },
         {
-          "duration_seconds" : 19.877117040999998,
+          "duration_seconds" : 22.942695458,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -4205,26 +4205,38 @@
           "name" : "xcuitest",
           "passed" : true,
           "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
+        },
+        {
+          "duration_seconds" : 46.743692375,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/CartView.swift: \".accessibilityIdentifier(\"cart-item-\\(index)\")\" → \".accessibilityIdentifier(\"cart-item-\\(index)-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 49.493812084198,
-        "agent_events" : 16,
-        "agent_output_bytes" : 23945,
-        "agent_output_chunks" : 16,
+        "agent_duration_seconds" : 59.64183700084686,
+        "agent_events" : 23,
+        "agent_output_bytes" : 38114,
+        "agent_output_chunks" : 23,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 62.901278018951416,
-        "test_invocations" : 1,
-        "tool_calls" : 6,
-        "total_events" : 58
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 111.01858794689178,
+        "test_invocations" : 2,
+        "tool_calls" : 8,
+        "total_events" : 77
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 112.700422375,
+        "duration_seconds" : 170.968588584,
         "passed" : true
       },
-      "run_id" : "2026-09-02T121109-interaction-001-opencode",
+      "run_id" : "2026-09-03T142116-interaction-001-opencode",
       "schema_version" : 1,
       "tags" : [
         "state",
@@ -4233,10 +4245,10 @@
       ],
       "task" : "interaction-001",
       "usage" : {
-        "estimated_cost_usd" : 0.005337855,
-        "input_tokens" : 1422,
-        "output_tokens" : 1066,
-        "total_tokens" : 2488
+        "estimated_cost_usd" : 0.00730524,
+        "input_tokens" : 2624,
+        "output_tokens" : 1358,
+        "total_tokens" : 3982
       }
     },
     {
@@ -4269,14 +4281,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "d46789d173705d18edc06d081382a136f9ae7ef3",
+        "base_commit" : "215f8c705697d070c69bdd1e1ddb8ec5abf86fa9",
         "deletions" : 1,
         "files_changed" : 1,
         "insertions" : 1
       },
       "graders" : [
         {
-          "duration_seconds" : 16.986109375,
+          "duration_seconds" : 17.301699125,
           "evidence" : [
             {
               "name" : "build.log",
@@ -4292,7 +4304,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'SearchFixture'"
         },
         {
-          "duration_seconds" : 35.370872,
+          "duration_seconds" : 34.526255708,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -4306,26 +4318,38 @@
           "name" : "xcuitest",
           "passed" : true,
           "summary" : "2 executed, 2 passed, 0 failed, 0 skipped"
+        },
+        {
+          "duration_seconds" : 74.19085075,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/PartsSearchView.swift: \".accessibilityIdentifier(\"result-\\(index)\")\" → \".accessibilityIdentifier(\"result-\\(index)-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 50.20960199832916,
-        "agent_events" : 13,
-        "agent_output_bytes" : 15623,
-        "agent_output_chunks" : 13,
+        "agent_duration_seconds" : 17.153246998786926,
+        "agent_events" : 16,
+        "agent_output_bytes" : 13308,
+        "agent_output_chunks" : 16,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 82.37194001674652,
-        "test_invocations" : 1,
-        "tool_calls" : 3,
-        "total_events" : 51
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 158.19654500484467,
+        "test_invocations" : 2,
+        "tool_calls" : 4,
+        "total_events" : 62
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 132.926017792,
+        "duration_seconds" : 175.797318625,
         "passed" : true
       },
-      "run_id" : "2026-09-02T121307-interaction-002-opencode",
+      "run_id" : "2026-09-03T142409-interaction-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "search",
@@ -4334,10 +4358,10 @@
       ],
       "task" : "interaction-002",
       "usage" : {
-        "estimated_cost_usd" : 0.004417035,
-        "input_tokens" : 984,
-        "output_tokens" : 670,
-        "total_tokens" : 1654
+        "estimated_cost_usd" : 0.00413895,
+        "input_tokens" : 284,
+        "output_tokens" : 585,
+        "total_tokens" : 869
       }
     },
     {
@@ -4370,14 +4394,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "68107b13f01748d2e278d4a1682884bf4838a9d9",
+        "base_commit" : "25e686ece5f7b8d1cb5d525ea8b8247bf3b67244",
         "deletions" : 0,
         "files_changed" : 1,
         "insertions" : 1
       },
       "graders" : [
         {
-          "duration_seconds" : 16.126401,
+          "duration_seconds" : 11.770721208,
           "evidence" : [
             {
               "name" : "build.log",
@@ -4393,7 +4417,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'RefreshFixture'"
         },
         {
-          "duration_seconds" : 24.8372335,
+          "duration_seconds" : 26.865431625,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -4407,26 +4431,38 @@
           "name" : "xcuitest",
           "passed" : true,
           "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
+        },
+        {
+          "duration_seconds" : 30.359281209,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/ReportView.swift: \".accessibilityIdentifier(\"row-\\(index)\")\" → \".accessibilityIdentifier(\"row-\\(index)-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 163.96581399440765,
-        "agent_events" : 32,
-        "agent_output_bytes" : 36789,
-        "agent_output_chunks" : 32,
+        "agent_duration_seconds" : 46.18221700191498,
+        "agent_events" : 15,
+        "agent_output_bytes" : 19581,
+        "agent_output_chunks" : 15,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 70.43606507778168,
-        "test_invocations" : 1,
-        "tool_calls" : 9,
-        "total_events" : 89
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 103.30776703357697,
+        "test_invocations" : 2,
+        "tool_calls" : 5,
+        "total_events" : 60
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 234.790247042,
+        "duration_seconds" : 149.818452083,
         "passed" : true
       },
-      "run_id" : "2026-09-02T121524-interaction-003-opencode",
+      "run_id" : "2026-09-03T142708-interaction-003-opencode",
       "schema_version" : 1,
       "tags" : [
         "async",
@@ -4435,10 +4471,10 @@
       ],
       "task" : "interaction-003",
       "usage" : {
-        "estimated_cost_usd" : 0.010890150000000001,
-        "input_tokens" : 1939,
-        "output_tokens" : 1849,
-        "total_tokens" : 3788
+        "estimated_cost_usd" : 0.00556773,
+        "input_tokens" : 1015,
+        "output_tokens" : 1382,
+        "total_tokens" : 2397
       }
     },
     {
@@ -4471,14 +4507,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "5bf3166ae8f657acc861e6e641a453a7c1fa689c",
-        "deletions" : 1,
+        "base_commit" : "7462cef63411084ee437accf5fca68729897839d",
+        "deletions" : 0,
         "files_changed" : 1,
-        "insertions" : 7
+        "insertions" : 9
       },
       "graders" : [
         {
-          "duration_seconds" : 12.139384666,
+          "duration_seconds" : 11.4630225,
           "evidence" : [
             {
               "name" : "build.log",
@@ -4494,7 +4530,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
         },
         {
-          "duration_seconds" : 32.394249042,
+          "duration_seconds" : 29.998666125,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -4508,26 +4544,38 @@
           "name" : "xcuitest",
           "passed" : true,
           "summary" : "2 executed, 2 passed, 0 failed, 0 skipped"
+        },
+        {
+          "duration_seconds" : 60.149505541,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/EnrolmentFlowView.swift: \".accessibilityIdentifier(\"full-name\")\" → \".accessibilityIdentifier(\"full-name-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 188.66447401046753,
-        "agent_events" : 25,
-        "agent_output_bytes" : 40434,
-        "agent_output_chunks" : 25,
+        "agent_duration_seconds" : 214.70671999454498,
+        "agent_events" : 32,
+        "agent_output_bytes" : 48670,
+        "agent_output_chunks" : 32,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 67.99087297916412,
-        "test_invocations" : 1,
-        "tool_calls" : 8,
-        "total_events" : 75
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 125.63173806667328,
+        "test_invocations" : 2,
+        "tool_calls" : 10,
+        "total_events" : 94
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 256.978547083,
+        "duration_seconds" : 340.735701834,
         "passed" : true
       },
-      "run_id" : "2026-09-02T121923-interaction-004-opencode",
+      "run_id" : "2026-09-03T142942-interaction-004-opencode",
       "schema_version" : 1,
       "tags" : [
         "forms",
@@ -4536,10 +4584,10 @@
       ],
       "task" : "interaction-004",
       "usage" : {
-        "estimated_cost_usd" : 0.010120379999999998,
-        "input_tokens" : 2286,
-        "output_tokens" : 2345,
-        "total_tokens" : 4631
+        "estimated_cost_usd" : 0.013386765000000002,
+        "input_tokens" : 2464,
+        "output_tokens" : 3140,
+        "total_tokens" : 5604
       }
     },
     {
@@ -8344,14 +8392,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "c76e08f1a7ccbe6a25b83fdf0228f5465264d129",
+        "base_commit" : "38f8673c9762da8ccf0dfb8d49421a11f2db3308",
         "deletions" : 0,
-        "files_changed" : 2,
-        "insertions" : 29
+        "files_changed" : 548,
+        "insertions" : 5922
       },
       "graders" : [
         {
-          "duration_seconds" : 5.290237792,
+          "duration_seconds" : 11.447885709,
           "evidence" : [
             {
               "name" : "build.log",
@@ -8367,7 +8415,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'SchemeFixture'"
         },
         {
-          "duration_seconds" : 11.072764542,
+          "duration_seconds" : 1.421458833,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -8379,28 +8427,40 @@
             }
           ],
           "name" : "xctest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+        },
+        {
+          "duration_seconds" : 0.947700334,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
           "passed" : true,
-          "summary" : "3 executed, 3 passed, 0 failed, 0 skipped"
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/TariffCalculator.swift: \"static let unitRate = 0.31\" → \"static let unitRate = 0.0\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 143.61079001426697,
-        "agent_events" : 33,
-        "agent_output_bytes" : 159675,
-        "agent_output_chunks" : 34,
+        "agent_duration_seconds" : 516.4744510650635,
+        "agent_events" : 93,
+        "agent_output_bytes" : 392076,
+        "agent_output_chunks" : 95,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 16.570863962173462,
-        "test_invocations" : 1,
-        "tool_calls" : 11,
-        "total_events" : 93
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 36.43271601200104,
+        "test_invocations" : 2,
+        "tool_calls" : 29,
+        "total_events" : 765
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 160.432597333,
-        "passed" : true
+        "duration_seconds" : 556.969382166,
+        "passed" : false
       },
-      "run_id" : "2026-09-02T140210-project-004-opencode",
+      "run_id" : "2026-09-03T143527-project-004-opencode",
       "schema_version" : 1,
       "tags" : [
         "scheme",
@@ -8409,10 +8469,10 @@
       ],
       "task" : "project-004",
       "usage" : {
-        "estimated_cost_usd" : 0.022621035,
-        "input_tokens" : 21336,
-        "output_tokens" : 3886,
-        "total_tokens" : 25222
+        "estimated_cost_usd" : 0.08418444,
+        "input_tokens" : 49884,
+        "output_tokens" : 7665,
+        "total_tokens" : 57549
       }
     },
     {
@@ -8445,14 +8505,23 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "562ac04a047fb4a28aa7213fdd4fad16437f01c1",
-        "deletions" : 1,
-        "files_changed" : 1285,
-        "insertions" : 1782
+        "base_commit" : "247a6954b7021765bf0a268fdcde1fbcb7bd8027",
+        "deletions" : 0,
+        "files_changed" : 1,
+        "insertions" : 30
       },
       "graders" : [
         {
-          "duration_seconds" : 6.955570542,
+          "duration_seconds" : 6.8875e-05,
+          "evidence" : [
+
+          ],
+          "name" : "file",
+          "passed" : true,
+          "summary" : "1 file assertion(s) satisfied"
+        },
+        {
+          "duration_seconds" : 6.773129166,
           "evidence" : [
             {
               "name" : "build.log",
@@ -8469,23 +8538,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 648.6864130496979,
-        "agent_events" : 352,
-        "agent_output_bytes" : 581363,
-        "agent_output_chunks" : 352,
+        "agent_duration_seconds" : 192.5520269870758,
+        "agent_events" : 138,
+        "agent_output_bytes" : 311759,
+        "agent_output_chunks" : 138,
         "build_invocations" : 1,
         "commands_executed" : 2,
-        "grading_duration_seconds" : 7.157747983932495,
+        "grading_duration_seconds" : 7.093590021133423,
         "test_invocations" : 0,
-        "tool_calls" : 103,
-        "total_events" : 2006
+        "tool_calls" : 45,
+        "total_events" : 296
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 657.913776416,
+        "duration_seconds" : 199.944615583,
         "passed" : true
       },
-      "run_id" : "2026-09-02T140451-project-005-opencode",
+      "run_id" : "2026-09-03T144449-project-005-opencode",
       "schema_version" : 1,
       "tags" : [
         "spm",
@@ -8494,10 +8563,10 @@
       ],
       "task" : "project-005",
       "usage" : {
-        "estimated_cost_usd" : 0.40271661000000003,
-        "input_tokens" : 33629,
-        "output_tokens" : 31387,
-        "total_tokens" : 65016
+        "estimated_cost_usd" : 0.10047672,
+        "input_tokens" : 25517,
+        "output_tokens" : 10519,
+        "total_tokens" : 36036
       }
     },
     {
@@ -8530,14 +8599,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "4c01a3fca23c9b2d749c631e332061ec2d1d3142",
+        "base_commit" : "2fd68353b3f3eb27482d4a701d22ea1215907f0e",
         "deletions" : 0,
-        "files_changed" : 0,
-        "insertions" : 0
+        "files_changed" : 1,
+        "insertions" : 67
       },
       "graders" : [
         {
-          "duration_seconds" : 1.781242417,
+          "duration_seconds" : 11.525462916,
           "evidence" : [
             {
               "name" : "build.log",
@@ -8549,11 +8618,11 @@
             }
           ],
           "name" : "build",
-          "passed" : false,
-          "summary" : "xcodebuild build failed (exit 65) for scheme 'MultiTargetFixture'"
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'MultiTargetFixture'"
         },
         {
-          "duration_seconds" : 1.934856084,
+          "duration_seconds" : 8.764787125,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -8565,28 +8634,40 @@
             }
           ],
           "name" : "xctest",
-          "passed" : false,
-          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+          "passed" : true,
+          "summary" : "2 executed, 2 passed, 0 failed, 0 skipped"
+        },
+        {
+          "duration_seconds" : 17.931843416,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Core/Counter.swift: \"public static let startingValue: Int = 0\" → \"public static let startingValue: Int = 99\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 63.85798501968384,
-        "agent_events" : 56,
-        "agent_output_bytes" : 113295,
-        "agent_output_chunks" : 56,
+        "agent_duration_seconds" : 39.27547299861908,
+        "agent_events" : 36,
+        "agent_output_bytes" : 25514,
+        "agent_output_chunks" : 36,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 3.8734540939331055,
-        "test_invocations" : 2,
-        "tool_calls" : 22,
-        "total_events" : 136
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 60.44705605506897,
+        "test_invocations" : 3,
+        "tool_calls" : 12,
+        "total_events" : 102
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 67.975967584,
-        "passed" : false
+        "duration_seconds" : 99.965852,
+        "passed" : true
       },
-      "run_id" : "2026-09-02T141550-project-006-opencode",
+      "run_id" : "2026-09-03T144809-project-006-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcode-project",
@@ -8596,10 +8677,10 @@
       ],
       "task" : "project-006",
       "usage" : {
-        "estimated_cost_usd" : 0.024536115,
-        "input_tokens" : 9705,
-        "output_tokens" : 3012,
-        "total_tokens" : 12717
+        "estimated_cost_usd" : 0.010301625,
+        "input_tokens" : 368,
+        "output_tokens" : 2165,
+        "total_tokens" : 2533
       }
     },
     {
@@ -11253,14 +11334,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "d31c18b438bb2e009b6832c154e9be3216674305",
-        "deletions" : 27,
+        "base_commit" : "9cacd4632d701f9e769a65f3fbf8c80941a28990",
+        "deletions" : 26,
         "files_changed" : 4,
-        "insertions" : 180
+        "insertions" : 168
       },
       "graders" : [
         {
-          "duration_seconds" : 16.9078015,
+          "duration_seconds" : 10.030406125,
           "evidence" : [
             {
               "name" : "build.log",
@@ -11276,7 +11357,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'CounterFixture'"
         },
         {
-          "duration_seconds" : 15.30423325,
+          "duration_seconds" : 19.278992208,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -11288,28 +11369,40 @@
             }
           ],
           "name" : "xcuitest",
-          "passed" : false,
-          "summary" : "2 executed, 0 passed, 2 failed, 0 skipped — failing: CounterFixtureUITests/testCounterIncrement(), CounterFixtureUITests/testLaunchPerformance()"
+          "passed" : true,
+          "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
+        },
+        {
+          "duration_seconds" : 28.593868958,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/CounterFixtureApp.swift: \".accessibilityIdentifier(\"counter-value\")\" → \".accessibilityIdentifier(\"counter-value-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 1441.0504729747772,
-        "agent_events" : 555,
-        "agent_output_bytes" : 1161330,
-        "agent_output_chunks" : 555,
+        "agent_duration_seconds" : 325.2508339881897,
+        "agent_events" : 143,
+        "agent_output_bytes" : 335057,
+        "agent_output_chunks" : 143,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 69.53986704349518,
-        "test_invocations" : 1,
-        "tool_calls" : 182,
-        "total_events" : 1138
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 80.68839406967163,
+        "test_invocations" : 2,
+        "tool_calls" : 48,
+        "total_events" : 319
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 1510.883776917,
-        "passed" : false
+        "duration_seconds" : 406.276748875,
+        "passed" : true
       },
-      "run_id" : "2026-09-02T143727-ui-auto-001-opencode",
+      "run_id" : "2026-09-03T144954-ui-auto-001-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -11319,10 +11412,10 @@
       ],
       "task" : "ui-auto-001",
       "usage" : {
-        "estimated_cost_usd" : 1.1115119100000002,
-        "input_tokens" : 41296,
-        "output_tokens" : 72032,
-        "total_tokens" : 113328
+        "estimated_cost_usd" : 0.12379649999999999,
+        "input_tokens" : 18538,
+        "output_tokens" : 17290,
+        "total_tokens" : 35828
       }
     },
     {
@@ -11355,14 +11448,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "5bf3166ae8f657acc861e6e641a453a7c1fa689c",
-        "deletions" : 5,
+        "base_commit" : "7462cef63411084ee437accf5fca68729897839d",
+        "deletions" : 6,
         "files_changed" : 3,
-        "insertions" : 74
+        "insertions" : 79
       },
       "graders" : [
         {
-          "duration_seconds" : 11.7926665,
+          "duration_seconds" : 11.814777291,
           "evidence" : [
             {
               "name" : "build.log",
@@ -11378,7 +11471,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
         },
         {
-          "duration_seconds" : 24.637965042,
+          "duration_seconds" : 3.759783209,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -11390,28 +11483,40 @@
             }
           ],
           "name" : "xcuitest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+        },
+        {
+          "duration_seconds" : 2.8524825419999997,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
           "passed" : true,
-          "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/EnrolmentFlowView.swift: \".accessibilityIdentifier(\"full-name\")\" → \".accessibilityIdentifier(\"full-name-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 327.2356780767441,
-        "agent_events" : 68,
-        "agent_output_bytes" : 256168,
-        "agent_output_chunks" : 68,
+        "agent_duration_seconds" : 169.2672699689865,
+        "agent_events" : 47,
+        "agent_output_bytes" : 93872,
+        "agent_output_chunks" : 47,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 59.29231798648834,
-        "test_invocations" : 2,
-        "tool_calls" : 21,
-        "total_events" : 163
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 41.49294602870941,
+        "test_invocations" : 3,
+        "tool_calls" : 15,
+        "total_events" : 126
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 386.800667875,
-        "passed" : true
+        "duration_seconds" : 211.111836875,
+        "passed" : false
       },
-      "run_id" : "2026-09-02T150242-ui-auto-002-opencode",
+      "run_id" : "2026-09-03T145642-ui-auto-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -11421,10 +11526,10 @@
       ],
       "task" : "ui-auto-002",
       "usage" : {
-        "estimated_cost_usd" : 0.062121344999999994,
-        "input_tokens" : 25857,
-        "output_tokens" : 7935,
-        "total_tokens" : 33792
+        "estimated_cost_usd" : 0.025450500000000004,
+        "input_tokens" : 3596,
+        "output_tokens" : 6065,
+        "total_tokens" : 9661
       }
     },
     {
@@ -11457,14 +11562,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "9f2ecea35532355d1bd4c9d4833616f3b6806509",
-        "deletions" : 18,
+        "base_commit" : "b3520a60ecfc9c41389e90b34ff0260554fff21b",
+        "deletions" : 0,
         "files_changed" : 1,
-        "insertions" : 7
+        "insertions" : 27
       },
       "graders" : [
         {
-          "duration_seconds" : 12.644306583,
+          "duration_seconds" : 10.325704708,
           "evidence" : [
             {
               "name" : "build.log",
@@ -11480,7 +11585,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'CartFixture'"
         },
         {
-          "duration_seconds" : 3.710828042,
+          "duration_seconds" : 37.359574583,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -11493,27 +11598,39 @@
           ],
           "name" : "xcuitest",
           "passed" : false,
-          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: CartFlowTests/testCartFlowEndToEnd()"
+        },
+        {
+          "duration_seconds" : 39.99107125,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/CartView.swift: \".accessibilityIdentifier(\"cart-item-\\(index)\")\" → \".accessibilityIdentifier(\"cart-item-\\(index)-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 110.37594199180603,
-        "agent_events" : 38,
-        "agent_output_bytes" : 103834,
-        "agent_output_chunks" : 38,
+        "agent_duration_seconds" : 212.5209139585495,
+        "agent_events" : 33,
+        "agent_output_bytes" : 106142,
+        "agent_output_chunks" : 33,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 38.76522898674011,
-        "test_invocations" : 2,
-        "tool_calls" : 13,
-        "total_events" : 101
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 111.77123701572418,
+        "test_invocations" : 3,
+        "tool_calls" : 12,
+        "total_events" : 96
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 149.488775875,
+        "duration_seconds" : 324.563712,
         "passed" : false
       },
-      "run_id" : "2026-09-02T150912-ui-auto-003-opencode",
+      "run_id" : "2026-09-03T150017-ui-auto-003-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -11523,10 +11640,10 @@
       ],
       "task" : "ui-auto-003",
       "usage" : {
-        "estimated_cost_usd" : 0.026208525,
-        "input_tokens" : 9219,
-        "output_tokens" : 5805,
-        "total_tokens" : 15024
+        "estimated_cost_usd" : 0.021875145,
+        "input_tokens" : 11476,
+        "output_tokens" : 3615,
+        "total_tokens" : 15091
       }
     },
     {
@@ -11559,14 +11676,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "d46789d173705d18edc06d081382a136f9ae7ef3",
-        "deletions" : 0,
-        "files_changed" : 1,
-        "insertions" : 24
+        "base_commit" : "215f8c705697d070c69bdd1e1ddb8ec5abf86fa9",
+        "deletions" : 1,
+        "files_changed" : 2,
+        "insertions" : 37
       },
       "graders" : [
         {
-          "duration_seconds" : 12.34220675,
+          "duration_seconds" : 11.370313542,
           "evidence" : [
             {
               "name" : "build.log",
@@ -11582,7 +11699,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'SearchFixture'"
         },
         {
-          "duration_seconds" : 17.810205708,
+          "duration_seconds" : 2.950671459,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -11595,27 +11712,39 @@
           ],
           "name" : "xcuitest",
           "passed" : false,
-          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: PartsSearchTests/testDeleteFirstRow()"
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+        },
+        {
+          "duration_seconds" : 2.262915083,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/PartsSearchView.swift: \".accessibilityIdentifier(\"result-\\(index)\")\" → \".accessibilityIdentifier(\"result-\\(index)-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 58.59456789493561,
-        "agent_events" : 23,
-        "agent_output_bytes" : 44605,
-        "agent_output_chunks" : 23,
+        "agent_duration_seconds" : 141.20230901241302,
+        "agent_events" : 31,
+        "agent_output_bytes" : 113986,
+        "agent_output_chunks" : 31,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 52.38542306423187,
-        "test_invocations" : 2,
-        "tool_calls" : 7,
-        "total_events" : 71
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 39.36348593235016,
+        "test_invocations" : 3,
+        "tool_calls" : 9,
+        "total_events" : 93
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 111.276671083,
+        "duration_seconds" : 180.908952458,
         "passed" : false
       },
-      "run_id" : "2026-09-02T151146-ui-auto-004-opencode",
+      "run_id" : "2026-09-03T150546-ui-auto-004-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -11625,10 +11754,10 @@
       ],
       "task" : "ui-auto-004",
       "usage" : {
-        "estimated_cost_usd" : 0.01040607,
-        "input_tokens" : 2967,
-        "output_tokens" : 2265,
-        "total_tokens" : 5232
+        "estimated_cost_usd" : 0.02029425,
+        "input_tokens" : 12258,
+        "output_tokens" : 3283,
+        "total_tokens" : 15541
       }
     },
     {
@@ -11661,14 +11790,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "20e1ecc2ffd6f24502d70d7644ff1d150f374404",
-        "deletions" : 0,
-        "files_changed" : 3,
-        "insertions" : 89
+        "base_commit" : "30affc0c520ea7c08c5701697c1fbd7f35f3fbfe",
+        "deletions" : 1,
+        "files_changed" : 4,
+        "insertions" : 66
       },
       "graders" : [
         {
-          "duration_seconds" : 12.932659625,
+          "duration_seconds" : 11.337315958,
           "evidence" : [
             {
               "name" : "build.log",
@@ -11684,7 +11813,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'TruncationFixture'"
         },
         {
-          "duration_seconds" : 3.2305945,
+          "duration_seconds" : 39.653895334,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -11697,27 +11826,39 @@
           ],
           "name" : "xcuitest",
           "passed" : false,
-          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: ScrollTapTests/testScrollToElementAndTap()"
+        },
+        {
+          "duration_seconds" : 46.484003834,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/ConsentView.swift: \".accessibilityIdentifier(\"disclaimer\")\" → \".accessibilityIdentifier(\"disclaimer-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 164.97740292549133,
-        "agent_events" : 43,
-        "agent_output_bytes" : 112207,
-        "agent_output_chunks" : 43,
+        "agent_duration_seconds" : 204.52207899093628,
+        "agent_events" : 100,
+        "agent_output_bytes" : 204996,
+        "agent_output_chunks" : 100,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 39.03857207298279,
-        "test_invocations" : 2,
-        "tool_calls" : 15,
-        "total_events" : 113
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 119.32528603076935,
+        "test_invocations" : 3,
+        "tool_calls" : 35,
+        "total_events" : 233
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 204.371921,
+        "duration_seconds" : 324.191878417,
         "passed" : false
       },
-      "run_id" : "2026-09-02T151341-ui-auto-005-opencode",
+      "run_id" : "2026-09-03T150851-ui-auto-005-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -11727,10 +11868,10 @@
       ],
       "task" : "ui-auto-005",
       "usage" : {
-        "estimated_cost_usd" : 0.031285845,
-        "input_tokens" : 8558,
-        "output_tokens" : 6184,
-        "total_tokens" : 14742
+        "estimated_cost_usd" : 0.06882640500000001,
+        "input_tokens" : 14025,
+        "output_tokens" : 10056,
+        "total_tokens" : 24081
       }
     },
     {
@@ -11763,14 +11904,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "68107b13f01748d2e278d4a1682884bf4838a9d9",
+        "base_commit" : "25e686ece5f7b8d1cb5d525ea8b8247bf3b67244",
         "deletions" : 0,
-        "files_changed" : 3,
-        "insertions" : 32
+        "files_changed" : 4,
+        "insertions" : 40
       },
       "graders" : [
         {
-          "duration_seconds" : 10.862698584,
+          "duration_seconds" : 10.744508875,
           "evidence" : [
             {
               "name" : "build.log",
@@ -11782,11 +11923,11 @@
             }
           ],
           "name" : "build",
-          "passed" : false,
-          "summary" : "xcodebuild build failed (exit 65) for scheme 'RefreshFixture'"
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'RefreshFixture'"
         },
         {
-          "duration_seconds" : 3.7547356670000003,
+          "duration_seconds" : 3.292674208,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -11800,26 +11941,38 @@
           "name" : "xcuitest",
           "passed" : false,
           "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+        },
+        {
+          "duration_seconds" : 2.520661167,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/ReportView.swift: \".accessibilityIdentifier(\"row-\\(index)\")\" → \".accessibilityIdentifier(\"row-\\(index)-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 76.83571994304657,
-        "agent_events" : 62,
-        "agent_output_bytes" : 123651,
-        "agent_output_chunks" : 62,
+        "agent_duration_seconds" : 105.0032809972763,
+        "agent_events" : 65,
+        "agent_output_bytes" : 128930,
+        "agent_output_chunks" : 65,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 38.49175500869751,
-        "test_invocations" : 1,
-        "tool_calls" : 24,
-        "total_events" : 151
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 39.74143695831299,
+        "test_invocations" : 2,
+        "tool_calls" : 23,
+        "total_events" : 163
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 115.646341375,
+        "duration_seconds" : 145.092689958,
         "passed" : false
       },
-      "run_id" : "2026-09-02T151710-ui-auto-006-opencode",
+      "run_id" : "2026-09-03T151417-ui-auto-006-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -11830,10 +11983,10 @@
       ],
       "task" : "ui-auto-006",
       "usage" : {
-        "estimated_cost_usd" : 0.036038295000000005,
-        "input_tokens" : 8342,
-        "output_tokens" : 5928,
-        "total_tokens" : 14270
+        "estimated_cost_usd" : 0.03715639500000001,
+        "input_tokens" : 8597,
+        "output_tokens" : 6344,
+        "total_tokens" : 14941
       }
     },
     {
@@ -11866,14 +12019,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "370686a49923398daac33358bbd42b9543cc1481",
-        "deletions" : 14,
+        "base_commit" : "392f2dcad4136ed038d975489850b11725044c7d",
+        "deletions" : 10,
         "files_changed" : 5,
-        "insertions" : 121
+        "insertions" : 93
       },
       "graders" : [
         {
-          "duration_seconds" : 1.45751875,
+          "duration_seconds" : 11.878276,
           "evidence" : [
             {
               "name" : "build.log",
@@ -11885,11 +12038,11 @@
             }
           ],
           "name" : "build",
-          "passed" : false,
-          "summary" : "xcodebuild build failed (exit 74) for scheme 'NavigationFixture'"
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'NavigationFixture'"
         },
         {
-          "duration_seconds" : 1.7982191250000001,
+          "duration_seconds" : 4.791413917,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -11902,27 +12055,39 @@
           ],
           "name" : "xcuitest",
           "passed" : false,
-          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: The test runner encountered an error"
+        },
+        {
+          "duration_seconds" : 17.222223,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/SettingsView.swift: \"navigationTitle(\"Settings\")\" → \"navigationTitle(\"Settings-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 172.3213940858841,
-        "agent_events" : 81,
-        "agent_output_bytes" : 168257,
-        "agent_output_chunks" : 81,
+        "agent_duration_seconds" : 295.1756180524826,
+        "agent_events" : 110,
+        "agent_output_bytes" : 287602,
+        "agent_output_chunks" : 111,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 25.661375999450684,
-        "test_invocations" : 2,
-        "tool_calls" : 30,
-        "total_events" : 191
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 57.53687298297882,
+        "test_invocations" : 3,
+        "tool_calls" : 40,
+        "total_events" : 255
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 198.292879167,
+        "duration_seconds" : 353.026131291,
         "passed" : false
       },
-      "run_id" : "2026-09-02T151910-ui-auto-007-opencode",
+      "run_id" : "2026-09-03T151646-ui-auto-007-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -11932,10 +12097,10 @@
       ],
       "task" : "ui-auto-007",
       "usage" : {
-        "estimated_cost_usd" : 0.06019006500000001,
-        "input_tokens" : 8619,
-        "output_tokens" : 12494,
-        "total_tokens" : 21113
+        "estimated_cost_usd" : 0.09267199500000002,
+        "input_tokens" : 23660,
+        "output_tokens" : 14110,
+        "total_tokens" : 37770
       }
     },
     {
@@ -11968,14 +12133,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "008baf8df38d4987e73000aaa51efe4f2af3d4df",
+        "base_commit" : "4aa58c98e54e45e1d0baa9745cf15ba1d8f3f73d",
         "deletions" : 0,
-        "files_changed" : 2,
-        "insertions" : 66
+        "files_changed" : 1,
+        "insertions" : 46
       },
       "graders" : [
         {
-          "duration_seconds" : 11.881707958,
+          "duration_seconds" : 12.416918542,
           "evidence" : [
             {
               "name" : "build.log",
@@ -11991,7 +12156,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'AdaptiveLayoutFixture'"
         },
         {
-          "duration_seconds" : 21.34423125,
+          "duration_seconds" : 13.146109125,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -12004,27 +12169,39 @@
           ],
           "name" : "xcuitest",
           "passed" : false,
-          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: AdaptiveLayoutTests/testAdaptiveLayoutPortraitToLandscapeToPortrait()"
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+        },
+        {
+          "duration_seconds" : 6.844951875,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : false,
+          "summary" : "The tests still passed with the app broken (Sources/JobDetailView.swift: \".accessibilityIdentifier(\"start\")\" → \".accessibilityIdentifier(\"start-mutated\")\"), so they do not assert the behaviour the task asked for"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 235.69233798980713,
-        "agent_events" : 56,
-        "agent_output_bytes" : 143547,
-        "agent_output_chunks" : 56,
+        "agent_duration_seconds" : 65.67498004436493,
+        "agent_events" : 28,
+        "agent_output_bytes" : 40534,
+        "agent_output_chunks" : 28,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 56.34131097793579,
-        "test_invocations" : 1,
-        "tool_calls" : 17,
-        "total_events" : 138
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 57.462465047836304,
+        "test_invocations" : 2,
+        "tool_calls" : 9,
+        "total_events" : 86
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 292.2463985,
+        "duration_seconds" : 123.490677334,
         "passed" : false
       },
-      "run_id" : "2026-09-02T152232-ui-auto-008-opencode",
+      "run_id" : "2026-09-03T152243-ui-auto-008-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -12035,10 +12212,10 @@
       ],
       "task" : "ui-auto-008",
       "usage" : {
-        "estimated_cost_usd" : 0.038370930000000004,
-        "input_tokens" : 12458,
-        "output_tokens" : 6714,
-        "total_tokens" : 19172
+        "estimated_cost_usd" : 0.011522295,
+        "input_tokens" : 2898,
+        "output_tokens" : 2504,
+        "total_tokens" : 5402
       }
     },
     {
@@ -12071,14 +12248,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "d1e6a77e55eece0efadb1391a8ea64806c607ea0",
+        "base_commit" : "ce5743681963237e3349a1e7696110d33c850b20",
         "deletions" : 0,
-        "files_changed" : 4,
-        "insertions" : 230
+        "files_changed" : 3,
+        "insertions" : 348
       },
       "graders" : [
         {
-          "duration_seconds" : 11.995107416,
+          "duration_seconds" : 15.988636833,
           "evidence" : [
             {
               "name" : "build.log",
@@ -12094,7 +12271,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'GestureFixture'"
         },
         {
-          "duration_seconds" : 22.399625916,
+          "duration_seconds" : 30.038471167,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -12107,27 +12284,39 @@
           ],
           "name" : "xcuitest",
           "passed" : false,
-          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: GestureFixtureUITests/testPinchToZoomOutChangesPixels()"
+          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: GestureFixtureUITests/testPinchToZoomOut()"
+        },
+        {
+          "duration_seconds" : 50.640409208,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/GestureFixtureApp.swift: \".accessibilityIdentifier(\"recorded-gestures\")\" → \".accessibilityIdentifier(\"recorded-gestures-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 120.08106398582458,
-        "agent_events" : 87,
-        "agent_output_bytes" : 179921,
-        "agent_output_chunks" : 87,
+        "agent_duration_seconds" : 100.52831697463989,
+        "agent_events" : 49,
+        "agent_output_bytes" : 93979,
+        "agent_output_chunks" : 49,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 56.46975302696228,
-        "test_invocations" : 2,
-        "tool_calls" : 29,
-        "total_events" : 202
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 126.8643729686737,
+        "test_invocations" : 3,
+        "tool_calls" : 19,
+        "total_events" : 130
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 176.908646709,
+        "duration_seconds" : 227.742926083,
         "passed" : false
       },
-      "run_id" : "2026-09-02T152728-ui-auto-009-opencode",
+      "run_id" : "2026-09-03T152451-ui-auto-009-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -12138,10 +12327,10 @@
       ],
       "task" : "ui-auto-009",
       "usage" : {
-        "estimated_cost_usd" : 0.055094325000000006,
-        "input_tokens" : 11002,
-        "output_tokens" : 9837,
-        "total_tokens" : 20839
+        "estimated_cost_usd" : 0.03556743,
+        "input_tokens" : 5227,
+        "output_tokens" : 9895,
+        "total_tokens" : 15122
       }
     },
     {
@@ -12174,14 +12363,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "d46789d173705d18edc06d081382a136f9ae7ef3",
-        "deletions" : 4,
-        "files_changed" : 2,
-        "insertions" : 33
+        "base_commit" : "215f8c705697d070c69bdd1e1ddb8ec5abf86fa9",
+        "deletions" : 2,
+        "files_changed" : 331,
+        "insertions" : 5346
       },
       "graders" : [
         {
-          "duration_seconds" : 12.288067834,
+          "duration_seconds" : 11.148486208,
           "evidence" : [
             {
               "name" : "build.log",
@@ -12197,7 +12386,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'SearchFixture'"
         },
         {
-          "duration_seconds" : 18.286248833,
+          "duration_seconds" : 72.94324375,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -12209,28 +12398,40 @@
             }
           ],
           "name" : "xcuitest",
+          "passed" : false,
+          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: SearchFixtureUITests/testLocationPermissionAlertHandledAndSearchWorks()"
+        },
+        {
+          "duration_seconds" : 74.286632,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
           "passed" : true,
-          "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/PartsSearchView.swift: \".accessibilityIdentifier(\"result-\\(index)\")\" → \".accessibilityIdentifier(\"result-\\(index)-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 97.6515280008316,
-        "agent_events" : 37,
-        "agent_output_bytes" : 105551,
-        "agent_output_chunks" : 37,
+        "agent_duration_seconds" : 336.63486194610596,
+        "agent_events" : 95,
+        "agent_output_bytes" : 293374,
+        "agent_output_chunks" : 95,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 52.770995020866394,
-        "test_invocations" : 1,
-        "tool_calls" : 13,
-        "total_events" : 100
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 181.4512059688568,
+        "test_invocations" : 2,
+        "tool_calls" : 30,
+        "total_events" : 550
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 150.74268625,
-        "passed" : true
+        "duration_seconds" : 520.739801167,
+        "passed" : false
       },
-      "run_id" : "2026-09-02T153026-ui-auto-010-opencode",
+      "run_id" : "2026-09-03T152840-ui-auto-010-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -12241,10 +12442,10 @@
       ],
       "task" : "ui-auto-010",
       "usage" : {
-        "estimated_cost_usd" : 0.026609535000000007,
-        "input_tokens" : 9003,
-        "output_tokens" : 5187,
-        "total_tokens" : 14190
+        "estimated_cost_usd" : 0.09501219,
+        "input_tokens" : 26921,
+        "output_tokens" : 13466,
+        "total_tokens" : 40387
       }
     },
     {
@@ -12277,14 +12478,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "68107b13f01748d2e278d4a1682884bf4838a9d9",
-        "deletions" : 2,
+        "base_commit" : "25e686ece5f7b8d1cb5d525ea8b8247bf3b67244",
+        "deletions" : 0,
         "files_changed" : 4,
-        "insertions" : 42
+        "insertions" : 50
       },
       "graders" : [
         {
-          "duration_seconds" : 12.371427583,
+          "duration_seconds" : 11.854363666,
           "evidence" : [
             {
               "name" : "build.log",
@@ -12300,7 +12501,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'RefreshFixture'"
         },
         {
-          "duration_seconds" : 17.483336209,
+          "duration_seconds" : 20.099352208,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -12314,26 +12515,38 @@
           "name" : "xcuitest",
           "passed" : true,
           "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
+        },
+        {
+          "duration_seconds" : 32.296540042,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/ReportView.swift: \".accessibilityIdentifier(\"row-\\(index)\")\" → \".accessibilityIdentifier(\"row-\\(index)-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 113.92428803443909,
-        "agent_events" : 54,
-        "agent_output_bytes" : 131797,
-        "agent_output_chunks" : 54,
+        "agent_duration_seconds" : 265.24572598934174,
+        "agent_events" : 60,
+        "agent_output_bytes" : 155119,
+        "agent_output_chunks" : 60,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 51.85597205162048,
-        "test_invocations" : 2,
-        "tool_calls" : 20,
-        "total_events" : 136
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 87.11462497711182,
+        "test_invocations" : 3,
+        "tool_calls" : 21,
+        "total_events" : 153
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 166.13398225,
+        "duration_seconds" : 352.703229834,
         "passed" : true
       },
-      "run_id" : "2026-09-02T153301-ui-auto-011-opencode",
+      "run_id" : "2026-09-03T153723-ui-auto-011-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -12343,10 +12556,10 @@
       ],
       "task" : "ui-auto-011",
       "usage" : {
-        "estimated_cost_usd" : 0.037191765,
-        "input_tokens" : 10136,
-        "output_tokens" : 6744,
-        "total_tokens" : 16880
+        "estimated_cost_usd" : 0.038038050000000004,
+        "input_tokens" : 12544,
+        "output_tokens" : 6979,
+        "total_tokens" : 19523
       }
     },
     {
@@ -12379,14 +12592,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "d46789d173705d18edc06d081382a136f9ae7ef3",
+        "base_commit" : "215f8c705697d070c69bdd1e1ddb8ec5abf86fa9",
         "deletions" : 0,
-        "files_changed" : 2,
-        "insertions" : 26
+        "files_changed" : 1,
+        "insertions" : 14
       },
       "graders" : [
         {
-          "duration_seconds" : 12.188771667,
+          "duration_seconds" : 11.626469415999999,
           "evidence" : [
             {
               "name" : "build.log",
@@ -12402,419 +12615,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'SearchFixture'"
         },
         {
-          "duration_seconds" : 30.799482083,
-          "evidence" : [
-            {
-              "name" : "xcuitest.log",
-              "path" : "logs/xcuitest.log"
-            },
-            {
-              "name" : "xcuitest.xcresult",
-              "path" : "logs/xcuitest.xcresult"
-            }
-          ],
-          "name" : "xcuitest",
-          "passed" : false,
-          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: SearchFixtureUITests/testSearchFieldLocateAndSearch()"
-        }
-      ],
-      "metrics" : {
-        "agent_duration_seconds" : 71.80620801448822,
-        "agent_events" : 46,
-        "agent_output_bytes" : 108878,
-        "agent_output_chunks" : 46,
-        "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 64.91488695144653,
-        "test_invocations" : 2,
-        "tool_calls" : 19,
-        "total_events" : 118
-      },
-      "result" : {
-        "agent_termination" : "completed",
-        "duration_seconds" : 137.048967625,
-        "passed" : false
-      },
-      "run_id" : "2026-09-02T153551-ui-auto-012-opencode",
-      "schema_version" : 1,
-      "tags" : [
-        "xcuitest",
-        "ui-automation",
-        "predicate",
-        "wait",
-        "operational"
-      ],
-      "task" : "ui-auto-012",
-      "usage" : {
-        "estimated_cost_usd" : 0.027763649999999997,
-        "input_tokens" : 9607,
-        "output_tokens" : 5559,
-        "total_tokens" : 15166
-      }
-    },
-    {
-      "agent" : {
-        "agent" : "opencode",
-        "configuration" : {
-          "isolation" : "none (host process)",
-          "mode" : "run --format json --pure --auto",
-          "network" : "unrestricted (host egress; --vm denies it)",
-          "plugins" : "disabled (--pure)",
-          "user_config" : "ignored (OPENCODE_CONFIG)",
-          "web_access" : "disabled (webfetch denied)"
-        },
-        "model" : "minimax/MiniMax-M2.7",
-        "version" : "1.18.25"
-      },
-      "artifacts" : {
-        "diff" : "diff.patch",
-        "events" : "events.jsonl",
-        "logs" : "logs"
-      },
-      "category" : "interaction",
-      "difficulty" : 5,
-      "environment" : {
-        "architecture" : "arm64",
-        "macos" : "26.5.1",
-        "runtime" : "iOS 26.5",
-        "simulator" : "iPhone 17",
-        "xcode" : "26.6",
-        "xcode_build" : "17F113"
-      },
-      "git" : {
-        "base_commit" : "5bf3166ae8f657acc861e6e641a453a7c1fa689c",
-        "deletions" : 0,
-        "files_changed" : 1,
-        "insertions" : 34
-      },
-      "graders" : [
-        {
-          "duration_seconds" : 12.175503667,
-          "evidence" : [
-            {
-              "name" : "build.log",
-              "path" : "logs/build.log"
-            },
-            {
-              "name" : "build.xcresult",
-              "path" : "logs/build.xcresult"
-            }
-          ],
-          "name" : "build",
-          "passed" : true,
-          "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
-        },
-        {
-          "duration_seconds" : 24.588267,
-          "evidence" : [
-            {
-              "name" : "xcuitest.log",
-              "path" : "logs/xcuitest.log"
-            },
-            {
-              "name" : "xcuitest.xcresult",
-              "path" : "logs/xcuitest.xcresult"
-            }
-          ],
-          "name" : "xcuitest",
-          "passed" : false,
-          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: EnrolmentFlowTests/testKeyboardDismissalPreservesFieldContents()"
-        }
-      ],
-      "metrics" : {
-        "agent_duration_seconds" : 32.085901975631714,
-        "agent_events" : 26,
-        "agent_output_bytes" : 83794,
-        "agent_output_chunks" : 26,
-        "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 58.835147976875305,
-        "test_invocations" : 2,
-        "tool_calls" : 11,
-        "total_events" : 77
-      },
-      "result" : {
-        "agent_termination" : "completed",
-        "duration_seconds" : 91.237030625,
-        "passed" : false
-      },
-      "run_id" : "2026-09-02T153812-ui-auto-014-opencode",
-      "schema_version" : 1,
-      "tags" : [
-        "xcuitest",
-        "ui-automation",
-        "keyboard",
-        "type",
-        "operational"
-      ],
-      "task" : "ui-auto-014",
-      "usage" : {
-        "estimated_cost_usd" : 0.013763580000000001,
-        "input_tokens" : 9132,
-        "output_tokens" : 1857,
-        "total_tokens" : 10989
-      }
-    },
-    {
-      "agent" : {
-        "agent" : "opencode",
-        "configuration" : {
-          "isolation" : "none (host process)",
-          "mode" : "run --format json --pure --auto",
-          "network" : "unrestricted (host egress; --vm denies it)",
-          "plugins" : "disabled (--pure)",
-          "user_config" : "ignored (OPENCODE_CONFIG)",
-          "web_access" : "disabled (webfetch denied)"
-        },
-        "model" : "minimax/MiniMax-M2.7",
-        "version" : "1.18.25"
-      },
-      "artifacts" : {
-        "diff" : "diff.patch",
-        "events" : "events.jsonl",
-        "logs" : "logs"
-      },
-      "category" : "interaction",
-      "difficulty" : 6,
-      "environment" : {
-        "architecture" : "arm64",
-        "macos" : "26.5.1",
-        "runtime" : "iOS 26.5",
-        "simulator" : "iPhone 17",
-        "xcode" : "26.6",
-        "xcode_build" : "17F113"
-      },
-      "git" : {
-        "base_commit" : "5bf3166ae8f657acc861e6e641a453a7c1fa689c",
-        "deletions" : 0,
-        "files_changed" : 1,
-        "insertions" : 20
-      },
-      "graders" : [
-        {
-          "duration_seconds" : 12.188915084,
-          "evidence" : [
-            {
-              "name" : "build.log",
-              "path" : "logs/build.log"
-            },
-            {
-              "name" : "build.xcresult",
-              "path" : "logs/build.xcresult"
-            }
-          ],
-          "name" : "build",
-          "passed" : true,
-          "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
-        },
-        {
-          "duration_seconds" : 17.504626833,
-          "evidence" : [
-            {
-              "name" : "xcuitest.log",
-              "path" : "logs/xcuitest.log"
-            },
-            {
-              "name" : "xcuitest.xcresult",
-              "path" : "logs/xcuitest.xcresult"
-            }
-          ],
-          "name" : "xcuitest",
-          "passed" : true,
-          "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
-        }
-      ],
-      "metrics" : {
-        "agent_duration_seconds" : 85.60327398777008,
-        "agent_events" : 25,
-        "agent_output_bytes" : 82161,
-        "agent_output_chunks" : 25,
-        "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 51.376254081726074,
-        "test_invocations" : 2,
-        "tool_calls" : 10,
-        "total_events" : 75
-      },
-      "result" : {
-        "agent_termination" : "completed",
-        "duration_seconds" : 137.321201709,
-        "passed" : true
-      },
-      "run_id" : "2026-09-02T153947-ui-auto-015-opencode",
-      "schema_version" : 1,
-      "tags" : [
-        "xcuitest",
-        "ui-automation",
-        "keyboard",
-        "erase",
-        "operational"
-      ],
-      "task" : "ui-auto-015",
-      "usage" : {
-        "estimated_cost_usd" : 0.013384395,
-        "input_tokens" : 9236,
-        "output_tokens" : 1330,
-        "total_tokens" : 10566
-      }
-    },
-    {
-      "agent" : {
-        "agent" : "opencode",
-        "configuration" : {
-          "isolation" : "none (host process)",
-          "mode" : "run --format json --pure --auto",
-          "network" : "unrestricted (host egress; --vm denies it)",
-          "plugins" : "disabled (--pure)",
-          "user_config" : "ignored (OPENCODE_CONFIG)",
-          "web_access" : "disabled (webfetch denied)"
-        },
-        "model" : "minimax/MiniMax-M2.7",
-        "version" : "1.18.25"
-      },
-      "artifacts" : {
-        "diff" : "diff.patch",
-        "events" : "events.jsonl",
-        "logs" : "logs"
-      },
-      "category" : "interaction",
-      "difficulty" : 5,
-      "environment" : {
-        "architecture" : "arm64",
-        "macos" : "26.5.1",
-        "runtime" : "iOS 26.5",
-        "simulator" : "iPhone 17",
-        "xcode" : "26.6",
-        "xcode_build" : "17F113"
-      },
-      "git" : {
-        "base_commit" : "5bf3166ae8f657acc861e6e641a453a7c1fa689c",
-        "deletions" : 8,
-        "files_changed" : 2,
-        "insertions" : 40
-      },
-      "graders" : [
-        {
-          "duration_seconds" : 12.008176667,
-          "evidence" : [
-            {
-              "name" : "build.log",
-              "path" : "logs/build.log"
-            },
-            {
-              "name" : "build.xcresult",
-              "path" : "logs/build.xcresult"
-            }
-          ],
-          "name" : "build",
-          "passed" : true,
-          "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
-        },
-        {
-          "duration_seconds" : 21.09579825,
-          "evidence" : [
-            {
-              "name" : "xcuitest.log",
-              "path" : "logs/xcuitest.log"
-            },
-            {
-              "name" : "xcuitest.xcresult",
-              "path" : "logs/xcuitest.xcresult"
-            }
-          ],
-          "name" : "xcuitest",
-          "passed" : true,
-          "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
-        }
-      ],
-      "metrics" : {
-        "agent_duration_seconds" : 801.0973069667816,
-        "agent_events" : 125,
-        "agent_output_bytes" : 357899,
-        "agent_output_chunks" : 126,
-        "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 55.891217947006226,
-        "test_invocations" : 2,
-        "tool_calls" : 36,
-        "total_events" : 277
-      },
-      "result" : {
-        "agent_termination" : "completed",
-        "duration_seconds" : 857.35187825,
-        "passed" : true
-      },
-      "run_id" : "2026-09-02T154209-ui-auto-016-opencode",
-      "schema_version" : 1,
-      "tags" : [
-        "xcuitest",
-        "ui-automation",
-        "keyboard",
-        "return-key",
-        "operational"
-      ],
-      "task" : "ui-auto-016",
-      "usage" : {
-        "estimated_cost_usd" : 0.13477990500000003,
-        "input_tokens" : 31992,
-        "output_tokens" : 22429,
-        "total_tokens" : 54421
-      }
-    },
-    {
-      "agent" : {
-        "agent" : "opencode",
-        "configuration" : {
-          "isolation" : "none (host process)",
-          "mode" : "run --format json --pure --auto",
-          "network" : "unrestricted (host egress; --vm denies it)",
-          "plugins" : "disabled (--pure)",
-          "user_config" : "ignored (OPENCODE_CONFIG)",
-          "web_access" : "disabled (webfetch denied)"
-        },
-        "model" : "minimax/MiniMax-M2.7",
-        "version" : "1.18.25"
-      },
-      "artifacts" : {
-        "diff" : "diff.patch",
-        "events" : "events.jsonl",
-        "logs" : "logs"
-      },
-      "category" : "interaction",
-      "difficulty" : 6,
-      "environment" : {
-        "architecture" : "arm64",
-        "macos" : "26.5.1",
-        "runtime" : "iOS 26.5",
-        "simulator" : "iPhone 17",
-        "xcode" : "26.6",
-        "xcode_build" : "17F113"
-      },
-      "git" : {
-        "base_commit" : "a45853b43c215ad6036de7845c2f33542375ba82",
-        "deletions" : 0,
-        "files_changed" : 1,
-        "insertions" : 21
-      },
-      "graders" : [
-        {
-          "duration_seconds" : 12.514188625,
-          "evidence" : [
-            {
-              "name" : "build.log",
-              "path" : "logs/build.log"
-            },
-            {
-              "name" : "build.xcresult",
-              "path" : "logs/build.xcresult"
-            }
-          ],
-          "name" : "build",
-          "passed" : true,
-          "summary" : "xcodebuild build succeeded for scheme 'SafeAreaFixture'"
-        },
-        {
-          "duration_seconds" : 3.687155917,
+          "duration_seconds" : 4.023258958,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -12830,33 +12631,514 @@
           "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
         },
         {
-          "duration_seconds" : 5.7e-05,
+          "duration_seconds" : 2.549717959,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/PartsSearchView.swift: \".accessibilityIdentifier(\"result-\\(index)\")\" → \".accessibilityIdentifier(\"result-\\(index)-mutated\")\")"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 48.026859998703,
+        "agent_events" : 17,
+        "agent_output_bytes" : 38307,
+        "agent_output_chunks" : 17,
+        "build_invocations" : 1,
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 41.10819709300995,
+        "test_invocations" : 3,
+        "tool_calls" : 5,
+        "total_events" : 64
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 89.47007625,
+        "passed" : false
+      },
+      "run_id" : "2026-09-03T154317-ui-auto-012-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "xcuitest",
+        "ui-automation",
+        "predicate",
+        "wait",
+        "operational"
+      ],
+      "task" : "ui-auto-012",
+      "usage" : {
+        "estimated_cost_usd" : 0.007061115,
+        "input_tokens" : 2847,
+        "output_tokens" : 1158,
+        "total_tokens" : 4005
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.25"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "interaction",
+      "difficulty" : 5,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "26.5.1",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "26.6",
+        "xcode_build" : "17F113"
+      },
+      "git" : {
+        "base_commit" : "7462cef63411084ee437accf5fca68729897839d",
+        "deletions" : 0,
+        "files_changed" : 2,
+        "insertions" : 46
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 11.209616917,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
+        },
+        {
+          "duration_seconds" : 27.596540792,
+          "evidence" : [
+            {
+              "name" : "xcuitest.log",
+              "path" : "logs/xcuitest.log"
+            },
+            {
+              "name" : "xcuitest.xcresult",
+              "path" : "logs/xcuitest.xcresult"
+            }
+          ],
+          "name" : "xcuitest",
+          "passed" : false,
+          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: FormFlowFixtureUITests/testKeyboardDismissalPreservesFieldContents()"
+        },
+        {
+          "duration_seconds" : 40.2545525,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/EnrolmentFlowView.swift: \".accessibilityIdentifier(\"full-name\")\" → \".accessibilityIdentifier(\"full-name-mutated\")\")"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 58.05927097797394,
+        "agent_events" : 36,
+        "agent_output_bytes" : 92597,
+        "agent_output_chunks" : 36,
+        "build_invocations" : 1,
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 100.90750098228455,
+        "test_invocations" : 3,
+        "tool_calls" : 13,
+        "total_events" : 103
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 159.26718425,
+        "passed" : false
+      },
+      "run_id" : "2026-09-03T154451-ui-auto-014-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "xcuitest",
+        "ui-automation",
+        "keyboard",
+        "type",
+        "operational"
+      ],
+      "task" : "ui-auto-014",
+      "usage" : {
+        "estimated_cost_usd" : 0.022532730000000004,
+        "input_tokens" : 8263,
+        "output_tokens" : 4157,
+        "total_tokens" : 12420
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.25"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "interaction",
+      "difficulty" : 6,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "26.5.1",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "26.6",
+        "xcode_build" : "17F113"
+      },
+      "git" : {
+        "base_commit" : "7462cef63411084ee437accf5fca68729897839d",
+        "deletions" : 0,
+        "files_changed" : 2,
+        "insertions" : 29
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 12.053077417,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
+        },
+        {
+          "duration_seconds" : 18.261343958,
+          "evidence" : [
+            {
+              "name" : "xcuitest.log",
+              "path" : "logs/xcuitest.log"
+            },
+            {
+              "name" : "xcuitest.xcresult",
+              "path" : "logs/xcuitest.xcresult"
+            }
+          ],
+          "name" : "xcuitest",
+          "passed" : true,
+          "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
+        },
+        {
+          "duration_seconds" : 37.237881292,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/EnrolmentFlowView.swift: \".accessibilityIdentifier(\"full-name\")\" → \".accessibilityIdentifier(\"full-name-mutated\")\")"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 44.21875607967377,
+        "agent_events" : 34,
+        "agent_output_bytes" : 86712,
+        "agent_output_chunks" : 34,
+        "build_invocations" : 1,
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 89.90686106681824,
+        "test_invocations" : 3,
+        "tool_calls" : 13,
+        "total_events" : 99
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 134.459112792,
+        "passed" : true
+      },
+      "run_id" : "2026-09-03T154732-ui-auto-015-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "xcuitest",
+        "ui-automation",
+        "keyboard",
+        "erase",
+        "operational"
+      ],
+      "task" : "ui-auto-015",
+      "usage" : {
+        "estimated_cost_usd" : 0.01865925,
+        "input_tokens" : 7862,
+        "output_tokens" : 3081,
+        "total_tokens" : 10943
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.25"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "interaction",
+      "difficulty" : 5,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "26.5.1",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "26.6",
+        "xcode_build" : "17F113"
+      },
+      "git" : {
+        "base_commit" : "7462cef63411084ee437accf5fca68729897839d",
+        "deletions" : 0,
+        "files_changed" : 2,
+        "insertions" : 37
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 12.556071625,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
+        },
+        {
+          "duration_seconds" : 12.12305,
+          "evidence" : [
+            {
+              "name" : "xcuitest.log",
+              "path" : "logs/xcuitest.log"
+            },
+            {
+              "name" : "xcuitest.xcresult",
+              "path" : "logs/xcuitest.xcresult"
+            }
+          ],
+          "name" : "xcuitest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+        },
+        {
+          "duration_seconds" : 5.773745959,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : false,
+          "summary" : "The tests still passed with the app broken (Sources/EnrolmentFlowView.swift: \".accessibilityIdentifier(\"full-name\")\" → \".accessibilityIdentifier(\"full-name-mutated\")\"), so they do not assert the behaviour the task asked for"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 56.7597359418869,
+        "agent_events" : 32,
+        "agent_output_bytes" : 90193,
+        "agent_output_chunks" : 32,
+        "build_invocations" : 1,
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 53.71716797351837,
+        "test_invocations" : 3,
+        "tool_calls" : 11,
+        "total_events" : 95
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 110.829916542,
+        "passed" : false
+      },
+      "run_id" : "2026-09-03T154948-ui-auto-016-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "xcuitest",
+        "ui-automation",
+        "keyboard",
+        "return-key",
+        "operational"
+      ],
+      "task" : "ui-auto-016",
+      "usage" : {
+        "estimated_cost_usd" : 0.02196264,
+        "input_tokens" : 8089,
+        "output_tokens" : 4545,
+        "total_tokens" : 12634
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.25"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "interaction",
+      "difficulty" : 6,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "26.5.1",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "26.6",
+        "xcode_build" : "17F113"
+      },
+      "git" : {
+        "base_commit" : "526ed91540fcce03f01023691f262e1dc728bba5",
+        "deletions" : 1,
+        "files_changed" : 3,
+        "insertions" : 38
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 0.012518666,
+          "evidence" : [
+
+          ],
+          "name" : "trajectory",
+          "passed" : true,
+          "summary" : "The agent's recorded commands show the work behind the deliverable (1 command(s))"
+        },
+        {
+          "duration_seconds" : 11.866028959,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SafeAreaFixture'"
+        },
+        {
+          "duration_seconds" : 4.032270833,
+          "evidence" : [
+            {
+              "name" : "xcuitest.log",
+              "path" : "logs/xcuitest.log"
+            },
+            {
+              "name" : "xcuitest.xcresult",
+              "path" : "logs/xcuitest.xcresult"
+            }
+          ],
+          "name" : "xcuitest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+        },
+        {
+          "duration_seconds" : 5.35e-05,
           "evidence" : [
 
           ],
           "name" : "file",
           "passed" : false,
           "summary" : "snapshot.txt: expected to exist"
+        },
+        {
+          "duration_seconds" : 5.124549875,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/BasketView.swift: \".accessibilityIdentifier(\"checkout\")\" → \".accessibilityIdentifier(\"checkout-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 70.60708093643188,
-        "agent_events" : 26,
-        "agent_output_bytes" : 38579,
-        "agent_output_chunks" : 26,
+        "agent_duration_seconds" : 105.40213191509247,
+        "agent_events" : 54,
+        "agent_output_bytes" : 117936,
+        "agent_output_chunks" : 54,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 38.172321915626526,
-        "test_invocations" : 2,
-        "tool_calls" : 7,
-        "total_events" : 79
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 42.47371304035187,
+        "test_invocations" : 3,
+        "tool_calls" : 20,
+        "total_events" : 144
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 109.103591583,
+        "duration_seconds" : 148.181717958,
         "passed" : false
       },
-      "run_id" : "2026-09-02T155630-ui-auto-017-opencode",
+      "run_id" : "2026-09-03T155143-ui-auto-017-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -12867,10 +13149,10 @@
       ],
       "task" : "ui-auto-017",
       "usage" : {
-        "estimated_cost_usd" : 0.011209845,
-        "input_tokens" : 2355,
-        "output_tokens" : 2597,
-        "total_tokens" : 4952
+        "estimated_cost_usd" : 0.03517287000000001,
+        "input_tokens" : 8795,
+        "output_tokens" : 6804,
+        "total_tokens" : 15599
       }
     },
     {
@@ -12903,14 +13185,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "5bf3166ae8f657acc861e6e641a453a7c1fa689c",
-        "deletions" : 13,
-        "files_changed" : 333,
-        "insertions" : 5423
+        "base_commit" : "7462cef63411084ee437accf5fca68729897839d",
+        "deletions" : 15,
+        "files_changed" : 3,
+        "insertions" : 124
       },
       "graders" : [
         {
-          "duration_seconds" : 11.545203708,
+          "duration_seconds" : 12.035281375,
           "evidence" : [
             {
               "name" : "build.log",
@@ -12926,7 +13208,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
         },
         {
-          "duration_seconds" : 36.111533,
+          "duration_seconds" : 28.987738708,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -12938,28 +13220,40 @@
             }
           ],
           "name" : "xcuitest",
-          "passed" : false,
-          "summary" : "1 executed, 0 passed, 1 failed, 0 skipped — failing: FormFlowEndToEndTests/testCompleteFlowEndToEnd()"
+          "passed" : true,
+          "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
+        },
+        {
+          "duration_seconds" : 38.02913825,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/EnrolmentFlowView.swift: \".accessibilityIdentifier(\"full-name\")\" → \".accessibilityIdentifier(\"full-name-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 163.79153501987457,
-        "agent_events" : 64,
-        "agent_output_bytes" : 166121,
-        "agent_output_chunks" : 63,
+        "agent_duration_seconds" : 112.01072800159454,
+        "agent_events" : 38,
+        "agent_output_bytes" : 89217,
+        "agent_output_chunks" : 38,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 69.77262890338898,
-        "test_invocations" : 1,
-        "tool_calls" : 21,
-        "total_events" : 484
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 102.05930006504059,
+        "test_invocations" : 2,
+        "tool_calls" : 11,
+        "total_events" : 108
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 236.258961583,
-        "passed" : false
+        "duration_seconds" : 214.379496542,
+        "passed" : true
       },
-      "run_id" : "2026-09-02T155823-ui-auto-018-opencode",
+      "run_id" : "2026-09-03T155416-ui-auto-018-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -12970,10 +13264,10 @@
       ],
       "task" : "ui-auto-018",
       "usage" : {
-        "estimated_cost_usd" : 0.0422703,
-        "input_tokens" : 13066,
-        "output_tokens" : 7851,
-        "total_tokens" : 20917
+        "estimated_cost_usd" : 0.019818405,
+        "input_tokens" : 4832,
+        "output_tokens" : 6008,
+        "total_tokens" : 10840
       }
     },
     {
@@ -13006,14 +13300,14 @@
         "xcode_build" : "17F113"
       },
       "git" : {
-        "base_commit" : "e4f61f3cb02f432203a50b6c15661d0d9c89c31e",
+        "base_commit" : "aac4371f15fb215c640d85d120932467ade88a9d",
         "deletions" : 0,
         "files_changed" : 2,
-        "insertions" : 20
+        "insertions" : 23
       },
       "graders" : [
         {
-          "duration_seconds" : 11.589075042,
+          "duration_seconds" : 11.857233333,
           "evidence" : [
             {
               "name" : "build.log",
@@ -13029,7 +13323,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'DynamicTypeFixture'"
         },
         {
-          "duration_seconds" : 2.6580610829999998,
+          "duration_seconds" : 4.469350625,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -13043,26 +13337,38 @@
           "name" : "xcuitest",
           "passed" : false,
           "summary" : "0 executed, 0 passed, 0 failed, 0 skipped — no tests executed"
+        },
+        {
+          "duration_seconds" : 2.514516917,
+          "evidence" : [
+            {
+              "name" : "mutation-test.log",
+              "path" : "logs/mutation-test.log"
+            }
+          ],
+          "name" : "mutation",
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/SettingsListView.swift: \".accessibilityIdentifier(\"\\(identifier)-name\")\" → \".accessibilityIdentifier(\"\\(identifier)-name-mutated\")\")"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 40.69487392902374,
-        "agent_events" : 32,
-        "agent_output_bytes" : 79939,
-        "agent_output_chunks" : 32,
+        "agent_duration_seconds" : 60.780908942222595,
+        "agent_events" : 44,
+        "agent_output_bytes" : 135544,
+        "agent_output_chunks" : 44,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 36.43068206310272,
-        "test_invocations" : 1,
-        "tool_calls" : 11,
-        "total_events" : 90
+        "commands_executed" : 5,
+        "grading_duration_seconds" : 51.51920211315155,
+        "test_invocations" : 2,
+        "tool_calls" : 17,
+        "total_events" : 119
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 77.473963667,
+        "duration_seconds" : 112.65007825,
         "passed" : false
       },
-      "run_id" : "2026-09-02T160224-ui-auto-019-opencode",
+      "run_id" : "2026-09-03T155752-ui-auto-019-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -13074,10 +13380,10 @@
       ],
       "task" : "ui-auto-019",
       "usage" : {
-        "estimated_cost_usd" : 0.017367285,
-        "input_tokens" : 7103,
-        "output_tokens" : 2802,
-        "total_tokens" : 9905
+        "estimated_cost_usd" : 0.02939157,
+        "input_tokens" : 13681,
+        "output_tokens" : 4721,
+        "total_tokens" : 18402
       }
     },
     {
@@ -13788,9 +14094,9 @@
   ],
   "score" : {
     "available" : 6840,
-    "fraction_of_available" : 0.5381811307424615,
+    "fraction_of_available" : 0.5346153087816213,
     "minimum_efficiency" : 0.25,
-    "points" : 3681.1589342784373,
+    "points" : 3656.76871206629,
     "reference_token_budget" : 50000,
     "scored_runs" : 134,
     "solves_with_unreported_tokens" : 0,
