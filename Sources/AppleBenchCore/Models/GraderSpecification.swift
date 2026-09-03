@@ -603,6 +603,7 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         appearanceMustDiffer = try container.decodeIfPresent(
             Bool.self, forKey: .appearanceMustDiffer
         ) ?? false
+        appearanceRegion = try container.decodeIfPresent(String.self, forKey: .appearanceRegion)
         clearState = try container.decodeIfPresent(Bool.self, forKey: .clearState) ?? false
         openURL = try container.decodeIfPresent(String.self, forKey: .openURL)
         push = try container.decodeIfPresent(String.self, forKey: .push)

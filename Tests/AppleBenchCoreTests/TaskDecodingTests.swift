@@ -347,4 +347,35 @@ struct TaskDecodingTests {
         let decoded = try JSONDecoder().decode([GraderSpecification].self, from: data)
         #expect(decoded == specifications)
     }
+
+    @Test("A uiflow grader keeps the region its appearance check is limited to")
+    func decodesAppearanceRegion() throws {
+        // The region was declared, given a coding key, and never decoded, so
+        // every appearance check silently measured the whole screen. A screen
+        // always adapts, so the check could not fail and nothing said so.
+        let yaml = """
+        id: t-1
+        title: T
+        repository: {url: ./x, commit: HEAD}
+        prompt: p
+        environment:
+          platform: ios
+          simulator: {device: "iPhone 17", runtime: "iOS 26.5"}
+        graders:
+          - type: uiflow
+            scheme: S
+            bundle_id: com.example.S
+            appearance_must_differ: true
+            appearance_region: the-card
+            assertions:
+              - {text: Hello}
+        """
+        let task = try TaskLoader.loadTask(from: write(yaml))
+        guard case .uiflow(let configuration) = task.graders[0] else {
+            Issue.record("expected a uiflow grader")
+            return
+        }
+        #expect(configuration.appearanceMustDiffer)
+        #expect(configuration.appearanceRegion == "the-card")
+    }
 }

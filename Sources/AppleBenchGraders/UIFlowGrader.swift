@@ -333,6 +333,15 @@ public struct UIFlowGrader: Grader {
         let difference = try ScreenshotComparison.difference(
             light, dark, crop: crop, screenSize: screen
         )
+        // Recorded whichever way it goes. A check that only speaks when it
+        // fails leaves no way to tell "the colours moved" from "the region was
+        // never measured", which is an afternoon of guessing.
+        await context.recorder.record(.warning, payload: .object([
+            "message": .string(String(
+                format: "appearance difference over %@: %.2f%%",
+                configuration.appearanceRegion ?? "the screen", difference * 100
+            ))
+        ]))
         // A screen that adapts turns over most of its area. The floor is set
         // well below that and well above the few percent a status bar clock or
         // a caret can move on its own.
