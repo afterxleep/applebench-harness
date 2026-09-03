@@ -13,6 +13,7 @@ public enum GraderSpecification: Sendable, Equatable {
     case runtime(RuntimeGraderConfiguration)
     case xcodeproj(XcodeprojGraderConfiguration)
     case uiflow(UIFlowGraderConfiguration)
+    case mutation(MutationGraderConfiguration)
 
     /// The `type` discriminator value for this grader.
     public var type: GraderType {
@@ -24,6 +25,7 @@ public enum GraderSpecification: Sendable, Equatable {
         case .runtime: .runtime
         case .xcodeproj: .xcodeproj
         case .uiflow: .uiflow
+        case .mutation: .mutation
         }
     }
 }
@@ -36,6 +38,7 @@ public enum GraderType: String, Sendable, Codable, CaseIterable {
     case runtime
     case xcodeproj
     case uiflow
+    case mutation
 }
 
 extension GraderSpecification: Codable {
@@ -61,6 +64,8 @@ extension GraderSpecification: Codable {
             self = .xcodeproj(try XcodeprojGraderConfiguration(from: decoder))
         case .uiflow:
             self = .uiflow(try UIFlowGraderConfiguration(from: decoder))
+        case .mutation:
+            self = .mutation(try MutationGraderConfiguration(from: decoder))
         }
     }
 
@@ -81,6 +86,8 @@ extension GraderSpecification: Codable {
         case .xcodeproj(let configuration):
             try configuration.encode(to: encoder)
         case .uiflow(let configuration):
+            try configuration.encode(to: encoder)
+        case .mutation(let configuration):
             try configuration.encode(to: encoder)
         }
     }
@@ -611,6 +618,95 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         for button in buttons where !known.contains(button) {
             throw BenchmarkFailure.invalidTask(
                 "uiflow has no hardware button '\(button)'. Valid: " + known.sorted().joined(separator: ", ")
+            )
+        }
+    }
+}
+
+// MARK: - Mutation
+
+/// One deliberate break, applied to the app the agent left behind.
+public struct SourceMutation: Sendable, Codable, Equatable {
+    /// Workspace-relative path to edit.
+    public var path: String
+    /// Literal text to find.
+    public var replace: String
+    /// What to put in its place.
+    public var with: String
+
+    public init(path: String, replace: String, with: String) {
+        self.path = path
+        self.replace = replace
+        self.with = with
+    }
+}
+
+/// Proves the agent's tests actually test something.
+///
+/// On a task whose deliverable is a test, the agent writes the thing it is
+/// graded by. `xcuitest` then runs whatever it wrote, and a test that launches
+/// the app and asserts nothing passes exactly like a real one. The task looks
+/// solved and nothing was verified.
+///
+/// The check is the one a person would do: break the behaviour the test claims
+/// to cover, and see whether the test notices. A test that still passes against
+/// a broken app was never testing that behaviour. The break is applied after
+/// the agent has exited and reverted afterwards, so it never touches what the
+/// other graders judge.
+public struct MutationGraderConfiguration: Sendable, Codable, Equatable {
+    public var project: String?
+    public var workspace: String?
+    public var scheme: String
+    /// Test identifiers to run, as `-only-testing:` entries.
+    public var tests: [String]
+    public var skipTests: [String]
+    /// The breaks to apply. All of them, together.
+    public var mutations: [SourceMutation]
+    public var destination: String?
+
+    public init(
+        project: String? = nil,
+        workspace: String? = nil,
+        scheme: String,
+        tests: [String] = [],
+        skipTests: [String] = [],
+        mutations: [SourceMutation],
+        destination: String? = nil
+    ) {
+        self.project = project
+        self.workspace = workspace
+        self.scheme = scheme
+        self.tests = tests
+        self.skipTests = skipTests
+        self.mutations = mutations
+        self.destination = destination
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case project, workspace, scheme, tests, mutations, destination
+        case skipTests = "skip_tests"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        project = try container.decodeIfPresent(String.self, forKey: .project)
+        workspace = try container.decodeIfPresent(String.self, forKey: .workspace)
+        scheme = try container.decode(String.self, forKey: .scheme)
+        tests = try container.decodeIfPresent([String].self, forKey: .tests) ?? []
+        skipTests = try container.decodeIfPresent([String].self, forKey: .skipTests) ?? []
+        mutations = try container.decode([SourceMutation].self, forKey: .mutations)
+        destination = try container.decodeIfPresent(String.self, forKey: .destination)
+    }
+
+    public func validate() throws {
+        guard !mutations.isEmpty else {
+            throw BenchmarkFailure.invalidTask(
+                "A mutation grader with no mutations proves nothing"
+            )
+        }
+        for mutation in mutations where mutation.replace == mutation.with {
+            throw BenchmarkFailure.invalidTask(
+                "Mutation on \(mutation.path) replaces text with itself, so it breaks nothing"
             )
         }
     }

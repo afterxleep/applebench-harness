@@ -21,6 +21,8 @@ public enum GraderCatalog {
                 XcodeprojGrader(configuration: configuration)
             case .uiflow(let configuration):
                 UIFlowGrader(configuration: configuration)
+            case .mutation(let configuration):
+                MutationGrader(configuration: configuration)
             }
         }
         return registry

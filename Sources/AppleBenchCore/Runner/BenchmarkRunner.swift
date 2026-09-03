@@ -217,7 +217,7 @@ public struct BenchmarkRunner: Sendable {
                 // device; plain builds just need the destination to exist.
                 let needsBoot = task.graders.contains { specification in
                     switch specification {
-                    case .xcuitest, .runtime, .uiflow: true
+                    case .xcuitest, .runtime, .uiflow, .mutation: true
                     case .build, .xctest, .file, .xcodeproj: false
                     }
                 }
@@ -401,7 +401,7 @@ public struct BenchmarkRunner: Sendable {
     private func taskNeedsSimulator(_ task: BenchmarkTask) -> Bool {
         task.graders.contains { specification in
             switch specification {
-            case .xcuitest, .runtime, .uiflow: true
+            case .xcuitest, .runtime, .uiflow, .mutation: true
             case .build(let configuration): configuration.destination == nil && task.environment.platform == .ios
             case .xctest: task.environment.platform == .ios
             // Resolving build settings for an iOS scheme needs a concrete
