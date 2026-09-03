@@ -264,30 +264,38 @@ if [ -n "$pending_mode" ]; then
     suite="$pending_suite"
 fi
 
-# Every model is benchmarked at the strongest reasoning it offers, so a score
-# reflects what the model can do rather than which setting it happened to get.
-# The ladder differs per model and some expose none at all, so the level comes
-# from the pinned catalog rather than a hardcoded word: asking a model for an
-# effort it does not have is not a stronger run, it is an invalid flag.
-if [ -z "$effort" ] && [ -n "$model" ]; then
-    effort="$(python3 - "$model" <<'PY' 2>/dev/null || true
-import json, pathlib, sys
-catalog = pathlib.Path("Data/model-catalog.json")
-if catalog.exists():
-    models = json.loads(catalog.read_text()).get("models", {})
-    entry = models.get(sys.argv[1])
-    if entry is None:
-        wanted = sys.argv[1].split("/")[-1].lower()
-        entry = next((v for k, v in models.items() if k.split("/")[-1].lower() == wanted), None)
-    if entry and entry.get("max_effort"):
-        print(entry["max_effort"])
-PY
-)"
-    if [ -n "$effort" ]; then
-        echo "  effort: $effort (the strongest $model exposes, per Data/model-catalog.json)"
+# No model named: offer the catalogue rather than guess one. Everything in it
+# is reachable and priced, so a pick cannot land on a name the gateway does not
+# have, and the effort comes from the model's own ladder rather than the
+# person choosing. Only when there is a terminal to draw on — a scripted run
+# with no --model is an error, not a prompt nobody will see.
+if [ -z "$model" ] && [ -t 0 ]; then
+    if picked="$("$root/Scripts/pick-model.py" --prefix openrouter/ </dev/tty)"; then
+        model="${picked%%$'\t'*}"
+        effort="${picked#*$'\t'}"
+        echo "Selected $model${effort:+ at effort $effort}"
     else
-        echo "  effort: provider default ($model exposes no effort ladder)"
+        echo "error: no model selected." >&2
+        exit 1
     fi
+fi
+
+# Check the model before spending an hour on it. A name the agent cannot reach
+# produces a suite of failures that read as the model being bad at Swift; a
+# model missing from the catalog publishes a report with no cost in it, and
+# the gap is invisible next to models that have one. Both are cheap to catch
+# here and expensive to notice afterwards.
+#
+# The same check resolves the effort: every model runs at the strongest
+# reasoning it exposes, and since the ladders differ — and some models have
+# none — the level comes from the catalog rather than a hardcoded word.
+if [ -n "$model" ]; then
+    echo "Checking $model…"
+    if ! resolved_effort="$("$root/Scripts/validate-model.py" "$model" --agent "$agent" ${effort:+--effort "$effort"})"; then
+        echo "error: refusing to start; fix the above or pass --effort explicitly." >&2
+        exit 1
+    fi
+    effort="$resolved_effort"
 fi
 
 echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} effort=${effort:-<default>} parallel=$parallel"

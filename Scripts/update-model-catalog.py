@@ -20,11 +20,14 @@ not move because a provider changed its prices on a Tuesday; re-running this
 script is a deliberate act that shows up as a diff, with `retrieved` saying
 when the prices were true.
 
-Only models the benchmark has actually scored are written, so the file stays
-small enough to read in a review. Pass model ids to add new ones.
-
 Usage:
-    update-model-catalog.py [model-id ...]
+    update-model-catalog.py --openrouter        every OpenRouter model opencode
+                                                can reach (the usual refresh)
+    update-model-catalog.py <model-id> ...      add named models
+    update-model-catalog.py                     refresh what reports already scored
+
+Models any published report has scored are always kept, so a refresh can never
+drop the prices a published number was computed from.
 """
 import json
 import pathlib
@@ -54,10 +57,22 @@ def known_models() -> set[str]:
 def resolve(catalog: dict, model: str) -> tuple[str, dict] | None:
     """Find a models.dev entry for one of our model ids.
 
-    Ids reach us in several shapes — `minimax/MiniMax-M2.7`, and the same model
-    through a gateway as `openrouter/minimax/minimax-m3` — so the last path
-    component is matched case-insensitively, preferring the provider we named.
+    Ids reach us in three shapes and all three have to land on the same entry:
+
+        minimax/MiniMax-M2.7                provider + model
+        openrouter/meta/muse-spark-1.2      gateway + a model whose own id
+                                            contains a slash
+        opencode/muse-spark-1.3-...-free    the agent's own hosted catalogue
+
+    So the first component is tried as the provider with the whole remainder as
+    the model id — which is the only reading that works for the middle case —
+    and a last-component match is the fallback for everything else.
     """
+    head, _, rest = model.partition("/")
+    block = catalog.get(head)
+    if block and rest and rest in (block.get("models") or {}):
+        return f"{head}/{rest}", block["models"][rest]
+
     parts = model.split("/")
     wanted = parts[-1].lower()
     preferred = parts[-2].lower() if len(parts) > 1 else None
@@ -76,6 +91,69 @@ def resolve(catalog: dict, model: str) -> tuple[str, dict] | None:
     return f"{provider}/{identifier}", entry
 
 
+def page_candidates(source_id: str) -> list[str]:
+    """Where a model's price page might live, best first.
+
+    models.dev renders a page per model *owner*, not per route to it, so a
+    gateway-prefixed id has no page of its own: `openrouter/anthropic/x`
+    redirects to the homepage while `anthropic/x` is the real page. Linking the
+    owner is also the more useful answer — it is where the price comes from.
+    """
+    candidates = [source_id]
+    head, _, rest = source_id.partition("/")
+    if head in {"openrouter", "opencode", "vercel", "nano-gpt"} and "/" in rest:
+        candidates.append(rest)
+    return [f"https://models.dev/models/{c}/" for c in candidates]
+
+
+def verify_urls(source_ids) -> set[str]:
+    """Which models.dev pages actually exist.
+
+    A missing page redirects to the site root rather than answering 404, so a
+    2xx alone is not proof — the request must not be redirected away.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *_args, **_kwargs):
+            return None
+
+    opener = urllib.request.build_opener(NoRedirect)
+
+    def check(url: str) -> str | None:
+        request = urllib.request.Request(
+            url, method="HEAD", headers={"User-Agent": "applebench-harness"}
+        )
+        try:
+            with opener.open(request, timeout=20) as response:
+                return url if response.status == 200 else None
+        except Exception:
+            return None
+
+    with ThreadPoolExecutor(max_workers=12) as pool:
+        return {url for url in pool.map(check, source_ids) if url}
+
+
+def agent_models(agent: str) -> set[str]:
+    """Every model id the agent CLI says it can reach."""
+    import subprocess
+
+    if agent != "opencode":
+        print(f"error: do not know how to list models for {agent}", file=sys.stderr)
+        return set()
+    try:
+        result = subprocess.run(
+            ["opencode", "models"], capture_output=True, text=True, timeout=120
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        print(f"error: could not run `opencode models`: {error}", file=sys.stderr)
+        return set()
+    if result.returncode != 0:
+        print("error: `opencode models` failed", file=sys.stderr)
+        return set()
+    return {line.strip() for line in result.stdout.splitlines() if line.strip()}
+
+
 def max_effort(entry: dict) -> str | None:
     """The strongest setting the model exposes, or None when it exposes none.
 
@@ -90,7 +168,27 @@ def max_effort(entry: dict) -> str | None:
 
 
 def main() -> int:
-    wanted = set(sys.argv[1:]) | known_models()
+    arguments = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+
+    # Whatever is already recorded stays recorded. Without this, adding one
+    # model by name would rewrite the file with only that model in it and
+    # silently un-price everything else — the next publish would drop cost
+    # from every report that is not the one being worked on.
+    existing: set[str] = set()
+    if CATALOG.exists():
+        existing = set(json.loads(CATALOG.read_text()).get("models", {}))
+
+    wanted = set(arguments) | known_models() | existing
+    if flags & {"--openrouter", "--all-agent-models"}:
+        available = agent_models("opencode")
+        if "--openrouter" in flags:
+            # One gateway, so every model is reachable with the same key and
+            # priced on the same page. Mixing routes into one catalog invites
+            # a comparison between a model run direct and one run through a
+            # gateway that prices it differently.
+            available = {m for m in available if m.startswith("openrouter/")}
+        wanted |= available
     if not wanted:
         print("error: no models to record; pass ids or publish a report first", file=sys.stderr)
         return 1
@@ -128,6 +226,24 @@ def main() -> int:
             "reasoning_options": entry.get("reasoning_options") or [],
             "max_effort": max_effort(entry),
         }
+
+    # models.dev does not render a page for every provider it prices, and the
+    # ones it lacks redirect to the homepage rather than 404. An unchecked link
+    # would therefore look fine and land the reader nowhere, so each is
+    # verified and only the ones that resolve are recorded.
+    if models:
+        candidates = {model: page_candidates(entry["source_id"]) for model, entry in models.items()}
+        every = {url for options in candidates.values() for url in options}
+        print(f"Checking {len(every)} price page(s)…", file=sys.stderr)
+        verified = verify_urls(every)
+        linked = 0
+        for model, entry in models.items():
+            for url in candidates[model]:
+                if url in verified:
+                    entry["url"] = url
+                    linked += 1
+                    break
+        print(f"  {linked} of {len(models)} have a page to link.", file=sys.stderr)
 
     # The date models.dev states for itself, not today: it is the day these
     # prices were true, and re-running the script on an unchanged upstream
