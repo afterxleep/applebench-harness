@@ -21,6 +21,9 @@ struct RunCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Reasoning effort passed to the agent when its CLI supports it (e.g. low, medium, high).")
     var effort: String?
 
+    @Flag(name: .long, help: "Seal the agent away from reference solutions, task files, other runs, and any executable outside the Apple toolchain. On for scoring runs.")
+    var sealAnswers = false
+
     @Flag(name: .long, help: "Show what the run is doing as it happens: commands, file edits, graders.")
     var stream = false
 
@@ -96,7 +99,10 @@ struct RunCommand: AsyncParsableCommand {
             stripWrapperCLIs: stripWrapperCLIs,
             runsRoot: runsDir.map { URL(fileURLWithPath: $0) } ?? Wiring.defaultRunsRoot(),
             limitCaps: LimitCaps(timeoutSeconds: timeoutCap ?? LimitCaps.standard.timeoutSeconds, maxTokens: maxTokens),
-            eventObserver: liveLog.observer()
+            eventObserver: liveLog.observer(),
+            sealAnswers: sealAnswers,
+            taskSetRoot: ProcessInfo.processInfo.environment["APPLEBENCH_TASKSET"]
+                .map { URL(fileURLWithPath: $0) }
         )
 
         print("AppleBench · \(benchmarkTask.id)\n")

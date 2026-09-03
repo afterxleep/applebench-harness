@@ -39,6 +39,14 @@ public enum AgentTelemetryCapability: String, Sendable, Codable {
     case plainText
 }
 
+/// Where an adapter's binary lives, when it has one on disk.
+///
+/// The sandbox needs it: the agent has to be allowed to execute itself while
+/// everything outside the toolchain is refused.
+public extension AgentAdapter {
+    var executableURL: URL? { nil }
+}
+
 public struct AgentMetadata: Sendable, Codable, Equatable {
     public var agent: String
     public var model: String?

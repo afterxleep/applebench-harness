@@ -22,6 +22,13 @@ public struct RunnerOptions: Sendable {
     /// Called for each recorded event, for a caller that wants to show the run
     /// moving. Purely observational: the run behaves identically without it.
     public var eventObserver: (@Sendable (BenchmarkEvent) -> Void)?
+    /// Seal the agent away from reference solutions, task files and other
+    /// runs. Off by default so a local run against the public samples still
+    /// works from any layout; a scoring run should always turn it on.
+    public var sealAnswers: Bool = false
+    /// Where the task set lives, so the seal can deny it. The runner does not
+    /// otherwise need to know.
+    public var taskSetRoot: URL?
 
     public init(
         model: String? = nil,
@@ -31,7 +38,9 @@ public struct RunnerOptions: Sendable {
         stripWrapperCLIs: Bool = false,
         runsRoot: URL,
         limitCaps: LimitCaps = LimitCaps(),
-        eventObserver: (@Sendable (BenchmarkEvent) -> Void)? = nil
+        eventObserver: (@Sendable (BenchmarkEvent) -> Void)? = nil,
+        sealAnswers: Bool = false,
+        taskSetRoot: URL? = nil
     ) {
         self.model = model
         self.effort = effort
@@ -41,6 +50,8 @@ public struct RunnerOptions: Sendable {
         self.runsRoot = runsRoot
         self.limitCaps = limitCaps
         self.eventObserver = eventObserver
+        self.sealAnswers = sealAnswers
+        self.taskSetRoot = taskSetRoot
     }
 }
 
@@ -148,6 +159,16 @@ public struct BenchmarkRunner: Sendable {
             effort: options.effort,
             environmentAllowlist: options.environmentAllowlist,
             stripWrapperCLIs: options.stripWrapperCLIs,
+            sandbox: options.sealAnswers
+                ? AgentSandbox.standard(
+                    harnessRoot: options.runsRoot.deletingLastPathComponent().deletingLastPathComponent(),
+                    taskSetRoot: options.taskSetRoot,
+                    workspaceURL: workspace.workspaceURL,
+                    denyWrapperCLIs: options.stripWrapperCLIs,
+                    agentExecutable: adapter.executableURL,
+                    runDirectory: runDirectoryURL
+                )
+                : nil,
             limits: task.limits.capped(by: options.limitCaps),
             environment: snapshot
         )

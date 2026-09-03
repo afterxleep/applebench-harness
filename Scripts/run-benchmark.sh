@@ -47,6 +47,10 @@
 #                           silent for ten minutes otherwise, which looks
 #                           identical to a wedged simulator.
 #       --stream-output     That, plus the model's own messages. Noisy.
+#       --no-seal           Let the agent read the reference solutions, the
+#                           task files and other runs. They sit on the same
+#                           disk under the same user, so a scoring run must
+#                           not use this. Sealing is on by default.
 #       --task-set-repo <u> Git URL of the task set to score. Cloned on first
 #                           use and fast-forwarded after, then prepared. Also
 #                           read from APPLEBENCH_TASKSET_REPO, so a scoring
@@ -102,6 +106,7 @@ out=""
 runs_dir="$root/.applebench/runs"
 strip_wrappers=""
 stream=""
+seal="--seal-answers"
 allow_env=()
 api_key=""
 api_key_file=""
@@ -130,6 +135,7 @@ while [ $# -gt 0 ]; do
         --runs-dir) runs_dir="$2"; shift 2 ;;
         --strip-wrapper-clis) strip_wrappers="--strip-wrapper-clis"; shift ;;
         --stream) stream="--stream"; shift ;;
+        --no-seal) seal=""; shift ;;
         --stream-output) stream="--stream-output"; shift ;;
         --allow-env) allow_env+=(--allow-env "$2"); shift 2 ;;
         --task-set-repo) task_set_repo="$2"; shift 2 ;;
@@ -369,6 +375,7 @@ set +e
     ${model:+--model "$model"} \
     ${effort:+--effort "$effort"} \
     ${stream:+"$stream"} \
+    ${seal:+"$seal"} \
     ${max_tokens:+--max-tokens "$max_tokens"} \
     ${timeout_cap:+--timeout-cap "$timeout_cap"} \
     ${agent_arg[@]+"${agent_arg[@]}"} \

@@ -37,9 +37,16 @@ public struct LiveEventLog: Sendable {
         guard level != .off else { return nil }
         let level = level
         let write = write
+        // Whether the agent is still running, so a command can be attributed to
+        // the model or to the harness. Without it the two are indistinguishable
+        // on screen: the uiflow grader drives the simulator through flowdeck
+        // after the agent has exited, and an unlabelled `$ flowdeck ...` reads
+        // as the model reaching for a wrapper the run explicitly denied it.
+        let phase = PhaseTracker()
         return { event in
+            let stage = phase.observe(event)
             guard let line = LiveEventLog.render(event, level: level) else { return }
-            write(line)
+            write("\(stage) \(line)")
         }
     }
 
@@ -92,6 +99,27 @@ public struct LiveEventLog: Sendable {
             return nil
         default:
             return nil
+        }
+    }
+
+    /// Tracks which side of the run an event belongs to.
+    ///
+    /// The agent and the harness both execute commands, and only one of them
+    /// is being measured.
+    final class PhaseTracker: @unchecked Sendable {
+        private let lock = NSLock()
+        private var stage = "setup"
+
+        func observe(_ event: BenchmarkEvent) -> String {
+            lock.lock()
+            defer { lock.unlock() }
+            switch event.type {
+            case .agentStarted: stage = "agent"
+            case .agentFinished: stage = "harness"
+            case .gradingStarted, .graderStarted: stage = "grading"
+            default: break
+            }
+            return stage.padding(toLength: 7, withPad: " ", startingAt: 0)
         }
     }
 
