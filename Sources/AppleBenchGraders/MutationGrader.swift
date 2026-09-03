@@ -28,6 +28,21 @@ public struct MutationGrader: Grader {
         let start = ContinuousClock.now
         try configuration.validate()
 
+        // `fake` changes nothing, so there is no test to challenge — asking
+        // whether its tests notice a broken app is a question about tests that
+        // do not exist. The task still fails for it on the test grader, which
+        // is what the solvability check rests on, and skipping here avoids a
+        // second `xcodebuild test` against a target that was never created.
+        guard context.agent != "fake" else {
+            return GradingResult(
+                grader: identifier,
+                passed: true,
+                duration: start.duration(to: .now),
+                summary: "Not applicable to the fake agent, which authors no test to challenge",
+                evidence: []
+            )
+        }
+
         var originals: [(url: URL, text: String)] = []
         // Restoring is not optional: every later grader judges the workspace,
         // and leaving a deliberate break in it would fail them all for a
