@@ -1,20 +1,20 @@
 ---
-title: "minimax/MiniMax-M3, gold suite, 4304 points"
+title: "minimax/MiniMax-M3, gold suite, 4354 points"
 date: 2026-09-02
 suite: gold
 suite_revision: "2026-08-31"
 score_spec: "points-v1"
-attempt: "first"
+attempt: "latest"
 data: minimax-m3
 model: "minimax/MiniMax-M3"
 harness: "opencode, opencode 1.18.25"
 tasks: 123
-passed: 102
-points: 4304
+passed: 103
+points: 4354
 points_available: 5940
 description: >-
   AppleBench results for minimax/MiniMax-M3 on the gold suite:
-  4304 of 5940 points and 102 of 123 tasks completed to a
+  4354 of 5940 points and 103 of 123 tasks completed to a
   verified result, with per-category points, cost against wall-clock time,
   and every task.
 lede: >-
