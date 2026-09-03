@@ -23,6 +23,8 @@ public enum GraderCatalog {
                 UIFlowGrader(configuration: configuration)
             case .mutation(let configuration):
                 MutationGrader(configuration: configuration)
+            case .trajectory(let configuration):
+                TrajectoryGrader(configuration: configuration)
             }
         }
         return registry

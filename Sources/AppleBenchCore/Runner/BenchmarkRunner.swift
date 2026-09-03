@@ -218,7 +218,7 @@ public struct BenchmarkRunner: Sendable {
                 let needsBoot = task.graders.contains { specification in
                     switch specification {
                     case .xcuitest, .runtime, .uiflow, .mutation: true
-                    case .build, .xctest, .file, .xcodeproj: false
+                    case .build, .xctest, .file, .xcodeproj, .trajectory: false
                     }
                 }
                 if needsBoot {
@@ -407,7 +407,7 @@ public struct BenchmarkRunner: Sendable {
             // Resolving build settings for an iOS scheme needs a concrete
             // destination, and product-level assertions build the scheme.
             case .xcodeproj(let configuration): configuration.destination == nil && task.environment.platform == .ios
-            case .file: false
+            case .file, .trajectory: false
             }
         }
     }

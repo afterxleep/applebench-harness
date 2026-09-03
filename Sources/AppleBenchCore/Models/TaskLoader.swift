@@ -118,6 +118,11 @@ public enum TaskLoader {
                     + "(needs build_settings, info_plist, or bundle_contains)"
                 )
             }
+            if case .trajectory(let configuration) = grader {
+                do { try configuration.validate() } catch let failure as BenchmarkFailure {
+                    throw BenchmarkFailure.invalidTask("Task '\(task.id)': \(failure)")
+                }
+            }
             if case .mutation(let configuration) = grader {
                 do { try configuration.validate() } catch let failure as BenchmarkFailure {
                     throw BenchmarkFailure.invalidTask("Task '\(task.id)': \(failure)")
@@ -133,7 +138,7 @@ public enum TaskLoader {
             switch specification {
             case .xcuitest, .runtime, .uiflow, .mutation: true
             case .xcodeproj: task.environment.platform == .ios
-            case .build, .xctest, .file: false
+            case .build, .xctest, .file, .trajectory: false
             }
         }
         if needsSimulator && task.environment.simulator == nil && task.environment.platform == .ios {

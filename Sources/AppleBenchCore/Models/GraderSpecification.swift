@@ -14,6 +14,7 @@ public enum GraderSpecification: Sendable, Equatable {
     case xcodeproj(XcodeprojGraderConfiguration)
     case uiflow(UIFlowGraderConfiguration)
     case mutation(MutationGraderConfiguration)
+    case trajectory(TrajectoryGraderConfiguration)
 
     /// The `type` discriminator value for this grader.
     public var type: GraderType {
@@ -26,6 +27,7 @@ public enum GraderSpecification: Sendable, Equatable {
         case .xcodeproj: .xcodeproj
         case .uiflow: .uiflow
         case .mutation: .mutation
+        case .trajectory: .trajectory
         }
     }
 }
@@ -39,6 +41,7 @@ public enum GraderType: String, Sendable, Codable, CaseIterable {
     case xcodeproj
     case uiflow
     case mutation
+    case trajectory
 }
 
 extension GraderSpecification: Codable {
@@ -66,6 +69,8 @@ extension GraderSpecification: Codable {
             self = .uiflow(try UIFlowGraderConfiguration(from: decoder))
         case .mutation:
             self = .mutation(try MutationGraderConfiguration(from: decoder))
+        case .trajectory:
+            self = .trajectory(try TrajectoryGraderConfiguration(from: decoder))
         }
     }
 
@@ -88,6 +93,8 @@ extension GraderSpecification: Codable {
         case .uiflow(let configuration):
             try configuration.encode(to: encoder)
         case .mutation(let configuration):
+            try configuration.encode(to: encoder)
+        case .trajectory(let configuration):
             try configuration.encode(to: encoder)
         }
     }
@@ -708,6 +715,85 @@ public struct MutationGraderConfiguration: Sendable, Codable, Equatable {
             throw BenchmarkFailure.invalidTask(
                 "Mutation on \(mutation.path) replaces text with itself, so it breaks nothing"
             )
+        }
+    }
+}
+
+// MARK: - Trajectory
+
+/// One claim about what the agent actually did, as the harness observed it.
+public struct TrajectoryAssertion: Sendable, Codable, Equatable {
+    /// A regular expression matched against each command the agent ran.
+    public var commandMatches: String?
+    /// The command must have been run at least this many times. Default 1.
+    public var atLeast: Int?
+    /// The command must never have been run.
+    public var absent: Bool?
+
+    public init(commandMatches: String? = nil, atLeast: Int? = nil, absent: Bool? = nil) {
+        self.commandMatches = commandMatches
+        self.atLeast = atLeast
+        self.absent = absent
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case absent
+        case commandMatches = "command_matches"
+        case atLeast = "at_least"
+    }
+}
+
+/// Grades what the agent did, not what it says it did.
+///
+/// Some deliverables are a file the agent writes: a test report, a screenshot,
+/// a log of gestures it performed. Reading that file back proves only that a
+/// file exists with the right words in it, and an agent can write those words
+/// without ever running anything. The artifact is self-reported and no
+/// assertion about its contents can fix that.
+///
+/// What is not self-reported is the trajectory. The harness spawns every
+/// command the agent runs and records it, so "did it actually run the tests"
+/// is answerable from evidence the agent never touched. Pairing the artifact
+/// with the run that must have produced it is what makes these tasks gradeable
+/// rather than merely checkable.
+public struct TrajectoryGraderConfiguration: Sendable, Codable, Equatable {
+    public var minCommands: Int?
+    public var minBuildInvocations: Int?
+    public var minTestInvocations: Int?
+    public var assertions: [TrajectoryAssertion]
+
+    public init(
+        minCommands: Int? = nil,
+        minBuildInvocations: Int? = nil,
+        minTestInvocations: Int? = nil,
+        assertions: [TrajectoryAssertion] = []
+    ) {
+        self.minCommands = minCommands
+        self.minBuildInvocations = minBuildInvocations
+        self.minTestInvocations = minTestInvocations
+        self.assertions = assertions
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case assertions
+        case minCommands = "min_commands"
+        case minBuildInvocations = "min_build_invocations"
+        case minTestInvocations = "min_test_invocations"
+    }
+
+    public func validate() throws {
+        let hasClause = minCommands != nil || minBuildInvocations != nil
+            || minTestInvocations != nil || !assertions.isEmpty
+        guard hasClause else {
+            throw BenchmarkFailure.invalidTask("A trajectory grader that claims nothing grades nothing")
+        }
+        for assertion in assertions {
+            guard let pattern = assertion.commandMatches else {
+                throw BenchmarkFailure.invalidTask("A trajectory assertion needs command_matches")
+            }
+            guard (try? NSRegularExpression(pattern: pattern)) != nil else {
+                throw BenchmarkFailure.invalidTask("Not a valid regular expression: \(pattern)")
+            }
         }
     }
 }
