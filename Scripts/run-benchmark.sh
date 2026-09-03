@@ -42,6 +42,11 @@
 #   -o, --out <dir>         Report directory (default: Reports/<suite>-<date>)
 #       --runs-dir <dir>    Run artifact root (default: .applebench/runs)
 #       --strip-wrapper-clis  Hide wrapper CLIs from the agent's PATH
+#       --stream            Show what each task is doing as it happens:
+#                           commands, file edits, graders. A task can sit
+#                           silent for ten minutes otherwise, which looks
+#                           identical to a wedged simulator.
+#       --stream-output     That, plus the model's own messages. Noisy.
 #       --task-set-repo <u> Git URL of the task set to score. Cloned on first
 #                           use and fast-forwarded after, then prepared. Also
 #                           read from APPLEBENCH_TASKSET_REPO, so a scoring
@@ -96,6 +101,7 @@ parallel="1"
 out=""
 runs_dir="$root/.applebench/runs"
 strip_wrappers=""
+stream=""
 allow_env=()
 api_key=""
 api_key_file=""
@@ -123,6 +129,8 @@ while [ $# -gt 0 ]; do
         -o|--out) out="$2"; shift 2 ;;
         --runs-dir) runs_dir="$2"; shift 2 ;;
         --strip-wrapper-clis) strip_wrappers="--strip-wrapper-clis"; shift ;;
+        --stream) stream="--stream"; shift ;;
+        --stream-output) stream="--stream-output"; shift ;;
         --allow-env) allow_env+=(--allow-env "$2"); shift 2 ;;
         --task-set-repo) task_set_repo="$2"; shift 2 ;;
         --task-set-dir) task_set_dir="$2"; shift 2 ;;
@@ -151,6 +159,13 @@ if [ -z "$model" ] && [ -t 0 ]; then
         echo "error: no model selected." >&2
         exit 1
     fi
+elif [ -z "$model" ]; then
+    # No model and no terminal to choose from. Running the agent's own default
+    # would score a model the report cannot name and cannot price, so it fails
+    # here rather than producing a number nobody can attribute.
+    echo "error: no --model given and no terminal to pick one on." >&2
+    echo "       Pass --model <id>, or run interactively to choose from the catalog." >&2
+    exit 2
 fi
 
 # Check the model before spending an hour on it. A name the agent cannot reach
@@ -320,6 +335,7 @@ set +e
     --tasks-dir "$taskset_tasks" \
     ${model:+--model "$model"} \
     ${effort:+--effort "$effort"} \
+    ${stream:+"$stream"} \
     ${max_tokens:+--max-tokens "$max_tokens"} \
     ${timeout_cap:+--timeout-cap "$timeout_cap"} \
     ${agent_arg[@]+"${agent_arg[@]}"} \
