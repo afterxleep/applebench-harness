@@ -74,10 +74,19 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
     /// or inline JSON. A value that names a file which cannot be read is an
     /// error rather than a silent fallback: a run that quietly ignores the
     /// requested provider would be scored against the wrong endpoint.
-    static func resolveProviderJSON(from value: String?) throws -> String? {
-        guard let value else { return nil }
+    static func resolveProviderJSON(
+        from value: String?,
+        hostConfigs: [URL] = hostConfigURLs
+    ) throws -> String? {
+        guard let value, !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            // Nothing was asked for, so carry over whatever the host defines.
+            // A scored run redirects HOME to keep user skills out, which also
+            // hides the config where a custom provider's endpoint and key
+            // live. Without this the agent has no provider and every task
+            // fails before reaching a model.
+            return try hostProviders(at: hostConfigs)
+        }
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
         if trimmed.hasPrefix("{") { return trimmed }
         guard let contents = try? String(contentsOfFile: trimmed, encoding: .utf8) else {
             throw BenchmarkFailure.agentLaunchFailure(
@@ -85,6 +94,54 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
             )
         }
         return contents.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Where OpenCode keeps its user configuration, in the order it reads them.
+    static var hostConfigURLs: [URL] {
+        let home = URL(fileURLWithPath: NSHomeDirectory())
+        return ["opencode.jsonc", "opencode.json"].map {
+            home.appendingPathComponent(".config/opencode/\($0)")
+        }
+    }
+
+    /// The `provider` block from the first host config that defines one.
+    ///
+    /// Only `provider` is taken. Skills, agents and the rest of the user's
+    /// configuration stay out, which is the whole point of the hermetic home:
+    /// a scored run must not inherit tooling the next machine will not have.
+    static func hostProviders(at urls: [URL]) throws -> String? {
+        for url in urls {
+            guard let text = try? String(contentsOf: url, encoding: .utf8),
+                  let root = jsonObject(from: text),
+                  let provider = root["provider"] as? [String: Any],
+                  !provider.isEmpty,
+                  let data = try? JSONSerialization.data(
+                      withJSONObject: provider, options: [.sortedKeys, .withoutEscapingSlashes]
+                  )
+            else { continue }
+            return String(decoding: data, as: UTF8.self)
+        }
+        return nil
+    }
+
+    /// Parses JSON with comments and trailing commas, which is what OpenCode's
+    /// own `.jsonc` config is written in.
+    static func jsonObject(from text: String) -> [String: Any]? {
+        if let data = text.data(using: .utf8),
+           let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            return root
+        }
+        var cleaned = text.replacingOccurrences(
+            of: #"(?m)(^|\s)//[^\n]*"#, with: "", options: .regularExpression
+        )
+        cleaned = cleaned.replacingOccurrences(
+            of: #"/\*[\s\S]*?\*/"#, with: "", options: .regularExpression
+        )
+        cleaned = cleaned.replacingOccurrences(
+            of: #",(\s*[}\]])"#, with: "$1", options: .regularExpression
+        )
+        guard let data = cleaned.data(using: .utf8) else { return nil }
+        return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
     }
 
     /// The `opencode run` argument list for one task.

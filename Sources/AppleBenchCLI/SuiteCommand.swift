@@ -172,6 +172,11 @@ struct SuiteCommand: AsyncParsableCommand {
 
         print("AppleBench · suite \(benchmarkSuite.id) · \(tasks.count) task(s) × \(entries.count) configuration(s) × \(runs) run(s)\n")
 
+        // Set when the agent never reached its model. A caller has to tell
+        // this from an ordinary run that hit a few infrastructure errors,
+        // because that one still produced results worth publishing and this
+        // one produced nothing at all.
+        let abandoned = AbandonedFlag()
         let report = await coordinator.runSuite(
             suite: benchmarkSuite,
             tasks: tasks,
@@ -189,6 +194,7 @@ struct SuiteCommand: AsyncParsableCommand {
             case .taskErrored(_, _, let error):
                 print("  ERROR · \(error)")
             case .suiteAbandoned(let reason):
+                abandoned.set()
                 print("")
                 print("Suite stopped: \(reason)")
                 print("Nothing here measures the model. Fix the agent and run it again.")
@@ -239,8 +245,37 @@ struct SuiteCommand: AsyncParsableCommand {
             }
         }
 
+        // Its own exit code, not just failure. A run that hit a few errors and
+        // finished still produced a result a caller may want to publish; an
+        // abandoned one produced nothing, and publishing it would put a score
+        // on the board that no model earned.
+        if abandoned.isSet {
+            throw ExitCode(Self.abandonedExitCode)
+        }
         if report.agents.contains(where: { $0.errored > 0 }) {
             throw ExitCode.failure
         }
+    }
+
+    /// Exit code meaning "the agent never reached its model, so nothing here
+    /// is a result". Callers gate publishing on it.
+    static let abandonedExitCode: Int32 = 3
+}
+
+/// A one-way flag the suite's progress callback can set from any worker.
+private final class AbandonedFlag: @unchecked Sendable {
+    private var value = false
+    private let lock = NSLock()
+
+    func set() {
+        lock.lock()
+        defer { lock.unlock() }
+        value = true
+    }
+
+    var isSet: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return value
     }
 }

@@ -412,7 +412,14 @@ echo "  $log"
 #
 # Suites are all of them: a score that spans gold and gold-02 has to name both,
 # or half of what was just run is filtered straight back out.
-if [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" != "no" ]; }; then
+#
+# Exit code 3 means the suite stopped because the agent never reached its
+# model. Publishing then would rewrite the model's page from whatever runs
+# happened to be in the tree already, and report a score nothing just earned.
+if [ "$suite_status" -eq 3 ]; then
+    echo
+    echo "Not publishing: the suite stopped before it measured anything." >&2
+elif [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" != "no" ]; }; then
     if [ -z "$model" ]; then
         echo "note: --publish needs --model to know which report to rewrite; skipping." >&2
     else

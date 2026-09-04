@@ -16,3 +16,8 @@ Reports/Logs/
 prepare.log
 run.log
 pending-suite.yaml
+
+# A run's exports. The published copies under site/_data are what the site
+# reads; these are the working ones, rewritten by every run.
+Reports/*/summary.csv
+Reports/*/summary.json
