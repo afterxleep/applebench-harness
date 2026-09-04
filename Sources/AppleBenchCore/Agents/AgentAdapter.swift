@@ -163,4 +163,21 @@ public struct AgentRunResult: Sendable {
         self.usage = usage
         self.finalResponse = finalResponse
     }
+
+    /// True when the agent process died without ever reaching the model.
+    ///
+    /// Grading carries on regardless: the fixture builds, its tests run, and
+    /// the task records a FAIL indistinguishable from a model that tried and
+    /// missed. A whole suite of those looks like a score of zero. Treating it
+    /// as an infrastructure error instead keeps a broken harness out of the
+    /// results.
+    ///
+    /// Spending a token or answering at all is proof enough that it ran, so a
+    /// model that crashed mid-task still counts against it. Timeouts and
+    /// budget stops are the harness ending a working model, never this.
+    public var neverRan: Bool {
+        guard terminationReason == .failed, (exitCode ?? 0) != 0 else { return false }
+        return (usage.totalTokens ?? 0) == 0
+            && (finalResponse?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+    }
 }

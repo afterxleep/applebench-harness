@@ -200,7 +200,11 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
         var launchArguments = arguments
         var sandboxApplied = false
         if let sandbox = context.sandbox {
-            guard let wrapped = try sandbox.wrap(
+            // The run directory is denied because it holds the task's grader
+            // specification and every other run's results. OpenCode's own
+            // config lives there too, and it cannot start without reading it.
+            let sealed = sandbox.allowingRead([Self.configURL(for: context)])
+            guard let wrapped = try sealed.wrap(
                 executable: executable,
                 arguments: arguments,
                 profileURL: context.runDirectoryURL.appendingPathComponent("agent.sb")

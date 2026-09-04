@@ -22,6 +22,14 @@ import Foundation
 public struct AgentSandbox: Sendable {
     /// Directories whose contents would answer the task.
     public let deniedReadPaths: [URL]
+    /// Individual files allowed back out of those denials.
+    ///
+    /// An agent's own configuration is written to its run directory rather than
+    /// its workspace, so the agent cannot edit its own permissions. That
+    /// directory is denied wholesale because it also holds the task's grader
+    /// specification and every other run's results, so the one file the agent
+    /// legitimately needs is named here rather than opening the directory.
+    public let allowedReadPaths: [URL]
     /// The one place the agent is expected to work, allowed back after the
     /// denials above so a workspace living under a denied root still opens.
     public let workspaceURL: URL
@@ -33,10 +41,29 @@ public struct AgentSandbox: Sendable {
     /// its own, and a script it writes in /tmp all fail the same way.
     public let executableRoots: [URL]
 
-    public init(deniedReadPaths: [URL], workspaceURL: URL, executableRoots: [URL] = []) {
+    public init(
+        deniedReadPaths: [URL],
+        workspaceURL: URL,
+        executableRoots: [URL] = [],
+        allowedReadPaths: [URL] = []
+    ) {
         self.deniedReadPaths = deniedReadPaths
         self.workspaceURL = workspaceURL
         self.executableRoots = executableRoots
+        self.allowedReadPaths = allowedReadPaths
+    }
+
+    /// A copy that also lets the agent read `paths`.
+    ///
+    /// Each adapter knows which files it puts outside the workspace; the
+    /// standard denial set cannot, so it asks rather than guessing at names.
+    public func allowingRead(_ paths: [URL]) -> AgentSandbox {
+        AgentSandbox(
+            deniedReadPaths: deniedReadPaths,
+            workspaceURL: workspaceURL,
+            executableRoots: executableRoots,
+            allowedReadPaths: allowedReadPaths + paths
+        )
     }
 
     /// Where a legitimate Apple-platform run needs to execute from.
@@ -155,12 +182,21 @@ public struct AgentSandbox: Sendable {
             // Denying read also denies exec: a binary has to be read to run,
             // and it has to be read to be copied somewhere the rule misses.
             let rule = (exists && !isDirectory.boolValue) ? "literal" : "subpath"
-            lines.append("(deny file-read* (\(rule) \(quote(path.path))))")
+            for spelling in spellings(of: path) {
+                lines.append("(deny file-read* (\(rule) \(quote(spelling))))")
+            }
         }
-        // The workspace usually lives under `.applebench/runs`, which was just
-        // denied wholesale. Allowing it back is what makes the run possible.
-        lines.append("(allow file-read* (subpath \(quote(workspaceURL.path))))")
-        lines.append("(allow file-write* (subpath \(quote(workspaceURL.path))))")
+        // Named files first, then the workspace. Both sit under a root that
+        // was just denied wholesale, and both have to come after it.
+        for path in allowedReadPaths {
+            for spelling in spellings(of: path) {
+                lines.append("(allow file-read* (literal \(quote(spelling))))")
+            }
+        }
+        for spelling in spellings(of: workspaceURL) {
+            lines.append("(allow file-read* (subpath \(quote(spelling))))")
+            lines.append("(allow file-write* (subpath \(quote(spelling))))")
+        }
 
         // Execution last, and as an allowlist. Refusing every binary outside
         // the toolchain is what stops the agent routing around a denied
@@ -190,6 +226,48 @@ public struct AgentSandbox: Sendable {
     }
 
     public static let sandboxExec = "/usr/bin/sandbox-exec"
+
+    /// Every spelling of a path a rule has to name.
+    ///
+    /// The sandbox matches paths after the kernel has resolved them, so a rule
+    /// written against a symlinked path matches nothing. On macOS that is not
+    /// an edge case: `/tmp` and `/var` are symlinks into `/private`, so a rule
+    /// naming either is denied on paper and readable in fact. Both spellings
+    /// are emitted, because the unresolved one is what a reader of the profile
+    /// recognises and the resolved one is what the kernel enforces.
+    private func spellings(of path: URL) -> [String] {
+        let resolved = Self.realPath(of: path)
+        return resolved == path.path ? [path.path] : [path.path, resolved]
+    }
+
+    /// A path with every symlink resolved, including ones Foundation leaves
+    /// alone.
+    ///
+    /// `URL.resolvingSymlinksInPath()` returns `/var/folders/…` unchanged even
+    /// though the real directory is `/private/var/folders/…`, which is exactly
+    /// the case a sandbox rule must not get wrong. `realpath(3)` needs the
+    /// path to exist, so the longest existing ancestor is resolved and the
+    /// rest appended: a rule written before its directory is created still
+    /// names the right place.
+    static func realPath(of path: URL) -> String {
+        var trailing: [String] = []
+        var current = path.standardizedFileURL
+        while current.path != "/" && !current.path.isEmpty {
+            if let resolved = resolve(current.path) {
+                return ([resolved.hasSuffix("/") ? String(resolved.dropLast()) : resolved]
+                    + trailing.reversed()).joined(separator: "/")
+            }
+            trailing.append(current.lastPathComponent)
+            current = current.deletingLastPathComponent()
+        }
+        return path.path
+    }
+
+    private static func resolve(_ path: String) -> String? {
+        guard let buffer = realpath(path, nil) else { return nil }
+        defer { free(buffer) }
+        return String(cString: buffer)
+    }
 
     /// SBPL string literal. A path with a quote in it would otherwise end the
     /// literal early and change what the rule denies.

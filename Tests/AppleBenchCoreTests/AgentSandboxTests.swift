@@ -139,6 +139,65 @@ struct AgentSandboxTests {
         #expect(found.contains(wrapper.path))
     }
 
+    @Test("An allowed file inside a denied root opens, and its siblings do not")
+    func allowedReadEscapesTheDenial() throws {
+        // The agent's own config lives in its run directory, outside the
+        // workspace so the agent cannot edit its own permissions. That
+        // directory is denied wholesale to hide other runs, so the one file it
+        // needs has to be allowed back by name.
+        let box = sandbox(denied: ["/runs"], workspace: "/runs/r1/workspace")
+            .allowingRead([URL(fileURLWithPath: "/runs/r1/opencode.json")])
+        let profile = box.profile()
+        let deny = try #require(profile.range(of: "(deny file-read* (subpath \"/runs\")"))
+        let allow = try #require(
+            profile.range(of: "(allow file-read* (literal \"/runs/r1/opencode.json\"))")
+        )
+        #expect(deny.lowerBound < allow.lowerBound)
+        // The answer key sits beside it in the same directory and stays shut.
+        #expect(!profile.contains("/runs/r1/metadata.json"))
+    }
+
+    @Test("sandbox-exec really opens the allowed file and really shuts its sibling")
+    func realSandboxHonoursTheAllowance() throws {
+        // Rule order in a string is not the claim. The claim is what the
+        // kernel does, and the last time this was only checked as text the
+        // agent was denied its own config on every task of a full suite.
+        let run = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-seal-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(
+            at: run.appendingPathComponent("workspace"), withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: run) }
+
+        let config = run.appendingPathComponent("opencode.json")
+        let answers = run.appendingPathComponent("metadata.json")
+        try "{}".write(to: config, atomically: true, encoding: .utf8)
+        try "{}".write(to: answers, atomically: true, encoding: .utf8)
+
+        let box = AgentSandbox(
+            deniedReadPaths: [run],
+            workspaceURL: run.appendingPathComponent("workspace")
+        ).allowingRead([config])
+        let profileURL = run.appendingPathComponent("agent.sb")
+
+        func canRead(_ file: URL) throws -> Bool {
+            let command = try #require(
+                try box.wrap(executable: "/bin/cat", arguments: [file.path], profileURL: profileURL)
+            )
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: command.executable)
+            process.arguments = command.arguments
+            process.standardOutput = FileHandle.nullDevice
+            process.standardError = FileHandle.nullDevice
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus == 0
+        }
+
+        #expect(try canRead(config), "the agent cannot read its own configuration")
+        #expect(try !canRead(answers), "the run's grader specification is readable")
+    }
+
     @Test("Wrapping produces a sandbox-exec invocation and writes the profile")
     func wrapWritesProfile() throws {
         let profileURL = URL(fileURLWithPath: NSTemporaryDirectory())

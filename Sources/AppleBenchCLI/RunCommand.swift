@@ -21,7 +21,7 @@ struct RunCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Reasoning effort passed to the agent when its CLI supports it (e.g. low, medium, high).")
     var effort: String?
 
-    @Option(name: .long, help: "Write a readable transcript per task under this directory, one folder per model (default: Transcripts).")
+    @Option(name: .long, help: "Write a readable transcript per task under this directory, one folder per model (default: Reports/Logs).")
     var transcripts: String?
 
     @Flag(name: .long, help: "Do not write transcripts.")
@@ -29,7 +29,7 @@ struct RunCommand: AsyncParsableCommand {
 
     /// Where transcripts go, or nil when they are switched off.
     var transcriptsRoot: URL? {
-        noTranscripts ? nil : URL(fileURLWithPath: transcripts ?? "Transcripts")
+        noTranscripts ? nil : URL(fileURLWithPath: transcripts ?? "Reports/Logs")
     }
 
     @Flag(name: .long, help: "Seal the agent away from reference solutions, task files, other runs, and any executable outside the Apple toolchain. On for scoring runs.")

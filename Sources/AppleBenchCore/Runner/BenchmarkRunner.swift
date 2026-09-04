@@ -191,6 +191,17 @@ public struct BenchmarkRunner: Sendable {
                 progress: progress
             )
 
+            // An agent that never reached the model is a broken harness, not a
+            // model that solved nothing. Grading it anyway would produce a
+            // credible-looking FAIL against an untouched fixture.
+            if agentResult.neverRan {
+                throw BenchmarkFailure.agentLaunchFailure(
+                    "The agent exited \(agentResult.exitCode.map(String.init) ?? "abnormally") "
+                        + "without producing any output, so it never reached the model. "
+                        + "Its output is in logs/agent-output.log."
+                )
+            }
+
             // Metadata (which includes the task's grader configuration) is
             // deliberately written only after the agent has exited: while the
             // agent runs, nothing in or near its workspace describes how it
@@ -340,7 +351,8 @@ public struct BenchmarkRunner: Sendable {
             if let transcriptsRoot = options.transcriptsRoot {
                 do {
                     let url = try RunTranscript.write(
-                        task: task, result: result, events: events, root: transcriptsRoot
+                        task: task, result: result, events: events,
+                        runDirectoryURL: runDirectoryURL, root: transcriptsRoot
                     )
                     await recorder.record(.artifactCreated, payload: .object([
                         "path": .string(url.path), "kind": .string("transcript"),

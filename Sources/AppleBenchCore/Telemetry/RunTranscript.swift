@@ -77,6 +77,11 @@ public enum RunTranscript {
         var entries: [String] = []
         var grading: [String] = []
         var isGrading = false
+        // A run records each of the agent's lines twice: parsed by the adapter
+        // into `agent_event`, and again as the raw stdout it came from. Both
+        // are read below, so whichever the run has is used and neither is
+        // rendered twice.
+        let hasParsedEvents = events.contains { $0.type == .agentEvent }
         for event in events {
             switch event.type {
             case .agentFinished, .gradingStarted, .verificationMaterialised:
@@ -87,7 +92,7 @@ public enum RunTranscript {
                 }
             case .agentOutput:
                 // Raw stdout: one JSON object per line, each carrying a part.
-                guard let text = string(event, "text") else { continue }
+                guard !hasParsedEvents, let text = string(event, "text") else { continue }
                 for line in text.split(separator: "\n") {
                     let trimmed = line.trimmingCharacters(in: .whitespaces)
                     guard trimmed.hasPrefix("{"),
@@ -131,12 +136,10 @@ public enum RunTranscript {
             var block = "[tool: \(name)]"
             if let state = part["state"] as? [String: Any] {
                 if let input = state["input"] as? [String: Any], !input.isEmpty {
-                    block += "\n  in:  " + summarise(input)
+                    block += "\n" + summarise(input)
                 }
-                if let output = state["output"] as? String {
-                    let flat = output.split(whereSeparator: \.isNewline).joined(separator: " ")
-                    block += "\n  out: " + String(flat.prefix(600))
-                        + (flat.count > 600 ? "…" : "")
+                if let output = state["output"] as? String, !output.isEmpty {
+                    block += "\n  out:\n" + indent(output)
                 }
             }
             return block
@@ -145,14 +148,26 @@ public enum RunTranscript {
         }
     }
 
-    /// A tool's arguments on one line, longest values clipped.
+    /// A tool's arguments, whole.
+    ///
+    /// Nothing here is clipped. The argument is usually the file the agent
+    /// wrote and the output is usually the log that decided the verdict, so a
+    /// transcript that shortens either cannot answer the question it exists
+    /// for.
     static func summarise(_ input: [String: Any]) -> String {
         input.keys.sorted().map { key in
             let value = String(describing: input[key] ?? "")
-                .split(whereSeparator: \.isNewline).joined(separator: " ")
-            return "\(key)=\(value.count > 200 ? String(value.prefix(200)) + "…" : value)"
+            guard value.contains(where: \.isNewline) else { return "  \(key): \(value)" }
+            return "  \(key):\n" + indent(value)
         }
-        .joined(separator: " ")
+        .joined(separator: "\n")
+    }
+
+    /// Indents a block so its lines read as content, not as transcript.
+    static func indent(_ text: String) -> String {
+        text.split(separator: "\n", omittingEmptySubsequences: false)
+            .map { "    \($0)" }
+            .joined(separator: "\n")
     }
 
     // MARK: - Payload access
@@ -185,11 +200,18 @@ public enum RunTranscript {
     ///
     /// One file per task inside a folder per model, so a re-run overwrites the
     /// task it re-ran and leaves the rest of that model's history alone.
+    ///
+    /// Two files, not one. `<task>.log` is the readable record, assembled by
+    /// the parser above; `<task>.output.log` is the agent's stdout and stderr
+    /// exactly as they arrived. The readable one is what you read, but it is
+    /// only ever as complete as this parser, and a scoring dispute has to be
+    /// settled against output that no code of ours has touched.
     @discardableResult
     public static func write(
         task: BenchmarkTask,
         result: BenchmarkRunResult,
         events: [BenchmarkEvent],
+        runDirectoryURL: URL?,
         root: URL
     ) throws -> URL {
         let directory = root.appendingPathComponent(slug(for: result.agent.model), isDirectory: true)
@@ -198,6 +220,29 @@ public enum RunTranscript {
         try render(task: task, result: result, events: events).write(
             to: url, atomically: true, encoding: .utf8
         )
+
+        let raw = rawOutput(events: events, runDirectoryURL: runDirectoryURL)
+        try raw.write(
+            to: directory.appendingPathComponent("\(task.id).output.log"),
+            atomically: true,
+            encoding: .utf8
+        )
         return url
+    }
+
+    /// The agent's output verbatim.
+    ///
+    /// The run directory holds the capture the session wrote; it is preferred
+    /// because it is one write of one string. Reassembling the `agent_output`
+    /// chunks is the fallback for a run whose directory has been cleaned away.
+    static func rawOutput(events: [BenchmarkEvent], runDirectoryURL: URL?) -> String {
+        if let runDirectoryURL {
+            let captured = runDirectoryURL.appendingPathComponent("logs/agent-output.log")
+            if let text = try? String(contentsOf: captured, encoding: .utf8) { return text }
+        }
+        return events
+            .filter { $0.type == .agentOutput }
+            .compactMap { string($0, "text") }
+            .joined()
     }
 }
