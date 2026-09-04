@@ -63,14 +63,33 @@ public final class ParallelCursor: @unchecked Sendable {
     private var next: Int = 0
     private var lock = os_unfair_lock_s()
 
+    private var abandoned = false
+
     /// Claim the next job index. Returns `nil` once every job in
-    /// `[0, total)` has been claimed.
+    /// `[0, total)` has been claimed, or once the queue is abandoned.
     public func claim(of total: Int) -> Int? {
         os_unfair_lock_lock(&lock)
         defer { os_unfair_lock_unlock(&lock) }
-        guard next < total else { return nil }
+        guard !abandoned, next < total else { return nil }
         let claimed = next
         next += 1
         return claimed
+    }
+
+    /// Stop handing out work.
+    ///
+    /// Deliberately not cancellation: a worker already inside a job keeps
+    /// going to its own teardown, which is what deletes the simulator it
+    /// created. Workers stop at their next claim instead.
+    public func abandon() {
+        os_unfair_lock_lock(&lock)
+        defer { os_unfair_lock_unlock(&lock) }
+        abandoned = true
+    }
+
+    public var wasAbandoned: Bool {
+        os_unfair_lock_lock(&lock)
+        defer { os_unfair_lock_unlock(&lock) }
+        return abandoned
     }
 }

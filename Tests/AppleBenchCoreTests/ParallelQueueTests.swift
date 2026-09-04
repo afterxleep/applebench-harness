@@ -41,6 +41,50 @@ struct ParallelQueueTests {
         #expect(cursor.claim(of: total) == nil)
     }
 
+    @Test("Abandoning the queue stops every worker claiming more")
+    func cursorAbandonsTheRest() {
+        // When the agent cannot reach its model, every remaining task will
+        // fail the same way. Finishing the suite would spend an hour to
+        // report a score of zero that says nothing about the model.
+        let cursor = ParallelCursor()
+        #expect(cursor.claim(of: 10) == 0)
+        cursor.abandon()
+        #expect(cursor.claim(of: 10) == nil)
+        #expect(cursor.wasAbandoned)
+    }
+
+    @Test("A queue nobody abandoned does not report that it was")
+    func cursorIsNotAbandonedByDefault() {
+        let cursor = ParallelCursor()
+        while cursor.claim(of: 3) != nil {}
+        #expect(!cursor.wasAbandoned)
+    }
+
+    @Test("In-flight workers stop at their next claim, not mid-job")
+    func abandonLetsRunningJobsFinish() async {
+        // Abandoning cancels nothing that is already running: a task holding
+        // a simulator has to reach its own teardown, or the run leaks one.
+        let cursor = ParallelCursor()
+        let total = 100
+        let claimed = await withTaskGroup(of: Int.self) { group in
+            for _ in 0..<4 {
+                group.addTask {
+                    var mine = 0
+                    while let index = cursor.claim(of: total) {
+                        mine += 1
+                        if index == 0 { cursor.abandon() }
+                    }
+                    return mine
+                }
+            }
+            var sum = 0
+            for await count in group { sum += count }
+            return sum
+        }
+        #expect(claimed < total, "abandoning did not stop the queue")
+        #expect(claimed >= 1)
+    }
+
     @Test("Many concurrent claimers never get the same index")
     func cursorConcurrentClaimers() async {
         let cursor = ParallelCursor()

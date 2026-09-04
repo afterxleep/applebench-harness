@@ -195,10 +195,10 @@ public struct BenchmarkRunner: Sendable {
             // model that solved nothing. Grading it anyway would produce a
             // credible-looking FAIL against an untouched fixture.
             if agentResult.neverRan {
-                throw BenchmarkFailure.agentLaunchFailure(
-                    "The agent exited \(agentResult.exitCode.map(String.init) ?? "abnormally") "
-                        + "without producing any output, so it never reached the model. "
-                        + "Its output is in logs/agent-output.log."
+                throw BenchmarkFailure.agentNeverRan(
+                    "it exited \(agentResult.exitCode.map(String.init) ?? "abnormally") "
+                        + "without producing any output. "
+                        + "Its output is in \(runDirectoryURL.lastPathComponent)/logs/agent-output.log."
                 )
             }
 

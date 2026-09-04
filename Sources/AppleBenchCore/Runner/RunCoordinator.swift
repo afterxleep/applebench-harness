@@ -39,6 +39,9 @@ public struct RunCoordinator: Sendable {
         case taskStarted(task: String, agent: String, run: Int, totalRuns: Int)
         case taskFinished(BenchmarkRunResult)
         case taskErrored(task: String, agent: String, error: String)
+        /// The suite stopped early because the agent never reached its model.
+        /// Jobs already running finish; nothing new is claimed.
+        case suiteAbandoned(reason: String)
     }
 
     /// One row of a suite comparison: an agent harness, optionally pinned to
@@ -193,6 +196,19 @@ public struct RunCoordinator: Sendable {
                         } catch {
                             result = nil
                             errorMessage = "\(error)"
+                            // An agent that never reached its model says
+                            // nothing about this task, and the next task will
+                            // hit the same wall. Stop claiming work rather
+                            // than grading a suite of untouched fixtures and
+                            // publishing it as a score.
+                            if case BenchmarkFailure.agentNeverRan(let why) = error,
+                               !cursor.wasAbandoned {
+                                cursor.abandon()
+                                progress(.suiteAbandoned(
+                                    reason: "the agent never reached its model on "
+                                        + "\(job.task.id): \(why)"
+                                ))
+                            }
                         }
 
                         if let r = result {

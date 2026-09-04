@@ -188,6 +188,10 @@ struct SuiteCommand: AsyncParsableCommand {
                 print("  \(Format.passFail(result.result.passed)) · \(Format.duration(result.result.durationSeconds))")
             case .taskErrored(_, _, let error):
                 print("  ERROR · \(error)")
+            case .suiteAbandoned(let reason):
+                print("")
+                print("Suite stopped: \(reason)")
+                print("Nothing here measures the model. Fix the agent and run it again.")
             }
         }
 
