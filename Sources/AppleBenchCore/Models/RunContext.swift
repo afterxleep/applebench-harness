@@ -22,7 +22,6 @@ public struct RunContext: Sendable {
     /// When true, the agent's `PATH` is filtered to remove well-known
     /// Apple-toolchain wrapper CLIs. Set by the calibration runs; off
     /// by default.
-    public let stripWrapperCLIs: Bool
     /// Seals the agent away from the paths that hold the answers. `nil` leaves
     /// them readable, which is only appropriate for a local run nobody is
     /// scoring.
@@ -38,7 +37,6 @@ public struct RunContext: Sendable {
         model: String?,
         effort: String? = nil,
         environmentAllowlist: [String] = [],
-        stripWrapperCLIs: Bool = false,
         sandbox: AgentSandbox? = nil,
         limits: RunLimits,
         environment: EnvironmentSnapshot
@@ -50,7 +48,6 @@ public struct RunContext: Sendable {
         self.model = model
         self.effort = effort
         self.environmentAllowlist = environmentAllowlist
-        self.stripWrapperCLIs = stripWrapperCLIs
         self.sandbox = sandbox
         self.limits = limits
         self.environment = environment
@@ -59,15 +56,15 @@ public struct RunContext: Sendable {
     /// Builds the child environment for an agent process: a minimal base plus
     /// explicitly allowlisted variables from the parent environment.
     ///
-    /// When `stripWrapperCLIs` is true, well-known third-party wrapper
-    /// CLIs that wrap Apple's toolchain (FlowDeck, Tuist, xcbeautify,
-    /// fastlane, ...) are stripped from the agent's `PATH`. This is
-    /// opt-in: the calibration runs use it, day-to-day runs don't. A
-    /// model that solves a task by typing `flowdeck build` is solving
-    /// the wrong task — the harness should measure raw-toolchain skill,
-    /// not wrapper-recall. But a real agent should be free to use the
-    /// wrapper when the run is asking the model to do the work, not to
-    /// prove it can do the work without one.
+    /// Third-party CLIs that wrap Apple's toolchain (FlowDeck, Tuist,
+    /// fastlane, CocoaPods, ...) are always stripped from the agent's
+    /// `PATH`. A model that solves a task by typing `flowdeck build` is
+    /// solving a different task, and whether it could depends on what
+    /// the operator happens to have installed. This used to be opt-in,
+    /// and the tasks compensated by saying "no third-party CLI" in the
+    /// prompt — which told the model those tools existed and were worth
+    /// reaching for. Removing PATH is not the enforcement; the sandbox
+    /// denies the binaries themselves.
     ///
     /// When `hermeticHome` is true, the agent's `HOME` is redirected to
     /// a fresh temp directory. The agent can still authenticate via
@@ -80,7 +77,6 @@ public struct RunContext: Sendable {
     /// harness noticing. The hermetic HOME prevents that.
     public func agentEnvironment(
         extra: [String: String] = [:],
-        stripWrapperCLIs: Bool = false,
         hermeticHome: URL? = nil
     ) -> [String: String] {
         let parent = ProcessInfo.processInfo.environment
@@ -103,14 +99,10 @@ public struct RunContext: Sendable {
             environment[key] = value
         }
         if let path = environment["PATH"] ?? parent["PATH"] {
-            if stripWrapperCLIs {
-                environment["PATH"] = Self.filterWrapperCLIs(
-                    from: path,
-                    agentBinaryNames: ["claude", "opencode", "claude-code", "codex"]
-                )
-            } else {
-                environment["PATH"] = path
-            }
+            environment["PATH"] = Self.filterWrapperCLIs(
+                from: path,
+                agentBinaryNames: ["claude", "opencode", "claude-code", "codex"]
+            )
         }
         return environment.compactMapValues { $0 }
     }

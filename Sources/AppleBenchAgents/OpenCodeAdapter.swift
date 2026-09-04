@@ -189,7 +189,7 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
                 "OPENCODE_CONFIG": Self.configURL(for: context).path
             ]
         )
-        if context.stripWrapperCLIs, let harnessPath = environment["PATH"] {
+        if let harnessPath = environment["PATH"] {
             do {
                 let sanitized = try RunContext.sanitizedPath(
                     forAgentBinary: executable,
@@ -205,15 +205,15 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
             }
         }
 
-        // When the run strips wrapper CLIs, also redirect HOME to a
-        // fresh temp dir so the agent cannot auto-load user-installed
-        // skills (e.g. `flowdeck`) that would shortcut the raw-toolchain
-        // requirement. Auth is carried over by symlinking the host's
+        // HOME is redirected to a fresh temp dir so the agent cannot
+        // auto-load user-installed skills (e.g. `flowdeck`) that would
+        // shortcut the toolchain. A skill is the same shortcut as the
+        // binary, reached a different way. Auth is carried over by symlinking the host's
         // opencode auth dir into the hermetic home — without that, the
         // harness launches an authenticated binary that cannot reach the
         // provider. (Skills are still absent because the symlink is to
         // the auth dir only, not to ~/.config/opencode/skills.)
-        if context.stripWrapperCLIs {
+        do {
             let home = URL(fileURLWithPath: NSTemporaryDirectory())
                 .appendingPathComponent("applebench-home-\(UUID().uuidString)", isDirectory: true)
             try? FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)

@@ -41,7 +41,6 @@
 #   -p, --parallel <n>      Concurrent tasks (default: 1)
 #   -o, --out <dir>         Report directory (default: Reports/<suite>-<date>)
 #       --runs-dir <dir>    Run artifact root (default: .applebench/runs)
-#       --strip-wrapper-clis  Hide wrapper CLIs from the agent's PATH
 #       --stream            Show what each task is doing as it happens:
 #                           commands, file edits, graders. A task can sit
 #                           silent for ten minutes otherwise, which looks
@@ -104,7 +103,7 @@ agent_arg=()
 parallel="1"
 out=""
 runs_dir="$root/.applebench/runs"
-strip_wrappers=""
+
 stream=""
 seal="--seal-answers"
 allow_env=()
@@ -133,7 +132,7 @@ while [ $# -gt 0 ]; do
         -p|--parallel) parallel="$2"; shift 2 ;;
         -o|--out) out="$2"; shift 2 ;;
         --runs-dir) runs_dir="$2"; shift 2 ;;
-        --strip-wrapper-clis) strip_wrappers="--strip-wrapper-clis"; shift ;;
+        --strip-wrapper-clis) shift ;;  # always on now; accepted so old commands keep working
         --stream) stream="--stream"; shift ;;
         --no-seal) seal=""; shift ;;
         --stream-output) stream="--stream-output"; shift ;;
@@ -381,7 +380,6 @@ set +e
     ${agent_arg[@]+"${agent_arg[@]}"} \
     --parallel "$parallel" \
     --runs-dir "$runs_dir" \
-    $strip_wrappers \
     ${allow_env[@]+"${allow_env[@]}"} \
     ${vm:+--vm "$vm"} \
     ${vm_allow[@]+"${vm_allow[@]}"} \

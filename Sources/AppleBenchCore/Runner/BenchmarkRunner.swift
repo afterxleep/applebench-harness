@@ -7,14 +7,6 @@ public struct RunnerOptions: Sendable {
     public var effort: String?
     public var keepWorkspace: Bool
     public var environmentAllowlist: [String]
-    /// When true, well-known Apple-toolchain wrapper CLIs (flowdeck,
-    /// tuist, fastlane, xcbeautify, swiftlint, periphery, xcodegen)
-    /// are stripped from the agent's `PATH` before the run starts.
-    /// Use this for calibration runs that want to measure
-    /// raw-toolchain skill, not
-    /// wrapper-recall. Default `false` so day-to-day runs keep the
-    /// agent's full toolset.
-    public var stripWrapperCLIs: Bool
     /// Root directory beneath which run directories are created.
     public var runsRoot: URL
     /// Ceilings applied to every task's own limits. Tightening only.
@@ -40,7 +32,6 @@ public struct RunnerOptions: Sendable {
         effort: String? = nil,
         keepWorkspace: Bool = false,
         environmentAllowlist: [String] = [],
-        stripWrapperCLIs: Bool = false,
         runsRoot: URL,
         limitCaps: LimitCaps = LimitCaps(),
         eventObserver: (@Sendable (BenchmarkEvent) -> Void)? = nil,
@@ -52,7 +43,6 @@ public struct RunnerOptions: Sendable {
         self.effort = effort
         self.keepWorkspace = keepWorkspace
         self.environmentAllowlist = environmentAllowlist
-        self.stripWrapperCLIs = stripWrapperCLIs
         self.runsRoot = runsRoot
         self.limitCaps = limitCaps
         self.eventObserver = eventObserver
@@ -165,13 +155,11 @@ public struct BenchmarkRunner: Sendable {
             model: options.model,
             effort: options.effort,
             environmentAllowlist: options.environmentAllowlist,
-            stripWrapperCLIs: options.stripWrapperCLIs,
             sandbox: options.sealAnswers
                 ? AgentSandbox.standard(
                     harnessRoot: options.runsRoot.deletingLastPathComponent().deletingLastPathComponent(),
                     taskSetRoot: options.taskSetRoot,
                     workspaceURL: workspace.workspaceURL,
-                    denyWrapperCLIs: options.stripWrapperCLIs,
                     agentExecutable: adapter.executableURL,
                     runDirectory: runDirectoryURL
                 )

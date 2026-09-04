@@ -89,8 +89,11 @@ struct SuiteCommand: AsyncParsableCommand {
     @Option(name: .long, parsing: .singleValue, help: "Environment variable name to expose to agent processes (repeatable).")
     var allowEnv: [String] = []
 
-    @Flag(name: .customLong("strip-wrapper-clis"), help: "Strip well-known Apple-toolchain wrapper CLIs from the agent's PATH. Use for calibration runs.")
-    var stripWrapperCLIs = false
+    /// Accepted and ignored. Wrapper CLIs are always denied now, so a script
+    /// or a habit that still passes this keeps working rather than failing on
+    /// an unknown flag.
+    @Flag(name: .customLong("strip-wrapper-clis"), help: .hidden)
+    var stripWrapperCLIsDeprecated = false
 
     @Option(name: .long, help: "Maximum concurrent tasks per agent. Defaults to 1 (serial); 2–3 is typical for calibration. Each slot runs a full task with its own simulator, so 3 means up to 3 simulators at once.")
     var parallel: Int = 1
@@ -160,7 +163,6 @@ struct SuiteCommand: AsyncParsableCommand {
             effort: effort,
             keepWorkspace: keepWorkspace,
             environmentAllowlist: allowEnv,
-            stripWrapperCLIs: stripWrapperCLIs,
             runsRoot: runsDir.map { URL(fileURLWithPath: $0) } ?? Wiring.defaultRunsRoot(),
             limitCaps: LimitCaps(timeoutSeconds: timeoutCap ?? LimitCaps.standard.timeoutSeconds, maxTokens: maxTokens),
             eventObserver: liveLog.observer(),

@@ -100,26 +100,44 @@ struct AgentSandboxTests {
         }
     }
 
-    @Test("Wrapper binaries are only denied when wrapper stripping is on")
-    func wrappersDeniedOnlyWhenAsked() {
-        let open = AgentSandbox.standard(
+    @Test("Wrapper binaries are denied without being asked")
+    func wrappersAreAlwaysDenied() throws {
+        // Denying them was once opt-in, so whether a task measured toolchain
+        // skill or wrapper recall depended on a flag being remembered. It is
+        // now unconditional, and the prompts no longer mention it.
+        let directory = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-always-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let wrapper = directory.appendingPathComponent("fastlane")
+        FileManager.default.createFile(
+            atPath: wrapper.path, contents: Data("#!/bin/sh\n".utf8),
+            attributes: [.posixPermissions: 0o755]
+        )
+
+        let box = AgentSandbox.standard(
             harnessRoot: URL(fileURLWithPath: "/h"),
             taskSetRoot: nil,
             workspaceURL: URL(fileURLWithPath: "/w"),
-            denyWrapperCLIs: false
+            hostPath: directory.path
         )
-        #expect(open.executableRoots.isEmpty)
-
+        #expect(box.deniedReadPaths.map(\.path).contains(wrapper.path))
         // Denying wrappers denies their binaries; it does not shrink the set
         // of tools the machine offers.
-        let sealed = AgentSandbox.standard(
-            harnessRoot: URL(fileURLWithPath: "/h"),
-            taskSetRoot: nil,
-            workspaceURL: URL(fileURLWithPath: "/w"),
-            denyWrapperCLIs: true,
-            hostPath: "/usr/bin:/bin"
-        )
-        #expect(sealed.executableRoots.isEmpty)
+        #expect(box.executableRoots.isEmpty)
+    }
+
+    @Test("The blocked list covers the ways round the toolchain")
+    func blockedListIsBroad() {
+        // A task answered with a wrapper measures whether the operator
+        // installed it. Each of these is a different route to that.
+        for expected in [
+            "flowdeck", "tuist", "xcodegen", "fastlane", "swiftlint", "xcpretty",
+            "pod", "carthage", "mint", "sourcery", "ios-deploy", "idb", "appium",
+            "bazel", "xcodes", "brew", "npm", "gem",
+        ] {
+            #expect(AgentSandbox.wrapperCLINames.contains(expected), "missing \(expected)")
+        }
     }
 
     @Test("A wrapper on PATH is found and denied, symlink and target both")

@@ -73,8 +73,7 @@ public final class ClaudeCodeAdapter: AgentAdapter, @unchecked Sendable {
         var environment = context.agentEnvironment(extra: [
             "CLAUDE_CODE_DISABLE_TELEMETRY": "1",
         ])
-        if context.stripWrapperCLIs,
-           let harnessPath = environment["PATH"] {
+        if let harnessPath = environment["PATH"] {
             do {
                 let sanitized = try RunContext.sanitizedPath(
                     forAgentBinary: executable,
@@ -92,12 +91,13 @@ public final class ClaudeCodeAdapter: AgentAdapter, @unchecked Sendable {
             }
         }
 
-        // When the run strips wrapper CLIs, also redirect HOME to a
-        // fresh temp dir so the agent cannot auto-load user-installed
-        // skills (e.g. the `flowdeck` Skill that ships with the host's
-        // ~/.claude/skills/). Auth must come from `ANTHROPIC_API_KEY`
-        // (already passed through `agentEnvironment`).
-        if context.stripWrapperCLIs {
+        // HOME is redirected to a fresh temp dir so the agent cannot
+        // auto-load user-installed skills (e.g. the `flowdeck` Skill that
+        // ships with the host's ~/.claude/skills/). A skill is the same
+        // shortcut as the binary, reached a different way. Auth must come
+        // from `ANTHROPIC_API_KEY` (already passed through
+        // `agentEnvironment`).
+        do {
             let home = URL(fileURLWithPath: NSTemporaryDirectory())
                 .appendingPathComponent("applebench-home-\(UUID().uuidString)", isDirectory: true)
             try? FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)

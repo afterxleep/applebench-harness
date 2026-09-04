@@ -82,8 +82,11 @@ struct RunCommand: AsyncParsableCommand {
     @Option(name: .long, parsing: .singleValue, help: "Environment variable name to expose to the agent process (repeatable).")
     var allowEnv: [String] = []
 
-    @Flag(name: .customLong("strip-wrapper-clis"), help: "Strip well-known Apple-toolchain wrapper CLIs (flowdeck, tuist, fastlane, xcbeautify, swiftlint, periphery, xcodegen) from the agent's PATH. Use for calibration runs that want to measure raw-toolchain skill, not wrapper-recall.")
-    var stripWrapperCLIs = false
+    /// Accepted and ignored. Wrapper CLIs are always denied now, so a script
+    /// or a habit that still passes this keeps working rather than failing on
+    /// an unknown flag.
+    @Flag(name: .customLong("strip-wrapper-clis"), help: .hidden)
+    var stripWrapperCLIsDeprecated = false
 
     func run() async throws {
         // Line-buffer stdout so progress streams to pipes/CI, not just TTYs.
@@ -107,7 +110,6 @@ struct RunCommand: AsyncParsableCommand {
             effort: effort,
             keepWorkspace: keepWorkspace,
             environmentAllowlist: allowEnv,
-            stripWrapperCLIs: stripWrapperCLIs,
             runsRoot: runsDir.map { URL(fileURLWithPath: $0) } ?? Wiring.defaultRunsRoot(),
             limitCaps: LimitCaps(timeoutSeconds: timeoutCap ?? LimitCaps.standard.timeoutSeconds, maxTokens: maxTokens),
             eventObserver: liveLog.observer(),

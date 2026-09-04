@@ -98,13 +98,43 @@ public struct AgentSandbox: Sendable {
     ///   - taskSetRoot: the task set, when one is configured. It holds every
     ///     fixture's `.solution` and every task's grader configuration.
     ///   - workspaceURL: the agent's checkout.
-    /// Wrapper CLIs that answer an Apple task by wrapping the toolchain.
+    /// Third-party tools that answer an Apple task by wrapping the toolchain.
+    ///
     /// Denying the binary is what actually removes one: taking it off `PATH`
     /// only stops the agent typing its name, and `/Users/me/.local/bin/flowdeck`
     /// still runs, as does a copy of it the agent makes somewhere else.
+    ///
+    /// The benchmark asks whether a model knows Apple's own toolchain. A task
+    /// answered with a wrapper measured whether the operator had installed it,
+    /// so the list is deliberately broad: project generators, build wrappers,
+    /// dependency managers, release automation, code generators, linters,
+    /// device bridges, and the runtime managers that would install any of the
+    /// above mid-run.
     public static let wrapperCLINames = [
-        "flowdeck", "tuist", "xcbeautify", "xcbeautify-tests", "fastlane",
-        "swift-package-bundler", "periphery", "swiftlint", "xcodegen",
+        // Harnesses and wrappers around xcodebuild
+        "flowdeck", "tuist", "xcbeautify", "xcbeautify-tests", "xcpretty",
+        "xcodebuild-pretty", "bcsymbolmap", "xcbuild", "buck", "buck2", "bazel",
+        "bazelisk", "xctool", "swift-package-bundler",
+        // Project generation and manipulation
+        "xcodegen", "xcodeproj", "struct", "xcake", "xcconfig",
+        // Dependency managers
+        "pod", "cocoapods", "carthage", "mint", "accio", "rome", "punic",
+        // Release, signing and distribution automation
+        "fastlane", "match", "gym", "sigh", "pilot", "deliver", "scan", "snapshot",
+        "frameit", "produce", "cert", "spaceship", "supply", "screengrab",
+        "bundletool", "sentry-cli", "firebase", "appcenter", "shipit",
+        // Code generation, linting and analysis
+        "swiftlint", "swiftformat", "swift-format", "sourcery", "swiftgen",
+        "periphery", "sourcekitten", "jazzy", "tailor", "infer", "danger",
+        // Device and simulator bridges
+        "ios-deploy", "idb", "idb_companion", "libimobiledevice", "ideviceinstaller",
+        "idevicesyslog", "ideviceinfo", "cfgutil", "appium", "maestro", "detox",
+        "waldo", "xcuitest-runner",
+        // Runtime and toolchain managers, which would install any of the above
+        "mise", "asdf", "rbenv", "rvm", "nodenv", "pyenv", "swiftenv",
+        "xcodes", "xcversion",
+        // Package managers that would fetch a replacement mid-run
+        "brew", "port", "gem", "npm", "npx", "pnpm", "yarn", "bun", "pipx",
     ]
 
     /// Every wrapper binary reachable from a PATH, resolved to a real file.
@@ -127,7 +157,6 @@ public struct AgentSandbox: Sendable {
         harnessRoot: URL,
         taskSetRoot: URL?,
         workspaceURL: URL,
-        denyWrapperCLIs: Bool = false,
         hostPath: String = ProcessInfo.processInfo.environment["PATH"] ?? "",
         agentExecutable: URL? = nil,
         runDirectory: URL? = nil
@@ -150,9 +179,11 @@ public struct AgentSandbox: Sendable {
         if let taskSetRoot {
             denied.append(taskSetRoot)
         }
-        if denyWrapperCLIs {
-            denied.append(contentsOf: wrapperBinaries(on: hostPath))
-        }
+        // Unconditional. Whether a task measured toolchain skill or wrapper
+        // recall used to depend on a flag being passed, and the tasks
+        // compensated by saying "no third-party CLI" in the prompt, which told
+        // the model such tools existed and were worth reaching for.
+        denied.append(contentsOf: wrapperBinaries(on: hostPath))
         // Execution stays open. Every tool on the machine is fair game except
         // the wrappers denied above, because a benchmark that also refuses
         // whatever the operator happens to have installed is measuring the
