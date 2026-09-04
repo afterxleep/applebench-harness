@@ -61,20 +61,21 @@ public struct MutationGrader: Grader {
                     message: "Nothing to mutate at \(mutation.path); the file is missing."
                 )
             }
-            guard text.contains(mutation.replace) else {
+            guard let mutated = try mutation.apply(to: text) else {
                 // The agent rewrote the code the mutation targets. That is not
                 // a grading outcome — the check cannot be performed at all, and
                 // reporting it as a pass or a fail would both be inventions.
+                let target = mutation.replace.map { "the text this task mutates (\"\($0)\")" }
+                    ?? "anything matching this task's pattern (\(mutation.pattern ?? ""))"
                 throw BenchmarkFailure.graderFailure(
                     grader: identifier,
-                    message: "\(mutation.path) no longer contains the text this task mutates "
-                        + "(\"\(mutation.replace)\"), so the test could not be challenged. "
-                        + "The task's mutation needs updating to match the fixture."
+                    message: "\(mutation.path) no longer contains \(target), so the test "
+                        + "could not be challenged. The task's mutation needs updating to "
+                        + "match the fixture."
                 )
             }
             originals.append((url, text))
-            try text.replacingOccurrences(of: mutation.replace, with: mutation.with)
-                .write(to: url, atomically: true, encoding: .utf8)
+            try mutated.write(to: url, atomically: true, encoding: .utf8)
         }
 
         var arguments = XcodebuildSupport.baseArguments(

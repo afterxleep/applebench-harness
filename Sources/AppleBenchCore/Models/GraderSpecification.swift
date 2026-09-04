@@ -637,15 +637,64 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
 public struct SourceMutation: Sendable, Codable, Equatable {
     /// Workspace-relative path to edit.
     public var path: String
-    /// Literal text to find.
-    public var replace: String
+    /// Literal text to find. Use this when the fixture owns the line.
+    public var replace: String?
+    /// A regular expression to find instead, with `$1` and friends available
+    /// in `with`.
+    ///
+    /// This is the form to use when the agent authors the code being broken.
+    /// A task that asks for a test without naming the accessibility
+    /// identifiers leaves the agent free to choose them, and a literal
+    /// mutation naming one from the fixture then matches nothing: the grader
+    /// cannot run at all, and the model loses a task it may have solved.
+    /// A pattern breaks whichever identifier the agent settled on.
+    public var pattern: String?
     /// What to put in its place.
     public var with: String
 
     public init(path: String, replace: String, with: String) {
+        self.init(path: path, replace: replace, pattern: nil, with: with)
+    }
+
+    public init(path: String, pattern: String, with: String) {
+        self.init(path: path, replace: nil, pattern: pattern, with: with)
+    }
+
+    public init(path: String, replace: String?, pattern: String?, with: String) {
         self.path = path
         self.replace = replace
+        self.pattern = pattern
         self.with = with
+    }
+
+    /// The mutated source, or `nil` when there was nothing here to break.
+    ///
+    /// `nil` is not a failure to report as a grading outcome: it means the
+    /// check could not be performed, which the caller has to say out loud
+    /// rather than resolve as a pass or a fail.
+    public func apply(to source: String) throws -> String? {
+        if let replace {
+            guard source.contains(replace) else { return nil }
+            return source.replacingOccurrences(of: replace, with: with)
+        }
+        guard let pattern else { return nil }
+        let regex = try Self.regex(pattern, path: path)
+        let range = NSRange(source.startIndex..., in: source)
+        guard regex.firstMatch(in: source, range: range) != nil else { return nil }
+        return regex.stringByReplacingMatches(
+            in: source, range: range, withTemplate: with
+        )
+    }
+
+    static func regex(_ pattern: String, path: String) throws -> NSRegularExpression {
+        do {
+            return try NSRegularExpression(pattern: pattern)
+        } catch {
+            throw BenchmarkFailure.invalidTask(
+                "Mutation on \(path) has a pattern that is not a valid regular "
+                    + "expression (\(pattern)): \(error.localizedDescription)"
+            )
+        }
     }
 }
 
@@ -712,10 +761,32 @@ public struct MutationGraderConfiguration: Sendable, Codable, Equatable {
                 "A mutation grader with no mutations proves nothing"
             )
         }
-        for mutation in mutations where mutation.replace == mutation.with {
-            throw BenchmarkFailure.invalidTask(
-                "Mutation on \(mutation.path) replaces text with itself, so it breaks nothing"
-            )
+        for mutation in mutations {
+            switch (mutation.replace, mutation.pattern) {
+            case (nil, nil):
+                throw BenchmarkFailure.invalidTask(
+                    "Mutation on \(mutation.path) says neither what text nor what pattern to break"
+                )
+            case (.some, .some):
+                throw BenchmarkFailure.invalidTask(
+                    "Mutation on \(mutation.path) gives both a literal and a pattern; use one"
+                )
+            case (.some(let literal), nil):
+                guard literal != mutation.with else {
+                    throw BenchmarkFailure.invalidTask(
+                        "Mutation on \(mutation.path) replaces text with itself, so it breaks nothing"
+                    )
+                }
+            case (nil, .some(let pattern)):
+                // Compiled here rather than at grading time: a bad pattern
+                // found mid-run costs the task and everything after it.
+                _ = try SourceMutation.regex(pattern, path: mutation.path)
+                guard pattern != mutation.with else {
+                    throw BenchmarkFailure.invalidTask(
+                        "Mutation on \(mutation.path) rewrites its pattern to itself, so it breaks nothing"
+                    )
+                }
+            }
         }
     }
 }

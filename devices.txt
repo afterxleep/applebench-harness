@@ -1,1 +1,35 @@
-No connected Apple devices found.
+================================================================================
+Device: Daniel's Apple Watch
+================================================================================
+UDID: 00008310-0010D5A41E08A01E
+Name: Daniel's Apple Watch
+Model: Watch7,5
+OS Version: (unavailable - device disconnected)
+Developer Mode Status: (unavailable)
+
+================================================================================
+Device: Test iPhone
+================================================================================
+UDID: 00008110-001505EE26D1801E
+Name: Test iPhone
+Model: iPhone 13 Pro Max
+OS Version: 26.5.2
+Developer Mode Status: Enabled (1)
+
+================================================================================
+Device: iPad de Daniel
+================================================================================
+UDID: 00008112-001651181145401E
+Name: iPad de Daniel
+Model: iPad Pro (12.9-inch) (6th generation)
+OS Version: 26.5.2
+Developer Mode Status: Enabled (1)
+
+================================================================================
+Device: iPhone de Daniel
+================================================================================
+UDID: 00008150-000515D40CA1401C
+Name: iPhone de Daniel
+Model: iPhone 17 Pro Max
+OS Version: 27.0
+Developer Mode Status: Enabled (1)
