@@ -137,6 +137,25 @@ public struct AgentSandbox: Sendable {
         "brew", "port", "gem", "npm", "npx", "pnpm", "yarn", "bun", "pipx",
     ]
 
+    /// Names too ordinary to look for in command text.
+    ///
+    /// Denying these as paths is free of doubt, because that check looks at
+    /// real files. Matching them in what the agent typed is not: `struct` is
+    /// a Swift keyword, `scan` and `match` and `produce` are English, and a
+    /// heredoc writing Swift source is full of them. They stay denied and are
+    /// simply not evidence.
+    public static let ambiguousWrapperNames: Set<String> = [
+        "struct", "match", "cert", "produce", "scan", "snapshot", "deliver",
+        "pilot", "supply", "gym", "sigh", "frameit", "rome", "port", "infer",
+        "danger", "firebase", "shipit", "accio", "punic", "tailor", "xcconfig",
+        "bun", "time", "command", "exec", "run",
+    ]
+
+    /// The wrapper names it is safe to recognise in a command the agent typed.
+    public static var distinctiveWrapperNames: Set<String> {
+        Set(wrapperCLINames).subtracting(ambiguousWrapperNames)
+    }
+
     /// Every wrapper binary reachable from a PATH, resolved to a real file.
     static func wrapperBinaries(on path: String) -> [URL] {
         let fm = FileManager.default
@@ -184,13 +203,20 @@ public struct AgentSandbox: Sendable {
         // compensated by saying "no third-party CLI" in the prompt, which told
         // the model such tools existed and were worth reaching for.
         denied.append(contentsOf: wrapperBinaries(on: hostPath))
-        // Execution stays open. Every tool on the machine is fair game except
-        // the wrappers denied above, because a benchmark that also refuses
-        // whatever the operator happens to have installed is measuring the
-        // machine, not the model. `executableRoots` remains available for a
-        // run that wants the stricter reading; nothing sets it by default.
-        _ = (agentExecutable, runDirectory)
-        return AgentSandbox(deniedReadPaths: denied, workspaceURL: workspaceURL)
+        // Denying binaries by name only holds while the agent uses the names.
+        // Copying a denied one already fails, because reading it is denied,
+        // but nothing stopped the agent fetching a fresh wrapper and running
+        // that — and on a host run it has the network to do it. So execution
+        // is an allowlist: Apple's toolchain, the agent's own binary, and the
+        // products this run builds. Deliberately not the workspace, which the
+        // agent can write to, and not Homebrew or any user bin.
+        return AgentSandbox(
+            deniedReadPaths: denied,
+            workspaceURL: workspaceURL,
+            executableRoots: toolchainRoots(
+                agentExecutable: agentExecutable, runDirectory: runDirectory
+            )
+        )
     }
 
     /// The sandbox profile, in Apple's SBPL.
@@ -235,7 +261,13 @@ public struct AgentSandbox: Sendable {
         if !executableRoots.isEmpty {
             lines.append("(deny process-exec*)")
             for root in executableRoots {
-                lines.append("(allow process-exec (subpath \(quote(root.path))))")
+                // Same resolved-path problem as the read rules: an allowance
+                // written against /tmp matches nothing, and here that stops
+                // the agent running itself rather than letting something
+                // through.
+                for spelling in spellings(of: root) {
+                    lines.append("(allow process-exec (subpath \(quote(spelling))))")
+                }
             }
         }
         return lines.joined(separator: "\n") + "\n"

@@ -122,9 +122,9 @@ struct AgentSandboxTests {
             hostPath: directory.path
         )
         #expect(box.deniedReadPaths.map(\.path).contains(wrapper.path))
-        // Denying wrappers denies their binaries; it does not shrink the set
-        // of tools the machine offers.
-        #expect(box.executableRoots.isEmpty)
+        // The directory the wrapper lives in is not an execution root either,
+        // so a second copy of it there is unreachable too.
+        #expect(!box.executableRoots.map(\.path).contains(directory.path))
     }
 
     @Test("The blocked list covers the ways round the toolchain")
@@ -216,6 +216,59 @@ struct AgentSandboxTests {
         #expect(try !canRead(answers), "the run's grader specification is readable")
     }
 
+    @Test("A binary the agent obtains at a new path cannot run")
+    func downloadedBinariesCannotRun() throws {
+        // Denying wrappers by name is defeated by fetching one. Copying a
+        // denied binary already fails, because reading it is denied — but
+        // nothing stopped the agent downloading a fresh one and running it,
+        // so execution is an allowlist rather than a list of names.
+        let scratch = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-exec-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: scratch, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: scratch) }
+
+        let tool = scratch.appendingPathComponent("downloaded-wrapper")
+        FileManager.default.createFile(
+            atPath: tool.path, contents: Data("#!/bin/sh\necho ran\n".utf8),
+            attributes: [.posixPermissions: 0o755]
+        )
+        let box = AgentSandbox(
+            deniedReadPaths: [], workspaceURL: scratch,
+            executableRoots: [URL(fileURLWithPath: "/bin"), URL(fileURLWithPath: "/usr/bin")]
+        )
+        let profileURL = scratch.appendingPathComponent("p.sb")
+        let command = try #require(
+            try box.wrap(executable: tool.path, arguments: [], profileURL: profileURL)
+        )
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: command.executable)
+        process.arguments = command.arguments
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        try process.run(); process.waitUntilExit()
+        #expect(process.terminationStatus != 0, "a downloaded binary was allowed to run")
+    }
+
+    @Test("The standard seal restricts execution to the toolchain")
+    func standardSealAllowlistsExecution() {
+        let box = AgentSandbox.standard(
+            harnessRoot: URL(fileURLWithPath: "/h"),
+            taskSetRoot: nil,
+            workspaceURL: URL(fileURLWithPath: "/h/.applebench/runs/r1/workspace"),
+            agentExecutable: URL(fileURLWithPath: "/Users/me/.opencode/bin/opencode"),
+            runDirectory: URL(fileURLWithPath: "/h/.applebench/runs/r1")
+        )
+        let roots = box.executableRoots.map(\.path)
+        #expect(roots.contains("/usr/bin"))
+        #expect(roots.contains("/Library/Developer"))
+        #expect(roots.contains("/Users/me/.opencode/bin"), "the agent cannot run itself")
+        #expect(roots.contains("/h/.applebench/runs/r1"), "test binaries the run builds")
+        // The workspace is writable, so allowing execution from it would let
+        // the agent run anything it managed to write there.
+        #expect(!roots.contains("/h/.applebench/runs/r1/workspace"))
+        #expect(!roots.contains("/opt/homebrew/bin"))
+    }
+
     @Test("Wrapping produces a sandbox-exec invocation and writes the profile")
     func wrapWritesProfile() throws {
         let profileURL = URL(fileURLWithPath: NSTemporaryDirectory())
@@ -231,5 +284,33 @@ struct AgentSandboxTests {
         #expect(command.executable == AgentSandbox.sandboxExec)
         #expect(command.arguments == ["-f", profileURL.path, "/usr/bin/true", "--flag"])
         #expect(FileManager.default.fileExists(atPath: profileURL.path))
+    }
+}
+
+@Suite("Adapter executable dispatch")
+struct AdapterExecutableTests {
+    private struct Located: AgentAdapter {
+        let identifier = "located"
+        let telemetry = AgentTelemetryCapability.plainText
+        var executableURL: URL? { URL(fileURLWithPath: "/opt/tools/bin/agent") }
+        func prepare(context: RunContext) async throws {}
+        func run(task: BenchmarkTask, context: RunContext, recorder: EventRecorder) async throws -> AgentRunResult {
+            AgentRunResult(
+                metadata: AgentMetadata(agent: identifier, model: nil as String?, version: nil, configuration: [:]),
+                terminationReason: .completed
+            )
+        }
+        func cleanup(context: RunContext) async {}
+    }
+
+    @Test("An adapter's own binary is visible through the protocol")
+    func executableIsDynamicallyDispatched() {
+        // It lived only in a protocol extension, so a call through `any
+        // AgentAdapter` bound to the extension's nil and the adapter's answer
+        // was never asked for. Nothing noticed while the sandbox let
+        // everything execute; with an allowlist it stops the agent running
+        // itself.
+        let adapter: any AgentAdapter = Located()
+        #expect(adapter.executableURL?.path == "/opt/tools/bin/agent")
     }
 }

@@ -7,10 +7,10 @@ struct TrajectoryCommandsTests {
     @Test("Only finished commands are read, and only their command text")
     func readsFinishedCommands() {
         let log = """
-        {"type":"command_started","payload":{"command":"/usr/bin/xcodebuild build"}}
-        {"type":"command_finished","payload":{"command":"/usr/bin/xcodebuild build","exit_code":0}}
+        {"type":"command_started","payload":{"phase":"agent","command":"/usr/bin/xcodebuild build"}}
+        {"type":"command_finished","payload":{"phase":"agent","command":"/usr/bin/xcodebuild build","exit_code":0}}
         {"type":"agent_output","payload":{"text":"command_finished"}}
-        {"type":"command_finished","payload":{"command":"xcrun simctl launch booted app"}}
+        {"type":"command_finished","payload":{"phase":"agent","command":"xcrun simctl launch booted app"}}
         not json at all
         """
         // A started command is not a command that ran, and agent output that

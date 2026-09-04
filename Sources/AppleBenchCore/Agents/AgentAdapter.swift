@@ -7,6 +7,12 @@ import Foundation
 /// recorder, and report how the process ended. They never grade, never see
 /// grader configuration, and never contain Apple-specific benchmark logic.
 public protocol AgentAdapter: Sendable {
+    /// Where this adapter's binary lives, when it has one on disk.
+    ///
+    /// The sandbox needs it: the agent has to be allowed to execute itself
+    /// while everything outside the toolchain is refused.
+    var executableURL: URL? { get }
+
     /// Stable identifier used on the command line (`--agent codex`).
     var identifier: String { get }
 
@@ -39,10 +45,12 @@ public enum AgentTelemetryCapability: String, Sendable, Codable {
     case plainText
 }
 
-/// Where an adapter's binary lives, when it has one on disk.
+/// Default for an adapter with no binary of its own.
 ///
-/// The sandbox needs it: the agent has to be allowed to execute itself while
-/// everything outside the toolchain is refused.
+/// The requirement is declared on the protocol, not just here. A member that
+/// exists only in an extension is bound statically, so a call through
+/// `any AgentAdapter` would reach this `nil` however the adapter answered —
+/// and the sandbox would refuse to let the agent execute itself.
 public extension AgentAdapter {
     var executableURL: URL? { nil }
 }
