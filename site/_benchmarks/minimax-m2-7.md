@@ -1,6 +1,6 @@
 ---
-title: "minimax/MiniMax-M2.7, gold suite, 100 points"
-date: 2026-09-03
+title: "minimax/MiniMax-M2.7, gold suite, 3168 points"
+date: 2026-09-04
 suite: gold
 suite_revision: "2026-09-03"
 score_spec: "points-v1"
@@ -9,12 +9,12 @@ data: minimax-m2-7
 model: "minimax/MiniMax-M2.7"
 harness: "opencode 1.18.27"
 tasks: 136
-passed: 3
-points: 100
+passed: 70
+points: 3168
 points_available: 6980
 description: >-
   AppleBench results for minimax/MiniMax-M2.7 on the gold suite:
-  100 of 6980 points and 3 of 136 tasks completed to a
+  3168 of 6980 points and 70 of 136 tasks completed to a
   verified result, with per-category points, cost against wall-clock time,
   and every task.
 lede: >-

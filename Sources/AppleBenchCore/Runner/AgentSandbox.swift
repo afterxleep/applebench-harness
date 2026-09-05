@@ -40,17 +40,25 @@ public struct AgentSandbox: Sendable {
     /// everywhere except the toolchain means a copy, a download, a build of
     /// its own, and a script it writes in /tmp all fail the same way.
     public let executableRoots: [URL]
+    /// Places the agent must never write, whatever else is allowed.
+    ///
+    /// The toolchain needs a temp directory, so writes cannot be confined to
+    /// the workspace alone. These are named last so no earlier allowance can
+    /// re-open them: the operator's own checkout and the task set.
+    public let deniedWritePaths: [URL]
 
     public init(
         deniedReadPaths: [URL],
         workspaceURL: URL,
         executableRoots: [URL] = [],
-        allowedReadPaths: [URL] = []
+        allowedReadPaths: [URL] = [],
+        deniedWritePaths: [URL] = []
     ) {
         self.deniedReadPaths = deniedReadPaths
         self.workspaceURL = workspaceURL
         self.executableRoots = executableRoots
         self.allowedReadPaths = allowedReadPaths
+        self.deniedWritePaths = deniedWritePaths
     }
 
     /// A copy that also lets the agent read `paths`.
@@ -62,7 +70,8 @@ public struct AgentSandbox: Sendable {
             deniedReadPaths: deniedReadPaths,
             workspaceURL: workspaceURL,
             executableRoots: executableRoots,
-            allowedReadPaths: allowedReadPaths + paths
+            allowedReadPaths: allowedReadPaths + paths,
+            deniedWritePaths: deniedWritePaths
         )
     }
 
@@ -194,6 +203,11 @@ public struct AgentSandbox: Sendable {
             // most of the way to satisfying it without doing the work.
             harnessRoot.appendingPathComponent("Sources/AppleBenchGraders"),
             harnessRoot.appendingPathComponent("Reports"),
+            // The fixtures as authored, which is where `.solution` and
+            // `solution.patch` actually live. Denying only the prepared copy
+            // under `.applebench` left the originals open, and a model did go
+            // and list one.
+            harnessRoot.appendingPathComponent("Fixtures"),
         ]
         if let taskSetRoot {
             denied.append(taskSetRoot)
@@ -215,7 +229,8 @@ public struct AgentSandbox: Sendable {
             workspaceURL: workspaceURL,
             executableRoots: toolchainRoots(
                 agentExecutable: agentExecutable, runDirectory: runDirectory
-            )
+            ),
+            deniedWritePaths: [harnessRoot] + (taskSetRoot.map { [$0] } ?? [])
         )
     }
 
@@ -243,6 +258,12 @@ public struct AgentSandbox: Sendable {
                 lines.append("(deny file-read* (\(rule) \(quote(spelling))))")
             }
         }
+        // By shape as well as by path, for a layout nobody has thought of
+        // yet. A reference fix is always one of these two names, wherever the
+        // directory holding it ends up.
+        lines.append(#"(deny file-read* (regex "/\.solution(/|$)"))"#)
+        lines.append(#"(deny file-read* (regex "/solution\.patch$"))"#)
+
         // Named files first, then the workspace. Both sit under a root that
         // was just denied wholesale, and both have to come after it.
         for path in allowedReadPaths {
@@ -250,8 +271,29 @@ public struct AgentSandbox: Sendable {
                 lines.append("(allow file-read* (literal \(quote(spelling))))")
             }
         }
+        // Writing is confined to the workspace. Eleven tasks in one suite put
+        // their deliverable somewhere else, six of them straight into the
+        // operator's own checkout: the grader looked in the workspace, found
+        // nothing, and failed work the model had done. A denied write fails
+        // loudly enough for the agent to try again in the right place.
+        lines.append("(deny file-write*)")
         for spelling in spellings(of: workspaceURL) {
             lines.append("(allow file-read* (subpath \(quote(spelling))))")
+            lines.append("(allow file-write* (subpath \(quote(spelling))))")
+        }
+        // The agent's own scratch space and its run directory still have to
+        // work: temporary files, caches, and the logs the harness collects.
+        for root in writableRoots {
+            lines.append("(allow file-write* (subpath \(quote(root))))")
+        }
+        // Last, so nothing above re-opens them.
+        for path in deniedWritePaths {
+            for spelling in spellings(of: path) {
+                lines.append("(deny file-write* (subpath \(quote(spelling))))")
+            }
+        }
+        lines.append("(allow file-write* (subpath \(quote(workspaceURL.path))))")
+        for spelling in spellings(of: workspaceURL) {
             lines.append("(allow file-write* (subpath \(quote(spelling))))")
         }
 
@@ -289,6 +331,22 @@ public struct AgentSandbox: Sendable {
     }
 
     public static let sandboxExec = "/usr/bin/sandbox-exec"
+
+    /// Places outside the workspace an agent legitimately writes to.
+    ///
+    /// Its hermetic HOME, the temporary directory it and the toolchain use,
+    /// and `/dev` for the null device. Without these the agent cannot start,
+    /// and a build cannot write an intermediate.
+    var writableRoots: [String] {
+        var roots = ["/dev", "/private/tmp", "/tmp", "/private/var/folders", "/var/folders"]
+        if let home = ProcessInfo.processInfo.environment["HOME"], home.hasPrefix("/") {
+            roots.append(home)
+        }
+        if let tmp = ProcessInfo.processInfo.environment["TMPDIR"], tmp.hasPrefix("/") {
+            roots.append(tmp)
+        }
+        return roots
+    }
 
     /// Every spelling of a path a rule has to name.
     ///

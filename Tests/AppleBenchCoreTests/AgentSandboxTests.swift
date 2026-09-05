@@ -100,6 +100,57 @@ struct AgentSandboxTests {
         }
     }
 
+    @Test("Answers are denied wherever they sit, not just under .applebench")
+    func answersDeniedAnywhere() {
+        // The harness checkout has a tracked `Fixtures/` beside `.applebench`,
+        // and every fixture in it carries its own `.solution` and
+        // `solution.patch`. Only the prepared copy was denied, so the originals
+        // were readable, and a model did go and list one.
+        let box = AgentSandbox.standard(
+            harnessRoot: URL(fileURLWithPath: "/h"),
+            taskSetRoot: nil,
+            workspaceURL: URL(fileURLWithPath: "/h/.applebench/runs/r1/workspace")
+        )
+        #expect(box.deniedReadPaths.map(\.path).contains("/h/Fixtures"))
+
+        // And by shape, for a layout nobody has thought of yet.
+        let profile = box.profile()
+        #expect(profile.contains("solution"), "no rule mentions a solution at all")
+    }
+
+    @Test("The agent cannot write outside its workspace")
+    func writesAreConfinedToTheWorkspace() throws {
+        // Eleven tasks wrote their deliverable outside the workspace, six of
+        // them straight into the operator's checkout. The grader looked in the
+        // workspace, found nothing, and failed work the model had done. The
+        // toolchain needs a temp directory, so writes cannot be confined to
+        // the workspace alone — but the checkout is never writable.
+        let scratch = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-write-\(UUID().uuidString)")
+        let workspace = scratch.appendingPathComponent("workspace")
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: scratch) }
+
+        let box = AgentSandbox(
+            deniedReadPaths: [], workspaceURL: workspace, deniedWritePaths: [scratch]
+        )
+        let profileURL = scratch.appendingPathComponent("p.sb")
+
+        func canWrite(_ target: URL) throws -> Bool {
+            let command = try #require(try box.wrap(
+                executable: "/usr/bin/touch", arguments: [target.path], profileURL: profileURL
+            ))
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: command.executable)
+            process.arguments = command.arguments
+            process.standardError = FileHandle.nullDevice
+            try process.run(); process.waitUntilExit()
+            return process.terminationStatus == 0
+        }
+        #expect(try canWrite(workspace.appendingPathComponent("report.md")))
+        #expect(try !canWrite(scratch.appendingPathComponent("escaped.md")))
+    }
+
     @Test("Wrapper binaries are denied without being asked")
     func wrappersAreAlwaysDenied() throws {
         // Denying them was once opt-in, so whether a task measured toolchain
