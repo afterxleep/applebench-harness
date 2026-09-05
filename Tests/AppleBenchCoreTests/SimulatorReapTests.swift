@@ -51,3 +51,37 @@ struct SimulatorReapTests {
         }
     }
 }
+
+/// Reaping must not delete a device another run is using.
+@Suite("Reaping and concurrent runs")
+struct SimulatorReapOwnershipTests {
+    private func listing(_ names: [(String, String)]) -> String {
+        let devices = names.map { #"{"udid":"\#($0.1)","name":"\#($0.0)"}"# }.joined(separator: ",")
+        return #"{"devices":{"iOS 26.5":[\#(devices)]}}"#
+    }
+
+    @Test("A device belonging to another live run is left alone")
+    func spareOtherLiveRuns() throws {
+        // Every AppleBench device except the caller's own was reaped, so a
+        // second run lost its simulator mid-grade and the failure was recorded
+        // against the model. ops-005 and g2-flow-002 both died this way.
+        let json = listing([
+            ("AppleBench-run-a", "AAA"),   // the caller's
+            ("AppleBench-run-b", "BBB"),   // another run, still going
+            ("AppleBench-run-c", "CCC"),   // finished, fair game
+        ])
+        let stale = try SimulatorManager.staleBenchmarkDeviceUDIDs(
+            listJSON: json, excluding: "AAA", claimedUDIDs: ["BBB"]
+        )
+        #expect(stale == ["CCC"])
+    }
+
+    @Test("With nothing claimed, everything but the caller's is still reaped")
+    func stillCleansStrandedDevices() throws {
+        let json = listing([("AppleBench-a", "AAA"), ("AppleBench-b", "BBB")])
+        let stale = try SimulatorManager.staleBenchmarkDeviceUDIDs(
+            listJSON: json, excluding: "AAA", claimedUDIDs: []
+        )
+        #expect(stale == ["BBB"])
+    }
+}

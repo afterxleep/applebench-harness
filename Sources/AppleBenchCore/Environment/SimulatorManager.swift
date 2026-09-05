@@ -52,7 +52,11 @@ public struct SimulatorManager: Sendable {
     /// A booted leftover counts: an unexpected booted device is what makes the
     /// next `xcodebuild test` hang against its own destination, so it is the
     /// most important one to reap, not the one to skip.
-    public static func staleBenchmarkDeviceUDIDs(listJSON: String, excluding liveUDID: String?) throws -> [String] {
+    public static func staleBenchmarkDeviceUDIDs(
+        listJSON: String,
+        excluding liveUDID: String?,
+        claimedUDIDs: Set<String> = []
+    ) throws -> [String] {
         struct Listing: Decodable {
             struct Device: Decodable {
                 let udid: String
@@ -66,8 +70,16 @@ public struct SimulatorManager: Sendable {
         let listing = try JSONDecoder().decode(Listing.self, from: data)
         return listing.devices.values
             .flatMap { $0 }
-            .filter { $0.name.hasPrefix(deviceNamePrefix) && $0.udid != liveUDID }
+            .filter {
+                $0.name.hasPrefix(deviceNamePrefix)
+                    && $0.udid != liveUDID
+                    // Another run in flight owns this one. Deleting it fails
+                    // that run's grading and records the loss against its
+                    // model, which is how ops-005 and g2-flow-002 died.
+                    && !claimedUDIDs.contains($0.udid)
+            }
             .map(\.udid)
+            .sorted()
     }
 
     /// Deletes every simulator this benchmark left behind, apart from the one
@@ -78,9 +90,14 @@ public struct SimulatorManager: Sendable {
     /// of a hundred-odd tasks strands a hundred-odd. Sweeping at the start of
     /// a run recovers from every one of them, whatever ended the last run.
     @discardableResult
-    public func reapStaleDevices(excluding liveUDID: String? = nil) async -> Int {
+    public func reapStaleDevices(
+        excluding liveUDID: String? = nil,
+        claimedUDIDs: Set<String> = []
+    ) async -> Int {
         guard let json = try? await simctl(["list", "devices", "--json"], describe: "list devices"),
-              let stale = try? Self.staleBenchmarkDeviceUDIDs(listJSON: json, excluding: liveUDID)
+              let stale = try? Self.staleBenchmarkDeviceUDIDs(
+                  listJSON: json, excluding: liveUDID, claimedUDIDs: claimedUDIDs
+              )
         else { return 0 }
         var reaped = 0
         for udid in stale {

@@ -235,7 +235,9 @@ public struct BenchmarkRunner: Sendable {
                 // timeout or a crash never reaches teardown, so its device is
                 // still here; sweeping before creating ours means a leak
                 // survives one run rather than accumulating across a suite.
-                let reaped = await simulatorManager.reapStaleDevices()
+                let reaped = await simulatorManager.reapStaleDevices(
+                    claimedUDIDs: SimulatorClaims.active(in: options.runsRoot)
+                )
                 if reaped > 0 {
                     await recorder.record(.simulatorReaped, payload: .object([
                         "removed": .int(reaped),
@@ -248,6 +250,9 @@ public struct BenchmarkRunner: Sendable {
                     snapshot: snapshot
                 )
                 simulatorUDID = udid
+                // Claim it before anything else can sweep it: another run's
+                // reaper deletes every benchmark device but its own.
+                SimulatorClaims.claim(udid, in: options.runsRoot)
                 await recorder.record(.simulatorPrepared, payload: .object(["udid": .string(udid)]))
                 // Booting is only required when something will run on the
                 // device; plain builds just need the destination to exist.
@@ -358,7 +363,8 @@ public struct BenchmarkRunner: Sendable {
                 adapter: adapter,
                 context: context,
                 keepWorkspace: options.keepWorkspace,
-                recorder: recorder
+                recorder: recorder,
+                runsRoot: options.runsRoot
             )
             progress(.finished(result))
             return result
@@ -369,7 +375,8 @@ public struct BenchmarkRunner: Sendable {
                 adapter: adapter,
                 context: context,
                 keepWorkspace: true,  // always keep evidence of a failed run
-                recorder: recorder
+                recorder: recorder,
+                runsRoot: options.runsRoot
             )
             throw error
         }
@@ -527,9 +534,11 @@ public struct BenchmarkRunner: Sendable {
         adapter: any AgentAdapter,
         context: RunContext,
         keepWorkspace: Bool,
-        recorder: EventRecorder
+        recorder: EventRecorder,
+        runsRoot: URL
     ) async {
         if let simulatorUDID {
+            SimulatorClaims.release(simulatorUDID, in: runsRoot)
             await simulatorManager.shutdown(udid: simulatorUDID)
             let removed = await simulatorManager.deleteVerifying(udid: simulatorUDID)
             await recorder.record(.simulatorReaped, payload: .object([
