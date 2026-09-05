@@ -120,15 +120,25 @@ def main() -> int:
                 last_run[task] = when
 
     new = sorted(t for t in scored if t not in scored_before)
-    # A task states when it was created or last updated. It needs running again
-    # when that date is newer than the day this model last ran it. A task with
-    # no date has not been touched since it was written, so it is not changed.
+    # A task states when it was created or last updated, and needs running
+    # again when that date is not older than the day this model last ran it.
+    #
+    # Not-older rather than newer, because `modified:` is a date and a run is a
+    # moment: a task edited after a suite finishes carries the same date as the
+    # run, and cannot be told apart from one edited before it started. Erring
+    # towards re-running costs a task's worth of tokens. Erring the other way
+    # scores a model against a version of the task it was never given, which is
+    # the failure this whole mechanism exists to prevent.
+    #
+    # A task with no date at all always runs. The date is what says a task has
+    # been checked; its absence says nobody has vouched for this one yet, and a
+    # score carried forward from an unvouched-for task is worth less than the
+    # tokens to run it again.
     modified = modified_dates()
     changed = [
         task for task in sorted(scored)
         if task in scored_before
-        and task in modified
-        and modified[task] > last_run.get(task, "")
+        and (task not in modified or modified[task] >= last_run.get(task, ""))
     ]
 
     wanted = {"both": new + changed, "new": new, "changed": changed}[args.mode]
