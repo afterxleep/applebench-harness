@@ -853,12 +853,28 @@ public struct TrajectoryGraderConfiguration: Sendable, Codable, Equatable {
         case minTestInvocations = "min_test_invocations"
     }
 
+    /// `assertions` is optional. A trajectory grader that asserts nothing about
+    /// the commands still checks the run did not reach its result through a
+    /// wrapper, which is the only claim it should be making about *how* the
+    /// work was done.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        assertions = try container.decodeIfPresent([TrajectoryAssertion].self, forKey: .assertions) ?? []
+        minCommands = try container.decodeIfPresent(Int.self, forKey: .minCommands)
+        minBuildInvocations = try container.decodeIfPresent(Int.self, forKey: .minBuildInvocations)
+        minTestInvocations = try container.decodeIfPresent(Int.self, forKey: .minTestInvocations)
+    }
+
     public func validate() throws {
-        let hasClause = minCommands != nil || minBuildInvocations != nil
-            || minTestInvocations != nil || !assertions.isEmpty
-        guard hasClause else {
-            throw BenchmarkFailure.invalidTask("A trajectory grader that claims nothing grades nothing")
-        }
+        // No clause is required. The grader always checks that the run did
+        // not reach its result through a wrapper, and that check is the whole
+        // reason to keep a trajectory grader on a task whose other assertions
+        // have gone: what a deliverable says is worth nothing if the work
+        // behind it was done by a tool the benchmark exists to exclude.
+        //
+        // Deliberately no "you must have run xcodebuild" clause any more.
+        // That graded how the work was done, and two models can reach the
+        // same correct outcome by different routes.
         for assertion in assertions {
             guard let pattern = assertion.commandMatches else {
                 throw BenchmarkFailure.invalidTask("A trajectory assertion needs command_matches")

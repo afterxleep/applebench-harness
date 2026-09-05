@@ -4,9 +4,13 @@ import Testing
 
 @Suite("Trajectory grader configuration")
 struct TrajectoryGraderConfigurationTests {
-    @Test("A grader that claims nothing is rejected")
-    func emptyIsInvalid() {
-        #expect(throws: BenchmarkFailure.self) { try TrajectoryGraderConfiguration().validate() }
+    @Test("A grader with no clauses still claims the run used no wrapper")
+    func emptyStillClaimsSomething() {
+        // Asserting nothing about the commands is allowed. The grader still
+        // checks the result was not reached through a wrapper, which is the
+        // only claim it should make about how the work was done: two models
+        // can reach the same correct outcome by different routes.
+        #expect(throws: Never.self) { try TrajectoryGraderConfiguration().validate() }
     }
 
     @Test("An assertion needs a pattern, and the pattern has to compile")
