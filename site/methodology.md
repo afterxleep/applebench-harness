@@ -120,20 +120,24 @@ diff. A pass rate gives them the same tick.
 So the headline number is **points**, and the pass rate stays beside it.
 
 ```text
-face value  = 10 × difficulty                     difficulty 1 to 10 gives 10 to 100 points
-budget      = 50,000 total tokens                 flat, the same for every task
+face value  = 10 points                           the same for every task
+budget      = 50,000 total tokens                 the same for every task
 efficiency  = clamp(budget / tokens, 0.25, 1.0)   unreported tokens → 0.25
 points      = passed ? face value × efficiency : 0
 
-score       = Σ points          available = Σ face value
+score       = Σ points          available = 10 × number of tasks
 ```
 
-**Difficulty scales the reward, not the allowance.** The obvious move is to give
-harder tasks a bigger token budget. The data does not support it: across the
-first scored run the median solve cost between 14k and 26k tokens at every
-difficulty from 1 to 7. Spend does not track authored difficulty, so scaling
-the allowance by difficulty would encode a relationship that is not there.
-Difficulty decides what a task is worth; every task gets the same allowance.
+**Every task is worth the same.** Face value used to be ten points per step of
+authored difficulty. Checking that rating against what runs actually cost
+showed it was wrong task by task: three tasks rated 6 were solved in under
+1,200 tokens, while tasks rated 1 cost twenty times that. Weighting the score
+by it paid sixty points for a one-line fix and ten for an afternoon's work.
+
+A task still carries a difficulty, because it tells a reader what kind of
+problem it is. It no longer decides what solving it is worth. What remains in
+the score is measured rather than authored: the task was solved, and this is
+what solving it cost.
 
 **A failure earns nothing and still counts its face value.** The denominator is
 a property of the suite, not of the model, so it does not move as a model gets
@@ -151,15 +155,15 @@ scored this way is published on the run's page.
 
 50,000 tokens and the 0.25 floor are judgment, not measurement, chosen so an
 ordinary solve is not penalized and genuine overspend is. They are frozen under
-a specification id, currently `points-v1`. Every published run records which
+a specification id, currently `points-v2`. Every published run records which
 one it was scored under. Changing a constant is a scoring revision, and
 every published number is recomputed from its stored export. That does not
 require re-running any benchmark.
 
 ### Why the score is a plain sum
 
-Every term depends only on the task it belongs to: its authored difficulty, its
-verdict, and what that run spent. Nothing is normalized against the rest of the
+Every term depends only on the task it belongs to: its verdict, and what that
+run spent. Nothing is normalized against the rest of the
 set, against other models, or against how many tasks the suite happens to hold.
 
 That is deliberate, and it is what makes the suite extensible. When a task set

@@ -27,38 +27,37 @@ struct BenchmarkScoreTests {
         )
     }
 
-    @Test("Face value is ten points per difficulty step")
-    func faceValueScalesWithDifficulty() {
-        #expect(AppleBenchScore.faceValue(difficulty: 1) == 10)
-        #expect(AppleBenchScore.faceValue(difficulty: 7) == 70)
-        #expect(AppleBenchScore.faceValue(difficulty: 10) == 100)
-    }
-
-    @Test("A task with no authored difficulty has no face value to award")
-    func unauthoredDifficultyHasNoFaceValue() {
-        #expect(AppleBenchScore.faceValue(difficulty: nil) == 0)
+    @Test("Every task is worth the same")
+    func faceValueIsFlat() {
+        // Face value was ten points per step of authored difficulty, which
+        // weighted the score by a judgment that turned out wrong per task:
+        // tasks rated 6 fell in under 1,200 tokens while tasks rated 1 cost
+        // twenty times that. What a solve is worth no longer depends on
+        // anyone's estimate of how hard it was.
+        #expect(AppleBenchScore.faceValue() == AppleBenchScore.pointsPerTask)
     }
 
     @Test("A solve inside the token allowance keeps its full face value")
     func solvesInsideBudgetScoreInFull() {
         #expect(AppleBenchScore.efficiency(totalTokens: 1) == 1)
         #expect(AppleBenchScore.efficiency(totalTokens: AppleBenchScore.referenceTokenBudget) == 1)
-        #expect(AppleBenchScore.points(passed: true, difficulty: 6, totalTokens: 20_000) == 60)
+        #expect(AppleBenchScore.points(passed: true, totalTokens: 20_000)
+            == Double(AppleBenchScore.pointsPerTask))
     }
 
     @Test("Points fall in proportion to the overspend beyond the allowance")
     func pointsDecayAboveBudget() {
         let budget = AppleBenchScore.referenceTokenBudget
         #expect(abs(AppleBenchScore.efficiency(totalTokens: budget * 2) - 0.5) < 0.0001)
-        // Twice the allowance on a difficulty-8 task: half of 80 points.
-        #expect(abs(AppleBenchScore.points(passed: true, difficulty: 8, totalTokens: budget * 2) - 40) < 0.0001)
+        // Twice the allowance: half the points.
+        #expect(abs(AppleBenchScore.points(passed: true, totalTokens: budget * 2) - 5) < 0.0001)
     }
 
     @Test("A wasteful solve still outscores a failure, down to the floor")
     func efficiencyIsFloored() {
         let runaway = AppleBenchScore.referenceTokenBudget * 100
         #expect(AppleBenchScore.efficiency(totalTokens: runaway) == AppleBenchScore.minimumEfficiency)
-        #expect(AppleBenchScore.points(passed: true, difficulty: 4, totalTokens: runaway) > 0)
+        #expect(AppleBenchScore.points(passed: true, totalTokens: runaway) > 0)
     }
 
     @Test("Unreported tokens take the floor rather than full marks")
@@ -72,24 +71,26 @@ struct BenchmarkScoreTests {
 
     @Test("A failed task scores nothing but still costs its face value")
     func failuresScoreZeroAndStayInTheDenominator() {
-        #expect(AppleBenchScore.points(passed: false, difficulty: 9, totalTokens: 100) == 0)
+        #expect(AppleBenchScore.points(passed: false, totalTokens: 100) == 0)
 
         let total = AppleBenchScore.total(for: [
             makeResult(task: "build-001", difficulty: 9, passed: false, tokens: 100)
         ])
         #expect(total.points == 0)
-        #expect(total.available == 90)
+        #expect(total.available == AppleBenchScore.pointsPerTask)
     }
 
-    @Test("A run with no authored difficulty is counted as unscored, not weighted")
-    func unscoredRunsAreReportedSeparately() {
+    @Test("A run with no authored difficulty is scored like any other")
+    func everyRunIsScorable() {
+        // Nothing is set aside for lacking a difficulty, because nothing is
+        // weighted by one.
         let total = AppleBenchScore.total(for: [
             makeResult(task: "adhoc-001", difficulty: nil),
             makeResult(task: "build-001", difficulty: 3),
         ])
-        #expect(total.scoredRuns == 1)
-        #expect(total.unscoredRuns == 1)
-        #expect(total.available == 30)
+        #expect(total.scoredRuns == 2)
+        #expect(total.unscoredRuns == 0)
+        #expect(total.available == 2 * AppleBenchScore.pointsPerTask)
     }
 
     @Test("Scoring two sets separately and adding them equals scoring the union")

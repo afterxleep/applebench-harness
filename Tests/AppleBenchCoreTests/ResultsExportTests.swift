@@ -116,9 +116,9 @@ struct ResultsExportTests {
         let faceValue = try #require(header.firstIndex(of: "face_value"))
         let efficiency = try #require(header.firstIndex(of: "efficiency"))
         let points = try #require(header.firstIndex(of: "points"))
-        #expect(row[faceValue] == "30")
+        #expect(row[faceValue] == "10")
         #expect(row[efficiency] == "1.00")
-        #expect(row[points] == "30.0")
+        #expect(row[points] == "10.0")
     }
 
     @Test("A failed row still states the face value it did not earn")
@@ -127,7 +127,7 @@ struct ResultsExportTests {
         let rows = try #require(CSVProbe.parse(csv))
         let faceValue = try #require(rows[0].firstIndex(of: "face_value"))
         let points = try #require(rows[0].firstIndex(of: "points"))
-        #expect(rows[1][faceValue] == "60")
+        #expect(rows[1][faceValue] == "10")
         #expect(rows[1][points] == "0.0")
     }
 
@@ -143,17 +143,17 @@ struct ResultsExportTests {
 
         let score = try #require(root["score"] as? [String: Any])
         #expect(score["specification"] as? String == AppleBenchScore.specification)
-        #expect(abs((score["points"] as? Double ?? 0) - 40) < 0.0001)
-        #expect(score["available"] as? Int == 100)
+        #expect(abs((score["points"] as? Double ?? 0) - 10) < 0.0001)
+        #expect(score["available"] as? Int == 20)
 
         let categories = try #require(root["categories"] as? [[String: Any]])
         let build = try #require(categories.first { $0["category"] as? String == "build" })
         let buildScore = try #require(build["score"] as? [String: Any])
-        #expect(abs((buildScore["points"] as? Double ?? 0) - 40) < 0.0001)
+        #expect(abs((buildScore["points"] as? Double ?? 0) - 10) < 0.0001)
 
         let configurations = try #require(root["configurations"] as? [[String: Any]])
         let configurationScore = try #require(configurations.first?["score"] as? [String: Any])
-        #expect(configurationScore["available"] as? Int == 100)
+        #expect(configurationScore["available"] as? Int == 20)
     }
 
     @Test("A solve with no reported tokens is scored at the floor and counted")
@@ -165,7 +165,7 @@ struct ResultsExportTests {
         )
         let score = try #require(root["score"] as? [String: Any])
         #expect(score["solves_with_unreported_tokens"] as? Int == 1)
-        #expect(abs((score["points"] as? Double ?? 0) - 12.5) < 0.0001)
+        #expect(abs((score["points"] as? Double ?? 0) - 2.5) < 0.0001)
     }
 
     @Test("Runs without a category are reported, not dropped")

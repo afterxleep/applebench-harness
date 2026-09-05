@@ -36,10 +36,22 @@ public enum AppleBenchScore {
     /// The frozen scoring specification these constants belong to. Published
     /// numbers are only comparable within one, the same way a pass rate is only
     /// comparable within one suite revision.
-    public static let specification = "points-v1"
+    public static let specification = "points-v2"
 
-    /// Points awarded per step of authored difficulty.
-    public static let pointsPerDifficultyStep = 10
+    /// What every task is worth. The same for all of them.
+    ///
+    /// Face value used to be ten points per step of authored difficulty. That
+    /// weighted the score by a judgment nobody had checked, and checking it
+    /// showed it was wrong per task: three tasks rated 6 were solved in under
+    /// 1,200 tokens while tasks rated 1 cost twenty times that. Weighting by
+    /// it paid sixty points for a one-line fix and ten for an afternoon's
+    /// work.
+    ///
+    /// Difficulty is still recorded on a task, because it says something to a
+    /// reader choosing what to look at. It no longer decides what a solve is
+    /// worth. What remains in the score is measured: the task was solved, and
+    /// what it cost to solve it.
+    public static let pointsPerTask = 10
 
     /// The token allowance a solve may spend before it starts losing points.
     ///
@@ -58,13 +70,10 @@ public enum AppleBenchScore {
 
     /// What a task is worth when solved at or under the allowance.
     ///
-    /// A task with no authored difficulty has no face value, because there is
-    /// nothing to weight it by. Such runs are counted as unscored rather than
-    /// being handed a guessed weight.
-    public static func faceValue(difficulty: Int?) -> Int {
-        guard let difficulty, difficulty > 0 else { return 0 }
-        return difficulty * pointsPerDifficultyStep
-    }
+    /// Every task, whatever it is. A suite's available points are therefore
+    /// just its size, which makes a score readable without knowing how any
+    /// task was rated.
+    public static func faceValue() -> Int { pointsPerTask }
 
     /// The fraction of face value a solve keeps, given what it spent.
     public static func efficiency(totalTokens: Int?) -> Double {
@@ -76,17 +85,13 @@ public enum AppleBenchScore {
 
     /// Points earned by one run. A failure earns nothing; its face value still
     /// counts toward what was available.
-    public static func points(passed: Bool, difficulty: Int?, totalTokens: Int?) -> Double {
+    public static func points(passed: Bool, totalTokens: Int?) -> Double {
         guard passed else { return 0 }
-        return Double(faceValue(difficulty: difficulty)) * efficiency(totalTokens: totalTokens)
+        return Double(faceValue()) * efficiency(totalTokens: totalTokens)
     }
 
     public static func points(for result: BenchmarkRunResult) -> Double {
-        points(
-            passed: result.result.passed,
-            difficulty: result.difficulty,
-            totalTokens: result.usage.totalTokens
-        )
+        points(passed: result.result.passed, totalTokens: result.usage.totalTokens)
     }
 
     /// Sums a set of runs. Because every term is independent, `total(for: a) +
@@ -146,14 +151,11 @@ public enum AppleBenchScore {
             var scored = 0
             var unscored = 0
             var blindSolves = 0
+            // Every run is scorable now. Nothing is excluded for lacking an
+            // authored difficulty, because nothing is weighted by one.
             for result in results {
-                let value = AppleBenchScore.faceValue(difficulty: result.difficulty)
-                guard value > 0 else {
-                    unscored += 1
-                    continue
-                }
                 scored += 1
-                possible += value
+                possible += AppleBenchScore.faceValue()
                 earned += AppleBenchScore.points(for: result)
                 if result.result.passed, (result.usage.totalTokens ?? 0) <= 0 {
                     blindSolves += 1

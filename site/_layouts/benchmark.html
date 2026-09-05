@@ -94,8 +94,8 @@ layout: default
 
   {%- assign report = site.data.reports[page.data] -%}
   <p style="color:var(--ink-3); font-size:.88rem; margin:0 0 2.5rem">
-    Points are <code>{{ report.score.specification | default: "points-v1" }}</code>: ten per step of authored
-    difficulty, kept in full for a solve inside a {{ report.score.reference_token_budget | default: 50000 | divided_by: 1000 }}k-token
+    Points are <code>{{ report.score.specification | default: "points-v2" }}</code>: ten per task,
+    kept in full for a solve inside a {{ report.score.reference_token_budget | default: 50000 | divided_by: 1000 }}k-token
     allowance and falling in proportion beyond it, floored at
     {{ report.score.minimum_efficiency | default: 0.25 | times: 100 | round }}%. A failure earns nothing and still counts
     its face value. Attempt rule: <code>{{ report.attempt | default: "all" }}</code>.
@@ -175,9 +175,15 @@ layout: default
   </div>
   {%- endif -%}
 
+  {%- comment -%}
+    Points by difficulty is gone. Every task is worth the same now, so that
+    chart would draw the shape of the task set rather than anything about the
+    model. Pass rate by difficulty stays below: it is the one view that shows
+    whether the authored rating means anything.
+  {%- endcomment -%}
   <div class="grid grid--2" style="margin-bottom:1.5rem">
     {%- include chart-points-by-category.html rows=rows -%}
-    {%- include chart-points-by-difficulty.html rows=rows -%}
+    {%- include chart-pass-by-category.html rows=rows -%}
   </div>
 
   {%- comment -%}
@@ -186,7 +192,6 @@ layout: default
     is the finding: work that got done, expensively.
   {%- endcomment -%}
   <div class="grid grid--2" style="margin-bottom:1.5rem">
-    {%- include chart-pass-by-category.html rows=rows -%}
     {%- include chart-pass-by-difficulty.html rows=rows -%}
   </div>
 

@@ -60,7 +60,7 @@ public enum ResultsExport {
                 String(result.git.filesChanged),
                 String(result.git.insertions),
                 String(result.git.deletions),
-                String(AppleBenchScore.faceValue(difficulty: result.difficulty)),
+                String(AppleBenchScore.faceValue()),
                 String(format: "%.2f", AppleBenchScore.efficiency(totalTokens: result.usage.totalTokens)),
                 String(format: "%.1f", AppleBenchScore.points(for: result)),
                 result.graders.map { "\($0.name)=\($0.passed ? "P" : "F")" }.joined(separator: ";"),
