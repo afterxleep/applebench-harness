@@ -60,7 +60,21 @@ public struct RuntimeGrader: Grader {
         }
 
         // 3. Install and launch on the benchmark simulator.
-        try await simulatorManager.install(udid: udid, appURL: appURL)
+        //
+        // The installer refusing the bundle is a verdict, not an outage: the
+        // bundle is what the agent built. Only a device that has gone away is
+        // the harness's problem.
+        do {
+            try await simulatorManager.install(udid: udid, appURL: appURL)
+        } catch where !SimulatorManager.isDeviceFault(error) {
+            return GradingResult(
+                grader: identifier,
+                passed: false,
+                duration: start.duration(to: .now),
+                summary: "The app could not be installed on the simulator: \(error)",
+                evidence: [logArtifact]
+            )
+        }
         let pid: pid_t
         do {
             pid = try await simulatorManager.launch(udid: udid, bundleIdentifier: configuration.launch.bundleIdentifier)

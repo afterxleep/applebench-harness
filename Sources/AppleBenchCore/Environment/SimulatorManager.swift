@@ -163,6 +163,21 @@ public struct SimulatorManager: Sendable {
         return reaped
     }
 
+    /// Whether an error from `simctl` is about the device rather than the app.
+    ///
+    /// An install can fail for two reasons that deserve opposite verdicts. The
+    /// device may be gone: deleted by a stray cleanup, never booted, timed out.
+    /// That is the harness's fault and is not scored. Or the installer may
+    /// have looked at the bundle and refused it — an Info.plist with no
+    /// identifier, no executable, a broken signature. That bundle is the
+    /// agent's deliverable, and the refusal is a verdict on its work.
+    public static func isDeviceFault(_ error: Error) -> Bool {
+        let text = "\(error)".lowercased()
+        return ["invalid device", "unable to find", "not found", "no such device",
+                "unable to boot", "timed out", "not booted", "device is shutdown"]
+            .contains { text.contains($0) }
+    }
+
     /// Deletes a device and confirms it is gone, retrying once.
     ///
     /// `simctl shutdown` returns before the device has finished shutting down,

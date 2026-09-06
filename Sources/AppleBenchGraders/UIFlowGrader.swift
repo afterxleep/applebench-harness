@@ -68,11 +68,13 @@ public struct UIFlowGrader: Grader {
         let applier = SimulatorDeviceStateApplier(grader: identifier, context: context)
 
         var evidence = [buildLog]
-        let outcome: Outcome = try await applier.withState(state) {
+        let outcome: Outcome
+        do {
+            outcome = try await applier.withState(state) {
             // Installed after the language/appearance settings are in place:
             // setting the system language reboots the device, which would drop
             // an install done first.
-            try await simulatorManager.install(udid: udid, appURL: appURL)
+            try await installOrReject(udid: udid, appURL: appURL)
             // Terminating a process that is not running is the expected case
             // here, not a failure, so the result is discarded either way.
             _ = await simulatorManager.terminate(
@@ -194,7 +196,7 @@ public struct UIFlowGrader: Grader {
                         udid: udid,
                         bundleIdentifier: configuration.bundleIdentifier
                     )
-                    try await simulatorManager.install(udid: udid, appURL: appURL)
+                    try await installOrReject(udid: udid, appURL: appURL)
                     _ = try await simulatorManager.launch(
                         udid: udid,
                         bundleIdentifier: configuration.bundleIdentifier
@@ -228,6 +230,15 @@ public struct UIFlowGrader: Grader {
                     stepFailure: nil, snapshot: snapshot, appearanceFailure: appearance
                 )
             }
+            }
+        } catch let rejected as BundleRejected {
+            return GradingResult(
+                grader: identifier,
+                passed: false,
+                duration: start.duration(to: .now),
+                summary: "The app could not be installed on the simulator: \(rejected.message)",
+                evidence: evidence
+            )
         }
 
         if let treeArtifact = write(outcome.snapshot, in: context) {
@@ -286,6 +297,20 @@ public struct UIFlowGrader: Grader {
                 grader: identifier,
                 message: "\(command.displayString) failed: \(result.standardError.trimmed())"
             )
+        }
+    }
+
+    /// The installer looked at the bundle the agent built and refused it.
+    /// Carried out of the device-state block as an error so the block still
+    /// restores the device, then turned into a verdict rather than an outage.
+    private struct BundleRejected: Error { let message: String }
+
+    /// Installs, distinguishing a refused bundle from a device that is gone.
+    private func installOrReject(udid: String, appURL: URL) async throws {
+        do {
+            try await simulatorManager.install(udid: udid, appURL: appURL)
+        } catch where !SimulatorManager.isDeviceFault(error) {
+            throw BundleRejected(message: "\(error)")
         }
     }
 

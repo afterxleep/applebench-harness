@@ -122,4 +122,73 @@ struct RuntimeGraderTests {
         #expect(result.summary.contains("build"))
         #expect(result.evidence.contains { $0.name == "runtime-build.log" })
     }
+
+    /// A simulator that cannot install the app the agent built.
+    private func contextWithApp(runner: FakeProcessRunner) async throws -> (GradingContext, URL) {
+        let (context, workspace) = try await makeGradingContext(processRunner: runner)
+        let products = context.derivedDataURL.appendingPathComponent("Build/Products/Debug-iphonesimulator/App.app")
+        try FileManager.default.createDirectory(at: products, withIntermediateDirectories: true)
+        return (GradingContext(
+            runID: "test",
+            workspaceURL: context.workspaceURL,
+            runDirectoryURL: context.runDirectoryURL,
+            artifactsDirectoryURL: context.artifactsDirectoryURL,
+            derivedDataURL: context.derivedDataURL,
+            simulatorUDID: "FAKE-UDID",
+            destination: context.destination,
+            changedFiles: context.changedFiles,
+            processRunner: context.processRunner,
+            recorder: context.recorder
+        ), workspace)
+    }
+
+    @Test("A bundle the installer rejects is a failure, not an infrastructure error")
+    func uninstallableBundleFails() async throws {
+        // ops-010 hand-wrote an Info.plist with nothing in it but a URL
+        // scheme and switched generation off, so the bundle had no identifier
+        // and no executable. simctl refused it, the harness called that an
+        // infrastructure error, and the task was excluded from completion
+        // instead of failed. The bundle is the agent's deliverable; the
+        // installer rejecting it is a verdict on the agent's work.
+        let runner = FakeProcessRunner()
+        runner.enqueue(exitCode: 0)                                    // build
+        for _ in 0..<3 {                                               // three install attempts
+            runner.enqueue(exitCode: 13, standardError: "An error was encountered processing the command (domain=IXErrorDomain, code=13): Failed to install the requested application")
+            runner.enqueue(exitCode: 0)                                // bootstatus between attempts
+        }
+        let (context, workspace) = try await contextWithApp(runner: runner)
+        defer { try? FileManager.default.removeItem(at: workspace) }
+        let grader = RuntimeGrader(
+            configuration: RuntimeGraderConfiguration(
+                scheme: "App", launch: RuntimeLaunchConfiguration(bundleIdentifier: "com.example.app"), observationSeconds: 1
+            ),
+            simulatorManager: SimulatorManager(processRunner: runner)
+        )
+        let result = try await grader.grade(task: defaultTask(), context: context)
+        #expect(!result.passed)
+        #expect(result.summary.contains("could not be installed"))
+    }
+
+    @Test("A simulator that has gone away is still an infrastructure error")
+    func missingDeviceIsInfrastructure() async throws {
+        // The other reason an install fails is that the device is not there
+        // any more. That is the harness's problem and must not be scored.
+        let runner = FakeProcessRunner()
+        runner.enqueue(exitCode: 0)
+        for _ in 0..<3 {
+            runner.enqueue(exitCode: 149, standardError: "Invalid device: FAKE-UDID")
+            runner.enqueue(exitCode: 0)
+        }
+        let (context, workspace) = try await contextWithApp(runner: runner)
+        defer { try? FileManager.default.removeItem(at: workspace) }
+        let grader = RuntimeGrader(
+            configuration: RuntimeGraderConfiguration(
+                scheme: "App", launch: RuntimeLaunchConfiguration(bundleIdentifier: "com.example.app"), observationSeconds: 1
+            ),
+            simulatorManager: SimulatorManager(processRunner: runner)
+        )
+        await #expect(throws: BenchmarkFailure.self) {
+            _ = try await grader.grade(task: defaultTask(), context: context)
+        }
+    }
 }
