@@ -2,10 +2,29 @@
 # stated set of tasks, so every run records the revision it was measured on
 # and results are only comparable within one.
 
-- id: "2026-09-03"
-  name: "2026-09-03"
-  gold_tasks: 134
+- id: "2026-09-06"
+  name: "2026-09-06"
+  gold_tasks: 136
   current: true
+  summary: >-
+    The graders judge outcomes, not routes. Prompts say what has to be true
+    when the work is done and no longer name the tools or the commands;
+    nothing in a grader asks which command was run or how many. Two visual
+    tasks join the suite. Scoring moves to points-v2, where every task is
+    worth the same.
+  changes:
+    - "Thirty-five operational prompts stop dictating commands and stop fencing off third-party tools, which the harness now denies unconditionally. Naming them was a hint."
+    - "Seventeen mutation graders match by pattern rather than by an identifier the agent is free to rename, so a renamed identifier fails the test instead of breaking the grader."
+    - "Every assertion that graded the route is gone: no grader asks for a tool to have been run, for a command count, or for a command string in a report. Deliverables are checked for what they contain."
+    - "Seed-data guards check the value, not the line: renaming a property or moving the data no longer fails a task whose behaviour is right."
+    - "Deliverables are asked for in the working directory rather than at the repo root, which a model could resolve to the operator's checkout."
+    - "Two tasks added that need the device: a landscape layout that starves its hero image, and a card that keeps light-mode colours in dark mode."
+    - "Each task carries the instant it last changed, so a task edited after a run is told apart from one edited before it."
+
+- id: "2026-09-03"
+  name: "2026-09-03 (superseded)"
+  gold_tasks: 134
+  current: false
   summary: >-
     Eleven tasks added that cannot be solved without driving the device, and
     twenty-five hardened so that a test asserting nothing no longer passes.
