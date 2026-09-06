@@ -17,15 +17,12 @@ description: >-
   4518 of 6840 points and 103 of 134 tasks completed to a
   verified result, with per-category points, cost against wall-clock time,
   and every task.
-lede: >-
-  123 tasks on suite revision 2026-08-31, at the provider's default reasoning.
-  103 passed; 4354 of 5940 points.
 ---
 ## Conditions
 
 | | |
 |---|---|
-| Attempt rule | First per task, gold suite only. 19 tasks were attempted more than once while the harness was being fixed. |
+| Attempt rule | Latest per task. |
 | Reasoning | Provider default. This model exposes no selectable effort level. |
 | Isolation | Not sandboxed. Web tools off, hermetic config, host egress open. |
 

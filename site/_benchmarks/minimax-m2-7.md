@@ -17,14 +17,11 @@ description: >-
   3168 of 6980 points and 70 of 136 tasks completed to a
   verified result, with per-category points, cost against wall-clock time,
   and every task.
-lede: >-
-  134 tasks on suite revision 2026-09-03, at the provider's default reasoning.
-  79 passed; 3657 of 6840 points.
 ---
 ## Conditions
 
 | | |
 |---|---|
-| Attempt rule | Latest per task. 25 tasks were rewritten after this model first ran them. |
+| Attempt rule | Latest per task. |
 | Reasoning | Provider default. This model exposes no selectable effort level. |
-| Isolation | Not sandboxed. Web tools off, hermetic config, host egress open. |
+| Isolation | Sandboxed. Reference solutions, task files and other runs are unreadable; writes are confined to the workspace; execution is limited to Apple's toolchain and third-party wrappers are denied. Web tools off, hermetic config, host egress open. |

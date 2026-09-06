@@ -175,12 +175,6 @@ layout: default
   </div>
   {%- endif -%}
 
-  {%- comment -%}
-    Points by difficulty is gone. Every task is worth the same now, so that
-    chart would draw the shape of the task set rather than anything about the
-    model. Pass rate by difficulty stays below: it is the one view that shows
-    whether the authored rating means anything.
-  {%- endcomment -%}
   <div class="grid grid--2" style="margin-bottom:1.5rem">
     {%- include chart-points-by-category.html rows=rows -%}
     {%- include chart-pass-by-category.html rows=rows -%}
@@ -191,9 +185,6 @@ layout: default
     two answer different questions, and the gap between a category's two bars
     is the finding: work that got done, expensively.
   {%- endcomment -%}
-  <div class="grid grid--2" style="margin-bottom:1.5rem">
-    {%- include chart-pass-by-difficulty.html rows=rows -%}
-  </div>
 
   {%- include chart-cost-vs-time.html rows=rows -%}
   {%- include chart-task-matrix.html rows=rows -%}
@@ -221,7 +212,6 @@ layout: default
         <tr>
           <th scope="col">Task</th>
           <th scope="col">Category</th>
-          <th scope="col">D</th>
           <th scope="col">Result</th>
           <th scope="col">Points</th>
           <th scope="col">Time</th>
@@ -236,7 +226,6 @@ layout: default
           <tr>
             <td><code>{{ row.task }}</code></td>
             <td>{{ row.category }}</td>
-            <td>{{ row.difficulty }}</td>
             <td>
               {%- if row.passed == "true" -%}
                 <span class="pill pill--pass">Pass</span>

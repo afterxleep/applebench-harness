@@ -31,7 +31,7 @@ many. Params: rows.
               tabindex="0"
               role="img"
               aria-label="{{ row.task }}: {% if row.passed == 'true' %}passed{% else %}failed{% endif %}"
-              title="{{ row.task }} (d{{ row.difficulty }}) · {% if row.passed == 'true' %}PASS{% else %}FAIL{% endif %}&#10;{{ row.graders }}"></span>
+              title="{{ row.task }} · {% if row.passed == 'true' %}PASS{% else %}FAIL{% endif %}&#10;{{ row.graders }}"></span>
       {%- endfor -%}
     </div>
   {%- endfor -%}
