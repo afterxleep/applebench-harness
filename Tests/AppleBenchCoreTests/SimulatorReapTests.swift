@@ -85,3 +85,40 @@ struct SimulatorReapOwnershipTests {
         #expect(stale == ["BBB"])
     }
 }
+
+/// Simulators the agent itself creates are cleaned up after it.
+@Suite("Reaping what the agent created")
+struct SimulatorAgentCreatedTests {
+    private func listing(_ names: [(String, String)]) -> String {
+        let devices = names.map { #"{"udid":"\#($0.1)","name":"\#($0.0)"}"# }.joined(separator: ",")
+        return #"{"devices":{"iOS 26.5":[\#(devices)]}}"#
+    }
+
+    @Test("A device that appeared during the agent phase is reaped, whatever it is called")
+    func newDevicesAreReaped() throws {
+        // ops-021 clones and renames a simulator; ops-013 creates one. The
+        // reaper only knew the benchmark's own prefix, so those stayed behind
+        // booted for the rest of the suite, and a later task's launch died
+        // under them.
+        let before = try SimulatorManager.allDeviceUDIDs(listJSON: listing([("iPhone 17", "AAA")]))
+        let after = try SimulatorManager.allDeviceUDIDs(listJSON: listing([
+            ("iPhone 17", "AAA"), ("Renamed iPhone 17", "BBB"), ("Test-iPhone-16", "CCC"),
+        ]))
+        let reap = SimulatorManager.agentCreatedUDIDs(before: before, after: after, names: [
+            "BBB": "Renamed iPhone 17", "CCC": "Test-iPhone-16",
+        ], claimed: [])
+        #expect(reap == ["BBB", "CCC"])
+    }
+
+    @Test("Another run's device that appeared meanwhile is not the agent's")
+    func otherRunsDevicesAreSpared() throws {
+        let before = try SimulatorManager.allDeviceUDIDs(listJSON: listing([]))
+        let after = try SimulatorManager.allDeviceUDIDs(listJSON: listing([
+            ("AppleBench-run-b", "BBB"), ("Renamed iPhone 17", "CCC"),
+        ]))
+        let reap = SimulatorManager.agentCreatedUDIDs(before: before, after: after, names: [
+            "BBB": "AppleBench-run-b", "CCC": "Renamed iPhone 17",
+        ], claimed: ["BBB"])
+        #expect(reap == ["CCC"])
+    }
+}

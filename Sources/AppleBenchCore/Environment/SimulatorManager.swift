@@ -107,6 +107,62 @@ public struct SimulatorManager: Sendable {
         return reaped
     }
 
+    /// Every simulator on the machine, by UDID, with its name.
+    public static func allDevices(listJSON: String) throws -> [String: String] {
+        struct Listing: Decodable {
+            struct Device: Decodable { let udid: String; let name: String }
+            let devices: [String: [Device]]
+        }
+        guard let data = listJSON.data(using: .utf8) else {
+            throw BenchmarkFailure.infrastructureFailure("simctl list produced no readable output")
+        }
+        let listing = try JSONDecoder().decode(Listing.self, from: data)
+        return Dictionary(listing.devices.values.flatMap { $0 }.map { ($0.udid, $0.name) },
+                          uniquingKeysWith: { first, _ in first })
+    }
+
+    public static func allDeviceUDIDs(listJSON: String) throws -> Set<String> {
+        Set(try allDevices(listJSON: listJSON).keys)
+    }
+
+    /// Devices that exist now and did not before the agent ran.
+    ///
+    /// An agent doing operational work creates, clones and renames simulators
+    /// under whatever names the task suggests. The reaper only ever knew the
+    /// benchmark's own prefix, so those survived the run booted, and a later
+    /// task's launch died under them. Anything that appeared during the agent
+    /// phase is the agent's to lose — except a device another run created
+    /// meanwhile, which carries the benchmark prefix and a claim.
+    public static func agentCreatedUDIDs(
+        before: Set<String>,
+        after: Set<String>,
+        names: [String: String],
+        claimed: Set<String>
+    ) -> [String] {
+        after.subtracting(before)
+            .filter { !claimed.contains($0) && !(names[$0] ?? "").hasPrefix(deviceNamePrefix) }
+            .sorted()
+    }
+
+    /// The machine's simulators right now.
+    public func devices() async -> [String: String] {
+        guard let json = try? await simctl(["list", "devices", "--json"], describe: "list devices"),
+              let devices = try? Self.allDevices(listJSON: json) else { return [:] }
+        return devices
+    }
+
+    /// Removes every simulator the agent left behind. Returns how many.
+    public func reapAgentCreatedDevices(before: Set<String>, claimed: Set<String>) async -> Int {
+        let now = await devices()
+        let created = Self.agentCreatedUDIDs(before: before, after: Set(now.keys), names: now, claimed: claimed)
+        var reaped = 0
+        for udid in created {
+            await shutdown(udid: udid)
+            if await deleteVerifying(udid: udid) { reaped += 1 }
+        }
+        return reaped
+    }
+
     /// Deletes a device and confirms it is gone, retrying once.
     ///
     /// `simctl shutdown` returns before the device has finished shutting down,

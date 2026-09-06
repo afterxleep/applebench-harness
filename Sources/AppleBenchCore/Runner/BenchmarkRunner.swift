@@ -170,6 +170,10 @@ public struct BenchmarkRunner: Sendable {
 
         var simulatorUDID: String?
         do {
+            // What the machine has before the agent touches it, so whatever it
+            // creates can be taken away again afterwards.
+            let devicesBeforeAgent = Set((await simulatorManager.devices()).keys)
+
             // Phase 4: agent, under runner-enforced wall clock.
             let agentResult = try await runAgentPhase(
                 task: task,
@@ -188,6 +192,20 @@ public struct BenchmarkRunner: Sendable {
                         + "without producing any output. "
                         + "Its output is in \(runDirectoryURL.lastPathComponent)/logs/agent-output.log."
                 )
+            }
+
+            // Simulators the agent created, cloned or renamed do not belong to
+            // it once it has exited. Left booted, they made a later task's
+            // launch die by signal.
+            let leftBehind = await simulatorManager.reapAgentCreatedDevices(
+                before: devicesBeforeAgent,
+                claimed: SimulatorClaims.active(in: options.runsRoot)
+            )
+            if leftBehind > 0 {
+                await recorder.record(.simulatorReaped, payload: .object([
+                    "removed": .int(leftBehind),
+                    "reason": .string("created by the agent and left behind"),
+                ]))
             }
 
             // Metadata (which includes the task's grader configuration) is
