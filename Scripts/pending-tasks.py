@@ -22,19 +22,54 @@ import argparse
 import json
 import os
 import pathlib
+import re
 import sys
 
 
-def modified_dates() -> dict[str, str]:
-    """`modified:` from each task file, as an ISO date."""
-    import os, re
+def parse_stamp(value: str) -> "datetime.datetime":
+    """A `modified:` value as an instant in UTC.
+
+    A bare date is read as the end of that day. A task edited and run on the
+    same day cannot be told apart from one edited before the run, so the safe
+    reading is that the edit came last and the task is still due. A timestamp
+    says exactly when, and is compared exactly.
+    """
+    import datetime
+    text = value.strip().strip('"').strip("'")
+    if re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", text):
+        return datetime.datetime.fromisoformat(text + "T23:59:59+00:00").astimezone(datetime.timezone.utc)
+    text = text.replace("Z", "+00:00")
+    if "T" not in text and " " in text:
+        text = text.replace(" ", "T", 1)
+    stamp = datetime.datetime.fromisoformat(text)
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=datetime.timezone.utc)
+    return stamp.astimezone(datetime.timezone.utc)
+
+
+def modified_stamps() -> dict[str, "datetime.datetime"]:
+    """`modified:` from each task file, as an instant."""
+    import os
     taskset = pathlib.Path(os.environ.get("APPLEBENCH_TASKSET") or pathlib.Path(__file__).resolve().parents[1])
-    dates = {}
+    stamps = {}
     for path in sorted((taskset / "Examples/Tasks").glob("*.yaml")):
-        found = re.search(r"^modified:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})", path.read_text(), re.MULTILINE)
+        found = re.search(r"^modified:\s*(\S+)", path.read_text(), re.MULTILINE)
         if found:
-            dates[path.stem] = found.group(1)
-    return dates
+            try:
+                stamps[path.stem] = parse_stamp(found.group(1))
+            except ValueError:
+                print(f"warning: {path.name}: unreadable modified: {found.group(1)!r}", file=sys.stderr)
+    return stamps
+
+
+def run_started(run_id: str) -> "datetime.datetime | None":
+    """When a run began, from its id: `2026-09-06T160906-<task>-<agent>`, in UTC."""
+    import datetime
+    found = re.match(r"([0-9]{4}-[0-9]{2}-[0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})", run_id)
+    if not found:
+        return None
+    day, hh, mm, ss = found.groups()
+    return datetime.datetime.fromisoformat(f"{day}T{hh}:{mm}:{ss}+00:00")
 
 
 def suite_tasks(path: pathlib.Path) -> list[str]:
@@ -101,9 +136,8 @@ def main() -> int:
                 report_path = candidate
                 break
 
-    # When each task was last run for this model. A run id starts with its UTC
-    # timestamp, so the date is the first ten characters.
-    last_run: dict[str, str] = {}
+    # When each task was last run for this model, from the run id's UTC stamp.
+    last_run: dict = {}
     scored_before: set[str] = set()
     if report_path and report_path.exists():
         print(f"comparing against {report_path.name}", file=sys.stderr)
@@ -115,30 +149,26 @@ def main() -> int:
             # No recorded fingerprint means the report predates them. Treat the
             # task as unchanged so adopting this does not re-run everything.
             scored_before.add(task)
-            when = str(run.get("run_id", ""))[:10]
-            if when and when > last_run.get(task, ""):
+            when = run_started(str(run.get("run_id", "")))
+            if when and (task not in last_run or when > last_run[task]):
                 last_run[task] = when
 
     new = sorted(t for t in scored if t not in scored_before)
     # A task states when it was created or last updated, and needs running
-    # again when that date is not older than the day this model last ran it.
+    # again when that instant is later than this model's last run of it.
     #
-    # Not-older rather than newer, because `modified:` is a date and a run is a
-    # moment: a task edited after a suite finishes carries the same date as the
-    # run, and cannot be told apart from one edited before it started. Erring
-    # towards re-running costs a task's worth of tokens. Erring the other way
-    # scores a model against a version of the task it was never given, which is
-    # the failure this whole mechanism exists to prevent.
+    # A bare date is read as the end of its day: a task edited and run on the
+    # same day cannot be told apart from one edited before the run, so it is
+    # taken to be still due. A timestamp is exact, and a task edited at 17:41
+    # and run at 18:09 is done.
     #
     # A task with no date at all always runs. The date is what says a task has
-    # been checked; its absence says nobody has vouched for this one yet, and a
-    # score carried forward from an unvouched-for task is worth less than the
-    # tokens to run it again.
-    modified = modified_dates()
+    # been checked; its absence says nobody has vouched for this one yet.
+    modified = modified_stamps()
     changed = [
         task for task in sorted(scored)
         if task in scored_before
-        and (task not in modified or modified[task] >= last_run.get(task, ""))
+        and (task not in modified or task not in last_run or modified[task] > last_run[task])
     ]
 
     wanted = {"both": new + changed, "new": new, "changed": changed}[args.mode]

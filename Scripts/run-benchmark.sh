@@ -8,7 +8,7 @@
 #   -s, --suite <id>        Suite to run (default: gold)
 #       --changed           Run only what this model still owes: tasks it has
 #                           never been scored on, and tasks whose `modified:`
-#                           date is newer than the day it last ran them. Needs
+#                           instant is later than its last run of them. Needs
 #                           --model. Nothing is marked by hand. Exits without
 #                           running when nothing is due, so it is safe to use
 #                           every time.
