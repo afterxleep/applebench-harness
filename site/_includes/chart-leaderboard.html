@@ -72,7 +72,7 @@ Params: runs (site.benchmarks).
 
   {%- if left_out.size > 0 -%}
   <p class="figure__note">
-    Not ranked: {% for run in left_out %}<a href="{{ run.url | relative_url }}">{{ run.model | split: "/" | last }}</a>{% unless forloop.last %}, {% endunless %}{% endfor %}.
+    Not ranked: {%- for run in left_out %} <a href="{{ run.url | relative_url }}">{{ run.model | split: "/" | last }}</a>{%- unless forloop.last %},{% endunless -%}{% endfor -%}.
     Measured on a superseded suite revision or an earlier scoring rule. Each is on its own page with its own conditions.
   </p>
   {%- endif -%}
