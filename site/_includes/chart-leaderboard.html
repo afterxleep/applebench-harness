@@ -17,10 +17,25 @@ Params: runs (site.benchmarks).
     </p>
   </figcaption>
 
+  {%- comment -%}
+    Only runs on the current suite revision and the current scoring
+    specification are ranked. A run scored on a superseded task set, or under
+    a scoring rule that weighted tasks differently, is on its own page with
+    its own conditions; ranking it here would compare numbers the
+    methodology says are not comparable.
+  {%- endcomment -%}
+  {%- assign current = site.data.suite_revisions | where: "current", true | first -%}
   {%- assign ranked = "" | split: "" -%}
+  {%- assign left_out = "" | split: "" -%}
   {%- for run in include.runs -%}
     {%- assign rows = site.data.benchmarks[run.data] -%}
-    {%- if rows -%}
+    {%- assign comparable = true -%}
+    {%- if current and run.suite_revision != current.id %}{% assign comparable = false %}{% endif -%}
+    {%- if run.score_spec != "points-v2" %}{% assign comparable = false %}{% endif -%}
+    {%- unless comparable -%}
+      {%- assign left_out = left_out | push: run -%}
+    {%- endunless -%}
+    {%- if rows and comparable -%}
       {%- assign earned = 0 -%}
       {%- assign available = 0 -%}
       {%- assign hits = rows | where: "passed", "true" -%}
@@ -55,6 +70,12 @@ Params: runs (site.benchmarks).
     {%- endfor -%}
   </div>
 
+  {%- if left_out.size > 0 -%}
+  <p class="figure__note">
+    Not ranked: {% for run in left_out %}<a href="{{ run.url | relative_url }}">{{ run.model | split: "/" | last }}</a>{% unless forloop.last %}, {% endunless %}{% endfor %}.
+    Measured on a superseded suite revision or an earlier scoring rule. Each is on its own page with its own conditions.
+  </p>
+  {%- endif -%}
   <p class="figure__note">
     A task is worth ten points, and a solve keeps all of them only if it
     stayed inside the token allowance. A failure earns nothing and still
