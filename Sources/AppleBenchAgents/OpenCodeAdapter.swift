@@ -260,7 +260,12 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
             // The run directory is denied because it holds the task's grader
             // specification and every other run's results. OpenCode's own
             // config lives there too, and it cannot start without reading it.
-            let sealed = sandbox.allowingRead([Self.configURL(for: context)])
+            var sealed = sandbox.allowingRead([Self.configURL(for: context)])
+            if let home = hermeticHome {
+                // OpenCode unpacks ripgrep here on first use; its grep tool
+                // is dead if the sandbox refuses to run it.
+                sealed = sealed.allowingExecution([home.appendingPathComponent(".cache/opencode/bin")])
+            }
             guard let wrapped = try sealed.wrap(
                 executable: executable,
                 arguments: arguments,

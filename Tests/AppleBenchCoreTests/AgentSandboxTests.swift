@@ -320,6 +320,27 @@ struct AgentSandboxTests {
         #expect(!roots.contains("/opt/homebrew/bin"))
     }
 
+    @Test("An adapter can open an execution root the allowlist could not know about")
+    func adapterAddsExecutionRoot() throws {
+        // OpenCode extracts ripgrep into its home at first use. The allowlist
+        // is built before that home exists, so it refused the binary and the
+        // agent's grep tool failed on every task.
+        let box = sandbox(execRoots: ["/usr/bin"])
+            .allowingExecution([URL(fileURLWithPath: "/tmp/home/.cache/opencode/bin")])
+        let profile = box.profile()
+        let deny = try #require(profile.range(of: "(deny process-exec*)"))
+        let allow = try #require(profile.range(of: "(allow process-exec (subpath \"/tmp/home/.cache/opencode/bin\"))"))
+        #expect(deny.lowerBound < allow.lowerBound)
+    }
+
+    @Test("Adding an execution root to an open sandbox keeps it open")
+    func executionRootOnOpenSandboxIsNoop() {
+        // No allowlist means everything may run already; adding a root must
+        // not switch the allowlist on and shut everything else.
+        let box = sandbox(execRoots: []).allowingExecution([URL(fileURLWithPath: "/x")])
+        #expect(!box.profile().contains("process-exec"))
+    }
+
     @Test("Wrapping produces a sandbox-exec invocation and writes the profile")
     func wrapWritesProfile() throws {
         let profileURL = URL(fileURLWithPath: NSTemporaryDirectory())

@@ -61,6 +61,24 @@ public struct AgentSandbox: Sendable {
         self.deniedWritePaths = deniedWritePaths
     }
 
+    /// A copy that also lets the agent execute from `roots`.
+    ///
+    /// An agent's own runtime unpacks helpers it depends on into its home —
+    /// OpenCode extracts ripgrep to `.cache/opencode/bin/rg` and its grep
+    /// tool is dead without it. The allowlist cannot know that path until the
+    /// adapter has made the home, so the adapter asks. It is a writable
+    /// place, so the residual risk is a binary the agent puts there itself;
+    /// the wrappers stay unreadable, so it cannot be a copy of one.
+    public func allowingExecution(_ roots: [URL]) -> AgentSandbox {
+        AgentSandbox(
+            deniedReadPaths: deniedReadPaths,
+            workspaceURL: workspaceURL,
+            executableRoots: executableRoots.isEmpty ? [] : executableRoots + roots,
+            allowedReadPaths: allowedReadPaths,
+            deniedWritePaths: deniedWritePaths
+        )
+    }
+
     /// A copy that also lets the agent read `paths`.
     ///
     /// Each adapter knows which files it puts outside the workspace; the
