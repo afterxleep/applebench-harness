@@ -88,6 +88,13 @@
 # or a path to a JSON file) before invoking this script.
 set -euo pipefail
 
+# The whole script is one function, called on the last line. Bash reads a
+# script as it runs it, so editing this file while a suite is mid-flight
+# shifts what the running copy reads next: one such edit made a run skip
+# straight past its own exit-status assignment after four hours of work.
+# Wrapping the body means it is parsed in full before anything executes.
+main() {
+
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 
@@ -441,3 +448,6 @@ elif [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" 
 fi
 
 exit "$suite_status"
+}
+
+main "$@"
