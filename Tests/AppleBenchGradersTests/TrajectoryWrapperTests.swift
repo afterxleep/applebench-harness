@@ -100,3 +100,24 @@ extension TrajectoryWrapperTests {
         #expect(TrajectoryGrader.wrappersUsed(in: ["brew install xcodegen"]) == ["brew"])
     }
 }
+
+extension TrajectoryWrapperTests {
+    @Test("A wrapper the shell could not find was not used")
+    func commandNotFoundIsNotUse() {
+        // ops-010 typed `xcbuild`, a tool that does not exist on the machine,
+        // got "command not found", and was failed for having used a wrapper.
+        // Typing a name is not the work being done by it; only an invocation
+        // that ran counts.
+        let ran = TrajectoryGrader.wrappersUsed(in: [
+            ("xcbuild -project App.xcodeproj -scheme App", "zsh:1: command not found: xcbuild"),
+            ("fastlane beta", "sandbox-exec: execvp() of 'fastlane' failed: Operation not permitted"),
+        ])
+        #expect(ran.isEmpty)
+    }
+
+    @Test("A wrapper that produced output did run")
+    func wrapperWithOutputCounts() {
+        let ran = TrajectoryGrader.wrappersUsed(in: [("fastlane beta", "[fastlane] Driving the lane 'beta'")])
+        #expect(ran == ["fastlane"])
+    }
+}
