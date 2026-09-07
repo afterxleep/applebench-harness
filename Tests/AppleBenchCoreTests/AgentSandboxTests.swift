@@ -267,8 +267,40 @@ struct AgentSandboxTests {
         #expect(try !canRead(answers), "the run's grader specification is readable")
     }
 
-    @Test("A binary the agent obtains at a new path cannot run")
-    func downloadedBinariesCannotRun() throws {
+    @Test("A binary the agent fetches into its workspace may run")
+    func downloadedBinariesMayRun() throws {
+        // A tool the agent downloads is its own work: it pays the tokens to
+        // find, fetch and drive it, and the deliverable is still judged by the
+        // graders that look at it. What stays refused is a wrapper already
+        // installed on this machine, so a score does not move with the
+        // operator's setup.
+        let run = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-run-\(UUID().uuidString)")
+        let workspace = run.appendingPathComponent("workspace")
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: run) }
+        let tool = workspace.appendingPathComponent("fetched-tool")
+        FileManager.default.createFile(
+            atPath: tool.path, contents: Data("#!/bin/sh\necho ran\n".utf8),
+            attributes: [.posixPermissions: 0o755]
+        )
+        let box = AgentSandbox.standard(
+            harnessRoot: URL(fileURLWithPath: "/h"), taskSetRoot: nil,
+            workspaceURL: workspace, runDirectory: run
+        )
+        let profileURL = run.appendingPathComponent("p.sb")
+        let command = try #require(try box.wrap(executable: tool.path, arguments: [], profileURL: profileURL))
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: command.executable)
+        process.arguments = command.arguments
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        try process.run(); process.waitUntilExit()
+        #expect(process.terminationStatus == 0, "a tool the agent fetched was refused")
+    }
+
+    @Test("A binary somewhere the agent does not control still cannot run")
+    func strayBinariesCannotRun() throws {
         // Denying wrappers by name is defeated by fetching one. Copying a
         // denied binary already fails, because reading it is denied — but
         // nothing stopped the agent downloading a fresh one and running it,

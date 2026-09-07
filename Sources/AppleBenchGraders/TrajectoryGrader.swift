@@ -60,18 +60,17 @@ public struct TrajectoryGrader: Grader {
                 failures.append("ran tests \(tests) time(s), fewer than the \(minimum) required")
             }
         }
-        // Unconditional, and not something a task opts into. The sandbox
-        // denies these binaries, but denial is a list of paths resolved when
-        // the run starts: it cannot see one reached through an interpreter or
-        // a path that appeared mid-run. A task answered with a wrapper is not
-        // a task answered.
+        // A wrapper the agent reached for is recorded, not punished. What a
+        // task asks is whether the work was done, and a deliverable produced
+        // with fastlane is still the deliverable. The sandbox denies the
+        // wrappers installed on this machine, so a published run measures the
+        // toolchain rather than the operator's setup — but that is a property
+        // of the environment, not a verdict on the model.
+        //
+        // The check fired three times in its life and was wrong all three:
+        // twice on Xcode's own xcbuild, once on `gem list` asking what was
+        // installed. It never once caught a wrapper doing the work.
         let wrappers = Self.wrappersUsed(in: Self.commandsWithOutput(in: text))
-        if !wrappers.isEmpty {
-            failures.append(
-                "used \(wrappers.joined(separator: ", ")), which wraps the toolchain "
-                    + "this task is asking about"
-            )
-        }
 
         for assertion in configuration.assertions {
             guard let pattern = assertion.commandMatches,
@@ -91,7 +90,8 @@ public struct TrajectoryGrader: Grader {
             passed: failures.isEmpty,
             duration: start.duration(to: .now),
             summary: failures.isEmpty
-                ? "The agent's recorded commands show the work behind the deliverable (\(commands.count) command(s))"
+                ? "The agent's recorded commands show the work behind the deliverable (\(commands.count) command(s)"
+                    + (wrappers.isEmpty ? ")" : ", including \(wrappers.joined(separator: ", ")))")
                 : "The deliverable is not backed by the run: " + failures.joined(separator: "; "),
             evidence: []
         )

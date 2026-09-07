@@ -3,13 +3,13 @@ import Foundation
 import Testing
 @testable import AppleBenchGraders
 
-/// The sandbox stops a wrapper running; this notices if one ran anyway.
+/// Which wrappers a run reached for, recorded but never punished.
 ///
-/// Denial is a list of paths resolved when the run starts, so it cannot see a
-/// wrapper reached some way that list does not describe — an interpreter, a
-/// shell function, a path that appeared mid-run. The command record is written
-/// by the harness and is the one part of a run the agent cannot author, so it
-/// is where that shows up.
+/// A deliverable produced with fastlane is still the deliverable, so this
+/// decides no verdict. It is reported alongside the command count because it
+/// says something about how a model works, and because the sandbox denying
+/// the wrappers on this machine is a property of the environment worth being
+/// able to see through.
 @Suite("Trajectory: wrapper detection")
 struct TrajectoryWrapperTests {
     @Test("A wrapper invocation is spotted in the recorded commands")
@@ -204,5 +204,28 @@ extension TrajectoryWrapperTests {
     func installedWrapperCounts() {
         #expect(TrajectoryGrader.wrappersUsed(in: [("/opt/homebrew/bin/xcodegen generate", "Loaded project.yml")]) == ["xcodegen"])
         #expect(TrajectoryGrader.wrappersUsed(in: [("xcbuild -project App.xcodeproj", "Build succeeded")]) == ["xcbuild"])
+    }
+}
+
+@Suite("Trajectory: a wrapper is not a verdict")
+struct WrapperIsNotAVerdictTests {
+    @Test("Reaching for a wrapper does not fail the task")
+    func wrapperDoesNotFail() async throws {
+        // Even a model that downloads fastlane and gets the job done has done
+        // the job. What the deliverable is worth is decided by the graders
+        // that look at it.
+        let log = #"""
+        {"type":"agent_event","payload":{"data":{"part":{"type":"tool","tool":"bash","state":{"input":{"command":"fastlane gym"},"output":"[fastlane] Driving the lane"}}}}}
+        """#
+        let commands = TrajectoryGrader.commandsWithOutput(in: log)
+        #expect(TrajectoryGrader.wrappersUsed(in: commands) == ["fastlane"])
+
+        let grader = TrajectoryGrader(configuration: TrajectoryGraderConfiguration())
+        let (context, workspace) = try await makeGradingContext(processRunner: FakeProcessRunner())
+        defer { try? FileManager.default.removeItem(at: workspace) }
+        try log.write(to: context.runDirectoryURL.appendingPathComponent("events.jsonl"), atomically: true, encoding: .utf8)
+        let result = try await grader.grade(task: defaultTask(), context: context)
+        #expect(result.passed)
+        #expect(result.summary.contains("fastlane"), "the run should still say what it reached for")
     }
 }

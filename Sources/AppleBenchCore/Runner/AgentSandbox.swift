@@ -112,7 +112,13 @@ public struct AgentSandbox: Sendable {
             roots.append(agentExecutable.resolvingSymlinksInPath().deletingLastPathComponent())
         }
         if let runDirectory {
-            // Test binaries and build products the run itself produces.
+            // Test binaries and build products the run itself produces, and
+            // the workspace inside it: a tool the agent fetches for itself is
+            // its own work and may run. Reaching for one installed on this
+            // machine is still refused, so a score does not depend on what the
+            // operator happens to have lying around — but downloading and
+            // driving fastlane is a route to the deliverable like any other,
+            // and it costs the model the tokens to do it.
             roots.append(runDirectory)
         }
         return roots
