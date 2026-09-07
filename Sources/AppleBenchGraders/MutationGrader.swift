@@ -36,6 +36,59 @@ public struct MutationGrader: Grader {
         return "\(mutation.path): every match of /\(mutation.pattern ?? "")/ rewritten"
     }
 
+    struct Applied {
+        let mutation: SourceMutation
+        let original: String
+        let mutated: String
+    }
+
+    enum Plan {
+        /// These mutations applied; those did not and are skipped.
+        case apply([Applied], skipped: [SourceMutation])
+        /// Nothing applied, and that is a verdict rather than a broken task.
+        case fail(summary: String)
+    }
+
+    /// Which mutations can be applied to the sources as the agent left them.
+    ///
+    /// A task may list several mutations that target the same thing in
+    /// different shapes — an identifier written as a literal, or computed —
+    /// and it is enough that one of them applies. Pattern mutations describe
+    /// a class the prompt requires the app to have, so when every pattern
+    /// finds nothing the app has none of it, and that is the agent's
+    /// failure. A literal describes fixture code; one that has gone means the
+    /// task needs updating, and that is an error rather than a verdict.
+    static func plan(_ mutations: [SourceMutation], sources: [String: String?]) throws -> Plan {
+        var applied: [Applied] = []
+        var skipped: [SourceMutation] = []
+        for mutation in mutations {
+            guard let text = sources[mutation.path] ?? nil else {
+                throw BenchmarkFailure.graderFailure(
+                    grader: "mutation",
+                    message: "Nothing to mutate at \(mutation.path); the file is missing."
+                )
+            }
+            if let mutated = try mutation.apply(to: text) {
+                applied.append(Applied(mutation: mutation, original: text, mutated: mutated))
+            } else {
+                skipped.append(mutation)
+            }
+        }
+        if !applied.isEmpty { return .apply(applied, skipped: skipped) }
+
+        if let literal = skipped.first(where: { $0.replace != nil }) {
+            throw BenchmarkFailure.graderFailure(
+                grader: "mutation",
+                message: "\(literal.path) no longer contains the text this task mutates "
+                    + "(\"\(literal.replace ?? "")\"), so the test could not be challenged. "
+                    + "The task's mutation needs updating to match the fixture."
+            )
+        }
+        let files = Set(skipped.map(\.path)).sorted().joined(separator: ", ")
+        return .fail(summary: "The app has no accessibility identifier left to break in \(files); "
+            + "the task requires a test that drives the app by identifier, and there is nothing for one to drive.")
+    }
+
     public func grade(task: BenchmarkTask, context: GradingContext) async throws -> GradingResult {
         let start = ContinuousClock.now
         try configuration.validate()
@@ -55,6 +108,22 @@ public struct MutationGrader: Grader {
             )
         }
 
+        var sources: [String: String?] = [:]
+        for mutation in configuration.mutations where sources[mutation.path] == nil {
+            let url = context.workspaceURL.appendingPathComponent(mutation.path)
+            sources[mutation.path] = try? String(contentsOf: url, encoding: .utf8)
+        }
+        let applied: [Applied]
+        switch try Self.plan(configuration.mutations, sources: sources) {
+        case .fail(let summary):
+            return GradingResult(
+                grader: identifier, passed: false, duration: start.duration(to: .now),
+                summary: summary, evidence: []
+            )
+        case .apply(let plan, _):
+            applied = plan
+        }
+
         var originals: [(url: URL, text: String)] = []
         // Restoring is not optional: every later grader judges the workspace,
         // and leaving a deliberate break in it would fail them all for a
@@ -64,30 +133,10 @@ public struct MutationGrader: Grader {
                 try? original.text.write(to: original.url, atomically: true, encoding: .utf8)
             }
         }
-
-        for mutation in configuration.mutations {
-            let url = context.workspaceURL.appendingPathComponent(mutation.path)
-            guard let text = try? String(contentsOf: url, encoding: .utf8) else {
-                throw BenchmarkFailure.graderFailure(
-                    grader: identifier,
-                    message: "Nothing to mutate at \(mutation.path); the file is missing."
-                )
-            }
-            guard let mutated = try mutation.apply(to: text) else {
-                // The agent rewrote the code the mutation targets. That is not
-                // a grading outcome — the check cannot be performed at all, and
-                // reporting it as a pass or a fail would both be inventions.
-                let target = mutation.replace.map { "the text this task mutates (\"\($0)\")" }
-                    ?? "anything matching this task's pattern (\(mutation.pattern ?? ""))"
-                throw BenchmarkFailure.graderFailure(
-                    grader: identifier,
-                    message: "\(mutation.path) no longer contains \(target), so the test "
-                        + "could not be challenged. The task's mutation needs updating to "
-                        + "match the fixture."
-                )
-            }
-            originals.append((url, text))
-            try mutated.write(to: url, atomically: true, encoding: .utf8)
+        for one in applied {
+            let url = context.workspaceURL.appendingPathComponent(one.mutation.path)
+            originals.append((url, one.original))
+            try one.mutated.write(to: url, atomically: true, encoding: .utf8)
         }
 
         var arguments = XcodebuildSupport.baseArguments(
@@ -109,7 +158,7 @@ public struct MutationGrader: Grader {
         )
 
         let broke = result.exitCode != 0
-        let described = configuration.mutations.map(Self.describe).joined(separator: "; ")
+        let described = applied.map { Self.describe($0.mutation) }.joined(separator: "; ")
         return GradingResult(
             grader: identifier,
             passed: broke,

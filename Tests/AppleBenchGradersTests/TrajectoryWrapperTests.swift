@@ -139,3 +139,48 @@ struct MutationDescriptionTests {
         #expect(MutationGrader.describe(m) == "Sources/CounterStore.swift: \"count += 1\" → \"count += 2\"")
     }
 }
+
+/// What the mutation grader does when some or none of its mutations apply.
+@Suite("Mutation planning")
+struct MutationPlanTests {
+    private let literal = SourceMutation(path: "Sources/Store.swift", replace: "count += 1", with: "count += 2")
+    private let quoted = SourceMutation(path: "Sources/View.swift", pattern: #"\.accessibilityIdentifier\("([^"]+)"\)"#, with: #".accessibilityIdentifier("$1-mutated")"#)
+    private let expression = SourceMutation(path: "Sources/View.swift", pattern: #"\.accessibilityIdentifier\(([A-Za-z_][A-Za-z0-9_.]*(?:\([^()]*\))?)\)"#, with: #".accessibilityIdentifier(($1) + "-mutated")"#)
+
+    @Test("A computed identifier is caught by the expression pattern when the quoted one finds nothing")
+    func expressionFormApplies() throws {
+        // MiniMax M3 rewrote `.accessibilityIdentifier("result-\(index)")` as
+        // `.accessibilityIdentifier(Self.identifier(for: part))`. Its test still
+        // drove the app by identifier; the quoted pattern just could not see it.
+        let source = "Text(part)\n    .accessibilityIdentifier(Self.identifier(for: part))\n"
+        let plan = try MutationGrader.plan([quoted, expression], sources: ["Sources/View.swift": source])
+        guard case .apply(let applied, let skipped) = plan else { Issue.record("expected apply"); return }
+        #expect(applied.count == 1 && skipped.count == 1)
+        #expect(applied[0].mutated.contains(#".accessibilityIdentifier((Self.identifier(for: part)) + "-mutated")"#))
+    }
+
+    @Test("When every pattern finds nothing, the app has no identifiers and that is a failure")
+    func noIdentifiersIsAFailure() throws {
+        // The prompts on these tasks require the test to drive the app by
+        // accessibility identifier. An app with none left is not an app the
+        // grader cannot judge; it is an app the agent stripped of the thing
+        // the task asked for.
+        let plan = try MutationGrader.plan([quoted, expression], sources: ["Sources/View.swift": "Text(part)\n"])
+        guard case .fail(let summary) = plan else { Issue.record("expected fail"); return }
+        #expect(summary.contains("no accessibility identifier"))
+    }
+
+    @Test("A literal that no longer exists is the task's problem, not the agent's")
+    func missingLiteralIsAnError() {
+        #expect(throws: BenchmarkFailure.self) {
+            _ = try MutationGrader.plan([literal], sources: ["Sources/Store.swift": "func increment() { total = total + 1 }"])
+        }
+    }
+
+    @Test("A missing file is an error whatever the mutation kind")
+    func missingFileIsAnError() {
+        #expect(throws: BenchmarkFailure.self) {
+            _ = try MutationGrader.plan([quoted], sources: [:])
+        }
+    }
+}
