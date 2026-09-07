@@ -1,20 +1,20 @@
 ---
-title: "minimax/MiniMax-M3, gold suite, 4518 points"
-date: 2026-09-02
+title: "minimax/MiniMax-M3, gold suite, 878 points"
+date: 2026-09-07
 suite: gold
-suite_revision: "2026-09-03"
-score_spec: "points-v1"
+suite_revision: "2026-09-06"
+score_spec: "points-v2"
 attempt: "latest"
 data: minimax-m3
 model: "minimax/MiniMax-M3"
-harness: "opencode, opencode 1.18.25, opencode 1.18.27"
-tasks: 134
+harness: "opencode, opencode 1.18.27"
+tasks: 136
 passed: 103
-points: 4518
-points_available: 6840
+points: 878
+points_available: 1360
 description: >-
   AppleBench results for minimax/MiniMax-M3 on the gold suite:
-  4518 of 6840 points and 103 of 134 tasks completed to a
+  878 of 1360 points and 103 of 136 tasks completed to a
   verified result, with per-category points, cost against wall-clock time,
   and every task.
 ---
@@ -24,16 +24,16 @@ description: >-
 |---|---|
 | Attempt rule | Latest per task. |
 | Reasoning | Provider default. This model exposes no selectable effort level. |
-| Isolation | Not sandboxed. Web tools off, hermetic config, host egress open. |
+| Isolation | Sandboxed. Reference solutions, task files and other runs are unreadable; writes are confined to the workspace; execution is limited to Apple's toolchain and third-party wrappers are denied. Web tools off, hermetic config, host egress open. |
 
 ## Excluded from the score
 
 | | |
 |---|---|
-| Public sample tasks | `build-002`, `ops-004`, `project-001`, `tests-003`. They ship with the open harness and are never scored. |
-| Launch failures | 8 runs under the model ids `minimax/minimax-m3` and `openrouter/minimax/minimax-m3`. Both mistyped; all 8 ended in under 5 seconds with no agent started. |
+| Public sample tasks | `build-002`, `ops-004`, `project-001`, `runtime-002`, `tests-003`, `visual-002`. They ship with the open harness and are never scored. |
 
 ## Scored at the efficiency floor
 
-`ops-010` and `ui-auto-005` hit the wall-clock limit and reported no token
-usage. Both workspaces graded clean, so both are passes at the 0.25 floor.
+`ops-010`, `project-004`, `ui-auto-003`, `ui-auto-014` and `visual-004` hit
+the wall-clock limit and reported no token usage. All five workspaces graded
+clean, so all five are passes at the 0.25 floor.
