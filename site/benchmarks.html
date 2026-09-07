@@ -9,9 +9,10 @@ description: Published AppleBench runs, with full per-task data and charts.
   <div class="article-header">
     <h1>Results</h1>
     <p class="article-header__lede">
-      Every published run, with its charts and its full per-task data. Each run
-      reports its AppleBench points, its pass rate, and the raw numbers behind
-      both, and states the conditions it was measured under.
+      Every published run, compared first by how much of the suite it solved,
+      then by the points those solves earned after spend, and by what they
+      cost. Each run page has the per-task data and the conditions it was
+      measured under.
     </p>
   </div>
 </div>
@@ -54,10 +55,15 @@ description: Published AppleBench runs, with full per-task data and charts.
 
   <div class="callout" style="margin-top:2.5rem">
     <p>
-      <strong>Reading these numbers.</strong> A score only means something
-      alongside the conditions: which suite, which model, which harness, which
-      Xcode, and, when a task was attempted more than once, which attempt
-      counts. Every run page states all five, plus the
+      <strong>Reading these numbers.</strong> Pass rate is the first comparison:
+      how many tasks reached a verified result. Points take those solves and
+      shrink them when a task went over the token allowance, so two close
+      point shares can hide a wide gap in what was actually finished. Cost
+      is reported separately, because provider prices move and a score that
+      moved with them would be measuring the wrong thing. A number only
+      means something alongside the conditions: which suite, which model,
+      which harness, which Xcode, and which attempt counts. Every run page
+      states those, plus the
       <a href="{{ '/methodology/#scoring' | relative_url }}">scoring
       specification</a> the points were computed under.
     </p>

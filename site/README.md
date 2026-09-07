@@ -61,6 +61,14 @@ Server-rendered CSS and inline SVG. No chart library, no client-side data
 fetch, and no chart that depends on JavaScript having run. The only script on
 the site is the theme toggle.
 
+The results index (`benchmarks.html`) compares every run on the current suite
+revision with four figures, in this order: pass rate, points, cost per
+solved task, and pass rate against suite cost. Pass rate leads because it is
+how much of the suite was solved; points and cost sit beside it so an
+expensive extra solve is not read as the same achievement as a cheap one.
+`_includes/chart-leaderboard.html` owns that comparison. Per-run pages keep
+their own category, cost-against-time, and task-matrix charts.
+
 Series colors come from a CVD-validated categorical palette defined as custom
 properties in `assets/css/main.scss`. Both themes are separately chosen sets,
 not an automatic inversion. Charts with more than one series encode identity

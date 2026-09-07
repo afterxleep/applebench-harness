@@ -3,7 +3,9 @@ One horizontal bar. Params: label, value, total, color (a CSS custom-property
 name without the leading dashes), suffix (optional right-hand annotation),
 value_label (optional replacement for the printed "value/total", for callers
 whose numbers are fractional and want them rounded), link (optional href: the
-label becomes a link to it, for a row that stands for something with a page).
+label becomes a link to it, for a row that stands for something with a page),
+hide_percent (optional: print only value_label, for a cost whose share of
+the most expensive run is the bar length and not the reading).
 The number is always printed beside the bar, so the reading never depends on
 color or on estimating a length.
 {%- endcomment -%}
@@ -27,14 +29,25 @@ so coerce before comparing · Liquid will not order a String against 0.
       {{ include.label }}
     {%- endif -%}
   </div>
+  {%- capture bar_aria -%}
+    {%- if include.hide_percent -%}
+      {{ include.label }}: {{ printed }}
+    {%- else -%}
+      {{ include.label }}: {{ printed | replace: '/', ' of ' }}, {{ pct | round: 1 }} percent
+    {%- endif -%}
+  {%- endcapture -%}
   <div class="bar-row__track"
        role="img"
-       aria-label="{{ include.label }}: {{ printed | replace: '/', ' of ' }}, {{ pct | round: 1 }} percent">
+       aria-label="{{ bar_aria | strip }}">
     <div class="bar-row__fill"
          style="width: {{ pct | round: 2 }}%; --bar-color: var(--{{ include.color | default: 'series-1' }});"></div>
   </div>
   <div class="bar-row__value">
+    {%- unless include.hide_percent -%}
     {{ pct | round: 1 }}%
     <span>{{ printed }}</span>
+    {%- else -%}
+    {{ printed }}
+    {%- endunless -%}
   </div>
 </div>

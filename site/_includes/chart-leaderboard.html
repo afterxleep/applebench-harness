@@ -1,64 +1,119 @@
 {%- comment -%}
-Every published run, ranked by the share of available points it earned. One
-measure, one series · magnitude by length, so a single hue and no legend.
+Comparison of every published run that can be ranked together: current suite
+revision, current scoring specification. Pass rate leads, because it is how
+much of the suite was solved. Points and cost sit beside it, because a solve
+that burned the token budget is not the same achievement as one that did not.
 
-Share rather than raw points, because runs are scored against different numbers
-of tasks as the suite grows, and a raw total would rank a model on how much of
-the suite it happened to be measured against. Each bar states its task count.
+Share, not raw totals, for any measure that grows with the suite. Each bar
+states its task count so two unequal sets are not read as like-for-like.
 
 Params: runs (site.benchmarks).
 {%- endcomment -%}
+
+{%- assign current = site.data.suite_revisions | where: "current", true | first -%}
+{%- assign comparison = "" | split: "" -%}
+{%- assign left_out = "" | split: "" -%}
+{%- assign max_list_cost = 0 -%}
+{%- assign max_solve_cost = 0 -%}
+{%- assign max_task_cost = 0 -%}
+
+{%- for run in include.runs -%}
+  {%- assign rows = site.data.benchmarks[run.data] -%}
+  {%- assign comparable = true -%}
+  {%- if current and run.suite_revision != current.id %}{% assign comparable = false %}{% endif -%}
+  {%- if run.score_spec != "points-v2" %}{% assign comparable = false %}{% endif -%}
+  {%- unless comparable -%}
+    {%- assign left_out = left_out | push: run -%}
+  {%- endunless -%}
+  {%- if rows and comparable -%}
+    {%- assign earned = 0 -%}
+    {%- assign available = 0 -%}
+    {%- assign list_cost = 0 -%}
+    {%- assign hits = rows | where: "passed", "true" -%}
+    {%- for row in rows -%}
+      {%- assign earned = earned | plus: row.points -%}
+      {%- assign available = available | plus: row.face_value -%}
+      {%- assign list_cost = list_cost | plus: row.list_cost_usd -%}
+    {%- endfor -%}
+    {%- assign solve_cost = 0 -%}
+    {%- if hits.size > 0 -%}
+      {%- assign solve_cost = list_cost | times: 1.0 | divided_by: hits.size -%}
+    {%- endif -%}
+    {%- assign task_cost = 0 -%}
+    {%- if rows.size > 0 -%}
+      {%- assign task_cost = list_cost | times: 1.0 | divided_by: rows.size -%}
+    {%- endif -%}
+    {%- if list_cost > max_list_cost %}{% assign max_list_cost = list_cost %}{% endif -%}
+    {%- if solve_cost > max_solve_cost %}{% assign max_solve_cost = solve_cost %}{% endif -%}
+    {%- if task_cost > max_task_cost %}{% assign max_task_cost = task_cost %}{% endif -%}
+    {%- assign name = run.model | split: "/" | last -%}
+    {%- capture packed -%}{{ name }}|{{ earned }}|{{ available }}|{{ hits.size }}|{{ rows.size }}|{{ run.url }}|{{ list_cost }}|{{ solve_cost }}|{{ task_cost }}{%- endcapture -%}
+    {%- assign comparison = comparison | push: packed -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- if max_list_cost <= 0 %}{% assign max_list_cost = 1 %}{% endif -%}
+{%- if max_solve_cost <= 0 %}{% assign max_solve_cost = 1 %}{% endif -%}
+{%- if max_task_cost <= 0 %}{% assign max_task_cost = 1 %}{% endif -%}
+
+{%- assign by_pass = "" | split: "" -%}
+{%- assign by_points = "" | split: "" -%}
+{%- assign by_solve_cost = "" | split: "" -%}
+{%- assign by_task_cost = "" | split: "" -%}
+{%- for packed in comparison -%}
+  {%- assign parts = packed | split: "|" -%}
+  {%- assign hits = parts[3] | plus: 0 -%}
+  {%- assign tasks = parts[4] | plus: 0 -%}
+  {%- assign earned = parts[1] | plus: 0 -%}
+  {%- assign available = parts[2] | plus: 0 -%}
+  {%- assign pass_key = 0 -%}
+  {%- if tasks > 0 %}{% assign pass_key = hits | times: 10000 | divided_by: tasks | round %}{% endif -%}
+  {%- assign point_key = 0 -%}
+  {%- if available > 0 %}{% assign point_key = earned | times: 10000 | divided_by: available | round %}{% endif -%}
+  {%- assign solve_key = parts[7] | times: 100000 | round -%}
+  {%- assign task_key = parts[8] | times: 100000 | round -%}
+  {%- capture pass_row -%}{{ pass_key | prepend: "00000" | slice: -5, 5 }}|{{ packed }}{%- endcapture -%}
+  {%- capture point_row -%}{{ point_key | prepend: "00000" | slice: -5, 5 }}|{{ packed }}{%- endcapture -%}
+  {%- capture solve_row -%}{{ solve_key | prepend: "00000000" | slice: -8, 8 }}|{{ packed }}{%- endcapture -%}
+  {%- capture task_row -%}{{ task_key | prepend: "00000000" | slice: -8, 8 }}|{{ packed }}{%- endcapture -%}
+  {%- assign by_pass = by_pass | push: pass_row -%}
+  {%- assign by_points = by_points | push: point_row -%}
+  {%- assign by_solve_cost = by_solve_cost | push: solve_row -%}
+  {%- assign by_task_cost = by_task_cost | push: task_row -%}
+{%- endfor -%}
+{%- assign by_pass = by_pass | sort | reverse -%}
+{%- assign by_points = by_points | sort | reverse -%}
+{%- assign by_solve_cost = by_solve_cost | sort -%}
+{%- assign by_task_cost = by_task_cost | sort -%}
+{%- assign by_name = comparison | sort -%}
+
+<div class="callout">
+  <p>
+    <strong>Pass rate and points are not the same number.</strong>
+    Pass rate is how many tasks reached a verified result. Points start from
+    those same solves and then fall when a task spent more than the 50,000-token
+    allowance, floored at 25%. A model can finish more of the suite and still
+    sit close on points if the extra solves were expensive. Pass rate is the
+    first reading; points and cost say what those passes cost to get.
+  </p>
+</div>
+
 <figure class="figure">
   <figcaption>
-    <h3 class="figure__title">Points earned, every published run</h3>
+    <h3 class="figure__title">Pass rate</h3>
     <p class="figure__subtitle">
-      Share of the points available to each run, best first, with the number of
-      tasks it was scored against.
+      Share of tasks completed to a verified result, best first, with the
+      number of tasks each run was scored against.
     </p>
   </figcaption>
 
-  {%- comment -%}
-    Only runs on the current suite revision and the current scoring
-    specification are ranked. A run scored on a superseded task set, or under
-    a scoring rule that weighted tasks differently, is on its own page with
-    its own conditions; ranking it here would compare numbers the
-    methodology says are not comparable.
-  {%- endcomment -%}
-  {%- assign current = site.data.suite_revisions | where: "current", true | first -%}
-  {%- assign ranked = "" | split: "" -%}
-  {%- assign left_out = "" | split: "" -%}
-  {%- for run in include.runs -%}
-    {%- assign rows = site.data.benchmarks[run.data] -%}
-    {%- assign comparable = true -%}
-    {%- if current and run.suite_revision != current.id %}{% assign comparable = false %}{% endif -%}
-    {%- if run.score_spec != "points-v2" %}{% assign comparable = false %}{% endif -%}
-    {%- unless comparable -%}
-      {%- assign left_out = left_out | push: run -%}
-    {%- endunless -%}
-    {%- if rows and comparable -%}
-      {%- assign earned = 0 -%}
-      {%- assign available = 0 -%}
-      {%- assign hits = rows | where: "passed", "true" -%}
-      {%- for row in rows -%}
-        {%- assign earned = earned | plus: row.points -%}
-        {%- assign available = available | plus: row.face_value -%}
-      {%- endfor -%}
-      {%- assign share = 0 -%}
-      {%- if available > 0 %}{% assign share = earned | times: 10000 | divided_by: available %}{% endif -%}
-      {%- assign name = run.model | split: "/" | last -%}
-      {%- capture packed -%}{{ share | round | prepend: "00000" | slice: -5, 5 }}|{{ name }}|{{ earned | round }}|{{ available }}|{{ hits.size }}|{{ rows.size }}|{{ run.url }}{%- endcapture -%}
-      {%- assign ranked = ranked | push: packed -%}
-    {%- endif -%}
-  {%- endfor -%}
-  {%- assign ranked = ranked | sort | reverse -%}
-
   <div class="bars bars--leaderboard">
-    {%- for packed in ranked -%}
+    {%- for packed in by_pass -%}
       {%- assign parts = packed | split: "|" -%}
-      {%- assign bar_value = parts[2] -%}
-      {%- assign bar_total = parts[3] -%}
+      {%- assign bar_value = parts[4] -%}
+      {%- assign bar_total = parts[5] -%}
       {%- capture bar_label %}{{ parts[1] }} · {{ parts[5] }} tasks{% endcapture -%}
-      {%- capture bar_printed %}{{ parts[2] }}/{{ parts[3] }}{% endcapture -%}
+      {%- capture bar_printed %}{{ parts[4] }}/{{ parts[5] }}{% endcapture -%}
       {%- assign bar_link = parts[6] | relative_url -%}
       {%- include bar-row.html
           label=bar_label
@@ -77,10 +132,68 @@ Params: runs (site.benchmarks).
   </p>
   {%- endif -%}
   <p class="figure__note">
-    A task is worth ten points, and a solve keeps all of them only if it
-    stayed inside the token allowance. A failure earns nothing and still
-    counts its ten, so a run's ceiling
-    does not move with the model. See
+    A pass is a workspace that graded clean. It says nothing about how many
+    tokens, how many rebuilds, or how many dollars that took. See
+    <a href="{{ '/methodology/#scoring' | relative_url }}">scoring</a>.
+  </p>
+
+  <details class="data-table">
+    <summary>View as a table</summary>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Run</th>
+          <th scope="col">Passed</th>
+          <th scope="col">Tasks</th>
+          <th scope="col">Pass rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%- for packed in by_pass -%}
+          {%- assign parts = packed | split: "|" -%}
+          <tr>
+            <td><a href="{{ parts[6] | relative_url }}">{{ parts[1] }}</a></td>
+            <td>{{ parts[4] }}</td>
+            <td>{{ parts[5] }}</td>
+            <td>{{ parts[4] | times: 1.0 | divided_by: parts[5] | times: 100 | round: 1 }}%</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </details>
+</figure>
+
+<figure class="figure">
+  <figcaption>
+    <h3 class="figure__title">Points</h3>
+    <p class="figure__subtitle">
+      Share of the points available to each run, best first. A solve keeps all
+      ten points only inside the token allowance; overspend shrinks the award
+      and a failure keeps the ten in the denominator.
+    </p>
+  </figcaption>
+
+  <div class="bars bars--leaderboard">
+    {%- for packed in by_points -%}
+      {%- assign parts = packed | split: "|" -%}
+      {%- assign bar_value = parts[2] | plus: 0 | round -%}
+      {%- assign bar_total = parts[3] -%}
+      {%- capture bar_label %}{{ parts[1] }} · {{ parts[5] }} tasks{% endcapture -%}
+      {%- capture bar_printed %}{{ bar_value }}/{{ bar_total }}{% endcapture -%}
+      {%- assign bar_link = parts[6] | relative_url -%}
+      {%- include bar-row.html
+          label=bar_label
+          value=bar_value
+          total=bar_total
+          value_label=bar_printed
+          link=bar_link
+          color="series-1" -%}
+    {%- endfor -%}
+  </div>
+
+  <p class="figure__note">
+    When this ranking is tighter than pass rate, the extra solves were the
+    expensive ones. See
     <a href="{{ '/methodology/#scoring' | relative_url }}">scoring</a>.
   </p>
 
@@ -98,20 +211,199 @@ Params: runs (site.benchmarks).
         </tr>
       </thead>
       <tbody>
-        {%- for packed in ranked -%}
+        {%- for packed in by_points -%}
           {%- assign parts = packed | split: "|" -%}
           <tr>
             <td><a href="{{ parts[6] | relative_url }}">{{ parts[1] }}</a></td>
-            <td>{{ parts[2] }}</td>
+            <td>{{ parts[2] | plus: 0 | round }}</td>
             <td>{{ parts[3] }}</td>
-            {%- comment -%}
-              Float division, not integer. `times: 1000 | divided_by:` truncates
-              and prints a tenth below the bar beside it, which reads as two
-              different numbers for the same measure inside one figure.
-            {%- endcomment -%}
             <td>{{ parts[2] | times: 1.0 | divided_by: parts[3] | times: 100 | round: 1 }}%</td>
             <td>{{ parts[4] }}</td>
             <td>{{ parts[5] }}</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </details>
+</figure>
+
+<figure class="figure">
+  <figcaption>
+    <h3 class="figure__title">Cost per solved task</h3>
+    <p class="figure__subtitle">
+      List-price spend divided by the number of passing tasks, cheapest first.
+      Failures that burned tokens are not in the denominator, so a model that
+      fails expensively looks cheaper here than the suite actually cost to run.
+    </p>
+  </figcaption>
+
+  <div class="bars bars--leaderboard bars--money">
+    {%- for packed in by_solve_cost -%}
+      {%- assign parts = packed | split: "|" -%}
+      {%- assign solve_cost = parts[8] | times: 1.0 -%}
+      {%- assign bar_value = solve_cost -%}
+      {%- assign bar_total = max_solve_cost -%}
+      {%- capture bar_label %}{{ parts[1] }} · {{ parts[4] }} solves{% endcapture -%}
+      {%- capture bar_printed -%}{% include money.html value=solve_cost places=3 %} / solve{%- endcapture -%}
+      {%- assign bar_link = parts[6] | relative_url -%}
+      {%- assign hide_percent = true -%}
+      {%- include bar-row.html
+          label=bar_label
+          value=bar_value
+          total=bar_total
+          value_label=bar_printed
+          link=bar_link
+          color="series-2"
+          hide_percent=hide_percent -%}
+    {%- endfor -%}
+  </div>
+
+  <p class="figure__note">
+    List price from the model owner, retrieved with the run. Cached prompt
+    tokens are billed at their own rate and are included in this total. A
+    missing cost is omitted from the sum rather than written as $0.00.
+  </p>
+
+  <details class="data-table">
+    <summary>View as a table</summary>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Run</th>
+          <th scope="col">Cost / solve</th>
+          <th scope="col">Cost / task</th>
+          <th scope="col">Suite cost</th>
+          <th scope="col">Passed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%- for packed in by_solve_cost -%}
+          {%- assign parts = packed | split: "|" -%}
+          {%- assign solve_cost = parts[8] | times: 1.0 -%}
+          {%- assign task_cost = parts[9] | times: 1.0 -%}
+          {%- assign list_cost = parts[7] | times: 1.0 -%}
+          <tr>
+            <td><a href="{{ parts[6] | relative_url }}">{{ parts[1] }}</a></td>
+            <td>{% include money.html value=solve_cost places=3 %}</td>
+            <td>{% include money.html value=task_cost places=3 %}</td>
+            <td>{% include money.html value=list_cost %}</td>
+            <td>{{ parts[4] }}</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </details>
+</figure>
+
+<figure class="figure">
+  <figcaption>
+    <h3 class="figure__title">Pass rate against suite cost</h3>
+    <p class="figure__subtitle">
+      One mark per run. The interesting region is top-left: more of the suite
+      solved, less spent. A run high and to the right passed a lot and paid
+      for it; a run that sits with a neighbour on points and ahead on this
+      chart is the one that actually finished more work.
+    </p>
+  </figcaption>
+
+  {%- assign series_names = "series-1,series-2,series-3,series-4,series-5,series-6,series-7,series-8" | split: "," -%}
+  <ul class="legend">
+    {%- for packed in by_name -%}
+      {%- assign parts = packed | split: "|" -%}
+      {%- assign idx = forloop.index0 | modulo: 8 -%}
+      <li>
+        <span class="legend__swatch" style="--swatch: var(--{{ series_names[idx] }})"></span>
+        {{ parts[0] }}
+      </li>
+    {%- endfor -%}
+  </ul>
+
+  {%- assign x0 = 64 -%}
+  {%- assign x1 = 636 -%}
+  {%- assign y0 = 24 -%}
+  {%- assign y1 = 330 -%}
+  {%- assign span_x = x1 | minus: x0 -%}
+  {%- assign span_y = y1 | minus: y0 -%}
+
+  <svg viewBox="0 0 660 382" role="img"
+       aria-label="Scatter plot of pass rate against total list-price cost, one mark per published run. The full data is in the table below.">
+    <text class="scatter__axis-title" x="0" y="14">Pass rate</text>
+
+    {%- for i in (0..4) -%}
+      {%- assign gy = span_y | times: i | divided_by: 4 | plus: y0 -%}
+      <line class="scatter__grid" x1="{{ x0 }}" y1="{{ gy }}" x2="{{ x1 }}" y2="{{ gy }}"/>
+      {%- assign gv = 4 | minus: i | times: 25 -%}
+      <text class="scatter__tick" x="{{ x0 | minus: 10 }}" y="{{ gy | plus: 4 }}" text-anchor="end">{{ gv }}%</text>
+    {%- endfor -%}
+
+    <line class="scatter__axis" x1="{{ x0 }}" y1="{{ y1 }}" x2="{{ x1 }}" y2="{{ y1 }}"/>
+
+    {%- for i in (0..4) -%}
+      {%- assign tx = span_x | times: i | divided_by: 4 | plus: x0 -%}
+      {%- assign tv = max_list_cost | times: i | divided_by: 4 -%}
+      <line class="scatter__grid" x1="{{ tx }}" y1="{{ y1 }}" x2="{{ tx }}" y2="{{ y1 | plus: 5 }}"/>
+      <text class="scatter__tick" x="{{ tx }}" y="{{ y1 | plus: 20 }}" text-anchor="middle">{% include money.html value=tv %}</text>
+    {%- endfor -%}
+
+    <text class="scatter__axis-title" x="{{ x0 }}" y="{{ y1 | plus: 42 }}">Suite cost (list price)</text>
+
+    {%- for packed in by_name -%}
+      {%- assign parts = packed | split: "|" -%}
+      {%- assign idx = forloop.index0 | modulo: 8 -%}
+      {%- assign hits = parts[3] | plus: 0 -%}
+      {%- assign tasks = parts[4] | plus: 0 -%}
+      {%- assign list_cost = parts[6] | times: 1.0 -%}
+      {%- assign rate = 0 -%}
+      {%- if tasks > 0 %}{% assign rate = hits | times: 1.0 | divided_by: tasks | times: 100 %}{% endif -%}
+      {%- assign px = list_cost | divided_by: max_list_cost | times: span_x | plus: x0 -%}
+      {%- assign py = rate | times: 0.01 | times: span_y -%}
+      {%- assign py = y1 | minus: py -%}
+      {%- assign label_x = px | plus: 12 -%}
+      {%- assign label_anchor = "start" -%}
+      {%- if px > 500 -%}
+        {%- assign label_x = px | minus: 12 -%}
+        {%- assign label_anchor = "end" -%}
+      {%- endif -%}
+      <circle class="scatter__dot" cx="{{ px }}" cy="{{ py }}" r="6.5"
+              fill="var(--{{ series_names[idx] }})">
+        <title>{{ parts[0] }} · {{ rate | round: 1 }}% · {% include money.html value=list_cost %}</title>
+      </circle>
+      <text class="scatter__label" x="{{ label_x }}" y="{{ py | plus: 4 }}" text-anchor="{{ label_anchor }}">{{ parts[0] }}</text>
+    {%- endfor -%}
+  </svg>
+
+  <p class="figure__note">
+    Linear on both axes. Pass rate is always 0–100%, so two runs a few points
+    apart stay a few points apart as more models arrive. Suite cost is the sum
+    of every task, passes and failures, at list price.
+  </p>
+
+  <details class="data-table">
+    <summary>View as a table</summary>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Run</th>
+          <th scope="col">Pass rate</th>
+          <th scope="col">Points share</th>
+          <th scope="col">Suite cost</th>
+          <th scope="col">Cost / solve</th>
+          <th scope="col">Cost / task</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%- for packed in by_pass -%}
+          {%- assign parts = packed | split: "|" -%}
+          {%- assign list_cost = parts[7] | times: 1.0 -%}
+          {%- assign solve_cost = parts[8] | times: 1.0 -%}
+          {%- assign task_cost = parts[9] | times: 1.0 -%}
+          <tr>
+            <td><a href="{{ parts[6] | relative_url }}">{{ parts[1] }}</a></td>
+            <td>{{ parts[4] | times: 1.0 | divided_by: parts[5] | times: 100 | round: 1 }}%</td>
+            <td>{{ parts[2] | times: 1.0 | divided_by: parts[3] | times: 100 | round: 1 }}%</td>
+            <td>{% include money.html value=list_cost %}</td>
+            <td>{% include money.html value=solve_cost places=3 %}</td>
+            <td>{% include money.html value=task_cost places=3 %}</td>
           </tr>
         {%- endfor -%}
       </tbody>

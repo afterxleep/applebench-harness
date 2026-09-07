@@ -117,7 +117,12 @@ log and edits two lines. The other rebuilds the project eleven times, argues
 with `simctl`, and burns three quarters of a million tokens arriving at the same
 diff. A pass rate gives them the same tick.
 
-So the headline number is **points**, and the pass rate stays beside it.
+The results index therefore leads with **pass rate**, and puts **points**
+beside it. Pass rate is how much of the suite was solved. Points are those
+same solves, reduced when a task spent more than the token allowance. A model
+can finish more of the work and still sit close on points if the extra solves
+were expensive; that compression is the cost speaking, not a smaller pass
+rate.
 
 ```text
 face value  = 10 points                           the same for every task
