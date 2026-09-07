@@ -10,10 +10,9 @@ Params: rows (the run rows).
   <figcaption>
     <h3 class="figure__title">Points by category</h3>
     <p class="figure__subtitle">
-      Points earned against points available. Ordered worst to best, so the
-      weakest capability is the first thing read rather than something averaged
-      away. A category well below its pass rate is one the model solved
-      expensively.
+      Points in each kind of work, worst first. If this bar is much shorter
+      than pass rate next to it, the model finished the tasks but spent a lot
+      of tokens doing it.
     </p>
   </figcaption>
 
@@ -56,11 +55,9 @@ Params: rows (the run rows).
   </div>
 
   <p class="figure__note">
-    A task is worth ten points, and a solve keeps all of them only if it
-    stayed inside the token allowance. A failure earns nothing and still
-    counts its ten, so a category's
-    ceiling does not move with the model. See
-    <a href="{{ '/methodology/#scoring' | relative_url }}">scoring</a>.
+    Each task is worth 10 points. A fail is 0, but those 10 still sit in the
+    total.
+    <a href="{{ '/methodology/#scoring' | relative_url }}">How scoring works</a>.
   </p>
 
   <details class="data-table">

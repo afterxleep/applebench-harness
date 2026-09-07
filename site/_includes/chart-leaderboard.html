@@ -91,8 +91,7 @@ Params: runs (site.benchmarks).
   <figcaption>
     <h3 class="figure__title">Pass rate</h3>
     <p class="figure__subtitle">
-      Share of tasks completed to a verified result, best first, with the
-      number of tasks each run was scored against.
+      How many tasks the model finished. Higher is better.
     </p>
   </figcaption>
 
@@ -117,13 +116,12 @@ Params: runs (site.benchmarks).
   {%- if left_out.size > 0 -%}
   <p class="figure__note">
     Not ranked: {%- for run in left_out %} <a href="{{ run.url | relative_url }}">{{ run.model | split: "/" | last }}</a>{%- unless forloop.last %},{% endunless -%}{% endfor -%}.
-    Measured on a superseded suite revision or an earlier scoring rule. Each is on its own page with its own conditions.
+    Older task set, so it does not belong on this chart.
   </p>
   {%- endif -%}
   <p class="figure__note">
-    A pass is a workspace that graded clean. It says nothing about how many
-    tokens, how many rebuilds, or how many dollars that took. See
-    <a href="{{ '/methodology/#scoring' | relative_url }}">scoring</a>.
+    A pass means the app built, ran, and the checks succeeded. This chart
+    does not care how much that cost.
   </p>
 
   <details class="data-table">
@@ -156,9 +154,9 @@ Params: runs (site.benchmarks).
   <figcaption>
     <h3 class="figure__title">Points</h3>
     <p class="figure__subtitle">
-      Share of the points available to each run, best first. A solve keeps all
-      ten points only inside the token allowance; overspend shrinks the award
-      and a failure keeps the ten in the denominator.
+      Each finished task is worth 10 points. Stay under 50,000 tokens and you
+      keep all 10. Use more and you keep less, never below 2.5. A fail is 0,
+      but those 10 points still sit in the total.
     </p>
   </figcaption>
 
@@ -181,9 +179,9 @@ Params: runs (site.benchmarks).
   </div>
 
   <p class="figure__note">
-    When this ranking is tighter than pass rate, the extra solves were the
-    expensive ones. See
-    <a href="{{ '/methodology/#scoring' | relative_url }}">scoring</a>.
+    If two models look close here but far apart on pass rate, the one with
+    more passes spent more tokens getting them.
+    <a href="{{ '/methodology/#scoring' | relative_url }}">How scoring works</a>.
   </p>
 
   <details class="data-table">
@@ -220,9 +218,8 @@ Params: runs (site.benchmarks).
   <figcaption>
     <h3 class="figure__title">Cost per solved task</h3>
     <p class="figure__subtitle">
-      List-price spend divided by the number of passing tasks, cheapest first.
-      Failures that burned tokens are not in the denominator, so a model that
-      fails expensively looks cheaper here than the suite actually cost to run.
+      What one successful task cost. Cheapest first. Failed tasks are left out
+      of this average.
     </p>
   </figcaption>
 
@@ -248,9 +245,8 @@ Params: runs (site.benchmarks).
   </div>
 
   <p class="figure__note">
-    List price from the model owner, retrieved with the run. Cached prompt
-    tokens are billed at their own rate and are included in this total. A
-    missing cost is omitted from the sum rather than written as $0.00.
+    List price at the time of the run. A task with no reported cost is left
+    out, not counted as free.
   </p>
 
   <details class="data-table">
@@ -286,12 +282,10 @@ Params: runs (site.benchmarks).
 
 <figure class="figure">
   <figcaption>
-    <h3 class="figure__title">Pass rate against suite cost</h3>
+    <h3 class="figure__title">Pass rate vs total cost</h3>
     <p class="figure__subtitle">
-      One mark per run. The interesting region is top-left: more of the suite
-      solved, less spent. A run high and to the right passed a lot and paid
-      for it; a run that sits with a neighbour on points and ahead on this
-      chart is the one that actually finished more work.
+      Each dot is one model. Up means more tasks finished. Left means cheaper.
+      Best place is up and left.
     </p>
   </figcaption>
 
@@ -362,9 +356,7 @@ Params: runs (site.benchmarks).
   </svg>
 
   <p class="figure__note">
-    Linear on both axes. Pass rate is always 0–100%, so two runs a few points
-    apart stay a few points apart as more models arrive. Suite cost is the sum
-    of every task, passes and failures, at list price.
+    Total cost includes every task, including the ones that failed.
   </p>
 
   <details class="data-table">

@@ -111,18 +111,17 @@ repository in a working state; both things are true, and the record says both.
 
 ## Scoring
 
-A pass rate answers one question: how many did it get right. Then it stops.
-Two models can complete the same task and be nothing alike. One reads the build
-log and edits two lines. The other rebuilds the project eleven times, argues
-with `simctl`, and burns three quarters of a million tokens arriving at the same
-diff. A pass rate gives them the same tick.
+**Pass rate** is how many tasks the model finished. **Points** start from
+those same finishes and then drop if a task used more than 50,000 tokens.
 
-The results index therefore leads with **pass rate**, and puts **points**
-beside it. Pass rate is how much of the suite was solved. Points are those
-same solves, reduced when a task spent more than the token allowance. A model
-can finish more of the work and still sit close on points if the extra solves
-were expensive; that compression is the cost speaking, not a smaller pass
-rate.
+Two models can pass the same task and not be alike. One reads the build log
+and edits two lines. The other rebuilds eleven times and burns most of a
+million tokens to get the same diff. Pass rate gives them the same tick.
+Points does not.
+
+That is why the results page shows pass rate first, then points. A model can
+finish more of the suite and still sit close on points if the extra finishes
+were expensive.
 
 ```text
 face value  = 10 points                           the same for every task
@@ -144,9 +143,9 @@ problem it is. It no longer decides what solving it is worth. What remains in
 the score is measured rather than authored: the task was solved, and this is
 what solving it cost.
 
-**A failure earns nothing and still counts its face value.** The denominator is
-a property of the suite, not of the model, so it does not move as a model gets
-better or worse.
+**A failure earns nothing and still counts its ten points in the total.** The
+total is a property of the suite, not of the model, so it does not move as a
+model gets better or worse.
 
 **A wasteful solve still beats a failure.** The 0.25 floor is there because
 doing the work badly is not the same as not doing it.

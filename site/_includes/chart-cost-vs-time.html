@@ -26,11 +26,10 @@ chart. Params: rows.
 
 <figure class="figure">
   <figcaption>
-    <h3 class="figure__title">Cost against wall-clock time</h3>
+    <h3 class="figure__title">Cost vs time</h3>
     <p class="figure__subtitle">
-      One mark per task. The interesting region is bottom-left: solved cheaply
-      and quickly. A failure far to the right is a model that spent the budget
-      and still did not land a verified result.
+      Each mark is one task. Bottom-left is cheap and fast. A square far to
+      the right spent a long time and still failed.
     </p>
   </figcaption>
 
@@ -90,10 +89,6 @@ chart. Params: rows.
   </svg>
 
   <p class="figure__note">
-    Linear on both axes, so the two expensive outliers compress everything
-    else toward the floor · that compression is the finding, not a rendering
-    problem. A cost of $0.00 means the agent CLI reported no usage for that
-    run, not that the run was free; absent data is left absent rather than
-    filled with a zero.
+    A cost of $0.00 means no usage was reported, not that the task was free.
   </p>
 </figure>

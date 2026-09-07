@@ -94,12 +94,13 @@ layout: default
 
   {%- assign report = site.data.reports[page.data] -%}
   <p style="color:var(--ink-3); font-size:.88rem; margin:0 0 2.5rem">
-    Points are <code>{{ report.score.specification | default: "points-v2" }}</code>: ten per task,
-    kept in full for a solve inside a {{ report.score.reference_token_budget | default: 50000 | divided_by: 1000 }}k-token
-    allowance and falling in proportion beyond it, floored at
-    {{ report.score.minimum_efficiency | default: 0.25 | times: 100 | round }}%. A failure earns nothing and still counts
-    its face value. Attempt rule: <code>{{ report.attempt | default: "all" }}</code>.
-    <a href="{{ '/methodology/#scoring' | relative_url }}">How this is scored</a>.
+    Each task is worth 10 points. Finish it in under {{ report.score.reference_token_budget | default: 50000 | divided_by: 1000 }}k
+    tokens and you keep all 10. Use more and you keep less, never below
+    {{ report.score.minimum_efficiency | default: 0.25 | times: 100 | round }}%.
+    Fail and you get 0, but those 10 points still sit in the total.
+    Rule used: <code>{{ report.score.specification | default: "points-v2" }}</code>,
+    attempt <code>{{ report.attempt | default: "all" }}</code>.
+    <a href="{{ '/methodology/#scoring' | relative_url }}">How scoring works</a>.
   </p>
 
   {%- comment -%}
@@ -197,11 +198,8 @@ layout: default
 
   <h2>Every run</h2>
   <p>
-    Each row is one <code>result.json</code>. The run id is the directory it
-    came from, so every number on this page traces back to the artifacts that
-    produced it. <strong>Points</strong> is what the task earned out of what it
-    was worth; the multiplier appears where the solve went over its token
-    allowance.
+    Each row is one task. <strong>Points</strong> is what it earned out of 10.
+    A ×0.50 next to the number means it used twice the token budget.
   </p>
 </div>
 
