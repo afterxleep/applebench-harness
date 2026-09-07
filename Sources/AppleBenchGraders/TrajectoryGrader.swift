@@ -160,6 +160,10 @@ public struct TrajectoryGrader: Grader {
         return found
     }
 
+    /// Where a program is Apple's, whatever it is called.
+    static let appleToolRoots = ["/Applications/Xcode", "/Library/Developer",
+                                 "/usr/bin/", "/bin/", "/usr/libexec/", "/System/"]
+
     /// Programs that run another program, so the next word is the real one.
     static let launchers: Set<String> = [
         "env", "sudo", "nohup", "time", "xargs", "exec", "command",
@@ -177,6 +181,12 @@ public struct TrajectoryGrader: Grader {
         while let first = words.first {
             let name = first.split(separator: "/").last.map(String.init) ?? first
             guard launchers.contains(name) else {
+                // A tool inside Xcode or the system toolchain is Apple's, even
+                // when it shares a name with a third-party one. M3 ran Xcode's
+                // own xcbuild by full path and was failed for using a wrapper.
+                if first.hasPrefix("/") && Self.appleToolRoots.contains(where: first.hasPrefix) {
+                    return nil
+                }
                 return name
             }
             // Skip the launcher, then its flags and any VAR=value it sets.

@@ -184,3 +184,25 @@ struct MutationPlanTests {
         }
     }
 }
+
+extension TrajectoryWrapperTests {
+    @Test("A wrapper's name inside a longer path is not that wrapper")
+    func absolutePathToAnAppleToolIsNotAWrapper() {
+        // M3 ran Xcode's own xcbuild, at its full path inside Xcode.app, while
+        // investigating a build failure. The detector took the last path
+        // component and saw the third-party tool of the same name. It also
+        // read `gem list` as CocoaPods territory when the agent was only
+        // asking what was installed.
+        let ran = TrajectoryGrader.wrappersUsed(in: [
+            ("/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/Support/xcbuild help", "build clang-scan"),
+            ("/Applications/Xcode-27.0.0-beta.6.app/Contents/Developer/usr/bin/xcodebuild -list", "Information about project"),
+        ])
+        #expect(ran.isEmpty)
+    }
+
+    @Test("A wrapper on the machine's own path still counts")
+    func installedWrapperCounts() {
+        #expect(TrajectoryGrader.wrappersUsed(in: [("/opt/homebrew/bin/xcodegen generate", "Loaded project.yml")]) == ["xcodegen"])
+        #expect(TrajectoryGrader.wrappersUsed(in: [("xcbuild -project App.xcodeproj", "Build succeeded")]) == ["xcbuild"])
+    }
+}
