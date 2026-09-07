@@ -25,21 +25,45 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
+def strip_parentheticals(text: str, containing: "re.Pattern[str]") -> str:
+    """Removes every bracketed span whose contents match, brackets balanced."""
+    out = []
+    i = 0
+    while i < len(text):
+        if text[i] == "(":
+            depth, j = 0, i
+            while j < len(text):
+                depth += text[j] == "("
+                depth -= text[j] == ")"
+                if depth == 0:
+                    break
+                j += 1
+            inner = text[i:j + 1]
+            if containing.search(inner):
+                # drop the space that led into it too
+                while out and out[-1] == " ":
+                    out.pop()
+                i = j + 1
+                continue
+        out.append(text[i])
+        i += 1
+    return "".join(out)
+
+
 def redact(summary: str) -> str:
     """The summary with everything that would help solve the task removed."""
     text = summary
     # "3 executed, 2 passed, 1 failed, 0 skipped. Failing: Suite/testName()"
     text = re.split(r"[.,;]?\s*(?:—\s*)?[Ff]ailing:\s", text, maxsplit=1)[0]
-    # mutation: "... they claim (Sources/X.swift: "old" → "new")" — the
-    # parenthetical nests brackets of its own, so cut from where it opens.
-    opening = text.find(" (")
-    if opening >= 0 and text.rstrip().endswith(")") and re.search(r"→|Sources/|Tests/", text[opening:]):
-        text = text[:opening]
+    # mutation: "... they claim (Sources/X.swift: "old" → "new"), so ..." —
+    # the parenthetical nests brackets of its own and may sit mid-sentence,
+    # so it is removed by matching its brackets rather than by pattern.
+    text = strip_parentheticals(text, containing=re.compile(r"→|Sources/|Tests/"))
     # uiflow / xcodeproj / file: keep the count, drop what was expected
     #   "2 of 2 UI assertion(s) failed in language=en: no element on screen shows "3/4/26"; ..."
     #   "1 of 3 project assertion(s) failed: build setting X is not set"
     #   "appearance difference over a91-reference: 0.00%"
-    m = re.match(r"(\d+ of \d+ (?:UI|project|file) assertion\(s\) (?:failed|hold)[^:]*)[:.].*", text, re.S)
+    m = re.match(r"(\d+ of \d+ (?:UI|project|file) assertion\(s\) (?:failed|hold)[^:—]*?)\s*[:.—].*", text, re.S)
     if m:
         text = m.group(1)
     text = re.sub(r"^appearance difference over \S+:", "appearance difference over the region:", text)
@@ -112,6 +136,10 @@ def self_test() -> int:
             "1 of 3 project assertion(s) failed",
         "appearance difference over a91-reference: 0.00%":
             "appearance difference over the region: 0.00%",
+        "The tests still passed with the app broken (Sources/BasketView.swift: \"nil\" → \".accessibilityIdentifier(\"$1-mutated\")\"), so they do not assert the behaviour the task asked for":
+            "The tests still passed with the app broken, so they do not assert the behaviour the task asked for",
+        "1 of 1 project assertion(s) failed — build setting CODE_SIGN_ENTITLEMENTS is not set":
+            "1 of 1 project assertion(s) failed",
         "xcodebuild build succeeded for scheme 'CartFixture'":
             "xcodebuild build succeeded for scheme 'CartFixture'",
         "2 file assertion(s) satisfied":

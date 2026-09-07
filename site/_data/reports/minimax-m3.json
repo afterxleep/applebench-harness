@@ -4110,7 +4110,7 @@
           ],
           "name": "xcodeproj",
           "passed": false,
-          "summary": "1 of 2 project assertion(s) failed — Info"
+          "summary": "1 of 2 project assertion(s) failed"
         },
         {
           "duration_seconds": 10.283325208,
@@ -8823,7 +8823,7 @@
           ],
           "name": "xcodeproj",
           "passed": false,
-          "summary": "1 of 1 project assertion(s) failed — build setting CODE_SIGN_ENTITLEMENTS is not set"
+          "summary": "1 of 1 project assertion(s) failed"
         },
         {
           "duration_seconds": 7.0375e-05,
@@ -9413,7 +9413,7 @@
           ],
           "name": "xcodeproj",
           "passed": false,
-          "summary": "1 of 1 project assertion(s) failed — built product does not contain 'Products"
+          "summary": "1 of 1 project assertion(s) failed"
         },
         {
           "duration_seconds": 10.512212583,
@@ -11807,7 +11807,7 @@
           ],
           "name": "mutation",
           "passed": false,
-          "summary": "The tests still passed with the app broken (Sources/ConsentView.swift: \".accessibilityIdentifier(\"disclaimer\")\" → \".accessibilityIdentifier(\"disclaimer-mutated\")\"), so they do not assert the behaviour the task asked for"
+          "summary": "The tests still passed with the app broken, so they do not assert the behaviour the task asked for"
         }
       ],
       "metrics": {
@@ -12273,7 +12273,7 @@
           ],
           "name": "mutation",
           "passed": false,
-          "summary": "The tests still passed with the app broken (Sources/GestureFixtureApp.swift: \".accessibilityIdentifier(\"recorded-gestures\")\" → \".accessibilityIdentifier(\"recorded-gestures-mutated\")\"), so they do not assert the behaviour the task asked for"
+          "summary": "The tests still passed with the app broken, so they do not assert the behaviour the task asked for"
         }
       ],
       "metrics": {
@@ -12608,7 +12608,7 @@
           ],
           "name": "mutation",
           "passed": false,
-          "summary": "The tests still passed with the app broken (Sources/PartsSearchView.swift: \".accessibilityIdentifier(\"result-\\(index)\")\" → \".accessibilityIdentifier(\"result-\\(index)-mutated\")\"), so they do not assert the behaviour the task asked for"
+          "summary": "The tests still passed with the app broken, so they do not assert the behaviour the task asked for"
         }
       ],
       "metrics": {
@@ -13075,7 +13075,7 @@
           ],
           "name": "mutation",
           "passed": false,
-          "summary": "The tests still passed with the app broken (Sources/BasketView.swift: \".accessibilityIdentifier(\"checkout\")\" → \".accessibilityIdentifier(\"checkout-mutated\")\"), so they do not assert the behaviour the task asked for"
+          "summary": "The tests still passed with the app broken, so they do not assert the behaviour the task asked for"
         }
       ],
       "metrics": {

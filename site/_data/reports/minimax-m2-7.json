@@ -13825,7 +13825,7 @@
           ],
           "name": "mutation",
           "passed": false,
-          "summary": "The tests still passed with the app broken (Sources/BasketView.swift: \"nil\" → \".accessibilityIdentifier(\"$1-mutated\")\"), so they do not assert the behaviour the task asked for"
+          "summary": "The tests still passed with the app broken, so they do not assert the behaviour the task asked for"
         }
       ],
       "metrics": {
