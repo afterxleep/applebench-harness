@@ -87,17 +87,6 @@ Params: runs (site.benchmarks).
 {%- assign by_task_cost = by_task_cost | sort -%}
 {%- assign by_name = comparison | sort -%}
 
-<div class="callout">
-  <p>
-    <strong>Pass rate and points are not the same number.</strong>
-    Pass rate is how many tasks reached a verified result. Points start from
-    those same solves and then fall when a task spent more than the 50,000-token
-    allowance, floored at 25%. A model can finish more of the suite and still
-    sit close on points if the extra solves were expensive. Pass rate is the
-    first reading; points and cost say what those passes cost to get.
-  </p>
-</div>
-
 <figure class="figure">
   <figcaption>
     <h3 class="figure__title">Pass rate</h3>
