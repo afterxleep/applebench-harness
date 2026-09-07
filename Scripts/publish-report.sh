@@ -92,6 +92,13 @@ for file in "${suite_files[@]+"${suite_files[@]}"}"; do selection+=(--suite "$fi
 cp "$root/Reports/$slug.csv"  "$root/site/_data/benchmarks/$slug.csv"
 cp "$root/Reports/$slug.json" "$root/site/_data/reports/$slug.json"
 
+# The site copies lose the answer key. A grader's summary names the test
+# that failed, the line a mutation targeted and the text a screen was
+# expected to show; on disk that is what an operator needs, on the site it
+# is the solution to a task whose sandbox denies those same files to the
+# agent. The verdict, the counts and the durations stay. Reports/ keeps all.
+python3 "$root/Scripts/redact-published.py" "$slug"
+
 # The page renders itself. Everything on it — the model, the harness and its
 # configuration, the host, the score, the charts, the per-task table — is
 # read from the exported data, so publishing a run does not depend on anyone

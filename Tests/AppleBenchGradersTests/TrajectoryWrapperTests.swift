@@ -121,3 +121,21 @@ extension TrajectoryWrapperTests {
         #expect(ran == ["fastlane"])
     }
 }
+
+@Suite("Mutation summaries")
+struct MutationDescriptionTests {
+    @Test("A pattern mutation is described as a pattern, not as nil")
+    func patternIsDescribed() {
+        let m = SourceMutation(path: "Sources/V.swift", pattern: #"\.accessibilityIdentifier\("([^"]+)"\)"#, with: ".accessibilityIdentifier(\"$1-mutated\")")
+        let text = MutationGrader.describe(m)
+        #expect(!text.contains("nil"))
+        #expect(!text.contains("$1"))
+        #expect(text.contains("every match"))
+    }
+
+    @Test("A literal mutation still shows what was swapped")
+    func literalIsQuoted() {
+        let m = SourceMutation(path: "Sources/CounterStore.swift", replace: "count += 1", with: "count += 2")
+        #expect(MutationGrader.describe(m) == "Sources/CounterStore.swift: \"count += 1\" → \"count += 2\"")
+    }
+}

@@ -24,6 +24,18 @@ public struct MutationGrader: Grader {
         self.configuration = configuration
     }
 
+    /// One mutation, as a reader of the summary should see it.
+    ///
+    /// A pattern mutation has no literal to quote. Printing its `replace`
+    /// wrote the word nil into published summaries and showed the raw `$1`
+    /// template as if it were the text that went in.
+    static func describe(_ mutation: SourceMutation) -> String {
+        if let literal = mutation.replace {
+            return "\(mutation.path): \"\(literal)\" → \"\(mutation.with)\""
+        }
+        return "\(mutation.path): every match of /\(mutation.pattern ?? "")/ rewritten"
+    }
+
     public func grade(task: BenchmarkTask, context: GradingContext) async throws -> GradingResult {
         let start = ContinuousClock.now
         try configuration.validate()
@@ -97,9 +109,7 @@ public struct MutationGrader: Grader {
         )
 
         let broke = result.exitCode != 0
-        let described = configuration.mutations
-            .map { "\($0.path): \"\($0.replace)\" → \"\($0.with)\"" }
-            .joined(separator: "; ")
+        let described = configuration.mutations.map(Self.describe).joined(separator: "; ")
         return GradingResult(
             grader: identifier,
             passed: broke,
