@@ -2,10 +2,25 @@
 # stated set of tasks, so every run records the revision it was measured on
 # and results are only comparable within one.
 
+- id: "2026-09-08"
+  name: "2026-09-08"
+  gold_tasks: 142
+  current: true
+  summary: >-
+    Six expert Swift concurrency tasks join the gold suite. Their contracts
+    cover actor reentrancy, cancellation-safe continuations, bounded task
+    groups, shared task ownership, AsyncStream multicast, and Swift 6.2
+    isolated conformances. All six fail unchanged and pass with their
+    reference solutions.
+  changes:
+    - "Six deterministic Swift concurrency tasks added at difficulties 8 through 10, with 33 hidden tests across their final contracts."
+    - "Every asynchronous observation is explicitly ordered and bounded, so a broken solution fails locally instead of hanging or relying on elapsed-time scheduling."
+    - "MiniMax M2.7 and MiniMax M3 were rerun under sealed answer isolation, and their latest authoritative attempts are included in the published scores."
+
 - id: "2026-09-06"
   name: "2026-09-06"
   gold_tasks: 136
-  current: true
+  current: false
   summary: >-
     The graders judge outcomes, not routes. Prompts say what has to be true
     when the work is done and no longer name the tools or the commands;

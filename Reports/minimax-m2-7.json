@@ -20,20 +20,20 @@
     },
     {
       "category" : "frameworks",
-      "completion_rate" : 0.7166666666666667,
-      "passed" : 43,
+      "completion_rate" : 0.6666666666666666,
+      "passed" : 44,
       "score" : {
-        "available" : 600,
-        "fraction_of_available" : 0.7166666666666667,
+        "available" : 660,
+        "fraction_of_available" : 0.6666666666666666,
         "minimum_efficiency" : 0.25,
-        "points" : 430,
+        "points" : 440,
         "reference_token_budget" : 50000,
-        "scored_runs" : 60,
+        "scored_runs" : 66,
         "solves_with_unreported_tokens" : 0,
         "specification" : "points-v2",
         "unscored_runs" : 0
       },
-      "total" : 60
+      "total" : 66
     },
     {
       "category" : "interaction",
@@ -138,48 +138,48 @@
       "total" : 8
     }
   ],
-  "completion_rate" : 0.6470588235294118,
+  "completion_rate" : 0.6267605633802817,
   "configurations" : [
     {
       "agent" : "opencode",
-      "completion_rate" : 0.6470588235294118,
-      "cost_per_solved_task_usd" : 0.057696990511363615,
+      "completion_rate" : 0.6267605633802817,
+      "cost_per_solved_task_usd" : 0.05849611938202246,
       "label" : "opencode · minimax/MiniMax-M2.7",
-      "median_duration_seconds" : 124.148705646,
+      "median_duration_seconds" : 123.2492904165,
       "model" : "minimax/MiniMax-M2.7",
-      "passed" : 88,
+      "passed" : 89,
       "score" : {
-        "available" : 1360,
-        "fraction_of_available" : 0.6260239548197901,
+        "available" : 1420,
+        "fraction_of_available" : 0.6066144919400807,
         "minimum_efficiency" : 0.25,
-        "points" : 851.3925785549145,
+        "points" : 861.3925785549145,
         "reference_token_budget" : 50000,
-        "scored_runs" : 136,
+        "scored_runs" : 142,
         "solves_with_unreported_tokens" : 0,
         "specification" : "points-v2",
         "unscored_runs" : 0
       },
-      "total" : 136,
-      "total_cost_usd" : 5.077335164999998,
-      "total_tokens" : 2059563
+      "total" : 142,
+      "total_cost_usd" : 5.206154624999999,
+      "total_tokens" : 2118267
     }
   ],
-  "passed" : 88,
+  "passed" : 89,
   "reasoning" : [
     {
       "at_maximum_effort" : false,
-      "cache_read_tokens" : 47188499,
-      "cache_write_tokens" : 3135191,
+      "cache_read_tokens" : 47919800,
+      "cache_write_tokens" : 3243943,
       "effort" : null,
-      "input_tokens" : 1556830,
-      "list_cost_usd" : 3.62366454,
+      "input_tokens" : 1586036,
+      "list_cost_usd" : 3.6862283999999996,
       "maximum_effort" : null,
       "model" : "minimax/MiniMax-M2.7",
-      "output_tokens" : 271088,
+      "output_tokens" : 279358,
       "price_retrieved" : "2026-09-03",
       "price_source" : "https://models.dev/api.json",
-      "reported_cost_usd" : 5.077335164999998,
-      "runs" : 136
+      "reported_cost_usd" : 5.206154624999999,
+      "runs" : 142
     }
   ],
   "runs" : [
@@ -1869,6 +1869,636 @@
         "input_tokens" : 107,
         "output_tokens" : 580,
         "total_tokens" : 1346
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.27"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 8,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
+      },
+      "git" : {
+        "base_commit" : "771bc31dbf266eff18542932856532ba50bc3f9a",
+        "deletions" : 1,
+        "files_changed" : 1,
+        "insertions" : 6
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 6.642003167,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'Concurrency009Fixture'"
+        },
+        {
+          "duration_seconds" : 11.915546416,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : true,
+          "summary" : "4 executed, 4 passed, 0 failed, 0 skipped"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 47.47677206993103,
+        "agent_events" : 13,
+        "agent_output_bytes" : 14134,
+        "agent_output_chunks" : 13,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 18.894243955612183,
+        "test_invocations" : 1,
+        "tool_calls" : 3,
+        "total_events" : 53
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 67.060783917,
+        "passed" : true
+      },
+      "run_id" : "2026-09-08T140301-concurrency-009-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "actor",
+        "reentrancy",
+        "stale-result",
+        "ordering"
+      ],
+      "task" : "concurrency-009",
+      "usage" : {
+        "cache_read_tokens" : 21835,
+        "cache_write_tokens" : 9191,
+        "estimated_cost_usd" : 0.006095625,
+        "input_tokens" : 427,
+        "output_tokens" : 564,
+        "total_tokens" : 1436
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.27"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
+      },
+      "git" : {
+        "base_commit" : "903c6cd2783848b8889696cc513ee601a31880f8",
+        "deletions" : 14,
+        "files_changed" : 1,
+        "insertions" : 20
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 4.35594075,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : false,
+          "summary" : "xcodebuild build failed (exit 65) for scheme 'Concurrency010Fixture'"
+        },
+        {
+          "duration_seconds" : 1.785039625,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 337.26271200180054,
+        "agent_events" : 65,
+        "agent_output_bytes" : 182153,
+        "agent_output_chunks" : 65,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 6.468501091003418,
+        "test_invocations" : 1,
+        "tool_calls" : 19,
+        "total_events" : 157
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 344.259236542,
+        "passed" : false
+      },
+      "run_id" : "2026-09-08T132635-concurrency-010-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "continuation",
+        "cancellation-handler",
+        "race",
+        "synchronization"
+      ],
+      "task" : "concurrency-010",
+      "usage" : {
+        "cache_read_tokens" : 382540,
+        "cache_write_tokens" : 56545,
+        "estimated_cost_usd" : 0.06828907499999999,
+        "input_tokens" : 16625,
+        "output_tokens" : 3134,
+        "total_tokens" : 32579
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.27"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 9,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
+      },
+      "git" : {
+        "base_commit" : "a94698d4adfc8ae42812b1995bd9786fe7003305",
+        "deletions" : 9,
+        "files_changed" : 1,
+        "insertions" : 30
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 4.9944025,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : false,
+          "summary" : "xcodebuild build failed (exit 65) for scheme 'Concurrency011Fixture'"
+        },
+        {
+          "duration_seconds" : 1.933930916,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 51.17039096355438,
+        "agent_events" : 47,
+        "agent_output_bytes" : 96822,
+        "agent_output_chunks" : 47,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 7.245281934738159,
+        "test_invocations" : 1,
+        "tool_calls" : 14,
+        "total_events" : 121
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 59.075803792,
+        "passed" : false
+      },
+      "run_id" : "2026-09-08T140439-concurrency-011-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "taskgroup",
+        "bounded-concurrency",
+        "cancellation",
+        "ordering"
+      ],
+      "task" : "concurrency-011",
+      "usage" : {
+        "cache_read_tokens" : 130545,
+        "cache_write_tokens" : 15463,
+        "estimated_cost_usd" : 0.018561525000000002,
+        "input_tokens" : 7798,
+        "output_tokens" : 1343,
+        "total_tokens" : 9957
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.27"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
+      },
+      "git" : {
+        "base_commit" : "22ab6fe7b41e8c4e43bc25f70115f32b3a5c60bd",
+        "deletions" : 9,
+        "files_changed" : 1,
+        "insertions" : 20
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 5.003100042,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'Concurrency012Fixture'"
+        },
+        {
+          "duration_seconds" : 11.064637333,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "5 executed, 4 passed, 1 failed, 0 skipped. Failing: SharedRequestPoolTests/testReleasingTheSameTicketTwiceDoesNotReleaseAnotherTicketsLease()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 38.50358593463898,
+        "agent_events" : 34,
+        "agent_output_bytes" : 45105,
+        "agent_output_chunks" : 34,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 16.31955897808075,
+        "test_invocations" : 1,
+        "tool_calls" : 12,
+        "total_events" : 95
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 55.316315667,
+        "passed" : false
+      },
+      "run_id" : "2026-09-08T140604-concurrency-012-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "task-lifetime",
+        "cancellation",
+        "coalescing",
+        "ownership"
+      ],
+      "task" : "concurrency-012",
+      "usage" : {
+        "cache_read_tokens" : 81189,
+        "cache_write_tokens" : 8585,
+        "estimated_cost_usd" : 0.011280015,
+        "input_tokens" : 2123,
+        "output_tokens" : 1289,
+        "total_tokens" : 4250
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.27"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 8,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
+      },
+      "git" : {
+        "base_commit" : "9ce4b099df1a0a274911e3bf5ec5281a9184e806",
+        "deletions" : 7,
+        "files_changed" : 1,
+        "insertions" : 77
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 6.980845541,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : false,
+          "summary" : "xcodebuild build failed (exit 65) for scheme 'Concurrency013Fixture'"
+        },
+        {
+          "duration_seconds" : 2.349877583,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 181.53351402282715,
+        "agent_events" : 28,
+        "agent_output_bytes" : 34271,
+        "agent_output_chunks" : 28,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 9.735357999801636,
+        "test_invocations" : 1,
+        "tool_calls" : 8,
+        "total_events" : 83
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 192.020561333,
+        "passed" : false
+      },
+      "run_id" : "2026-09-08T141241-concurrency-013-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "asyncstream",
+        "multicast",
+        "termination",
+        "lifetime"
+      ],
+      "task" : "concurrency-013",
+      "usage" : {
+        "cache_read_tokens" : 78962,
+        "cache_write_tokens" : 11935,
+        "estimated_cost_usd" : 0.017105145,
+        "input_tokens" : 1658,
+        "output_tokens" : 1261,
+        "total_tokens" : 7820
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.27"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 8,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
+      },
+      "git" : {
+        "base_commit" : "8ed193d8c4bfeafc693fb3a630709ffcd53c0bde",
+        "deletions" : 1,
+        "files_changed" : 1,
+        "insertions" : 1
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 4.372550541,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : false,
+          "summary" : "xcodebuild build failed (exit 65) for scheme 'Concurrency014Fixture'"
+        },
+        {
+          "duration_seconds" : 1.797563959,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 61.80233705043793,
+        "agent_events" : 16,
+        "agent_output_bytes" : 16524,
+        "agent_output_chunks" : 16,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 6.481249094009399,
+        "test_invocations" : 1,
+        "tool_calls" : 4,
+        "total_events" : 59
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 68.913380583,
+        "passed" : false
+      },
+      "run_id" : "2026-09-08T144507-concurrency-014-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "swift6.2",
+        "isolated-conformance",
+        "mainactor",
+        "protocol"
+      ],
+      "task" : "concurrency-014",
+      "usage" : {
+        "cache_read_tokens" : 36230,
+        "cache_write_tokens" : 7033,
+        "estimated_cost_usd" : 0.007488075,
+        "input_tokens" : 575,
+        "output_tokens" : 679,
+        "total_tokens" : 2662
       }
     },
     {
@@ -14973,15 +15603,15 @@
     }
   ],
   "score" : {
-    "available" : 1360,
-    "fraction_of_available" : 0.6260239548197901,
+    "available" : 1420,
+    "fraction_of_available" : 0.6066144919400807,
     "minimum_efficiency" : 0.25,
-    "points" : 851.3925785549145,
+    "points" : 861.3925785549145,
     "reference_token_budget" : 50000,
-    "scored_runs" : 136,
+    "scored_runs" : 142,
     "solves_with_unreported_tokens" : 0,
     "specification" : "points-v2",
     "unscored_runs" : 0
   },
-  "total" : 136
+  "total" : 142
 }
