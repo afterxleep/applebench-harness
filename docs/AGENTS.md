@@ -57,6 +57,11 @@ host shell leaks in.
 **Telemetry capability:** `structured`, tool events, messages, and per-step
 token usage are all parsed from the JSON stream.
 
+If OpenCode exits before emitting any output, the suite retries that task three
+times by default (four total attempts). Use `--agent-startup-retries` to change
+the retry count. The suite stops only after all startup attempts fail, because
+an untouched fixture does not measure the model.
+
 ### `opencode-vm`, the same harness, hard-isolated in a Tart VM
 
 Register identifier: `opencode-vm`. Triggered when the CLI is invoked with
@@ -143,4 +148,3 @@ adapter, for instance):
 3. Optionally implement `AgentOutputParser` if the CLI has structured output.
 
 No core runner code changes.
-

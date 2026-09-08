@@ -98,6 +98,9 @@ struct SuiteCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Maximum concurrent tasks per agent. Defaults to 1 (serial); 2–3 is typical for calibration. Each slot runs a full task with its own simulator, so 3 means up to 3 simulators at once.")
     var parallel: Int = 1
 
+    @Option(name: .long, help: "Retries when the agent exits before reaching its model (default: 3, for 4 total attempts).")
+    var agentStartupRetries: Int = 3
+
     func run() async throws {
         // Line-buffer stdout so progress streams to pipes/CI, not just TTYs.
         setlinebuf(stdout)
@@ -115,6 +118,9 @@ struct SuiteCommand: AsyncParsableCommand {
         }
         guard parallel >= 1 else {
             throw ValidationError("--parallel must be at least 1")
+        }
+        guard agentStartupRetries >= 0 else {
+            throw ValidationError("--agent-startup-retries must be at least 0")
         }
 
         let suiteURL = try ReferenceResolver.resolveSuite(suite)
@@ -185,7 +191,8 @@ struct SuiteCommand: AsyncParsableCommand {
             entries: entries,
             runs: runs,
             options: options,
-            parallelism: parallel
+            parallelism: parallel,
+            agentStartupRetries: agentStartupRetries
         ) { progress in
             switch progress {
             case .taskStarted(let task, let agent, let run, let totalRuns):

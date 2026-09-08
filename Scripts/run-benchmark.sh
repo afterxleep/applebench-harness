@@ -39,6 +39,9 @@
 #                           (repeatable). The escape hatch for anything the
 #                           flags above do not cover.
 #   -p, --parallel <n>      Concurrent tasks (default: 1)
+#       --agent-startup-retries <n>
+#                           Retries when the agent exits before reaching its
+#                           model (default: 3, for 4 total attempts).
 #   -o, --out <dir>         Report directory (default: Reports/<suite>-<date>)
 #       --runs-dir <dir>    Run artifact root (default: .applebench/runs)
 #       --stream            Show what each task is doing as it happens:
@@ -108,6 +111,7 @@ max_tokens=""
 timeout_cap=""
 agent_arg=()
 parallel="1"
+agent_startup_retries="3"
 out=""
 runs_dir="$root/.applebench/runs"
 
@@ -137,6 +141,7 @@ while [ $# -gt 0 ]; do
         --timeout-cap) timeout_cap="$2"; shift 2 ;;
         --agent-arg) agent_arg+=(--agent-arg "$2"); shift 2 ;;
         -p|--parallel) parallel="$2"; shift 2 ;;
+        --agent-startup-retries) agent_startup_retries="$2"; shift 2 ;;
         -o|--out) out="$2"; shift 2 ;;
         --runs-dir) runs_dir="$2"; shift 2 ;;
         --strip-wrapper-clis) shift ;;  # always on now; accepted so old commands keep working
@@ -386,6 +391,7 @@ set +e
     ${timeout_cap:+--timeout-cap "$timeout_cap"} \
     ${agent_arg[@]+"${agent_arg[@]}"} \
     --parallel "$parallel" \
+    --agent-startup-retries "$agent_startup_retries" \
     --runs-dir "$runs_dir" \
     ${allow_env[@]+"${allow_env[@]}"} \
     ${vm:+--vm "$vm"} \

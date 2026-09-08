@@ -87,6 +87,7 @@ public struct RunCoordinator: Sendable {
         runs: Int,
         options: RunnerOptions,
         parallelism: Int = 1,
+        agentStartupRetries: Int = 3,
         progress: @escaping @Sendable (SuiteProgress) -> Void = { _ in }
     ) async -> SuiteReport {
         var allResults: [BenchmarkRunResult] = []
@@ -112,6 +113,7 @@ public struct RunCoordinator: Sendable {
                 slots: slots,
                 adapter: entry.adapter,
                 options: entryOptions,
+                agentStartupRetries: max(0, agentStartupRetries),
                 progress: progress
             )
 
@@ -151,6 +153,7 @@ public struct RunCoordinator: Sendable {
         slots: Int,
         adapter: any AgentAdapter,
         options: RunnerOptions,
+        agentStartupRetries: Int,
         progress: @escaping @Sendable (SuiteProgress) -> Void
     ) async -> JobOutcome {
         // Serialized aggregate state. The `NonReentrantLock` (an
@@ -184,30 +187,38 @@ public struct RunCoordinator: Sendable {
                             totalRuns: 1
                         ))
 
-                        let result: BenchmarkRunResult?
-                        let errorMessage: String?
-                        do {
-                            result = try await runner.run(
-                                task: job.task,
-                                adapter: adapter,
-                                options: options
-                            )
-                            errorMessage = nil
-                        } catch {
-                            result = nil
-                            errorMessage = "\(error)"
-                            // An agent that never reached its model says
-                            // nothing about this task, and the next task will
-                            // hit the same wall. Stop claiming work rather
-                            // than grading a suite of untouched fixtures and
-                            // publishing it as a score.
-                            if case BenchmarkFailure.agentNeverRan(let why) = error,
-                               !cursor.wasAbandoned {
-                                cursor.abandon()
-                                progress(.suiteAbandoned(
-                                    reason: "the agent never reached its model on "
-                                        + "\(job.task.id): \(why)"
-                                ))
+                        var result: BenchmarkRunResult?
+                        var errorMessage: String?
+                        var startupAttempt = 0
+                        while result == nil {
+                            do {
+                                result = try await runner.run(
+                                    task: job.task,
+                                    adapter: adapter,
+                                    options: options
+                                )
+                                errorMessage = nil
+                            } catch BenchmarkFailure.agentNeverRan(let why) {
+                                errorMessage = "\(BenchmarkFailure.agentNeverRan(why))"
+                                if startupAttempt < agentStartupRetries {
+                                    startupAttempt += 1
+                                    continue
+                                }
+
+                                // Repeated pre-model exits say nothing about
+                                // the task. Stop before untouched fixtures can
+                                // be published as model failures.
+                                if !cursor.wasAbandoned {
+                                    cursor.abandon()
+                                    progress(.suiteAbandoned(
+                                        reason: "the agent never reached its model on "
+                                            + "\(job.task.id) after \(startupAttempt + 1) attempts: \(why)"
+                                    ))
+                                }
+                                break
+                            } catch {
+                                errorMessage = "\(error)"
+                                break
                             }
                         }
 

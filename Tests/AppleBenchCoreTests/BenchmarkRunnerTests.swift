@@ -65,6 +65,51 @@ struct ScriptedAdapter: AgentAdapter {
     func cleanup(context: RunContext) async {}
 }
 
+private final class StartupFailureCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var remainingFailures: Int
+    private(set) var attempts = 0
+
+    init(failures: Int) {
+        remainingFailures = failures
+    }
+
+    func nextShouldFail() -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        attempts += 1
+        guard remainingFailures > 0 else { return false }
+        remainingFailures -= 1
+        return true
+    }
+}
+
+private struct FlakyStartupAdapter: AgentAdapter {
+    let identifier = "flaky-startup"
+    let telemetry = AgentTelemetryCapability.plainText
+    let counter: StartupFailureCounter
+
+    func prepare(context: RunContext) async throws {}
+
+    func run(task: BenchmarkTask, context: RunContext, recorder: EventRecorder) async throws -> AgentRunResult {
+        if counter.nextShouldFail() {
+            return AgentRunResult(
+                metadata: AgentMetadata(agent: identifier, model: context.model),
+                terminationReason: .failed,
+                exitCode: 1
+            )
+        }
+        await recorder.record(.agentOutput, payload: .object(["text": .string("worked")]))
+        return AgentRunResult(
+            metadata: AgentMetadata(agent: identifier, model: context.model),
+            terminationReason: .completed,
+            exitCode: 0
+        )
+    }
+
+    func cleanup(context: RunContext) async {}
+}
+
 // MARK: - Harness
 
 struct RunnerHarness {
@@ -324,6 +369,25 @@ struct BenchmarkRunnerTests {
 
 @Suite("Suite coordination", .serialized)
 struct RunCoordinatorTests {
+    @Test("Retries an agent that exits before reaching its model")
+    func retriesAgentStartupFailure() async throws {
+        let harness = try await RunnerHarness.make()
+        defer { harness.cleanUp() }
+        let counter = StartupFailureCounter(failures: 3)
+
+        let report = await RunCoordinator(runner: harness.makeRunner()).runSuite(
+            suite: BenchmarkSuite(id: "unit", name: "Unit", tasks: ["unit-001"]),
+            tasks: [harness.task],
+            entries: [.init(adapter: FlakyStartupAdapter(counter: counter))],
+            runs: 1,
+            options: harness.options
+        )
+
+        #expect(counter.attempts == 4)
+        #expect(report.agents.first?.passed == 1)
+        #expect(report.agents.first?.errored == 0)
+    }
+
     @Test("Aggregates completion across repeated runs")
     func aggregation() async throws {
         let harness = try await RunnerHarness.make()
