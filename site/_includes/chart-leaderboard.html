@@ -347,11 +347,13 @@ Params: runs (site.benchmarks).
         {%- assign label_x = px | minus: 12 -%}
         {%- assign label_anchor = "end" -%}
       {%- endif -%}
-      <circle class="scatter__dot" cx="{{ px }}" cy="{{ py }}" r="6.5"
-              fill="var(--{{ series_names[idx] }})">
+      <circle class="scatter__dot" cx="{{ px }}" cy="{{ py }}" r="6"
+              style="fill:var(--{{ series_names[idx] }})">
         <title>{{ parts[0] }} · {{ rate | round: 1 }}% · {% include money.html value=list_cost %}</title>
       </circle>
-      <text class="scatter__label" x="{{ label_x }}" y="{{ py | plus: 4 }}" text-anchor="{{ label_anchor }}">{{ parts[0] }}</text>
+      <text class="scatter__label" x="{{ label_x }}" y="{{ py | plus: 3 }}"
+            text-anchor="{{ label_anchor }}"
+            style="--model-color:var(--{{ series_names[idx] }})">{{ parts[0] }}</text>
     {%- endfor -%}
   </svg>
 

@@ -16,8 +16,14 @@
   --blue: #0066cc;
   --blue-dark: #004b99;
   --blue-soft: #eaf4ff;
-  --series-1: #0066cc;
-  --series-2: #497a9f;
+  --series-1: #005eb8;
+  --series-2: #a23d22;
+  --series-3: #147a3d;
+  --series-4: #6b4fa1;
+  --series-5: #9a6700;
+  --series-6: #006d77;
+  --series-7: #9e2f62;
+  --series-8: #42526e;
   --hero: #09090b;
   --hero-panel: #151517;
   --hero-line: #343438;
@@ -1133,8 +1139,20 @@ th {
   font-family: var(--font);
 }
 
-.scatter__dot {
-  fill: var(--blue);
+.scatter__axis-title {
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.scatter__tick {
+  font-size: 7.5px;
+  font-weight: 400;
+}
+
+.scatter__label {
+  fill: var(--model-color, var(--ink-2));
+  font-size: 9px;
+  font-weight: 600;
 }
 
 .stats {
@@ -1468,6 +1486,15 @@ th {
     width: 18px;
     height: 18px;
     flex-basis: 18px;
+  }
+
+  .scatter__axis-title,
+  .scatter__label {
+    font-size: 22px;
+  }
+
+  .scatter__tick {
+    font-size: 21px;
   }
 
   .figure figcaption {
