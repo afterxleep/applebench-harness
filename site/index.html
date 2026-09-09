@@ -15,11 +15,11 @@ description: >-
 <section class="hero">
   <div class="wrap hero__grid">
     <div class="hero__main">
-      <p class="eyebrow">Independent benchmark <span>2026 edition</span></p>
+      <p class="eyebrow">AppleBench <span>Gold suite, 2026</span></p>
       <h1>Can an AI agent ship a <em>working Apple app?</em></h1>
       <p class="hero__lede">
         Give it a broken Xcode project. Let it diagnose and repair the problem.
-        Then check the app it leaves behind—not the answer it claims to have.
+        Then check the app it leaves behind, not the answer it claims to have.
       </p>
       <div class="button-row">
         <a class="button button--primary" href="{{ '/benchmarks/' | relative_url }}">Read the results <span aria-hidden="true">↗</span></a>
@@ -27,8 +27,18 @@ description: >-
       </div>
     </div>
 
-    <aside class="hero__proof" aria-label="Current benchmark facts">
-      <p class="hero__proof-label">Gold suite / current</p>
+    <aside class="hero__proof" aria-label="Independent verification and current benchmark facts">
+      <div class="verification-chain">
+        <p class="hero__proof-label">Independent verification</p>
+        <p class="verification-chain__title">Nothing passes on trust.</p>
+        <ol aria-label="Verification stages">
+          <li><span>01</span>Agent exits</li>
+          <li><span>02</span>Clean build</li>
+          <li><span>03</span>Tests run</li>
+          <li><span>04</span>App launches</li>
+          <li><span>05</span>Score recorded</li>
+        </ol>
+      </div>
       <dl>
         <div><dt>{{ scoring_tasks }}</dt><dd>scoring tasks</dd></div>
         <div><dt>{{ category_count }}</dt><dd>areas of Apple development</dd></div>
@@ -133,10 +143,31 @@ description: >-
   </div>
 </section>
 
+<section class="section section--evolving">
+  <div class="wrap evolving-grid">
+    <div class="section__head">
+      <p class="section__index">05 / A living benchmark</p>
+      <h2>The suite keeps moving.</h2>
+    </div>
+    <div class="evolving-copy">
+      <p class="section__lede">
+        Apple development does not stand still, and neither can the benchmark.
+        New tasks are added as Swift, Xcode, Apple frameworks, and agent
+        workflows change.
+      </p>
+      <div class="evolving-points">
+        <article><span>01</span><h3>New failure modes</h3><p>Fresh tasks cover real problems that current agents and toolchains expose.</p></article>
+        <article><span>02</span><h3>Versioned suites</h3><p>Every result names the exact task set used, so comparisons stay honest.</p></article>
+        <article><span>03</span><h3>Recalibrated evidence</h3><p>Fixtures and graders are checked again as platforms and models evolve.</p></article>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="section section--closing">
   <div class="wrap closing-grid">
     <div>
-      <p class="section__index">05 / Trust</p>
+      <p class="section__index">06 / Trust</p>
       <h2>The harness is public.<br><em>The answers are not.</em></h2>
     </div>
     <div>

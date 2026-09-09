@@ -60,3 +60,10 @@ jobs:
 
       - name: Build
         run: bundle exec jekyll build --trace
+
+      - name: Reject em dashes
+        run: |
+          if grep -REIn --exclude-dir=_site --exclude=Gemfile.lock '—|&mdash;|&#8212;|&#x2014;' .; then
+            echo "Site copy must not contain em dashes."
+            exit 1
+          fi

@@ -133,7 +133,7 @@ layout: default
             {%- elsif reasoning.maximum_effort -%}
               provider default; this model exposes up to <code>{{ reasoning.maximum_effort }}</code> and it was not requested
             {%- else -%}
-              provider default &mdash; this model exposes no selectable effort level, so there is no stronger setting to ask for
+              provider default; this model exposes no selectable effort level, so there is no stronger setting to ask for
             {%- endif -%}
           </td>
         </tr>
@@ -176,7 +176,7 @@ layout: default
   </div>
   {%- endif -%}
 
-  <div class="grid grid--2" style="margin-bottom:1.5rem">
+  <div class="benchmark-chart-stack">
     {%- include chart-points-by-category.html rows=rows -%}
     {%- include chart-pass-by-category.html rows=rows -%}
   </div>
