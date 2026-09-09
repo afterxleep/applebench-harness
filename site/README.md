@@ -19,7 +19,6 @@ bundle exec jekyll serve
 | `methodology.md` | Execution model, isolation, recorded variables, known limits |
 | `benchmarks.html` | Index of published runs |
 | `_benchmarks/` | One page per published run |
-| `blog.html`, `_posts/` | The blog |
 | `_data/benchmarks/*.csv` | Chart source data, exported by the harness |
 | `_includes/chart-*.html` | The charts |
 

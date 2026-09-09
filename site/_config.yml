@@ -15,7 +15,6 @@ author:
   name: Daniel Bernal
 
 plugins:
-  - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
 
@@ -27,11 +26,6 @@ collections:
 defaults:
   - scope:
       path: ""
-      type: posts
-    values:
-      layout: post
-  - scope:
-      path: ""
       type: benchmarks
     values:
       layout: benchmark
@@ -40,7 +34,6 @@ defaults:
     values:
       layout: page
 
-permalink: /blog/:year/:month/:title/
 paginate: false
 
 sass:
@@ -53,14 +46,12 @@ exclude:
   - vendor
   - README.md
 
-# Ordered navigation. `benchmarks` and `blog` are index pages, not collections
-# being enumerated here.
+# Ordered navigation. `benchmarks` is an index page, not a collection being
+# enumerated here.
 nav:
   - title: Benchmark
     url: /benchmark/
   - title: Results
     url: /benchmarks/
-  - title: Blog
-    url: /blog/
   - title: Methodology
     url: /methodology/
