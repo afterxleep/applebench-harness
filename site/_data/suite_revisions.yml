@@ -1,10 +1,22 @@
 # What the suite was, when. A published number only means something against a
 # stated set of tasks, so every run records the revision it was measured on
 # and results are only comparable within one.
+# The current entry also drives the task totals shown on the homepage.
 
 - id: "2026-09-08"
   name: "2026-09-08"
   gold_tasks: 142
+  app_run_tasks: 47
+  public_sample_tasks: 8
+  category_tasks:
+    build: 1
+    tests: 3
+    runtime: 5
+    visual: 8
+    interaction: 27
+    project: 4
+    frameworks: 66
+    ops: 28
   current: true
   summary: >-
     Six expert Swift concurrency tasks join the gold suite. Their contracts

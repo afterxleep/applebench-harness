@@ -59,8 +59,10 @@ token usage are all parsed from the JSON stream.
 
 If OpenCode exits before emitting any output, the suite retries that task three
 times by default (four total attempts). Use `--agent-startup-retries` to change
-the retry count. The suite stops only after all startup attempts fail, because
-an untouched fixture does not measure the model.
+the retry count. Every retry is written to the run log and waits 1, 2, then 4
+seconds (capped at 8 seconds for additional retries), so a transient provider
+failure is not retried as one invisible burst. The suite stops only after all
+startup attempts fail, because an untouched fixture does not measure the model.
 
 ### `opencode-vm`, the same harness, hard-isolated in a Tart VM
 

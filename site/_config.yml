@@ -1,11 +1,9 @@
 title: AppleBench
-tagline: A benchmark for agentic Apple-platform engineering
+tagline: A benchmark for AI agents that build Apple apps
 description: >-
-  AppleBench asks whether an AI coding agent can take an Apple-development task
-  from request to verified working result without a human stepping in. It hands
-  the agent an isolated checkout of a real, intentionally broken Xcode project,
-  then grades the final workspace itself with fresh xcodebuild, XCTest,
-  XCUITest, and Simulator runtime checks.
+  AppleBench tests whether an AI coding agent can fix a real broken Xcode
+  project and leave an app that builds, passes its tests, and works on a
+  simulator.
 
 url: https://afterxleep.github.io
 baseurl: /applebench-harness

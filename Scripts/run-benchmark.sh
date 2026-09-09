@@ -42,6 +42,7 @@
 #       --agent-startup-retries <n>
 #                           Retries when the agent exits before reaching its
 #                           model (default: 3, for 4 total attempts).
+#                           Each retry is logged and waits 1, 2, then 4s.
 #   -o, --out <dir>         Report directory (default: Reports/<suite>-<date>)
 #       --runs-dir <dir>    Run artifact root (default: .applebench/runs)
 #       --stream            Show what each task is doing as it happens:

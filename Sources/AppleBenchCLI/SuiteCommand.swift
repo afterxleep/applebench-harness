@@ -198,6 +198,16 @@ struct SuiteCommand: AsyncParsableCommand {
             case .taskStarted(let task, let agent, let run, let totalRuns):
                 let attempt = totalRuns > 1 ? " (\(run)/\(totalRuns))" : ""
                 print("→ \(task) · \(agent)\(attempt)")
+            case .agentStartupRetry(
+                let task,
+                let agent,
+                let nextAttempt,
+                let totalAttempts,
+                let delaySeconds,
+                let error
+            ):
+                print("  RETRY · \(task) · \(agent) · attempt \(nextAttempt)/\(totalAttempts) in \(delaySeconds)s")
+                print("          \(error)")
             case .taskFinished(let result):
                 print("  \(Format.passFail(result.result.passed)) · \(Format.duration(result.result.durationSeconds))")
             case .taskErrored(_, _, let error):

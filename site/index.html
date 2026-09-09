@@ -2,29 +2,31 @@
 layout: default
 title: AppleBench
 description: >-
-  A benchmark that asks whether an AI agent can ship an Apple app without you:
-  build it, run it, drive it on a simulator, and leave it working. Graded with
-  fresh xcodebuild, XCTest, XCUITest and Simulator checks, after the agent has
-  exited.
+  AppleBench gives AI coding agents broken Xcode projects, then checks whether
+  the finished apps build, pass their tests, and work on a simulator.
 ---
+
+{%- assign current_suite = site.data.suite_revisions | where: "current", true | first -%}
+{%- assign scoring_tasks = current_suite.gold_tasks -%}
+{%- assign app_run_tasks = current_suite.app_run_tasks -%}
+{%- assign sample_tasks = current_suite.public_sample_tasks -%}
+{%- assign category_count = current_suite.category_tasks | size -%}
 
 <section class="hero">
   <div class="wrap">
-    <p class="eyebrow"><span class="eyebrow__dot"></span> 134 scoring tasks · 8 categories · graded by Xcode</p>
-    <h1>Can an agent ship an Apple app without you?</h1>
+    <p class="eyebrow"><span class="eyebrow__dot"></span> {{ scoring_tasks }} scoring tasks · {{ category_count }} areas · checked after the agent stops</p>
+    <h1>Can an AI agent fix a real Apple app?</h1>
     <p class="hero__lede">
-      Not "can it write Swift". Can it take a real Xcode project with something
-      genuinely wrong in it and hand back a working app. Built, launched, driven
-      on a simulator, and still working when someone else checks.
-      <strong>One task in three cannot pass unless the app actually runs.</strong>
+      AppleBench gives an AI coding agent a real Xcode project with a real bug.
+      The agent must find the problem, fix it, and leave the project working.
     </p>
     <p class="hero__lede" style="margin-top:.8rem">
-      AppleBench records everything the agent does. Then,
-      <strong>once it has exited</strong>, it grades the workspace left behind:
-      fresh <code>xcodebuild</code>, XCTest, XCUITest, resolved build settings,
-      and the app running on a device.
+      AppleBench records every command and file change. After the agent stops,
+      it builds the project from scratch, runs the tests, launches the app, and
+      checks it on a simulator.
+      <strong>{{ app_run_tasks }} of {{ scoring_tasks }} tasks cannot pass unless the app runs.</strong>
     </p>
-    <p class="hero__lede" style="margin-top:.8rem"><strong>Agents do not grade themselves.</strong></p>
+    <p class="hero__lede" style="margin-top:.8rem"><strong>The agent never grades its own work.</strong></p>
     <div class="button-row">
       <a class="button button--primary" href="{{ '/benchmarks/' | relative_url }}">See the results</a>
       <a class="button button--ghost" href="{{ '/benchmark/' | relative_url }}">How it works</a>
@@ -36,25 +38,20 @@ description: >-
   <div class="wrap">
     <div class="section__head">
       <h2>Why another benchmark</h2>
-      <p>
-        Most coding benchmarks stop at the diff. Shipping on Apple platforms is
-        mostly what happens after it. That is where agents come apart.
-      </p>
+      <p>Writing code is only part of the job.</p>
     </div>
 
-<pre><code>understand → edit → build → diagnose → run → inspect → interact → test → verify</code></pre>
+<pre><code>understand → fix → build → run → test → verify</code></pre>
 
     <p style="color:var(--ink-2); max-width:64ch">
-      The edit is one step out of nine, and it is the one every model can
-      already do. AppleBench grades the end of that loop, not the middle of it.
-      A patch that looks right and leaves the app crashing on launch scores
-      exactly nothing.
+      Many coding benchmarks stop after an agent edits some files. AppleBench
+      checks what those edits actually produce. If the project does not build,
+      the app crashes, or a required check fails, the task fails.
     </p>
     <p style="color:var(--ink-2); max-width:64ch">
-      Everything except the model is held still: same harness, same prompt,
-      same commit, same Xcode, same simulator, same limits. Most capable models
-      get the easy tasks. What separates them is the eight steps after the
-      edit, and what each solved task <em>cost</em>.
+      For each task, every model gets the same project, request, Xcode setup,
+      simulator, and limits. The results show how many tasks it completed and
+      what each run cost.
     </p>
   </div>
 </section>
@@ -63,23 +60,17 @@ description: >-
   <div class="wrap">
     <div class="section__head">
       <h2>What it measures</h2>
-      <p>
-        Operational Apple-platform work: 46 tasks are tagged operational, 55
-        sit in the toolchain and interaction categories, and 45 are graded by
-        running the app rather than by reading the diff. Plain Swift and
-        language-level concurrency are covered well elsewhere, so they are out
-        of scope here.
-      </p>
+      <p>{{ scoring_tasks }} tasks in {{ category_count }} clear areas.</p>
     </div>
     <div class="grid">
-      <div class="card"><span class="card__tag">build</span><h3>Build failures</h3><p>Compiler failures specific to the Apple SDK: availability, linking, module resolution.</p></div>
-      <div class="card"><span class="card__tag">tests</span><h3>Failing tests</h3><p>Diagnose, fix, and rerun against tests the agent did not write and cannot rewrite.</p></div>
-      <div class="card"><span class="card__tag">runtime</span><h3>Runtime defects</h3><p>Crashes and misbehavior that compile perfectly and only appear when the app runs.</p></div>
-      <div class="card"><span class="card__tag">visual</span><h3>Layout and spec</h3><p>Read a design spec, fix the layout, and satisfy structural UI assertions.</p></div>
-      <div class="card"><span class="card__tag">interaction</span><h3>Driving the app</h3><p>Run it on a simulator, interact with it, and write XCUITests that hold.</p></div>
-      <div class="card"><span class="card__tag">project</span><h3>Project configuration</h3><p>Target membership, Info.plist, asset catalogs, schemes, Swift packages.</p></div>
-      <div class="card"><span class="card__tag">frameworks</span><h3>Apple frameworks</h3><p>SwiftData, Core Data, WidgetKit, App Intents, where the API contract is the task.</p></div>
-      <div class="card"><span class="card__tag">ops</span><h3>Raw toolchain</h3><p>Operational loops through <code>xcodebuild</code>, <code>simctl</code>, and <code>devicectl</code>, with no wrapper CLI on the path.</p></div>
+      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.build }} task</span><h3>Build problems</h3><p>Fix a project that does not compile or link.</p></div>
+      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.tests }} tasks</span><h3>Failing tests</h3><p>Find the bug behind a failing test and leave every test passing.</p></div>
+      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.runtime }} tasks</span><h3>Runtime bugs</h3><p>Fix crashes and wrong behavior that only appear when the app runs.</p></div>
+      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.visual }} tasks</span><h3>UI and layout</h3><p>Fix screens that clip, overlap, or fail their design requirements.</p></div>
+      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.interaction }} tasks</span><h3>App interaction</h3><p>Launch the app, use it, and add UI tests that prove the flow works.</p></div>
+      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.project }} tasks</span><h3>Project setup</h3><p>Fix targets, property lists, assets, schemes, and Swift packages.</p></div>
+      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.frameworks }} tasks</span><h3>Frameworks and Swift</h3><p>Solve problems in Swift concurrency, SwiftData, Core Data, WidgetKit, App Intents, and more.</p></div>
+      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.ops }} tasks</span><h3>Command-line work</h3><p>Use Apple's build, test, simulator, and device tools correctly.</p></div>
     </div>
   </div>
 </section>
@@ -87,58 +78,49 @@ description: >-
 <section class="section">
   <div class="wrap">
     <div class="section__head">
-      <h2>How a run is graded</h2>
-      <p>
-        The grading is the product. The rest is plumbing that keeps it
-        honest.
-      </p>
+      <h2>How a run is checked</h2>
+      <p>The agent does the work. AppleBench checks the result.</p>
     </div>
     <div class="grid grid--2">
       <div class="card">
-        <h3>Grading starts after the agent is gone</h3>
+        <h3>Checks start after the agent stops</h3>
         <p>
-          Fresh derived data, fresh <code>xcodebuild</code>, run against the
-          workspace the agent left. Its own successful build never counts, and
-          nothing describing how it will be graded is written near the
-          workspace until it has exited.
+          AppleBench uses a clean build and runs its own tests against the
+          project the agent left behind. The agent saying “it works” does not
+          count.
         </p>
       </div>
       <div class="card">
-        <h3>Every task is proven solvable</h3>
+        <h3>Every task is proven possible</h3>
         <p>
-          An agent that changes nothing must <strong>fail</strong> a task, and
-          the reference fix must <strong>pass</strong> it. Both halves run
-          against real <code>xcodebuild</code> before a task is allowed into
-          the set. All 134 currently hold.
+          Before a task is added, the broken project must fail and a known
+          working fix must pass. All {{ scoring_tasks }} current tasks meet
+          both rules.
         </p>
       </div>
       <div class="card">
-        <h3>Nothing is guessed</h3>
+        <h3>No numbers are made up</h3>
         <p>
-          Token counts and cost come from the agent CLI, and stay
-          <code>null</code> when it did not report them. Never zero, never
-          estimated. A timeout and a passing workspace are two separate facts
-          and are recorded that way.
+          Token counts and cost come from the agent tool. If it does not report
+          them, they stay empty. Timeouts and final project results are recorded
+          separately.
         </p>
       </div>
       <div class="card">
-        <h3>Solving it is half the score</h3>
+        <h3>Scoring is simple</h3>
         <p>
-          A task is worth ten points per step of authored difficulty, and a
-          solve keeps all of them only if the agent stayed inside its token
-          allowance. Beyond that the points fall in proportion. Two models can
-          land the same diff and score nothing alike, which is the point.
+          Every task starts at 10 points. A failed task gets 0. A passed task
+          keeps all 10 points if it stays within 50,000 tokens; after that, its
+          points fall as token use rises.
           <a href="{{ '/methodology/#scoring' | relative_url }}">How scoring works</a>.
         </p>
       </div>
       <div class="card">
-        <h3>The answers stay private</h3>
+        <h3>Scoring tasks stay private</h3>
         <p>
-          The 134 scoring tasks are private and rotated. Eight samples ship
-          with the open harness so anyone can run it, and those are never
-          scored. A scoring run is also sealed in a VM that denies network
-          egress, because keeping answers closed and sealing the run solve two
-          different problems.
+          The {{ scoring_tasks }} scoring tasks and their fixes are private.
+          For published scores, the agent runs on a separate virtual Mac with
+          no internet access, so it cannot look up the answers.
         </p>
       </div>
     </div>
@@ -149,7 +131,7 @@ description: >-
   <div class="wrap">
     <div class="section__head">
       <h2>Latest results</h2>
-      <p>Published runs. Open one for every task.</p>
+      <p>Open any run to see the result for every task.</p>
     </div>
     {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
     <ul class="entry-list">
@@ -187,31 +169,26 @@ description: >-
 <section class="section">
   <div class="wrap">
     <div class="section__head">
-      <h2>Open harness, private answers</h2>
-      <p>You can run it. You cannot see the scoring set.</p>
+      <h2>The harness is public. The answers are not.</h2>
+      <p>Anyone can inspect and run the benchmark code.</p>
     </div>
 
     <div class="wrap wrap--narrow" style="padding:0">
       <p>
-        The harness is open: the grading engine, the task schema, the fixture
-        tooling, the isolation model, and eight sample tasks with their
-        fixtures. Clone it and it runs on those with no arguments. They are
-        real tasks, meant to be read and copied from when you write your own,
-        and no published score ever comes from them.
+        The public repository includes the runner, the graders, and
+        {{ sample_tasks }} sample tasks. The samples show exactly how a run
+        works, but they never count toward a published score.
       </p>
       <p>
-        The 134 scoring tasks stay private. Not because they are precious, but
-        because a benchmark whose answers are on the internet stops measuring
-        anything the moment somebody scrapes it. Every published number comes
-        from that private set.
+        The {{ scoring_tasks }} scoring tasks and their reference fixes stay
+        private. If the answers were online, a model could memorize or search
+        for them, and the score would stop meaning much.
       </p>
       <p>
-        Neither half works alone, so a scoring run is sandboxed too. The
-        agent runs in a VM that default-denies every network destination and
-        mounts nothing of the host except the workspace it was given: the
-        standard Apple toolchain and nothing else. Every run records whether
-        it was isolated that way, because a number from an unconfined run is
-        a different claim.
+        During a published scoring run, the agent works on a separate virtual
+        Mac. It can use the project and Apple's developer tools, but it cannot
+        use the internet. Every result records whether this protection was
+        active.
       </p>
     </div>
 

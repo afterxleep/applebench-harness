@@ -68,19 +68,25 @@ struct ScriptedAdapter: AgentAdapter {
 private final class StartupFailureCounter: @unchecked Sendable {
     private let lock = NSLock()
     private var remainingFailures: Int
-    private(set) var attempts = 0
+    private var recordedRunIDs: [String] = []
 
     init(failures: Int) {
         remainingFailures = failures
     }
 
-    func nextShouldFail() -> Bool {
+    func nextShouldFail(runID: String) -> Bool {
         lock.lock()
         defer { lock.unlock() }
-        attempts += 1
+        recordedRunIDs.append(runID)
         guard remainingFailures > 0 else { return false }
         remainingFailures -= 1
         return true
+    }
+
+    var runIDs: [String] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recordedRunIDs
     }
 }
 
@@ -92,7 +98,7 @@ private struct FlakyStartupAdapter: AgentAdapter {
     func prepare(context: RunContext) async throws {}
 
     func run(task: BenchmarkTask, context: RunContext, recorder: EventRecorder) async throws -> AgentRunResult {
-        if counter.nextShouldFail() {
+        if counter.nextShouldFail(runID: context.runID) {
             return AgentRunResult(
                 metadata: AgentMetadata(agent: identifier, model: context.model),
                 terminationReason: .failed,
@@ -108,6 +114,76 @@ private struct FlakyStartupAdapter: AgentAdapter {
     }
 
     func cleanup(context: RunContext) async {}
+}
+
+private struct StartupRetryNotice: Equatable {
+    var task: String
+    var agent: String
+    var nextAttempt: Int
+    var totalAttempts: Int
+    var delaySeconds: Int
+}
+
+private final class StartupRetryTrace: @unchecked Sendable {
+    private let lock = NSLock()
+    private var recordedNotices: [StartupRetryNotice] = []
+    private var recordedDelays: [Duration] = []
+    private var recordedAbandonmentReasons: [String] = []
+    private var recordedErrors: [String] = []
+
+    func record(_ progress: RunCoordinator.SuiteProgress) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        switch progress {
+        case let .agentStartupRetry(
+            task, agent, nextAttempt, totalAttempts, delaySeconds, _
+        ):
+            recordedNotices.append(StartupRetryNotice(
+                task: task,
+                agent: agent,
+                nextAttempt: nextAttempt,
+                totalAttempts: totalAttempts,
+                delaySeconds: delaySeconds
+            ))
+        case .suiteAbandoned(let reason):
+            recordedAbandonmentReasons.append(reason)
+        case .taskErrored(_, _, let error):
+            recordedErrors.append(error)
+        case .taskStarted, .taskFinished:
+            break
+        }
+    }
+
+    func recordDelay(_ delay: Duration) {
+        lock.lock()
+        recordedDelays.append(delay)
+        lock.unlock()
+    }
+
+    var notices: [StartupRetryNotice] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recordedNotices
+    }
+
+    var delays: [Duration] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recordedDelays
+    }
+
+    var abandonmentReasons: [String] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recordedAbandonmentReasons
+    }
+
+    var errors: [String] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recordedErrors
+    }
 }
 
 // MARK: - Harness
@@ -369,23 +445,77 @@ struct BenchmarkRunnerTests {
 
 @Suite("Suite coordination", .serialized)
 struct RunCoordinatorTests {
-    @Test("Retries an agent that exits before reaching its model")
+    @Test("Retries an agent in distinct runs with visible bounded backoff")
     func retriesAgentStartupFailure() async throws {
         let harness = try await RunnerHarness.make()
         defer { harness.cleanUp() }
         let counter = StartupFailureCounter(failures: 3)
+        let trace = StartupRetryTrace()
 
-        let report = await RunCoordinator(runner: harness.makeRunner()).runSuite(
+        let coordinator = RunCoordinator(
+            runner: harness.makeRunner(),
+            sleepBeforeAgentStartupRetry: { delay in trace.recordDelay(delay) }
+        )
+        let report = await coordinator.runSuite(
             suite: BenchmarkSuite(id: "unit", name: "Unit", tasks: ["unit-001"]),
             tasks: [harness.task],
             entries: [.init(adapter: FlakyStartupAdapter(counter: counter))],
             runs: 1,
-            options: harness.options
+            options: harness.options,
+            progress: { trace.record($0) }
         )
 
-        #expect(counter.attempts == 4)
+        #expect(counter.runIDs.count == 4)
+        #expect(Set(counter.runIDs).count == 4)
+        #expect(trace.notices == [
+            StartupRetryNotice(
+                task: "unit-001", agent: "flaky-startup",
+                nextAttempt: 2, totalAttempts: 4, delaySeconds: 1
+            ),
+            StartupRetryNotice(
+                task: "unit-001", agent: "flaky-startup",
+                nextAttempt: 3, totalAttempts: 4, delaySeconds: 2
+            ),
+            StartupRetryNotice(
+                task: "unit-001", agent: "flaky-startup",
+                nextAttempt: 4, totalAttempts: 4, delaySeconds: 4
+            ),
+        ])
+        #expect(trace.delays == [.seconds(1), .seconds(2), .seconds(4)])
         #expect(report.agents.first?.passed == 1)
         #expect(report.agents.first?.errored == 0)
+    }
+
+    @Test("Abandons without a score after all startup attempts fail")
+    func abandonsAfterStartupRetriesExhausted() async throws {
+        let harness = try await RunnerHarness.make()
+        defer { harness.cleanUp() }
+        let counter = StartupFailureCounter(failures: 4)
+        let trace = StartupRetryTrace()
+
+        let coordinator = RunCoordinator(
+            runner: harness.makeRunner(),
+            sleepBeforeAgentStartupRetry: { delay in trace.recordDelay(delay) }
+        )
+        let report = await coordinator.runSuite(
+            suite: BenchmarkSuite(id: "unit", name: "Unit", tasks: ["unit-001"]),
+            tasks: [harness.task],
+            entries: [.init(adapter: FlakyStartupAdapter(counter: counter))],
+            runs: 1,
+            options: harness.options,
+            progress: { trace.record($0) }
+        )
+
+        #expect(counter.runIDs.count == 4)
+        #expect(Set(counter.runIDs).count == 4)
+        #expect(trace.notices.map(\.nextAttempt) == [2, 3, 4])
+        #expect(trace.delays == [.seconds(1), .seconds(2), .seconds(4)])
+        #expect(trace.abandonmentReasons.count == 1)
+        #expect(trace.abandonmentReasons.first?.contains("unit-001 after 4 attempts") == true)
+        #expect(trace.errors.count == 1)
+        #expect(report.agents.first?.attempted == 0)
+        #expect(report.agents.first?.errored == 1)
+        #expect(report.results.isEmpty)
     }
 
     @Test("Aggregates completion across repeated runs")

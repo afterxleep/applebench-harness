@@ -37,6 +37,14 @@ public struct RunCoordinator: Sendable {
 
     public enum SuiteProgress: Sendable {
         case taskStarted(task: String, agent: String, run: Int, totalRuns: Int)
+        case agentStartupRetry(
+            task: String,
+            agent: String,
+            nextAttempt: Int,
+            totalAttempts: Int,
+            delaySeconds: Int,
+            error: String
+        )
         case taskFinished(BenchmarkRunResult)
         case taskErrored(task: String, agent: String, error: String)
         /// The suite stopped early because the agent never reached its model.
@@ -64,9 +72,21 @@ public struct RunCoordinator: Sendable {
     }
 
     private let runner: BenchmarkRunner
+    private let sleepBeforeAgentStartupRetry: @Sendable (Duration) async -> Void
 
     public init(runner: BenchmarkRunner) {
         self.runner = runner
+        self.sleepBeforeAgentStartupRetry = { delay in
+            try? await Task.sleep(for: delay)
+        }
+    }
+
+    init(
+        runner: BenchmarkRunner,
+        sleepBeforeAgentStartupRetry: @escaping @Sendable (Duration) async -> Void
+    ) {
+        self.runner = runner
+        self.sleepBeforeAgentStartupRetry = sleepBeforeAgentStartupRetry
     }
 
     /// Runs every task in the suite for every entry, `runs` times each.
@@ -189,7 +209,8 @@ public struct RunCoordinator: Sendable {
 
                         var result: BenchmarkRunResult?
                         var errorMessage: String?
-                        var startupAttempt = 0
+                        var startupAttempt = 1
+                        let totalStartupAttempts = agentStartupRetries + 1
                         while result == nil {
                             do {
                                 result = try await runner.run(
@@ -200,8 +221,22 @@ public struct RunCoordinator: Sendable {
                                 errorMessage = nil
                             } catch BenchmarkFailure.agentNeverRan(let why) {
                                 errorMessage = "\(BenchmarkFailure.agentNeverRan(why))"
-                                if startupAttempt < agentStartupRetries {
-                                    startupAttempt += 1
+                                if startupAttempt < totalStartupAttempts {
+                                    let nextAttempt = startupAttempt + 1
+                                    let delaySeconds = Self.startupRetryDelaySeconds(
+                                        afterFailedAttempt: startupAttempt
+                                    )
+                                    progress(.agentStartupRetry(
+                                        task: job.task.id,
+                                        agent: adapterID,
+                                        nextAttempt: nextAttempt,
+                                        totalAttempts: totalStartupAttempts,
+                                        delaySeconds: delaySeconds,
+                                        error: why
+                                    ))
+                                    await sleepBeforeAgentStartupRetry(.seconds(delaySeconds))
+                                    guard !Task.isCancelled else { return }
+                                    startupAttempt = nextAttempt
                                     continue
                                 }
 
@@ -212,7 +247,7 @@ public struct RunCoordinator: Sendable {
                                     cursor.abandon()
                                     progress(.suiteAbandoned(
                                         reason: "the agent never reached its model on "
-                                            + "\(job.task.id) after \(startupAttempt + 1) attempts: \(why)"
+                                            + "\(job.task.id) after \(startupAttempt) attempts: \(why)"
                                     ))
                                 }
                                 break
@@ -248,6 +283,10 @@ public struct RunCoordinator: Sendable {
             totalCost: s.totalCost,
             results: s.results
         )
+    }
+
+    private static func startupRetryDelaySeconds(afterFailedAttempt attempt: Int) -> Int {
+        1 << min(max(attempt - 1, 0), 3)
     }
 
     public typealias AgentReport = SuiteReport.AgentReport

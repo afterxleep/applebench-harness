@@ -9,6 +9,11 @@ description: >-
   graded independently after the agent exits.
 ---
 
+{% assign current_suite = site.data.suite_revisions | where: "current", true | first %}
+{% assign scoring_tasks = current_suite.gold_tasks %}
+{% assign sample_tasks = current_suite.public_sample_tasks %}
+{% assign category_count = current_suite.category_tasks | size %}
+
 ## The question
 
 **Can an AI coding agent take an Apple-development task from request to
@@ -20,9 +25,10 @@ the project configuration actually resolve the way it claims to.
 
 ## The shape of the set
 
-134 scoring tasks across eight categories. Each one is a small, self-contained Xcode
-project with a single planted defect, and a prompt that states the **symptom**
-and never the cause or the file. The diagnosis is the task.
+{{ scoring_tasks }} scoring tasks across {{ category_count }} categories. Each one is a small,
+self-contained Xcode project with a planted defect. The prompt describes the
+**symptom**, but does not reveal the cause or the file. Finding the cause is
+part of the task.
 
 | Category | What it tests |
 |---|---|
@@ -39,9 +45,9 @@ Difficulty runs 1 to 10 and is **comparative within a category**, not an absolut
 scale across the set. A `visual` 5 and an `ops` 5 are not the same amount of
 work; they are each the middle of their own ladder.
 
-Language-level Swift and concurrency were deliberately removed. Other
-benchmarks cover them well and overlap buys nothing. What nobody else
-measures is whether an agent can drive the Apple toolchain.
+The suite now includes expert Swift concurrency problems when they can be
+checked with deterministic builds and tests. The main focus remains the full
+Apple-development workflow: diagnose, edit, build, test, launch, and verify.
 
 ## What a task looks like
 
@@ -139,9 +145,9 @@ result; it exists only to prove the other half of the contract.
 
 The set is partitioned:
 
-- **`gold`**: 134 scoring tasks. Prompts, fixtures and expected outputs stay
+- **`gold`**: {{ scoring_tasks }} scoring tasks. Prompts, fixtures and expected outputs stay
   unpublished. Published scores come from this suite only.
-- **`dev`**: a small leakable subset that ships with the open harness and is
+- **`dev`**: {{ sample_tasks }} sample tasks that ship with the open harness and are
   **never scored**.
 
 These defend against different threats. Keeping the answers off the internet
