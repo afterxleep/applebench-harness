@@ -1,12 +1,15 @@
 ---
 layout: default
 ---
-<div class="wrap wrap--narrow">
-  <div class="article-header">
-    <h1>{{ page.title }}</h1>
-    {%- if page.lede %}<p class="article-header__lede">{{ page.lede }}</p>{% endif -%}
-  </div>
-  <article class="prose">
+<div class="wrap">
+  <header class="article-header article-header--editorial">
+    <p class="section__index">{{ page.kicker | default: "AppleBench / Reference" }}</p>
+    <div class="article-header__grid">
+      <h1>{{ page.title }}</h1>
+      {%- if page.lede %}<p class="article-header__lede">{{ page.lede }}</p>{% endif -%}
+    </div>
+  </header>
+  <article class="prose prose--editorial">
     {{ content }}
   </article>
 </div>

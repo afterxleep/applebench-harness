@@ -1,6 +1,7 @@
 ---
 title: Methodology
 permalink: /methodology/
+kicker: AppleBench / Methodology
 lede: >-
   How a run is executed, what is recorded, and the specific ways a benchmark
   like this can lie to you.
@@ -10,6 +11,21 @@ description: >-
 ---
 
 {% assign current_suite = site.data.suite_revisions | where: "current", true | first %}
+
+<nav class="article-index" aria-label="On this page">
+  <p>On this page</p>
+  <ol>
+    <li><a href="#the-run">The run</a></li>
+    <li><a href="#the-separation-that-matters">Separation</a></li>
+    <li><a href="#isolation-levels">Isolation</a></li>
+    <li><a href="#what-is-recorded">Recorded evidence</a></li>
+    <li><a href="#scoring">Scoring</a></li>
+    <li><a href="#grading-against-the-device">Device grading</a></li>
+    <li><a href="#reading-a-published-number">Reading a result</a></li>
+    <li><a href="#suite-revisions">Suite revisions</a></li>
+    <li><a href="#known-limits">Known limits</a></li>
+  </ol>
+</nav>
 
 ## The run
 

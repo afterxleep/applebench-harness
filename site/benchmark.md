@@ -1,6 +1,7 @@
 ---
 title: The benchmark
 permalink: /benchmark/
+kicker: AppleBench / The benchmark
 lede: >-
   What AppleBench contains, how a task is built, and what a passing result
   actually proves.
@@ -13,6 +14,19 @@ description: >-
 {% assign scoring_tasks = current_suite.gold_tasks %}
 {% assign sample_tasks = current_suite.public_sample_tasks %}
 {% assign category_count = current_suite.category_tasks | size %}
+
+<nav class="article-index" aria-label="On this page">
+  <p>On this page</p>
+  <ol>
+    <li><a href="#the-question">The question</a></li>
+    <li><a href="#the-shape-of-the-set">Shape of the set</a></li>
+    <li><a href="#what-a-task-looks-like">A task, in full</a></li>
+    <li><a href="#the-graders">The graders</a></li>
+    <li><a href="#are-the-tasks-sound">Task calibration</a></li>
+    <li><a href="#public-harness-private-answers">Public and private</a></li>
+    <li><a href="#what-is-deliberately-absent">Deliberate limits</a></li>
+  </ol>
+</nav>
 
 ## The question
 

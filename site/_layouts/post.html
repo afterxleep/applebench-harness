@@ -1,18 +1,24 @@
 ---
 layout: default
 ---
-<div class="wrap wrap--narrow">
-  <div class="article-header">
-    <p class="entry__meta">
-      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
-      {%- for tag in page.tags %}<span>{{ tag }}</span>{% endfor -%}
-    </p>
-    <h1>{{ page.title }}</h1>
-    {%- if page.lede %}<p class="article-header__lede">{{ page.lede }}</p>{% endif -%}
-  </div>
-  <article class="prose">
+<div class="wrap">
+  <header class="article-header article-header--editorial article-header--post">
+    <p class="section__index">AppleBench / Field note</p>
+    <div class="article-header__grid">
+      <div>
+        <p class="entry__meta">
+          <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
+          {%- for tag in page.tags %}<span>{{ tag }}</span>{% endfor -%}
+        </p>
+        <h1>{{ page.title }}</h1>
+      </div>
+      {%- if page.lede %}<p class="article-header__lede">{{ page.lede }}</p>{% endif -%}
+    </div>
+  </header>
+  <article class="prose prose--editorial">
     {{ content }}
   </article>
-  <hr>
-  <p><a href="{{ '/blog/' | relative_url }}">← All posts</a></p>
+  <footer class="article-footer">
+    <a class="text-link" href="{{ '/blog/' | relative_url }}">← All field notes</a>
+  </footer>
 </div>
