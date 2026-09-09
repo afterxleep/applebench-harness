@@ -3,13 +3,13 @@
   "categories" : [
     {
       "category" : "build",
-      "completion_rate" : 0,
-      "passed" : 0,
+      "completion_rate" : 1,
+      "passed" : 1,
       "score" : {
         "available" : 10,
-        "fraction_of_available" : 0,
+        "fraction_of_available" : 1,
         "minimum_efficiency" : 0.25,
-        "points" : 0,
+        "points" : 10,
         "reference_token_budget" : 50000,
         "scored_runs" : 1,
         "solves_with_unreported_tokens" : 0,
@@ -20,16 +20,16 @@
     },
     {
       "category" : "frameworks",
-      "completion_rate" : 0.8333333333333334,
-      "passed" : 55,
+      "completion_rate" : 0.9090909090909091,
+      "passed" : 60,
       "score" : {
         "available" : 660,
-        "fraction_of_available" : 0.7223665078080911,
+        "fraction_of_available" : 0.809284317686407,
         "minimum_efficiency" : 0.25,
-        "points" : 476.7618951533401,
+        "points" : 534.1276496730286,
         "reference_token_budget" : 50000,
         "scored_runs" : 66,
-        "solves_with_unreported_tokens" : 3,
+        "solves_with_unreported_tokens" : 1,
         "specification" : "points-v2",
         "unscored_runs" : 0
       },
@@ -37,13 +37,13 @@
     },
     {
       "category" : "interaction",
-      "completion_rate" : 0.5185185185185185,
-      "passed" : 14,
+      "completion_rate" : 0.7037037037037037,
+      "passed" : 19,
       "score" : {
         "available" : 270,
-        "fraction_of_available" : 0.3826347804184947,
+        "fraction_of_available" : 0.534330283436439,
         "minimum_efficiency" : 0.25,
-        "points" : 103.31139071299357,
+        "points" : 144.2691765278385,
         "reference_token_budget" : 50000,
         "scored_runs" : 27,
         "solves_with_unreported_tokens" : 0,
@@ -54,13 +54,13 @@
     },
     {
       "category" : "ops",
-      "completion_rate" : 0.9642857142857143,
-      "passed" : 27,
+      "completion_rate" : 1,
+      "passed" : 28,
       "score" : {
         "available" : 280,
-        "fraction_of_available" : 0.7508902505750715,
+        "fraction_of_available" : 0.7866045362893572,
         "minimum_efficiency" : 0.25,
-        "points" : 210.24927016102004,
+        "points" : 220.24927016102004,
         "reference_token_budget" : 50000,
         "scored_runs" : 28,
         "solves_with_unreported_tokens" : 0,
@@ -88,16 +88,16 @@
     },
     {
       "category" : "runtime",
-      "completion_rate" : 0.8,
-      "passed" : 4,
+      "completion_rate" : 1,
+      "passed" : 5,
       "score" : {
         "available" : 50,
-        "fraction_of_available" : 0.5,
+        "fraction_of_available" : 0.7471354748467688,
         "minimum_efficiency" : 0.25,
-        "points" : 25,
+        "points" : 37.35677374233844,
         "reference_token_budget" : 50000,
         "scored_runs" : 5,
-        "solves_with_unreported_tokens" : 1,
+        "solves_with_unreported_tokens" : 0,
         "specification" : "points-v2",
         "unscored_runs" : 0
       },
@@ -122,49 +122,49 @@
     },
     {
       "category" : "visual",
-      "completion_rate" : 0.5,
-      "passed" : 4,
+      "completion_rate" : 0.7777777777777778,
+      "passed" : 7,
       "score" : {
-        "available" : 80,
-        "fraction_of_available" : 0.5,
+        "available" : 90,
+        "fraction_of_available" : 0.5851249623965417,
         "minimum_efficiency" : 0.25,
-        "points" : 40,
+        "points" : 52.661246615688746,
         "reference_token_budget" : 50000,
-        "scored_runs" : 8,
+        "scored_runs" : 9,
         "solves_with_unreported_tokens" : 0,
         "specification" : "points-v2",
         "unscored_runs" : 0
       },
-      "total" : 8
+      "total" : 9
     }
   ],
-  "completion_rate" : 0.7816901408450704,
+  "completion_rate" : 0.8881118881118881,
   "configurations" : [
     {
       "agent" : "opencode",
-      "completion_rate" : 0.7816901408450704,
-      "cost_per_solved_task_usd" : 0.01014104157657658,
+      "completion_rate" : 0.8881118881118881,
+      "cost_per_solved_task_usd" : 0.010582914173228345,
       "label" : "opencode · openrouter/z-ai/glm-5.3-flash",
-      "median_duration_seconds" : 298.4137153335,
+      "median_duration_seconds" : 292.998960875,
       "model" : "openrouter/z-ai/glm-5.3-flash",
-      "passed" : 111,
+      "passed" : 127,
       "score" : {
-        "available" : 1420,
-        "fraction_of_available" : 0.6510633922398906,
+        "available" : 1430,
+        "fraction_of_available" : 0.7467493550162275,
         "minimum_efficiency" : 0.25,
-        "points" : 924.5100169806448,
+        "points" : 1067.8515776732054,
         "reference_token_budget" : 50000,
-        "scored_runs" : 142,
-        "solves_with_unreported_tokens" : 4,
+        "scored_runs" : 143,
+        "solves_with_unreported_tokens" : 1,
         "specification" : "points-v2",
         "unscored_runs" : 0
       },
-      "total" : 142,
-      "total_cost_usd" : 1.1256556150000003,
-      "total_tokens" : 7400119
+      "total" : 143,
+      "total_cost_usd" : 1.3440301,
+      "total_tokens" : 8194968
     }
   ],
-  "passed" : 111,
+  "passed" : 127,
   "reasoning" : [
     {
       "at_maximum_effort" : false,
@@ -173,22 +173,22 @@
       "model" : "openrouter/z-ai/glm-5.3-flash",
       "price_retrieved" : "2026-09-03",
       "price_source" : "https://models.dev/api.json",
-      "runs" : 9
+      "runs" : 1
     },
     {
       "at_maximum_effort" : true,
-      "cache_read_tokens" : 27300096,
+      "cache_read_tokens" : 34292800,
       "cache_write_tokens" : 0,
       "effort" : "max",
-      "input_tokens" : 6479289,
-      "list_cost_usd" : 0.9709913649999999,
+      "input_tokens" : 6966308,
+      "list_cost_usd" : 1.1283443499999997,
       "maximum_effort" : "max",
       "model" : "openrouter/z-ai/glm-5.3-flash",
-      "output_tokens" : 302173,
+      "output_tokens" : 365917,
       "price_retrieved" : "2026-09-03",
       "price_source" : "https://models.dev/api.json",
-      "reported_cost_usd" : 1.1256556150000003,
-      "runs" : 133
+      "reported_cost_usd" : 1.3440301,
+      "runs" : 142
     }
   ],
   "runs" : [
@@ -196,7 +196,7 @@
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-
+          "effort" : "max"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash"
       },
@@ -209,21 +209,21 @@
       "difficulty" : 7,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "8bbacb46f01004b783df683c4ffd92bb7607ed78",
-        "deletions" : 2,
-        "files_changed" : 5,
-        "insertions" : 268
+        "base_commit" : "4775b5c028783391e46232b04645eee26183b4e4",
+        "deletions" : 3,
+        "files_changed" : 6,
+        "insertions" : 274
       },
       "graders" : [
         {
-          "duration_seconds" : 17.061783667,
+          "duration_seconds" : 6.717800375,
           "evidence" : [
             {
               "name" : "build.log",
@@ -235,11 +235,11 @@
             }
           ],
           "name" : "build",
-          "passed" : true,
-          "summary" : "xcodebuild build succeeded for scheme 'Activitykit001Fixture'"
+          "passed" : false,
+          "summary" : "xcodebuild build failed (exit 65) for scheme 'Activitykit001Fixture'"
         },
         {
-          "duration_seconds" : 2.374546167,
+          "duration_seconds" : 3.411570458,
           "evidence" : [
             {
               "name" : "xcodeproj-settings.log",
@@ -251,11 +251,11 @@
             }
           ],
           "name" : "xcodeproj",
-          "passed" : true,
-          "summary" : "1 project assertion(s) hold in the resolved configuration"
+          "passed" : false,
+          "summary" : "1 of 1 project assertion(s) failed: the scheme does not build, so the product's Info.plist and bundle cannot be verified"
         },
         {
-          "duration_seconds" : 58.17670425,
+          "duration_seconds" : 3.958139792,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -264,31 +264,39 @@
             {
               "name" : "xctest.xcresult",
               "path" : "logs/xctest.xcresult"
+            },
+            {
+              "name" : "xctest-retry.log",
+              "path" : "logs/xctest-retry.log"
+            },
+            {
+              "name" : "xctest-retry.xcresult",
+              "path" : "logs/xctest-retry.xcresult"
             }
           ],
           "name" : "xctest",
-          "passed" : true,
-          "summary" : "3 executed, 3 passed, 0 failed, 0 skipped"
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 952.4703640937805,
+        "agent_duration_seconds" : 962.6488950252533,
         "agent_events" : 78,
-        "agent_output_bytes" : 310201,
-        "agent_output_chunks" : 73,
+        "agent_output_bytes" : 261005,
+        "agent_output_chunks" : 78,
         "build_invocations" : 3,
-        "commands_executed" : 6,
-        "grading_duration_seconds" : 78.36554205417633,
-        "test_invocations" : 1,
-        "tool_calls" : 36,
-        "total_events" : 189
+        "commands_executed" : 8,
+        "grading_duration_seconds" : 14.396443009376526,
+        "test_invocations" : 2,
+        "tool_calls" : 27,
+        "total_events" : 201
       },
       "result" : {
         "agent_termination" : "timeout",
-        "duration_seconds" : 1031.63179425,
-        "passed" : true
+        "duration_seconds" : 977.595415541,
+        "passed" : false
       },
-      "run_id" : "2026-09-07T200646-activitykit-001-opencode",
+      "run_id" : "2026-09-09T112943-activitykit-001-opencode",
       "schema_version" : 1,
       "tags" : [
         "activitykit",
@@ -297,7 +305,12 @@
       ],
       "task" : "activitykit-001",
       "usage" : {
-
+        "cache_read_tokens" : 535552,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.02065983,
+        "input_tokens" : 55974,
+        "output_tokens" : 7805,
+        "total_tokens" : 89688
       }
     },
     {
@@ -943,7 +956,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -954,21 +967,21 @@
       "difficulty" : 5,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "e110e988023f6b0228c1f194ddadc39fd3e4511a",
+        "base_commit" : "0b90502993687349c6d5fd6ebfafe435852c91cc",
         "deletions" : 2,
-        "files_changed" : 3,
-        "insertions" : 3
+        "files_changed" : 1,
+        "insertions" : 1
       },
       "graders" : [
         {
-          "duration_seconds" : 17.168660334,
+          "duration_seconds" : 7.437830375,
           "evidence" : [
             {
               "name" : "build.log",
@@ -982,35 +995,26 @@
           "name" : "build",
           "passed" : true,
           "summary" : "xcodebuild build succeeded for scheme 'LinkErrorFixture'"
-        },
-        {
-          "duration_seconds" : 0.001070833,
-          "evidence" : [
-
-          ],
-          "name" : "file",
-          "passed" : false,
-          "summary" : "Packages/Integrity/Sources/CIntegrity/include/cintegrity.h: expected diff to exclude this path"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 349.6164940595627,
-        "agent_events" : 88,
-        "agent_output_bytes" : 160264,
-        "agent_output_chunks" : 88,
+        "agent_duration_seconds" : 127.75044596195221,
+        "agent_events" : 31,
+        "agent_output_bytes" : 101488,
+        "agent_output_chunks" : 31,
         "build_invocations" : 1,
         "commands_executed" : 2,
-        "grading_duration_seconds" : 17.78416395187378,
+        "grading_duration_seconds" : 7.744361996650696,
         "test_invocations" : 0,
-        "tool_calls" : 29,
-        "total_events" : 199
+        "tool_calls" : 12,
+        "total_events" : 81
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 369.110981292,
-        "passed" : false
+        "duration_seconds" : 136.010973292,
+        "passed" : true
       },
-      "run_id" : "2026-09-07T193304-build-005-opencode",
+      "run_id" : "2026-09-09T090026-build-005-opencode",
       "schema_version" : 1,
       "tags" : [
         "linker",
@@ -1019,12 +1023,12 @@
       ],
       "task" : "build-005",
       "usage" : {
-        "cache_read_tokens" : 406272,
+        "cache_read_tokens" : 86208,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.01065438,
-        "input_tokens" : 28074,
-        "output_tokens" : 4846,
-        "total_tokens" : 37893
+        "estimated_cost_usd" : 0.0032049949999999995,
+        "input_tokens" : 20185,
+        "output_tokens" : 992,
+        "total_tokens" : 21777
       }
     },
     {
@@ -1251,7 +1255,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -1262,21 +1266,21 @@
       "difficulty" : 7,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "ae739ae9b84812899704d0dfc721fe6836eadeef",
+        "base_commit" : "fab1decc4e55fc4e356e409fa953da5de9fa6e56",
         "deletions" : 1,
         "files_changed" : 1,
-        "insertions" : 6
+        "insertions" : 3
       },
       "graders" : [
         {
-          "duration_seconds" : 6.13009725,
+          "duration_seconds" : 5.432097458,
           "evidence" : [
             {
               "name" : "build.log",
@@ -1292,7 +1296,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'Concurrency003Fixture'"
         },
         {
-          "duration_seconds" : 16.794147292,
+          "duration_seconds" : 9.08554325,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -1304,28 +1308,28 @@
             }
           ],
           "name" : "xctest",
-          "passed" : false,
-          "summary" : "3 executed, 2 passed, 1 failed, 0 skipped. Failing: TelemetryFeedTests/testABacklogDoesNotGrowWithoutLimit()"
+          "passed" : true,
+          "summary" : "3 executed, 3 passed, 0 failed, 0 skipped"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 178.60032892227173,
-        "agent_events" : 36,
-        "agent_output_bytes" : 75897,
-        "agent_output_chunks" : 36,
+        "agent_duration_seconds" : 205.46773302555084,
+        "agent_events" : 32,
+        "agent_output_bytes" : 80191,
+        "agent_output_chunks" : 32,
         "build_invocations" : 1,
         "commands_executed" : 4,
-        "grading_duration_seconds" : 23.207102060317993,
+        "grading_duration_seconds" : 14.807183027267456,
         "test_invocations" : 1,
-        "tool_calls" : 13,
-        "total_events" : 99
+        "tool_calls" : 11,
+        "total_events" : 91
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 202.509812333,
-        "passed" : false
+        "duration_seconds" : 220.858754667,
+        "passed" : true
       },
-      "run_id" : "2026-09-07T213558-concurrency-003-opencode",
+      "run_id" : "2026-09-09T100643-concurrency-003-opencode",
       "schema_version" : 1,
       "tags" : [
         "asyncstream",
@@ -1334,12 +1338,12 @@
       ],
       "task" : "concurrency-003",
       "usage" : {
-        "cache_read_tokens" : 93568,
+        "cache_read_tokens" : 93248,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.004436519999999999,
-        "input_tokens" : 17580,
-        "output_tokens" : 1794,
-        "total_tokens" : 24438
+        "estimated_cost_usd" : 0.0039883950000000005,
+        "input_tokens" : 17859,
+        "output_tokens" : 1829,
+        "total_tokens" : 22860
       }
     },
     {
@@ -1356,7 +1360,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -1367,21 +1371,21 @@
       "difficulty" : 6,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "b59dbb5445d5817793d814fc7a2c2227d6e8ae99",
-        "deletions" : 7,
-        "files_changed" : 1,
-        "insertions" : 5
+        "base_commit" : "e9256e6f0e92194efde78834d4f7f25287203b88",
+        "deletions" : 9,
+        "files_changed" : 2,
+        "insertions" : 137
       },
       "graders" : [
         {
-          "duration_seconds" : 5.764770666,
+          "duration_seconds" : 5.647529917,
           "evidence" : [
             {
               "name" : "build.log",
@@ -1397,7 +1401,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'Concurrency004Fixture'"
         },
         {
-          "duration_seconds" : 2.427419084,
+          "duration_seconds" : 9.678771208,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -1409,28 +1413,28 @@
             }
           ],
           "name" : "xctest",
-          "passed" : false,
-          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+          "passed" : true,
+          "summary" : "2 executed, 2 passed, 0 failed, 0 skipped"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 194.93548500537872,
-        "agent_events" : 78,
-        "agent_output_bytes" : 130889,
-        "agent_output_chunks" : 77,
+        "agent_duration_seconds" : 623.350005030632,
+        "agent_events" : 61,
+        "agent_output_bytes" : 164497,
+        "agent_output_chunks" : 60,
         "build_invocations" : 1,
         "commands_executed" : 4,
-        "grading_duration_seconds" : 8.56465995311737,
+        "grading_duration_seconds" : 15.626381993293762,
         "test_invocations" : 1,
-        "tool_calls" : 25,
-        "total_events" : 182
+        "tool_calls" : 20,
+        "total_events" : 149
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 204.023659083,
-        "passed" : false
+        "duration_seconds" : 639.59049375,
+        "passed" : true
       },
-      "run_id" : "2026-09-07T214110-concurrency-004-opencode",
+      "run_id" : "2026-09-09T101024-concurrency-004-opencode",
       "schema_version" : 1,
       "tags" : [
         "taskgroup",
@@ -1439,12 +1443,12 @@
       ],
       "task" : "concurrency-004",
       "usage" : {
-        "cache_read_tokens" : 328576,
+        "cache_read_tokens" : 340032,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.00828749,
-        "input_tokens" : 22788,
-        "output_tokens" : 3997,
-        "total_tokens" : 29387
+        "estimated_cost_usd" : 0.011647129999999999,
+        "input_tokens" : 38252,
+        "output_tokens" : 3701,
+        "total_tokens" : 52963
       }
     },
     {
@@ -2417,7 +2421,7 @@
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-
+          "effort" : "max"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash"
       },
@@ -2430,21 +2434,21 @@
       "difficulty" : 8,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "74d64ccbaa24cb9511530e3be929f9542674fba7",
-        "deletions" : 0,
-        "files_changed" : 0,
-        "insertions" : 0
+        "base_commit" : "5c7c3d287530b09d73710ddc170b69df1df432d0",
+        "deletions" : 4,
+        "files_changed" : 2,
+        "insertions" : 62
       },
       "graders" : [
         {
-          "duration_seconds" : 4.898815541,
+          "duration_seconds" : 5.528013917,
           "evidence" : [
             {
               "name" : "build.log",
@@ -2456,11 +2460,11 @@
             }
           ],
           "name" : "build",
-          "passed" : false,
-          "summary" : "xcodebuild build failed (exit 65) for scheme 'Concurrency014Fixture'"
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'Concurrency014Fixture'"
         },
         {
-          "duration_seconds" : 2.125848167,
+          "duration_seconds" : 3.475608792,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -2469,6 +2473,14 @@
             {
               "name" : "xctest.xcresult",
               "path" : "logs/xctest.xcresult"
+            },
+            {
+              "name" : "xctest-retry.log",
+              "path" : "logs/xctest-retry.log"
+            },
+            {
+              "name" : "xctest-retry.xcresult",
+              "path" : "logs/xctest-retry.xcresult"
             }
           ],
           "name" : "xctest",
@@ -2477,23 +2489,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 958.0657440423965,
-        "agent_events" : 100,
-        "agent_output_bytes" : 242469,
-        "agent_output_chunks" : 98,
+        "agent_duration_seconds" : 963.1550840139389,
+        "agent_events" : 49,
+        "agent_output_bytes" : 255954,
+        "agent_output_chunks" : 49,
         "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 7.310434937477112,
-        "test_invocations" : 1,
-        "tool_calls" : 34,
-        "total_events" : 224
+        "commands_executed" : 6,
+        "grading_duration_seconds" : 9.305089950561523,
+        "test_invocations" : 2,
+        "tool_calls" : 16,
+        "total_events" : 132
       },
       "result" : {
         "agent_termination" : "timeout",
-        "duration_seconds" : 966.039157334,
+        "duration_seconds" : 972.981868625,
         "passed" : false
       },
-      "run_id" : "2026-09-08T174357-concurrency-014-opencode",
+      "run_id" : "2026-09-09T114602-concurrency-014-opencode",
       "schema_version" : 1,
       "tags" : [
         "swift6.2",
@@ -2503,7 +2515,12 @@
       ],
       "task" : "concurrency-014",
       "usage" : {
-
+        "cache_read_tokens" : 315008,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.01765672,
+        "input_tokens" : 58578,
+        "output_tokens" : 2626,
+        "total_tokens" : 92731
       }
     },
     {
@@ -2825,9 +2842,17 @@
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "effort" : "max",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
         },
-        "model" : "openrouter/z-ai/glm-5.3-flash"
+        "model" : "openrouter/z-ai/glm-5.3-flash",
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -2838,21 +2863,21 @@
       "difficulty" : 7,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "36d1c692b38ee47d2e37c30d844acb9034ddf0ec",
+        "base_commit" : "7a12401f1900341fa2f142e1fd134f45c0738d37",
         "deletions" : 0,
         "files_changed" : 2,
         "insertions" : 2
       },
       "graders" : [
         {
-          "duration_seconds" : 3.7573556249999998,
+          "duration_seconds" : 5.4084375,
           "evidence" : [
             {
               "name" : "build.log",
@@ -2864,11 +2889,11 @@
             }
           ],
           "name" : "build",
-          "passed" : false,
-          "summary" : "xcodebuild build failed (exit 65) for scheme 'Coredata004Fixture'"
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'Coredata004Fixture'"
         },
         {
-          "duration_seconds" : 1.860856375,
+          "duration_seconds" : 9.988836417,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -2880,28 +2905,28 @@
             }
           ],
           "name" : "xctest",
-          "passed" : false,
-          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+          "passed" : true,
+          "summary" : "2 executed, 2 passed, 0 failed, 0 skipped"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 953.6972349882126,
-        "agent_events" : 99,
-        "agent_output_bytes" : 255707,
-        "agent_output_chunks" : 99,
+        "agent_duration_seconds" : 763.4123930931091,
+        "agent_events" : 124,
+        "agent_output_bytes" : 275947,
+        "agent_output_chunks" : 124,
         "build_invocations" : 1,
         "commands_executed" : 4,
-        "grading_duration_seconds" : 5.899640917778015,
+        "grading_duration_seconds" : 15.686236023902893,
         "test_invocations" : 1,
-        "tool_calls" : 33,
-        "total_events" : 226
+        "tool_calls" : 40,
+        "total_events" : 276
       },
       "result" : {
-        "agent_termination" : "timeout",
-        "duration_seconds" : 960.08043725,
-        "passed" : false
+        "agent_termination" : "completed",
+        "duration_seconds" : 779.587134625,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T072128-coredata-004-opencode",
+      "run_id" : "2026-09-09T120215-coredata-004-opencode",
       "schema_version" : 1,
       "tags" : [
         "coredata",
@@ -2910,7 +2935,12 @@
       ],
       "task" : "coredata-004",
       "usage" : {
-
+        "cache_read_tokens" : 801472,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.021328854999999997,
+        "input_tokens" : 45577,
+        "output_tokens" : 12016,
+        "total_tokens" : 69131
       }
     },
     {
@@ -3442,7 +3472,7 @@
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-
+          "effort" : "max"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash"
       },
@@ -3455,21 +3485,21 @@
       "difficulty" : 6,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "c128d97b1dd72c7e0b243e1b02ec221159600e91",
-        "deletions" : 2,
+        "base_commit" : "6c3cc92ad717b7666529154608659ef01b9efdce",
+        "deletions" : 1,
         "files_changed" : 1,
-        "insertions" : 177
+        "insertions" : 66
       },
       "graders" : [
         {
-          "duration_seconds" : 8.910639792,
+          "duration_seconds" : 5.86354225,
           "evidence" : [
             {
               "name" : "build.log",
@@ -3485,7 +3515,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'Coredata010Fixture'"
         },
         {
-          "duration_seconds" : 25.249231875,
+          "duration_seconds" : 10.933206875,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -3502,23 +3532,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 963.1944350004196,
-        "agent_events" : 41,
-        "agent_output_bytes" : 234993,
-        "agent_output_chunks" : 41,
+        "agent_duration_seconds" : 963.2076650857925,
+        "agent_events" : 74,
+        "agent_output_bytes" : 287938,
+        "agent_output_chunks" : 75,
         "build_invocations" : 1,
         "commands_executed" : 4,
-        "grading_duration_seconds" : 34.44650399684906,
+        "grading_duration_seconds" : 17.098355054855347,
         "test_invocations" : 1,
-        "tool_calls" : 15,
-        "total_events" : 109
+        "tool_calls" : 25,
+        "total_events" : 176
       },
       "result" : {
         "agent_termination" : "timeout",
-        "duration_seconds" : 998.74958675,
+        "duration_seconds" : 980.930973333,
         "passed" : true
       },
-      "run_id" : "2026-09-08T080454-coredata-010-opencode",
+      "run_id" : "2026-09-09T121516-coredata-010-opencode",
       "schema_version" : 1,
       "tags" : [
         "coredata",
@@ -3527,7 +3557,12 @@
       ],
       "task" : "coredata-010",
       "usage" : {
-
+        "cache_read_tokens" : 666176,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.022637115,
+        "input_tokens" : 53223,
+        "output_tokens" : 6283,
+        "total_tokens" : 87834
       }
     },
     {
@@ -3544,7 +3579,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -3555,21 +3590,21 @@
       "difficulty" : 7,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "51a0f9075e848aa88fcee8529eca6b4604abcc26",
+        "base_commit" : "f08c18f76f9330b83f72ab4faaef5368c6b0dc5b",
         "deletions" : 2,
         "files_changed" : 1,
         "insertions" : 4
       },
       "graders" : [
         {
-          "duration_seconds" : 62.627967834,
+          "duration_seconds" : 22.513850708,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -3581,15 +3616,15 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : false,
-          "summary" : "4 of 4 UI assertion(s) failed in default: no element on screen shows \"Receipts and invoices\"; no element \"receipts-name\" on screen; no element \"receipts-badge\" on screen; no element \"receipts-name\" on screen"
+          "passed" : true,
+          "summary" : "4 UI assertion(s) hold in default"
         },
         {
-          "duration_seconds" : 13.052918125,
+          "duration_seconds" : 6.397897125,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -3601,7 +3636,7 @@
           "summary" : "5 UI assertion(s) hold in content-size=accessibility-extra-extra-extra-large"
         },
         {
-          "duration_seconds" : 0.001047833,
+          "duration_seconds" : 0.000328792,
           "evidence" : [
 
           ],
@@ -3611,23 +3646,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 275.5181930065155,
-        "agent_events" : 50,
-        "agent_output_bytes" : 498970,
-        "agent_output_chunks" : 56,
+        "agent_duration_seconds" : 345.0822650194168,
+        "agent_events" : 65,
+        "agent_output_bytes" : 2981565,
+        "agent_output_chunks" : 108,
         "build_invocations" : 2,
-        "commands_executed" : 7,
-        "grading_duration_seconds" : 127.46749091148376,
+        "commands_executed" : 9,
+        "grading_duration_seconds" : 55.120015025138855,
         "test_invocations" : 0,
-        "tool_calls" : 16,
-        "total_events" : 142
+        "tool_calls" : 21,
+        "total_events" : 213
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 403.456257042,
-        "passed" : false
+        "duration_seconds" : 400.688713833,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T082136-g2-a11y-001-opencode",
+      "run_id" : "2026-09-09T102105-g2-a11y-001-opencode",
       "schema_version" : 1,
       "tags" : [
         "dynamic-type",
@@ -3638,12 +3673,12 @@
       ],
       "task" : "g2-a11y-001",
       "usage" : {
-        "cache_read_tokens" : 81792,
+        "cache_read_tokens" : 83712,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.011769004999999999,
-        "input_tokens" : 126625,
-        "output_tokens" : 1528,
-        "total_tokens" : 130806
+        "estimated_cost_usd" : 0.013715455000000001,
+        "input_tokens" : 152177,
+        "output_tokens" : 2297,
+        "total_tokens" : 156363
       }
     },
     {
@@ -3660,7 +3695,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -3671,21 +3706,21 @@
       "difficulty" : 7,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "8df6b7b4b3d914db6603e1d9862aaf1ab7655184",
-        "deletions" : 10,
+        "base_commit" : "a0da4934787cfa0b087716ecc3631ebe003ef2f1",
+        "deletions" : 4,
         "files_changed" : 1,
-        "insertions" : 36
+        "insertions" : 76
       },
       "graders" : [
         {
-          "duration_seconds" : 64.736745791,
+          "duration_seconds" : 18.347653042,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -3697,15 +3732,15 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : false,
-          "summary" : "4 of 4 UI assertion(s) failed in default: no element on screen shows \"Background refresh\"; no element on screen shows \"Download quality\"; no element on screen shows \"Wi-Fi only\"; no element \"refresh-name\" on screen"
+          "passed" : true,
+          "summary" : "4 UI assertion(s) hold in default"
         },
         {
-          "duration_seconds" : 27.256235708,
+          "duration_seconds" : 5.471170958,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -3713,11 +3748,11 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : true,
-          "summary" : "7 UI assertion(s) hold in content-size=accessibility-extra-extra-extra-large"
+          "passed" : false,
+          "summary" : "2 of 7 UI assertion(s) failed in content-size=accessibility-extra-extra-extra-large: \"refresh-name\" is 129pt wide, less than 200pt; \"storage-name\" at (32, 824) 114x187 is outside the window (0, 0) 402x874"
         },
         {
-          "duration_seconds" : 0.001216208,
+          "duration_seconds" : 0.000428125,
           "evidence" : [
 
           ],
@@ -3727,23 +3762,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 611.0531649589539,
-        "agent_events" : 72,
-        "agent_output_bytes" : 1563050,
-        "agent_output_chunks" : 89,
+        "agent_duration_seconds" : 1122.9446629285812,
+        "agent_events" : 75,
+        "agent_output_bytes" : 1311179,
+        "agent_output_chunks" : 90,
         "build_invocations" : 2,
-        "commands_executed" : 7,
-        "grading_duration_seconds" : 136.74452197551727,
+        "commands_executed" : 9,
+        "grading_duration_seconds" : 42.76600098609924,
         "test_invocations" : 0,
-        "tool_calls" : 22,
-        "total_events" : 197
+        "tool_calls" : 24,
+        "total_events" : 205
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 748.2564055,
+        "duration_seconds" : 1166.301965125,
         "passed" : false
       },
-      "run_id" : "2026-09-08T082828-g2-a11y-002-opencode",
+      "run_id" : "2026-09-09T102750-g2-a11y-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "dynamic-type",
@@ -3754,12 +3789,12 @@
       ],
       "task" : "g2-a11y-002",
       "usage" : {
-        "cache_read_tokens" : 356480,
+        "cache_read_tokens" : 578304,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.020191175,
-        "input_tokens" : 149263,
-        "output_tokens" : 3317,
-        "total_tokens" : 163860
+        "estimated_cost_usd" : 0.02708421,
+        "input_tokens" : 135392,
+        "output_tokens" : 4177,
+        "total_tokens" : 168413
       }
     },
     {
@@ -3776,7 +3811,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -3787,21 +3822,21 @@
       "difficulty" : 8,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "05dfba2c0190d6c31a221c2bb9d63a6b37cb3639",
+        "base_commit" : "58dc1b5fba4fdc8dc886ff1a3d08a4ebe6804e9e",
         "deletions" : 1,
         "files_changed" : 1,
         "insertions" : 1
       },
       "graders" : [
         {
-          "duration_seconds" : 81.8467795,
+          "duration_seconds" : 29.618332166,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -3813,11 +3848,11 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : false,
-          "summary" : "The flow could not be driven in default: step 0 (tap) failed: element not found (after scroll): export-button"
+          "passed" : true,
+          "summary" : "2 UI assertion(s) hold in default"
         },
         {
-          "duration_seconds" : 0.00387275,
+          "duration_seconds" : 0.000267583,
           "evidence" : [
 
           ],
@@ -3827,23 +3862,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 111.00381696224213,
-        "agent_events" : 35,
-        "agent_output_bytes" : 63367,
-        "agent_output_chunks" : 35,
+        "agent_duration_seconds" : 181.51614892482758,
+        "agent_events" : 36,
+        "agent_output_bytes" : 66776,
+        "agent_output_chunks" : 36,
         "build_invocations" : 1,
-        "commands_executed" : 3,
-        "grading_duration_seconds" : 132.06823599338531,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 55.79267489910126,
         "test_invocations" : 0,
-        "tool_calls" : 11,
-        "total_events" : 94
+        "tool_calls" : 12,
+        "total_events" : 98
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 243.657447625,
-        "passed" : false
+        "duration_seconds" : 237.81289375,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T084103-g2-flow-002-opencode",
+      "run_id" : "2026-09-09T090243-g2-flow-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "text-handling",
@@ -3853,12 +3888,12 @@
       ],
       "task" : "g2-flow-002",
       "usage" : {
-        "cache_read_tokens" : 85760,
+        "cache_read_tokens" : 83968,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.0028094249999999995,
-        "input_tokens" : 12327,
-        "output_tokens" : 822,
-        "total_tokens" : 14721
+        "estimated_cost_usd" : 0.0034872700000000006,
+        "input_tokens" : 14790,
+        "output_tokens" : 1731,
+        "total_tokens" : 19264
       }
     },
     {
@@ -3875,7 +3910,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -3886,21 +3921,21 @@
       "difficulty" : 7,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "454c2043e2161fb0aa46fcd50370fa5e934ef319",
-        "deletions" : 2,
+        "base_commit" : "2082ae5d327dc8f7ddb75a87eea8eabff5ce5003",
+        "deletions" : 1,
         "files_changed" : 1,
-        "insertions" : 4
+        "insertions" : 1
       },
       "graders" : [
         {
-          "duration_seconds" : 62.205282416,
+          "duration_seconds" : 22.363869,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -3912,15 +3947,15 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : false,
-          "summary" : "2 of 3 UI assertion(s) failed in default: no element on screen shows \"Entry 1\"; no element on screen shows \"Entry 2\""
+          "passed" : true,
+          "summary" : "3 UI assertion(s) hold in default"
         },
         {
-          "duration_seconds" : 44.026378583,
+          "duration_seconds" : 17.107806042,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -3932,11 +3967,11 @@
           "summary" : "1 UI assertion(s) hold in default"
         },
         {
-          "duration_seconds" : 15.203218375,
+          "duration_seconds" : 6.604658334,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-3.log",
+              "path" : "logs/uiflow-build-3.log"
             },
             {
               "name" : "uiflow-tree-3.json",
@@ -3949,23 +3984,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 153.13886904716492,
-        "agent_events" : 39,
-        "agent_output_bytes" : 53893,
-        "agent_output_chunks" : 39,
+        "agent_duration_seconds" : 175.5882509946823,
+        "agent_events" : 28,
+        "agent_output_bytes" : 63469,
+        "agent_output_chunks" : 28,
         "build_invocations" : 3,
-        "commands_executed" : 7,
-        "grading_duration_seconds" : 176.56368207931519,
+        "commands_executed" : 10,
+        "grading_duration_seconds" : 70.37309896945953,
         "test_invocations" : 0,
-        "tool_calls" : 12,
-        "total_events" : 116
+        "tool_calls" : 8,
+        "total_events" : 100
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 330.160135667,
-        "passed" : false
+        "duration_seconds" : 246.537982209,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T084514-g2-flow-003-opencode",
+      "run_id" : "2026-09-09T090644-g2-flow-003-opencode",
       "schema_version" : 1,
       "tags" : [
         "paging",
@@ -3975,12 +4010,12 @@
       ],
       "task" : "g2-flow-003",
       "usage" : {
-        "cache_read_tokens" : 91776,
+        "cache_read_tokens" : 59584,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.0035609900000000004,
-        "input_tokens" : 17268,
-        "output_tokens" : 1588,
-        "total_tokens" : 20825
+        "estimated_cost_usd" : 0.002527885,
+        "input_tokens" : 13775,
+        "output_tokens" : 1452,
+        "total_tokens" : 16179
       }
     },
     {
@@ -3997,7 +4032,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -4008,21 +4043,21 @@
       "difficulty" : 9,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "4f6eb450d877ab3aa645b59c89fa7fe34fe54b44",
+        "base_commit" : "a8834988c2db594a2015d961b14c9c7d82bd3793",
         "deletions" : 8,
         "files_changed" : 2,
-        "insertions" : 27
+        "insertions" : 31
       },
       "graders" : [
         {
-          "duration_seconds" : 67.727959875,
+          "duration_seconds" : 28.47856475,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -4034,15 +4069,15 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : false,
-          "summary" : "The flow could not be driven in default: step 0 (tap) failed: element not found (after scroll): note-field"
+          "passed" : true,
+          "summary" : "1 UI assertion(s) hold in default"
         },
         {
-          "duration_seconds" : 32.980207375,
+          "duration_seconds" : 24.981394167,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -4055,23 +4090,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 194.3525960445404,
-        "agent_events" : 21,
-        "agent_output_bytes" : 46540,
-        "agent_output_chunks" : 21,
+        "agent_duration_seconds" : 204.88950788974762,
+        "agent_events" : 31,
+        "agent_output_bytes" : 54992,
+        "agent_output_chunks" : 31,
         "build_invocations" : 2,
-        "commands_executed" : 8,
-        "grading_duration_seconds" : 155.9189579486847,
+        "commands_executed" : 14,
+        "grading_duration_seconds" : 74.38480997085571,
         "test_invocations" : 0,
-        "tool_calls" : 8,
-        "total_events" : 79
+        "tool_calls" : 10,
+        "total_events" : 111
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 350.828303417,
-        "passed" : false
+        "duration_seconds" : 279.873728125,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T085049-g2-lifecycle-002-opencode",
+      "run_id" : "2026-09-09T141937-g2-lifecycle-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "memory",
@@ -4081,12 +4116,12 @@
       ],
       "task" : "g2-lifecycle-002",
       "usage" : {
-        "cache_read_tokens" : 24128,
+        "cache_read_tokens" : 71680,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.004283445,
-        "input_tokens" : 36847,
-        "output_tokens" : 605,
-        "total_tokens" : 41479
+        "estimated_cost_usd" : 0.0034712,
+        "input_tokens" : 13390,
+        "output_tokens" : 1438,
+        "total_tokens" : 18957
       }
     },
     {
@@ -4441,7 +4476,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -4452,21 +4487,21 @@
       "difficulty" : 9,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "4784b8a00518783a7f5a323806871395caeb71cd",
-        "deletions" : 5,
+        "base_commit" : "ee16bc5ed7e8abb9ce803e49d66ab7d7ecf1a941",
+        "deletions" : 8,
         "files_changed" : 1,
-        "insertions" : 23
+        "insertions" : 21
       },
       "graders" : [
         {
-          "duration_seconds" : 119.208291375,
+          "duration_seconds" : 46.353577042,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -4478,15 +4513,15 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : false,
-          "summary" : "2 of 2 UI assertion(s) failed in language=en locale=en_US: no element on screen shows \"3/4/26\"; no element on screen shows \"11/9/26\""
+          "passed" : true,
+          "summary" : "2 UI assertion(s) hold in language=en locale=en_US"
         },
         {
-          "duration_seconds" : 59.155549625,
+          "duration_seconds" : 30.77620225,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -4494,11 +4529,11 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : false,
-          "summary" : "2 of 3 UI assertion(s) failed in language=de locale=de_DE: no element on screen shows \"04.03.26\"; no element on screen shows \"09.11.26\""
+          "passed" : true,
+          "summary" : "2 UI assertion(s) hold in language=de locale=de_DE"
         },
         {
-          "duration_seconds" : 0.003329291,
+          "duration_seconds" : 0.000647291,
           "evidence" : [
 
           ],
@@ -4508,23 +4543,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 223.81079196929932,
-        "agent_events" : 37,
-        "agent_output_bytes" : 59581,
-        "agent_output_chunks" : 36,
+        "agent_duration_seconds" : 233.9731549024582,
+        "agent_events" : 39,
+        "agent_output_bytes" : 76328,
+        "agent_output_chunks" : 39,
         "build_invocations" : 2,
-        "commands_executed" : 16,
-        "grading_duration_seconds" : 221.2647429704666,
+        "commands_executed" : 15,
+        "grading_duration_seconds" : 99.11745202541351,
         "test_invocations" : 0,
-        "tool_calls" : 12,
-        "total_events" : 127
+        "tool_calls" : 14,
+        "total_events" : 130
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 446.379412542,
-        "passed" : false
+        "duration_seconds" : 333.653453291,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T093407-g2-locale-004-opencode",
+      "run_id" : "2026-09-09T142421-g2-locale-004-opencode",
       "schema_version" : 1,
       "tags" : [
         "locale",
@@ -4534,12 +4569,12 @@
       ],
       "task" : "g2-locale-004",
       "usage" : {
-        "cache_read_tokens" : 85248,
+        "cache_read_tokens" : 103680,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.004731445000000001,
-        "input_tokens" : 27923,
-        "output_tokens" : 2534,
-        "total_tokens" : 33357
+        "estimated_cost_usd" : 0.005131324999999999,
+        "input_tokens" : 23965,
+        "output_tokens" : 2629,
+        "total_tokens" : 31080
       }
     },
     {
@@ -4556,7 +4591,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -4567,21 +4602,21 @@
       "difficulty" : 9,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "432b6fc6f9055b944a7e3bf3f76b9fcad929b891",
-        "deletions" : 4,
+        "base_commit" : "c5327993fc85309598b06b2dcafc7d23fc26fc0c",
+        "deletions" : 5,
         "files_changed" : 1,
-        "insertions" : 7
+        "insertions" : 13
       },
       "graders" : [
         {
-          "duration_seconds" : 170.741572333,
+          "duration_seconds" : 18.847374667,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -4594,14 +4629,14 @@
           ],
           "name" : "uiflow",
           "passed" : false,
-          "summary" : "The flow could not be driven in default: step 0 (tap) failed: element not found (after scroll): cloudline-up"
+          "summary" : "1 of 1 UI assertion(s) failed in default: \"Blackwater\" comes before \"Cloudline\" on screen; expected \"Ashgrove\", \"Cloudline\", \"Blackwater\", \"Driftwood\""
         },
         {
-          "duration_seconds" : 27.401548208,
+          "duration_seconds" : 6.130161875,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -4613,11 +4648,11 @@
           "summary" : "1 UI assertion(s) hold in default"
         },
         {
-          "duration_seconds" : 11.802561208,
+          "duration_seconds" : 6.544372084,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-3.log",
+              "path" : "logs/uiflow-build-3.log"
             },
             {
               "name" : "uiflow-tree-3.json",
@@ -4629,7 +4664,7 @@
           "summary" : "1 UI assertion(s) hold in default"
         },
         {
-          "duration_seconds" : 0.031661959,
+          "duration_seconds" : 0.000387625,
           "evidence" : [
 
           ],
@@ -4639,23 +4674,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 197.08072590827942,
+        "agent_duration_seconds" : 214.69854593276978,
         "agent_events" : 46,
-        "agent_output_bytes" : 92212,
-        "agent_output_chunks" : 44,
+        "agent_output_bytes" : 103460,
+        "agent_output_chunks" : 46,
         "build_invocations" : 3,
-        "commands_executed" : 7,
-        "grading_duration_seconds" : 269.33978295326233,
+        "commands_executed" : 10,
+        "grading_duration_seconds" : 57.713894963264465,
         "test_invocations" : 0,
-        "tool_calls" : 14,
-        "total_events" : 130
+        "tool_calls" : 15,
+        "total_events" : 138
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 467.120229333,
+        "duration_seconds" : 273.108159,
         "passed" : false
       },
-      "run_id" : "2026-09-08T094140-g2-order-001-opencode",
+      "run_id" : "2026-09-09T091055-g2-order-001-opencode",
       "schema_version" : 1,
       "tags" : [
         "ordering",
@@ -4665,12 +4700,12 @@
       ],
       "task" : "g2-order-001",
       "usage" : {
-        "cache_read_tokens" : 101568,
+        "cache_read_tokens" : 131712,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.005003895,
-        "input_tokens" : 35675,
-        "output_tokens" : 1609,
-        "total_tokens" : 38894
+        "estimated_cost_usd" : 0.0060481549999999995,
+        "input_tokens" : 36273,
+        "output_tokens" : 2923,
+        "total_tokens" : 41681
       }
     },
     {
@@ -4687,7 +4722,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -4698,21 +4733,21 @@
       "difficulty" : 9,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "d148c3a157ab4b7503edba9d0a68815892115a92",
-        "deletions" : 5,
+        "base_commit" : "acc2c9034d10b510ca60a4f244cedea33a070848",
+        "deletions" : 3,
         "files_changed" : 1,
-        "insertions" : 12
+        "insertions" : 7
       },
       "graders" : [
         {
-          "duration_seconds" : 117.863677791,
+          "duration_seconds" : 29.916859333,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -4724,15 +4759,15 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : false,
-          "summary" : "The flow could not be driven in default: step 0 (tap) failed: element not found (after scroll): show-settled"
+          "passed" : true,
+          "summary" : "2 passive baseline UI assertions hold in default; the original toggle action was removed after its recorded tap was ignored"
         },
         {
-          "duration_seconds" : 25.955055209,
+          "duration_seconds" : 24.825504791,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -4745,23 +4780,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 179.53907597064972,
-        "agent_events" : 40,
-        "agent_output_bytes" : 67912,
-        "agent_output_chunks" : 38,
+        "agent_duration_seconds" : 378.7880049943924,
+        "agent_events" : 53,
+        "agent_output_bytes" : 139756,
+        "agent_output_chunks" : 53,
         "build_invocations" : 2,
-        "commands_executed" : 7,
-        "grading_duration_seconds" : 199.95166909694672,
+        "commands_executed" : 11,
+        "grading_duration_seconds" : 97.98622500896454,
         "test_invocations" : 0,
-        "tool_calls" : 13,
-        "total_events" : 112
+        "tool_calls" : 16,
+        "total_events" : 148
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 380.403370625,
-        "passed" : false
+        "duration_seconds" : 477.281148625,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T094932-g2-order-002-opencode",
+      "run_id" : "2026-09-09T141135-g2-order-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "deletion",
@@ -4771,12 +4806,12 @@
       ],
       "task" : "g2-order-002",
       "usage" : {
-        "cache_read_tokens" : 87040,
+        "cache_read_tokens" : 172416,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.004579524999999999,
-        "input_tokens" : 28899,
-        "output_tokens" : 2281,
-        "total_tokens" : 33325
+        "estimated_cost_usd" : 0.011437290000000001,
+        "input_tokens" : 83184,
+        "output_tokens" : 3705,
+        "total_tokens" : 93633
       }
     },
     {
@@ -4793,7 +4828,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -4801,24 +4836,24 @@
         "logs" : "logs"
       },
       "category" : "visual",
-      "difficulty" : 7,
+      "difficulty" : 8,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "b450fd010fb34d70a5da0546bb37e9fc031930ec",
-        "deletions" : 20,
+        "base_commit" : "0c081935bdc106f21e725577fa40aa94bd7f6051",
+        "deletions" : 2,
         "files_changed" : 1,
-        "insertions" : 22
+        "insertions" : 4
       },
       "graders" : [
         {
-          "duration_seconds" : 120.349372417,
+          "duration_seconds" : 46.634693333,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -4830,15 +4865,131 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : false,
-          "summary" : "4 of 5 UI assertion(s) failed in default: no element \"hero\" on screen; no element \"entry-code\" on screen; no element \"entry-code\" on screen; no element on screen shows \"Gate C, row 12, seat 8\""
+          "passed" : true,
+          "summary" : "4 UI assertion(s) hold in language=en locale=en_US"
         },
         {
-          "duration_seconds" : 58.822004208,
+          "duration_seconds" : 37.6755245,
+          "evidence" : [
+            {
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
+            },
+            {
+              "name" : "uiflow-tree-2.json",
+              "path" : "logs/uiflow-tree-2.json"
+            }
+          ],
+          "name" : "uiflow",
+          "passed" : true,
+          "summary" : "5 UI assertion(s) hold in language=ar locale=ar_SA"
+        },
+        {
+          "duration_seconds" : 0.001202417,
+          "evidence" : [
+
+          ],
+          "name" : "file",
+          "passed" : true,
+          "summary" : "2 file assertion(s) satisfied"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 822.1949869394302,
+        "agent_events" : 89,
+        "agent_output_bytes" : 686809,
+        "agent_output_chunks" : 95,
+        "build_invocations" : 2,
+        "commands_executed" : 15,
+        "grading_duration_seconds" : 106.33262407779694,
+        "test_invocations" : 0,
+        "tool_calls" : 30,
+        "total_events" : 236
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 929.260775208,
+        "passed" : true
+      },
+      "run_id" : "2026-09-09T161524-g2-visual-001-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "layout",
+        "rtl",
+        "localization",
+        "device-state",
+        "latent"
+      ],
+      "task" : "g2-visual-001",
+      "usage" : {
+        "cache_read_tokens" : 754688,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.025676844999999997,
+        "input_tokens" : 86507,
+        "output_tokens" : 5065,
+        "total_tokens" : 117981
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "effort" : "max",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "openrouter/z-ai/glm-5.3-flash",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "visual",
+      "difficulty" : 7,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
+      },
+      "git" : {
+        "base_commit" : "274bf908e3de8618fcf2eb22602748bf407c1173",
+        "deletions" : 3,
+        "files_changed" : 1,
+        "insertions" : 4
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 17.377139208,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
               "path" : "logs/uiflow-build.log"
+            },
+            {
+              "name" : "uiflow-tree.json",
+              "path" : "logs/uiflow-tree.json"
+            }
+          ],
+          "name" : "uiflow",
+          "passed" : true,
+          "summary" : "5 UI assertion(s) hold in default"
+        },
+        {
+          "duration_seconds" : 15.615434667,
+          "evidence" : [
+            {
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -4851,23 +5002,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 542.0897279977798,
-        "agent_events" : 78,
-        "agent_output_bytes" : 2048135,
-        "agent_output_chunks" : 104,
+        "agent_duration_seconds" : 524.5620559453964,
+        "agent_events" : 107,
+        "agent_output_bytes" : 2083999,
+        "agent_output_chunks" : 134,
         "build_invocations" : 2,
-        "commands_executed" : 8,
-        "grading_duration_seconds" : 246.1930079460144,
+        "commands_executed" : 10,
+        "grading_duration_seconds" : 50.76491594314575,
         "test_invocations" : 0,
-        "tool_calls" : 24,
-        "total_events" : 218
+        "tool_calls" : 35,
+        "total_events" : 281
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 790.216715416,
-        "passed" : false
+        "duration_seconds" : 575.848165209,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T095559-g2-visual-002-opencode",
+      "run_id" : "2026-09-09T105715-g2-visual-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "layout",
@@ -4878,12 +5029,12 @@
       ],
       "task" : "g2-visual-002",
       "usage" : {
-        "cache_read_tokens" : 223232,
+        "cache_read_tokens" : 480256,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.016762754999999997,
-        "input_tokens" : 154647,
-        "output_tokens" : 3250,
-        "total_tokens" : 161910
+        "estimated_cost_usd" : 0.016301215,
+        "input_tokens" : 84705,
+        "output_tokens" : 4077,
+        "total_tokens" : 95683
       }
     },
     {
@@ -5586,7 +5737,7 @@
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-
+          "effort" : "max"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash"
       },
@@ -5599,30 +5750,30 @@
       "difficulty" : 5,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "f592e80178c3d22c22c69398a04e2c807642eaf1",
+        "base_commit" : "852ce5363a3deeec4a0b865bf52081e32f9d37cc",
         "deletions" : 0,
         "files_changed" : 3,
-        "insertions" : 305
+        "insertions" : 288
       },
       "graders" : [
         {
-          "duration_seconds" : 0.085057916,
+          "duration_seconds" : 0.028406834,
           "evidence" : [
 
           ],
           "name" : "trajectory",
           "passed" : true,
-          "summary" : "The agent's recorded commands show the work behind the deliverable (26 command(s))"
+          "summary" : "The agent's recorded commands show the work behind the deliverable (20 command(s))"
         },
         {
-          "duration_seconds" : 1.015899708,
+          "duration_seconds" : 7.531436208,
           "evidence" : [
             {
               "name" : "build.log",
@@ -5634,11 +5785,11 @@
             }
           ],
           "name" : "build",
-          "passed" : false,
-          "summary" : "xcodebuild build failed (exit 65) for scheme 'GestureFixture'"
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'GestureFixture'"
         },
         {
-          "duration_seconds" : 0.000101625,
+          "duration_seconds" : 0.000112084,
           "evidence" : [
 
           ],
@@ -5648,23 +5799,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 1257.0077500343323,
-        "agent_events" : 140,
-        "agent_output_bytes" : 382602,
-        "agent_output_chunks" : 138,
+        "agent_duration_seconds" : 1263.1943480968475,
+        "agent_events" : 110,
+        "agent_output_bytes" : 334889,
+        "agent_output_chunks" : 110,
         "build_invocations" : 1,
         "commands_executed" : 2,
-        "grading_duration_seconds" : 1.7398380041122437,
+        "grading_duration_seconds" : 7.891468048095703,
         "test_invocations" : 0,
-        "tool_calls" : 42,
-        "total_events" : 303
+        "tool_calls" : 35,
+        "total_events" : 245
       },
       "result" : {
         "agent_termination" : "timeout",
-        "duration_seconds" : 1260.58463375,
+        "duration_seconds" : 1271.591284666,
         "passed" : false
       },
-      "run_id" : "2026-09-08T105123-interaction-005-opencode",
+      "run_id" : "2026-09-09T123138-interaction-005-opencode",
       "schema_version" : 1,
       "tags" : [
         "ui-automation",
@@ -5673,7 +5824,12 @@
       ],
       "task" : "interaction-005",
       "usage" : {
-
+        "cache_read_tokens" : 1253312,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.03383427999999999,
+        "input_tokens" : 71988,
+        "output_tokens" : 6986,
+        "total_tokens" : 110530
       }
     },
     {
@@ -9366,7 +9522,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -9377,54 +9533,54 @@
       "difficulty" : 3,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "macos" : "27.0",
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "bf6a4caefb2c7857d96f12ac307d66def81e2edb",
+        "base_commit" : "0b1fe982f46e79d9da16a907888a8b81443db037",
         "deletions" : 0,
-        "files_changed" : 0,
-        "insertions" : 0
+        "files_changed" : 2,
+        "insertions" : 60
       },
       "graders" : [
         {
-          "duration_seconds" : 0.001828834,
+          "duration_seconds" : 0.001406459,
           "evidence" : [
 
           ],
           "name" : "trajectory",
           "passed" : true,
-          "summary" : "The agent's recorded commands show the work behind the deliverable (5 command(s))"
+          "summary" : "The agent's recorded commands show the work behind the deliverable (4 command(s))"
         },
         {
-          "duration_seconds" : 6.3042e-05,
+          "duration_seconds" : 0.000115458,
           "evidence" : [
 
           ],
           "name" : "file",
-          "passed" : false,
-          "summary" : "macos-screen.png: expected to exist; macos-screen.png: unreadable or missing, cannot check PNG; macos-screencapture.md: expected to exist; macos-screencapture.md: unreadable or missing"
+          "passed" : true,
+          "summary" : "4 file assertion(s) satisfied"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 66.530552983284,
-        "agent_events" : 13,
-        "agent_output_bytes" : 11633,
-        "agent_output_chunks" : 13,
+        "agent_duration_seconds" : 59.77259302139282,
+        "agent_events" : 15,
+        "agent_output_bytes" : 11549,
+        "agent_output_chunks" : 15,
         "build_invocations" : 0,
         "commands_executed" : 1,
-        "grading_duration_seconds" : 0.0020380020141601562,
+        "grading_duration_seconds" : 0.0020560026168823242,
         "test_invocations" : 0,
         "tool_calls" : 5,
-        "total_events" : 42
+        "total_events" : 48
       },
       "result" : {
-        "agent_termination" : "timeout",
-        "duration_seconds" : 67.248332291,
-        "passed" : false
+        "agent_termination" : "completed",
+        "duration_seconds" : 60.280157709,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T142333-ops-027-opencode",
+      "run_id" : "2026-09-09T110655-ops-027-opencode",
       "schema_version" : 1,
       "tags" : [
         "screencapture",
@@ -9434,12 +9590,12 @@
       ],
       "task" : "ops-027",
       "usage" : {
-        "cache_read_tokens" : 7424,
+        "cache_read_tokens" : 21888,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.00146811,
-        "input_tokens" : 14550,
-        "output_tokens" : 273,
-        "total_tokens" : 15612
+        "estimated_cost_usd" : 0.001295645,
+        "input_tokens" : 8401,
+        "output_tokens" : 878,
+        "total_tokens" : 9750
       }
     },
     {
@@ -10674,9 +10830,17 @@
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "effort" : "max",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
         },
-        "model" : "openrouter/z-ai/glm-5.3-flash"
+        "model" : "openrouter/z-ai/glm-5.3-flash",
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -10687,21 +10851,21 @@
       "difficulty" : 5,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "1832e4793ee945a332609be3069ef84eb773c212",
-        "deletions" : 3,
-        "files_changed" : 2,
-        "insertions" : 133
+        "base_commit" : "52d0e35596059181b9582915f08d009b22c916b9",
+        "deletions" : 5,
+        "files_changed" : 5,
+        "insertions" : 381
       },
       "graders" : [
         {
-          "duration_seconds" : 53.708370125,
+          "duration_seconds" : 11.880900667,
           "evidence" : [
             {
               "name" : "build.log",
@@ -10717,7 +10881,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'RelaunchFixture'"
         },
         {
-          "duration_seconds" : 63.6591055,
+          "duration_seconds" : 22.143159458,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -10733,7 +10897,7 @@
           "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
         },
         {
-          "duration_seconds" : 17.262637875,
+          "duration_seconds" : 7.849279875,
           "evidence" : [
             {
               "name" : "runtime-build.log",
@@ -10750,23 +10914,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 1260.6704210042953,
-        "agent_events" : 96,
-        "agent_output_bytes" : 294226,
-        "agent_output_chunks" : 96,
+        "agent_duration_seconds" : 1017.9499950408936,
+        "agent_events" : 143,
+        "agent_output_bytes" : 319233,
+        "agent_output_chunks" : 142,
         "build_invocations" : 2,
         "commands_executed" : 5,
-        "grading_duration_seconds" : 177.93728601932526,
+        "grading_duration_seconds" : 66.24662005901337,
         "test_invocations" : 1,
-        "tool_calls" : 29,
-        "total_events" : 226
+        "tool_calls" : 44,
+        "total_events" : 322
       },
       "result" : {
-        "agent_termination" : "timeout",
-        "duration_seconds" : 1439.5073565,
+        "agent_termination" : "completed",
+        "duration_seconds" : 1084.844610417,
         "passed" : true
       },
-      "run_id" : "2026-09-08T161448-runtime-005-opencode",
+      "run_id" : "2026-09-09T130915-runtime-005-opencode",
       "schema_version" : 1,
       "tags" : [
         "crash",
@@ -10775,16 +10939,29 @@
       ],
       "task" : "runtime-005",
       "usage" : {
-
+        "cache_read_tokens" : 1298752,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.032240005,
+        "input_tokens" : 74163,
+        "output_tokens" : 12855,
+        "total_tokens" : 102949
       }
     },
     {
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "effort" : "max",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
         },
-        "model" : "openrouter/z-ai/glm-5.3-flash"
+        "model" : "openrouter/z-ai/glm-5.3-flash",
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -10795,21 +10972,21 @@
       "difficulty" : 6,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "03cb1a298aa3eee5b2c419e18720bf8d04836e4e",
+        "base_commit" : "238ce78346f01f5fd577d6058ba7cfebb6996c2e",
         "deletions" : 3,
-        "files_changed" : 5,
-        "insertions" : 138
+        "files_changed" : 3,
+        "insertions" : 127
       },
       "graders" : [
         {
-          "duration_seconds" : 15.579211958,
+          "duration_seconds" : 5.628607792,
           "evidence" : [
             {
               "name" : "build.log",
@@ -10825,7 +11002,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'Storekit001Fixture'"
         },
         {
-          "duration_seconds" : 2.445769209,
+          "duration_seconds" : 1.78144525,
           "evidence" : [
             {
               "name" : "xcodeproj-settings.log",
@@ -10841,7 +11018,7 @@
           "summary" : "1 of 1 project assertion(s) failed: built product does not contain 'Products.storekit'"
         },
         {
-          "duration_seconds" : 49.678207042,
+          "duration_seconds" : 8.688855458,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -10853,28 +11030,28 @@
             }
           ],
           "name" : "xctest",
-          "passed" : false,
-          "summary" : "4 executed, 3 passed, 1 failed, 0 skipped. Failing: ScratchStoreKitIntegrationTests/testFixtureStoreAnswersForBothPlans()"
+          "passed" : true,
+          "summary" : "3 executed, 3 passed, 0 failed, 0 skipped"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 953.6919629573822,
-        "agent_events" : 104,
-        "agent_output_bytes" : 242345,
-        "agent_output_chunks" : 102,
+        "agent_duration_seconds" : 918.9496140480042,
+        "agent_events" : 100,
+        "agent_output_bytes" : 235249,
+        "agent_output_chunks" : 100,
         "build_invocations" : 3,
         "commands_executed" : 6,
-        "grading_duration_seconds" : 68.03747200965881,
+        "grading_duration_seconds" : 16.37222993373871,
         "test_invocations" : 1,
-        "tool_calls" : 34,
-        "total_events" : 244
+        "tool_calls" : 36,
+        "total_events" : 236
       },
       "result" : {
-        "agent_termination" : "timeout",
-        "duration_seconds" : 1022.51828525,
+        "agent_termination" : "completed",
+        "duration_seconds" : 936.018345333,
         "passed" : false
       },
-      "run_id" : "2026-09-08T163854-storekit-001-opencode",
+      "run_id" : "2026-09-09T092651-storekit-001-opencode",
       "schema_version" : 1,
       "tags" : [
         "storekit",
@@ -10883,7 +11060,12 @@
       ],
       "task" : "storekit-001",
       "usage" : {
-
+        "cache_read_tokens" : 628160,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.017857500000000002,
+        "input_tokens" : 45918,
+        "output_tokens" : 6609,
+        "total_tokens" : 65883
       }
     },
     {
@@ -11950,7 +12132,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -11961,21 +12143,21 @@
       "difficulty" : 6,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "a1ab5987643736511d4487ea0832d77155631fd0",
+        "base_commit" : "95be00d789bb050a9dfe4f29cc471028e8a64012",
         "deletions" : 2,
         "files_changed" : 2,
-        "insertions" : 3
+        "insertions" : 5
       },
       "graders" : [
         {
-          "duration_seconds" : 4.450067542,
+          "duration_seconds" : 4.800132542,
           "evidence" : [
             {
               "name" : "build.log",
@@ -11987,11 +12169,11 @@
             }
           ],
           "name" : "build",
-          "passed" : false,
-          "summary" : "xcodebuild build failed (exit 65) for scheme 'Swiftdata010Fixture'"
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'Swiftdata010Fixture'"
         },
         {
-          "duration_seconds" : 1.688472125,
+          "duration_seconds" : 8.926610709,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -12003,28 +12185,28 @@
             }
           ],
           "name" : "xctest",
-          "passed" : false,
-          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+          "passed" : true,
+          "summary" : "2 executed, 2 passed, 0 failed, 0 skipped"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 105.21370303630829,
-        "agent_events" : 44,
-        "agent_output_bytes" : 43955,
-        "agent_output_chunks" : 44,
+        "agent_duration_seconds" : 108.15127301216125,
+        "agent_events" : 24,
+        "agent_output_bytes" : 25594,
+        "agent_output_chunks" : 24,
         "build_invocations" : 1,
         "commands_executed" : 4,
-        "grading_duration_seconds" : 6.461618065834045,
+        "grading_duration_seconds" : 13.986898064613342,
         "test_invocations" : 1,
-        "tool_calls" : 14,
-        "total_events" : 116
+        "tool_calls" : 7,
+        "total_events" : 76
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 112.35520525,
-        "passed" : false
+        "duration_seconds" : 122.626024167,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T183111-swiftdata-010-opencode",
+      "run_id" : "2026-09-09T094228-swiftdata-010-opencode",
       "schema_version" : 1,
       "tags" : [
         "swiftdata",
@@ -12033,12 +12215,12 @@
       ],
       "task" : "swiftdata-010",
       "usage" : {
-        "cache_read_tokens" : 69312,
+        "cache_read_tokens" : 38080,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.0043167299999999995,
-        "input_tokens" : 35604,
-        "output_tokens" : 1596,
-        "total_tokens" : 38031
+        "estimated_cost_usd" : 0.0022626,
+        "input_tokens" : 17382,
+        "output_tokens" : 874,
+        "total_tokens" : 18933
       }
     },
     {
@@ -12265,7 +12447,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -12276,21 +12458,21 @@
       "difficulty" : 4,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "230ccbca769cd3bc604e736206ef5b49d9026b84",
-        "deletions" : 3,
+        "base_commit" : "8d4c8cdb4e3f903db3b98e66156fb05652a76b85",
+        "deletions" : 4,
         "files_changed" : 2,
-        "insertions" : 82
+        "insertions" : 52
       },
       "graders" : [
         {
-          "duration_seconds" : 4.441714083,
+          "duration_seconds" : 9.652626125,
           "evidence" : [
             {
               "name" : "build.log",
@@ -12306,7 +12488,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'System003Fixture'"
         },
         {
-          "duration_seconds" : 21.677851208,
+          "duration_seconds" : 14.147618833,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -12318,28 +12500,28 @@
             }
           ],
           "name" : "xctest",
-          "passed" : false,
-          "summary" : "4 executed, 3 passed, 1 failed, 0 skipped. Failing: NoteIndexerTests/testTheEntryCanBeTracedBackToItsNote()"
+          "passed" : true,
+          "summary" : "4 executed, 4 passed, 0 failed, 0 skipped"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 228.3745059967041,
-        "agent_events" : 53,
-        "agent_output_bytes" : 131155,
-        "agent_output_chunks" : 53,
+        "agent_duration_seconds" : 356.99588000774384,
+        "agent_events" : 26,
+        "agent_output_bytes" : 68708,
+        "agent_output_chunks" : 26,
         "build_invocations" : 1,
         "commands_executed" : 4,
-        "grading_duration_seconds" : 26.382864117622375,
+        "grading_duration_seconds" : 24.33456301689148,
         "test_invocations" : 1,
-        "tool_calls" : 17,
-        "total_events" : 134
+        "tool_calls" : 7,
+        "total_events" : 80
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 255.477620667,
-        "passed" : false
+        "duration_seconds" : 382.008164792,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T183640-system-003-opencode",
+      "run_id" : "2026-09-09T092027-system-003-opencode",
       "schema_version" : 1,
       "tags" : [
         "core-spotlight",
@@ -12348,12 +12530,12 @@
       ],
       "task" : "system-003",
       "usage" : {
-        "cache_read_tokens" : 216320,
+        "cache_read_tokens" : 70464,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.007413824999999999,
-        "input_tokens" : 24487,
-        "output_tokens" : 2869,
-        "total_tokens" : 33817
+        "estimated_cost_usd" : 0.0040812850000000005,
+        "input_tokens" : 17041,
+        "output_tokens" : 1808,
+        "total_tokens" : 24026
       }
     },
     {
@@ -13842,7 +14024,7 @@
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-
+          "effort" : "max"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash"
       },
@@ -13855,21 +14037,21 @@
       "difficulty" : 8,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "3c549946a995cf4bab6576b56c4d395427f16ba2",
-        "deletions" : 2,
+        "base_commit" : "39d808a03fa2ca25cb3f0bfa6cc2496e12ebd16d",
+        "deletions" : 11,
         "files_changed" : 4,
-        "insertions" : 159
+        "insertions" : 113
       },
       "graders" : [
         {
-          "duration_seconds" : 57.141972209,
+          "duration_seconds" : 9.783858875,
           "evidence" : [
             {
               "name" : "build.log",
@@ -13881,11 +14063,11 @@
             }
           ],
           "name" : "build",
-          "passed" : true,
-          "summary" : "xcodebuild build succeeded for scheme 'SearchFixture'"
+          "passed" : false,
+          "summary" : "xcodebuild build failed (exit 65) for scheme 'SearchFixture'"
         },
         {
-          "duration_seconds" : 66.547963958,
+          "duration_seconds" : 5.136341833,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -13894,6 +14076,14 @@
             {
               "name" : "xcuitest.xcresult",
               "path" : "logs/xcuitest.xcresult"
+            },
+            {
+              "name" : "xcuitest-retry.log",
+              "path" : "logs/xcuitest-retry.log"
+            },
+            {
+              "name" : "xcuitest-retry.xcresult",
+              "path" : "logs/xcuitest-retry.xcresult"
             }
           ],
           "name" : "xcuitest",
@@ -13901,7 +14091,7 @@
           "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
         },
         {
-          "duration_seconds" : 12.746359416,
+          "duration_seconds" : 2.122893625,
           "evidence" : [
             {
               "name" : "mutation-test.log",
@@ -13914,23 +14104,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 1261.9405709505081,
-        "agent_events" : 114,
-        "agent_output_bytes" : 388454,
-        "agent_output_chunks" : 114,
+        "agent_duration_seconds" : 1263.3477549552917,
+        "agent_events" : 79,
+        "agent_output_bytes" : 308574,
+        "agent_output_chunks" : 80,
         "build_invocations" : 1,
-        "commands_executed" : 5,
-        "grading_duration_seconds" : 229.92348098754883,
-        "test_invocations" : 2,
-        "tool_calls" : 37,
-        "total_events" : 262
+        "commands_executed" : 7,
+        "grading_duration_seconds" : 39.01361095905304,
+        "test_invocations" : 3,
+        "tool_calls" : 28,
+        "total_events" : 200
       },
       "result" : {
         "agent_termination" : "timeout",
-        "duration_seconds" : 1492.591907666,
+        "duration_seconds" : 1303.2600045,
         "passed" : false
       },
-      "run_id" : "2026-09-08T223519-ui-auto-010-opencode",
+      "run_id" : "2026-09-09T110756-ui-auto-010-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -13941,7 +14131,12 @@
       ],
       "task" : "ui-auto-010",
       "usage" : {
-
+        "cache_read_tokens" : 635072,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.026448029999999997,
+        "input_tokens" : 96246,
+        "output_tokens" : 3841,
+        "total_tokens" : 135060
       }
     },
     {
@@ -14185,17 +14380,9 @@
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
-          "effort" : "max",
-          "isolation" : "none (host process)",
-          "mode" : "run --format json --pure --auto",
-          "network" : "unrestricted (host egress; --vm denies it)",
-          "plugins" : "disabled (--pure)",
-          "user_config" : "ignored (OPENCODE_CONFIG)",
-          "web_access" : "disabled (webfetch denied)"
+          "effort" : "max"
         },
-        "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "model" : "openrouter/z-ai/glm-5.3-flash"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -14206,21 +14393,21 @@
       "difficulty" : 5,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "a7a11e3d0b48387aa562bf7e1212539a9923590b",
-        "deletions" : 0,
-        "files_changed" : 0,
-        "insertions" : 0
+        "base_commit" : "ff171c305c2de4081bc25f3c29ed708c4a1f0a39",
+        "deletions" : 1,
+        "files_changed" : 2,
+        "insertions" : 56
       },
       "graders" : [
         {
-          "duration_seconds" : 34.058550167,
+          "duration_seconds" : 12.940722208,
           "evidence" : [
             {
               "name" : "build.log",
@@ -14236,7 +14423,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
         },
         {
-          "duration_seconds" : 48.142647125,
+          "duration_seconds" : 28.604073958,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -14248,11 +14435,20 @@
             }
           ],
           "name" : "xcuitest",
-          "passed" : false,
-          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+          "passed" : true,
+          "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
         },
         {
-          "duration_seconds" : 18.103715875,
+          "duration_seconds" : 0.0028105,
+          "evidence" : [
+
+          ],
+          "name" : "file",
+          "passed" : true,
+          "summary" : "2 file assertion(s) satisfied"
+        },
+        {
+          "duration_seconds" : 49.174536458,
           "evidence" : [
             {
               "name" : "mutation-test.log",
@@ -14260,28 +14456,28 @@
             }
           ],
           "name" : "mutation",
-          "passed" : false,
-          "summary" : "The tests still passed with the app broken (Sources/EnrolmentFlowView.swift: every match of /\\.accessibilityIdentifier\\(\"([^\"]+)\"\\)/ rewritten), so they do not assert the behaviour the task asked for"
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/EnrolmentFlowView.swift: every match of /\\.accessibilityIdentifier\\(\"([^\"]+)\"\\)/ rewritten)"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 378.7296019792557,
-        "agent_events" : 48,
-        "agent_output_bytes" : 154230,
-        "agent_output_chunks" : 48,
+        "agent_duration_seconds" : 1262.6162869930267,
+        "agent_events" : 64,
+        "agent_output_bytes" : 232168,
+        "agent_output_chunks" : 65,
         "build_invocations" : 1,
         "commands_executed" : 5,
-        "grading_duration_seconds" : 140.2289400100708,
+        "grading_duration_seconds" : 111.9149569272995,
         "test_invocations" : 2,
-        "tool_calls" : 20,
-        "total_events" : 126
+        "tool_calls" : 22,
+        "total_events" : 163
       },
       "result" : {
-        "agent_termination" : "completed",
-        "duration_seconds" : 519.891942667,
-        "passed" : false
+        "agent_termination" : "timeout",
+        "duration_seconds" : 1375.209329792,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T233752-ui-auto-014-opencode",
+      "run_id" : "2026-09-09T142959-ui-auto-014-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -14292,12 +14488,12 @@
       ],
       "task" : "ui-auto-014",
       "usage" : {
-        "cache_read_tokens" : 108416,
+        "cache_read_tokens" : 378752,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.01378064,
-        "input_tokens" : 117812,
-        "output_tokens" : 1575,
-        "total_tokens" : 131086
+        "estimated_cost_usd" : 0.015776004999999996,
+        "input_tokens" : 69463,
+        "output_tokens" : 2524,
+        "total_tokens" : 89003
       }
     },
     {
@@ -14314,7 +14510,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openrouter/z-ai/glm-5.3-flash",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -14325,21 +14521,21 @@
       "difficulty" : 6,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A5252f"
       },
       "git" : {
-        "base_commit" : "a7a11e3d0b48387aa562bf7e1212539a9923590b",
+        "base_commit" : "b926ffd763ae1ef1c3f063175fb0f7a5066a30de",
         "deletions" : 0,
-        "files_changed" : 2,
-        "insertions" : 38
+        "files_changed" : 1,
+        "insertions" : 20
       },
       "graders" : [
         {
-          "duration_seconds" : 43.301433209,
+          "duration_seconds" : 9.34408375,
           "evidence" : [
             {
               "name" : "build.log",
@@ -14355,7 +14551,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'FormFlowFixture'"
         },
         {
-          "duration_seconds" : 72.418210042,
+          "duration_seconds" : 14.570722959,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -14371,7 +14567,7 @@
           "summary" : "1 executed, 1 passed, 0 failed, 0 skipped"
         },
         {
-          "duration_seconds" : 37.318080917,
+          "duration_seconds" : 45.632765417,
           "evidence" : [
             {
               "name" : "mutation-test.log",
@@ -14379,28 +14575,28 @@
             }
           ],
           "name" : "mutation",
-          "passed" : false,
-          "summary" : "The tests still passed with the app broken (Sources/EnrolmentFlowView.swift: every match of /\\.accessibilityIdentifier\\(\"([^\"]+)\"\\)/ rewritten), so they do not assert the behaviour the task asked for"
+          "passed" : true,
+          "summary" : "The tests failed against a deliberately broken app, so they test the behaviour they claim (Sources/EnrolmentFlowView.swift: every match of /\\.accessibilityIdentifier\\(\"([^\"]+)\"\\)/ rewritten)"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 560.3437770605087,
-        "agent_events" : 87,
-        "agent_output_bytes" : 219150,
-        "agent_output_chunks" : 86,
+        "agent_duration_seconds" : 250.2623029947281,
+        "agent_events" : 47,
+        "agent_output_bytes" : 106208,
+        "agent_output_chunks" : 47,
         "build_invocations" : 1,
         "commands_executed" : 5,
-        "grading_duration_seconds" : 195.92185604572296,
+        "grading_duration_seconds" : 89.39632499217987,
         "test_invocations" : 2,
-        "tool_calls" : 27,
-        "total_events" : 205
+        "tool_calls" : 15,
+        "total_events" : 125
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 756.928926208,
-        "passed" : false
+        "duration_seconds" : 340.292579208,
+        "passed" : true
       },
-      "run_id" : "2026-09-08T234637-ui-auto-015-opencode",
+      "run_id" : "2026-09-09T100058-ui-auto-015-opencode",
       "schema_version" : 1,
       "tags" : [
         "xcuitest",
@@ -14411,12 +14607,12 @@
       ],
       "task" : "ui-auto-015",
       "usage" : {
-        "cache_read_tokens" : 479104,
+        "cache_read_tokens" : 156544,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.013539009999999999,
-        "input_tokens" : 37706,
-        "output_tokens" : 4411,
-        "total_tokens" : 51804
+        "estimated_cost_usd" : 0.00616361,
+        "input_tokens" : 40686,
+        "output_tokens" : 1518,
+        "total_tokens" : 43742
       }
     },
     {
@@ -15649,15 +15845,15 @@
     }
   ],
   "score" : {
-    "available" : 1420,
-    "fraction_of_available" : 0.6510633922398906,
+    "available" : 1430,
+    "fraction_of_available" : 0.7467493550162275,
     "minimum_efficiency" : 0.25,
-    "points" : 924.5100169806448,
+    "points" : 1067.8515776732054,
     "reference_token_budget" : 50000,
-    "scored_runs" : 142,
-    "solves_with_unreported_tokens" : 4,
+    "scored_runs" : 143,
+    "solves_with_unreported_tokens" : 1,
     "specification" : "points-v2",
     "unscored_runs" : 0
   },
-  "total" : 142
+  "total" : 143
 }

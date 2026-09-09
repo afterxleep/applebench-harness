@@ -3,6 +3,33 @@
 # and results are only comparable within one.
 # The current entry also drives the task totals shown on the homepage.
 
+- id: "2026-09-09"
+  name: "2026-09-09"
+  gold_tasks: 143
+  app_run_tasks: 48
+  public_sample_tasks: 8
+  category_tasks:
+    build: 1
+    tests: 3
+    runtime: 5
+    visual: 9
+    interaction: 27
+    project: 4
+    frameworks: 66
+    ops: 28
+  current: true
+  summary: >-
+    The 143-task gold set adds an Arabic right-to-left layout task. Harness and
+    task corrections remove false UI, locale, startup, timeout, and sandbox
+    failures while preserving the model's original workspace and evidence for
+    review.
+  changes:
+    - "A previously unlisted Arabic right-to-left badge task now fails unchanged, passes its reference solution in English and Arabic, and is scored for every published model."
+    - "UI flow grading now reads a fresh settled accessibility tree, clears state where flows must be isolated, and accepts valid region-aware localized date renderings."
+    - "The ledger baseline no longer depends on a flaky toggle tap, and the enrolment automation task now requires an explicit assertion that the keyboard disappeared."
+    - "Reviewed adjudications can correct a grader verdict without rewriting result.json, and targeted reports can build on an immutable prior baseline instead of rerunning unaffected work."
+    - "Agent startup failures retry only before a model is reached; package verification and timeout accounting now preserve the model's actual work and failure stage."
+
 - id: "2026-09-08"
   name: "2026-09-08"
   gold_tasks: 142
@@ -17,7 +44,7 @@
     project: 4
     frameworks: 66
     ops: 28
-  current: true
+  current: false
   summary: >-
     Six expert Swift concurrency tasks join the gold suite. Their contracts
     cover actor reentrancy, cancellation-safe continuations, bounded task

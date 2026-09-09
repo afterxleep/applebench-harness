@@ -1,20 +1,20 @@
 ---
-title: "minimax/MiniMax-M3, gold suite, 914 points"
+title: "minimax/MiniMax-M3, gold suite, 945 points"
 date: 2026-09-07
 suite: gold
-suite_revision: "2026-09-08"
+suite_revision: "2026-09-09"
 score_spec: "points-v2"
 attempt: "latest"
 data: minimax-m3
 model: "minimax/MiniMax-M3"
-harness: "opencode, opencode 1.18.27"
-tasks: 142
-passed: 107
-points: 914
-points_available: 1420
+harness: "opencode, opencode 1.18.27, opencode 1.18.30"
+tasks: 143
+passed: 110
+points: 945
+points_available: 1430
 description: >-
   AppleBench results for minimax/MiniMax-M3 on the gold suite:
-  914 of 1420 points and 107 of 142 tasks completed to a
+  945 of 1430 points and 110 of 143 tasks completed to a
   verified result, with per-category points, cost against wall-clock time,
   and every task.
 ---
@@ -33,6 +33,16 @@ actor-reentrancy, continuation, task-group and multicast-stream tasks. It
 failed the shared-lifetime and isolated-conformance tasks, finishing the
 addition 4/6.
 
+## September 9 calibration
+
+`g2-locale-004` is corrected from fail to pass from its saved localized UI
+trees. M3's saved `g2-lifecycle-002` patch was replayed without another model
+call and passed both isolated flows. The materially revised `ui-auto-014` task
+was rerun and passed build, its UI test, the explicit keyboard-disappearance
+check, and mutation grading. On the new `g2-visual-001` task, M3 used a
+different implementation from the reference solution and passed the English,
+Arabic, and file graders under provider-default reasoning.
+
 ## Excluded from the score
 
 | | |
@@ -41,6 +51,6 @@ addition 4/6.
 
 ## Scored at the efficiency floor
 
-`ops-010`, `project-004`, `ui-auto-003`, `ui-auto-014` and `visual-004` hit
-the wall-clock limit and reported no token usage. All five workspaces graded
-clean, so all five are passes at the 0.25 floor.
+`ops-010`, `project-004`, `ui-auto-003` and `visual-004` hit the wall-clock
+limit and reported no token usage. All four workspaces graded clean, so all
+four are passes at the 0.25 floor.

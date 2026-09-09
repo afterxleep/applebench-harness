@@ -20,13 +20,13 @@
     },
     {
       "category": "frameworks",
-      "completion_rate": 0.6666666666666666,
-      "passed": 44,
+      "completion_rate": 0.6818181818181818,
+      "passed": 45,
       "score": {
         "available": 660,
-        "fraction_of_available": 0.6666666666666666,
+        "fraction_of_available": 0.6818181818181818,
         "minimum_efficiency": 0.25,
-        "points": 440,
+        "points": 450,
         "reference_token_budget": 50000,
         "scored_runs": 66,
         "solves_with_unreported_tokens": 0,
@@ -37,13 +37,13 @@
     },
     {
       "category": "interaction",
-      "completion_rate": 0.37037037037037035,
-      "passed": 10,
+      "completion_rate": 0.3333333333333333,
+      "passed": 9,
       "score": {
         "available": 270,
-        "fraction_of_available": 0.37037037037037035,
+        "fraction_of_available": 0.3333333333333333,
         "minimum_efficiency": 0.25,
-        "points": 100,
+        "points": 90,
         "reference_token_budget": 50000,
         "scored_runs": 27,
         "solves_with_unreported_tokens": 0,
@@ -122,64 +122,64 @@
     },
     {
       "category": "visual",
-      "completion_rate": 0.75,
+      "completion_rate": 0.6666666666666666,
       "passed": 6,
       "score": {
-        "available": 80,
-        "fraction_of_available": 0.75,
+        "available": 90,
+        "fraction_of_available": 0.6666666666666666,
         "minimum_efficiency": 0.25,
         "points": 60,
         "reference_token_budget": 50000,
-        "scored_runs": 8,
+        "scored_runs": 9,
         "solves_with_unreported_tokens": 0,
         "specification": "points-v2",
         "unscored_runs": 0
       },
-      "total": 8
+      "total": 9
     }
   ],
-  "completion_rate": 0.6267605633802817,
+  "completion_rate": 0.6223776223776224,
   "configurations": [
     {
       "agent": "opencode",
-      "completion_rate": 0.6267605633802817,
-      "cost_per_solved_task_usd": 0.05849611938202246,
+      "completion_rate": 0.6223776223776224,
+      "cost_per_solved_task_usd": 0.058402602134831456,
       "label": "opencode · minimax/MiniMax-M2.7",
-      "median_duration_seconds": 123.2492904165,
+      "median_duration_seconds": 123.480614167,
       "model": "minimax/MiniMax-M2.7",
       "passed": 89,
       "score": {
-        "available": 1420,
-        "fraction_of_available": 0.6066144919400807,
+        "available": 1430,
+        "fraction_of_available": 0.6023724325558842,
         "minimum_efficiency": 0.25,
         "points": 861.3925785549145,
         "reference_token_budget": 50000,
-        "scored_runs": 142,
+        "scored_runs": 143,
         "solves_with_unreported_tokens": 0,
         "specification": "points-v2",
         "unscored_runs": 0
       },
-      "total": 142,
-      "total_cost_usd": 5.206154624999999,
-      "total_tokens": 2118267
+      "total": 143,
+      "total_cost_usd": 5.19783159,
+      "total_tokens": 2109299
     }
   ],
   "passed": 89,
   "reasoning": [
     {
       "at_maximum_effort": false,
-      "cache_read_tokens": 47919800,
-      "cache_write_tokens": 3243943,
+      "cache_read_tokens": 47847014,
+      "cache_write_tokens": 3239714,
       "effort": null,
-      "input_tokens": 1586036,
-      "list_cost_usd": 3.6862283999999996,
+      "input_tokens": 1576712,
+      "list_cost_usd": 3.6792860399999996,
       "maximum_effort": null,
       "model": "minimax/MiniMax-M2.7",
-      "output_tokens": 279358,
+      "output_tokens": 279543,
       "price_retrieved": "2026-09-03",
       "price_source": "https://models.dev/api.json",
-      "reported_cost_usd": 5.206154624999999,
-      "runs": 142
+      "reported_cost_usd": 5.19783159,
+      "runs": 143
     }
   ],
   "runs": [
@@ -4032,8 +4032,8 @@
             }
           ],
           "name": "uiflow",
-          "passed": false,
-          "summary": "1 of 1 UI assertion(s) failed in default"
+          "passed": true,
+          "summary": "The corrected suffix assertion finds dentist in the recorded default-state UI tree"
         },
         {
           "duration_seconds": 21.452334292,
@@ -4468,8 +4468,8 @@
             }
           ],
           "name": "uiflow",
-          "passed": false,
-          "summary": "2 of 2 UI assertion(s) failed in language=en locale=en_US"
+          "passed": true,
+          "summary": "2 localized date assertions hold in language=en locale=en_US"
         },
         {
           "duration_seconds": 30.81339175,
@@ -4484,8 +4484,8 @@
             }
           ],
           "name": "uiflow",
-          "passed": false,
-          "summary": "2 of 3 UI assertion(s) failed in language=de locale=de_DE"
+          "passed": true,
+          "summary": "2 localized date assertions hold in language=de locale=de_DE"
         },
         {
           "duration_seconds": 0.000478833,
@@ -4510,7 +4510,7 @@
       "result": {
         "agent_termination": "completed",
         "duration_seconds": 204.532169166,
-        "passed": false
+        "passed": true
       },
       "run_id": "2026-09-06T162040-g2-locale-004-opencode",
       "schema_version": 1,
@@ -4761,6 +4761,119 @@
         "input_tokens": 1304,
         "output_tokens": 1028,
         "total_tokens": 3047
+      }
+    },
+    {
+      "agent": {
+        "agent": "opencode",
+        "configuration": {
+          "answer_isolation": "sealed (solutions, task files and other runs denied)",
+          "isolation": "none (host process)",
+          "mode": "run --format json --pure --auto",
+          "network": "unrestricted (host egress; --vm denies it)",
+          "plugins": "disabled (--pure)",
+          "user_config": "ignored (OPENCODE_CONFIG)",
+          "web_access": "disabled (webfetch denied)"
+        },
+        "model": "minimax/MiniMax-M2.7",
+        "version": "1.18.30"
+      },
+      "artifacts": {
+        "diff": "diff.patch",
+        "events": "events.jsonl",
+        "logs": "logs"
+      },
+      "category": "visual",
+      "difficulty": 8,
+      "environment": {
+        "architecture": "arm64",
+        "macos": "27.0",
+        "runtime": "iOS 26.5",
+        "simulator": "iPhone 17",
+        "xcode": "27.0",
+        "xcode_build": "27A5252f"
+      },
+      "git": {
+        "base_commit": "0c081935bdc106f21e725577fa40aa94bd7f6051",
+        "deletions": 1,
+        "files_changed": 1,
+        "insertions": 1
+      },
+      "graders": [
+        {
+          "duration_seconds": 62.2860585,
+          "evidence": [
+            {
+              "name": "uiflow-build.log",
+              "path": "logs/uiflow-build.log"
+            },
+            {
+              "name": "uiflow-tree.json",
+              "path": "logs/uiflow-tree.json"
+            }
+          ],
+          "name": "uiflow",
+          "passed": false,
+          "summary": "2 of 4 UI assertion(s) failed in language=en locale=en_US"
+        },
+        {
+          "duration_seconds": 50.72156025,
+          "evidence": [
+            {
+              "name": "uiflow-build-2.log",
+              "path": "logs/uiflow-build-2.log"
+            },
+            {
+              "name": "uiflow-tree-2.json",
+              "path": "logs/uiflow-tree-2.json"
+            }
+          ],
+          "name": "uiflow",
+          "passed": true,
+          "summary": "5 UI assertion(s) hold in language=ar locale=ar_SA"
+        },
+        {
+          "duration_seconds": 0.001280875,
+          "evidence": [],
+          "name": "file",
+          "passed": true,
+          "summary": "2 file assertion(s) satisfied"
+        }
+      ],
+      "metrics": {
+        "agent_duration_seconds": 76.80684196949005,
+        "agent_events": 13,
+        "agent_output_bytes": 17063,
+        "agent_output_chunks": 13,
+        "build_invocations": 2,
+        "commands_executed": 15,
+        "grading_duration_seconds": 140.53286802768707,
+        "test_invocations": 0,
+        "tool_calls": 3,
+        "total_events": 78
+      },
+      "result": {
+        "agent_termination": "completed",
+        "duration_seconds": 218.217916125,
+        "passed": false
+      },
+      "run_id": "2026-09-09T165137-g2-visual-001-opencode",
+      "schema_version": 1,
+      "tags": [
+        "layout",
+        "rtl",
+        "localization",
+        "device-state",
+        "latent"
+      ],
+      "task": "g2-visual-001",
+      "usage": {
+        "cache_read_tokens": 22094,
+        "cache_write_tokens": 10170,
+        "estimated_cost_usd": 0.007143689999999999,
+        "input_tokens": 1049,
+        "output_tokens": 421,
+        "total_tokens": 2457
       }
     },
     {
@@ -14021,7 +14134,7 @@
           "web_access": "disabled (webfetch denied)"
         },
         "model": "minimax/MiniMax-M2.7",
-        "version": "1.18.27"
+        "version": "1.18.30"
       },
       "artifacts": {
         "diff": "diff.patch",
@@ -14039,14 +14152,14 @@
         "xcode_build": "27A5252f"
       },
       "git": {
-        "base_commit": "9fb489540d7a59b32d11b0febd1d853f853f5202",
-        "deletions": 3,
+        "base_commit": "31f06f699cf9ab64f1c0b592a7d43127ffcd6e1a",
+        "deletions": 1,
         "files_changed": 2,
-        "insertions": 42
+        "insertions": 44
       },
       "graders": [
         {
-          "duration_seconds": 10.607852041,
+          "duration_seconds": 10.691024958,
           "evidence": [
             {
               "name": "build.log",
@@ -14062,8 +14175,16 @@
           "summary": "xcodebuild build succeeded for scheme 'FormFlowFixture'"
         },
         {
-          "duration_seconds": 32.0210925,
+          "duration_seconds": 4.850933167,
           "evidence": [
+            {
+              "name": "xcuitest.log",
+              "path": "logs/xcuitest.log"
+            },
+            {
+              "name": "xcuitest.xcresult",
+              "path": "logs/xcuitest.xcresult"
+            },
             {
               "name": "xcuitest-retry.log",
               "path": "logs/xcuitest-retry.log"
@@ -14074,11 +14195,18 @@
             }
           ],
           "name": "xcuitest",
-          "passed": true,
-          "summary": "1 executed, 1 passed, 0 failed, 0 skipped"
+          "passed": false,
+          "summary": "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
         },
         {
-          "duration_seconds": 59.07452475,
+          "duration_seconds": 0.001888958,
+          "evidence": [],
+          "name": "file",
+          "passed": true,
+          "summary": "2 file assertion(s) satisfied"
+        },
+        {
+          "duration_seconds": 2.540309834,
           "evidence": [
             {
               "name": "mutation-test.log",
@@ -14086,28 +14214,28 @@
             }
           ],
           "name": "mutation",
-          "passed": true,
-          "summary": "The tests failed against a deliberately broken app, so they test the behaviour they claim"
+          "passed": false,
+          "summary": "The unmutated UI tests did not compile, so their failure cannot prove that the mutation was detected"
         }
       ],
       "metrics": {
-        "agent_duration_seconds": 57.59102201461792,
-        "agent_events": 36,
-        "agent_output_bytes": 111029,
-        "agent_output_chunks": 35,
+        "agent_duration_seconds": 72.67267191410065,
+        "agent_events": 33,
+        "agent_output_bytes": 52011,
+        "agent_output_chunks": 33,
         "build_invocations": 1,
-        "commands_executed": 6,
-        "grading_duration_seconds": 588.9256509542465,
+        "commands_executed": 7,
+        "grading_duration_seconds": 69.70449006557465,
         "test_invocations": 3,
-        "tool_calls": 14,
-        "total_events": 107
+        "tool_calls": 13,
+        "total_events": 106
       },
       "result": {
         "agent_termination": "completed",
-        "duration_seconds": 646.897124583,
-        "passed": true
+        "duration_seconds": 143.036029708,
+        "passed": false
       },
-      "run_id": "2026-09-06T005222-ui-auto-014-opencode",
+      "run_id": "2026-09-09T150628-ui-auto-014-opencode",
       "schema_version": 1,
       "tags": [
         "xcuitest",
@@ -14118,12 +14246,12 @@
       ],
       "task": "ui-auto-014",
       "usage": {
-        "cache_read_tokens": 153985,
-        "cache_write_tokens": 28838,
-        "estimated_cost_usd": 0.028936950000000003,
-        "input_tokens": 13128,
-        "output_tokens": 2085,
-        "total_tokens": 17249
+        "cache_read_tokens": 59105,
+        "cache_write_tokens": 14439,
+        "estimated_cost_usd": 0.013470225,
+        "input_tokens": 2755,
+        "output_tokens": 1849,
+        "total_tokens": 5824
       }
     },
     {
@@ -15459,15 +15587,15 @@
     }
   ],
   "score": {
-    "available": 1420,
-    "fraction_of_available": 0.6066144919400807,
+    "available": 1430,
+    "fraction_of_available": 0.6023724325558842,
     "minimum_efficiency": 0.25,
     "points": 861.3925785549145,
     "reference_token_budget": 50000,
-    "scored_runs": 142,
+    "scored_runs": 143,
     "solves_with_unreported_tokens": 0,
     "specification": "points-v2",
     "unscored_runs": 0
   },
-  "total": 142
+  "total": 143
 }
