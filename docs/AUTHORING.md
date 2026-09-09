@@ -20,6 +20,7 @@ prompt: |
 environment:
   xcode: "27.0"          # optional; strict match when present
   platform: ios
+  screen_recording: false # set true only for real macOS display capture
   simulator:
     device: "iPhone 17"
     runtime: "iOS 26.5"
@@ -63,7 +64,8 @@ the task.
 - **`build`**, fresh `xcodebuild build` with clean derived data.
 - **`xctest`**, fresh `xcodebuild test`; supports `test_plan`, `tests`
   (`-only-testing:`), `skip_tests`; totals parsed from the `.xcresult` bundle,
-  not scraped from terminal output. Zero executed tests is a FAIL.
+  not scraped from terminal output. A zero-test run is retried once; zero
+  executed tests after the retry is a FAIL.
 - **`xcuitest`**, same contract, for UI test bundles, against the run's
   dedicated simulator.
 - **`file`**, deterministic assertions: `exists`, `contains`, `matches`
@@ -124,6 +126,10 @@ attached.
     orientation: landscape-left
   after_steps:                  # run once after_state is in place
     - { action: tap, target: "seat-3C", by_id: true }
+  gestures:                     # precise coordinate drags after batch steps
+    - { from: "380,309", to: "8,309", duration: 0.5 }
+  post_gesture_steps:           # batch steps after the gestures complete
+    - { action: tap, target: "Delete" }
   buttons: [home]               # Indigo HID hardware buttons
   relaunch: true                # cold start before the final read
   assertions:
@@ -143,12 +149,16 @@ orientation actually matches, and language is a write to
 
 Flow fields, in the order they run: `clear_state` and `privacy` (after the
 install, because both name the app on the device), `open_url`, `steps`,
-`after_state`, `after_steps`, `buttons`, `push`, `memory_warning`, `reinstall`,
-`relaunch`.
+`after_state`, `after_steps`, `gestures`, `post_gesture_steps`, `buttons`,
+`push`, `memory_warning`, `reinstall`, `relaunch`. Use
+`post_gesture_steps` when an interaction depends on a precise drag first, such
+as tapping the Delete action revealed by a row swipe.
 
 Assertions are deliberately few and all pure functions over the tree: `text`,
-`absent`, `order` (geometric, top to bottom), `inside_window`, `min_width`,
-`min_height`, `not_overlapping`, `above`, `orientation`.
+`absent`, `localized_date` with `locale` (accepts any standard localized date
+style), `order` (geometric, top to bottom), `inside_window`, `min_width`,
+`min_height`, `not_overlapping`, `above`, `orientation`. Add `id` or `label`
+when a localized date or geometry assertion must address one element.
 
 Three things worth knowing before writing one:
 
@@ -280,4 +290,3 @@ along with their three fixtures. Complexity-class puzzles are not
 Apple-platform engineering, and the toolchain-operations tasks measured whether
 an agent would *save a log file*, which the operational tasks now cover as a
 means rather than as an end. All of it remains in git history.
-

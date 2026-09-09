@@ -92,6 +92,19 @@ struct XCTestGraderTests {
             }
             """
         )
+        runner.enqueue(exitCode: 0)
+        runner.enqueue(
+            exitCode: 0,
+            standardOutput: """
+            {
+              "result": "Succeeded",
+              "totalTestCount": 0,
+              "passedTests": 0,
+              "failedTests": 0,
+              "skippedTests": 0
+            }
+            """
+        )
         let (context, workspace) = try await makeGradingContext(processRunner: runner)
         defer { try? FileManager.default.removeItem(at: workspace) }
 
@@ -105,6 +118,37 @@ struct XCTestGraderTests {
 
         #expect(!result.passed)
         #expect(result.summary.contains("No tests executed"))
+    }
+
+    @Test("A zero-test result is retried once before a verdict is recorded")
+    func zeroExecutedRetriesOnce() async throws {
+        let runner = FakeProcessRunner()
+        runner.enqueue(exitCode: 0, standardOutput: "** TEST SUCCEEDED **\n")
+        runner.enqueue(
+            exitCode: 0,
+            standardOutput: #"{"totalTestCount":0,"passedTests":0,"failedTests":0,"skippedTests":0}"#
+        )
+        runner.enqueue(exitCode: 0, standardOutput: "** TEST SUCCEEDED **\n")
+        runner.enqueue(
+            exitCode: 0,
+            standardOutput: #"{"totalTestCount":1,"passedTests":1,"failedTests":0,"skippedTests":0}"#
+        )
+        let (context, workspace) = try await makeGradingContext(processRunner: runner)
+        defer { try? FileManager.default.removeItem(at: workspace) }
+
+        let grader = XCTestGrader(
+            configuration: XCTestGraderConfiguration(
+                scheme: "App",
+                tests: ["AppTests/testPersistence"]
+            )
+        )
+        let result = try await grader.grade(task: defaultTask(), context: context)
+
+        let testRuns = runner.commands().filter { $0.executable == "/usr/bin/xcodebuild" }
+        #expect(testRuns.count == 2)
+        #expect(result.passed)
+        #expect(result.summary.contains("1 executed"))
+        #expect(result.evidence.contains { $0.name == "xctest-retry.log" })
     }
 
     @Test("Skipped tests are excluded from the executed count")
@@ -157,7 +201,7 @@ struct XCTestGraderTests {
         runner.enqueue(exitCode: 0)
         runner.enqueue(
             exitCode: 0,
-            standardOutput: #"{"totalTestCount":0,"passedTests":0,"failedTests":0,"skippedTests":0}"#
+            standardOutput: #"{"totalTestCount":1,"passedTests":1,"failedTests":0,"skippedTests":0}"#
         )
         let (context, workspace) = try await makeGradingContext(processRunner: runner)
         defer { try? FileManager.default.removeItem(at: workspace) }

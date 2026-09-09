@@ -78,7 +78,7 @@ public struct BenchmarkRunner: Sendable {
     /// Extra wall-clock slack granted beyond the task timeout before the
     /// runner forcibly cancels an adapter that failed to enforce the limit
     /// on its own process.
-    private let timeoutBackstopSlack: Duration = .seconds(30)
+    private let timeoutBackstopSlack: Duration
 
     public init(
         environment: any BenchmarkEnvironment,
@@ -86,7 +86,8 @@ public struct BenchmarkRunner: Sendable {
         simulatorManager: SimulatorManager,
         processRunner: any ProcessRunning,
         graderRegistry: GraderRegistry,
-        verificationMaterialiser: VerificationMaterialiser = VerificationMaterialiser()
+        verificationMaterialiser: VerificationMaterialiser = VerificationMaterialiser(),
+        timeoutBackstopSlack: Duration = .seconds(30)
     ) {
         self.environment = environment
         self.workspaceManager = workspaceManager
@@ -94,6 +95,7 @@ public struct BenchmarkRunner: Sendable {
         self.processRunner = processRunner
         self.graderRegistry = graderRegistry
         self.verificationMaterialiser = verificationMaterialiser
+        self.timeoutBackstopSlack = timeoutBackstopSlack
     }
 
     public func run(
@@ -187,10 +189,18 @@ public struct BenchmarkRunner: Sendable {
             // model that solved nothing. Grading it anyway would produce a
             // credible-looking FAIL against an untouched fixture.
             if agentResult.neverRan {
+                let outputPath = "\(runDirectoryURL.lastPathComponent)/logs/agent-output.log"
+                if let failure = agentResult.startupFailure {
+                    throw BenchmarkFailure.agentNeverRan(
+                        message: "the provider rejected startup: \(failure.summary). "
+                            + "Its output is in \(outputPath).",
+                        retryable: failure.isRetryable
+                    )
+                }
                 throw BenchmarkFailure.agentNeverRan(
-                    "it exited \(agentResult.exitCode.map(String.init) ?? "abnormally") "
-                        + "without producing any output. "
-                        + "Its output is in \(runDirectoryURL.lastPathComponent)/logs/agent-output.log."
+                    message: "it exited \(agentResult.exitCode.map(String.init) ?? "abnormally") "
+                        + "without producing a model response. Its output is in \(outputPath).",
+                    retryable: true
                 )
             }
 
@@ -446,9 +456,18 @@ public struct BenchmarkRunner: Sendable {
                     }
                     // Backstop fired first: cancel the adapter and report timeout.
                     group.cancelAll()
+                    let progress = context.agentProgress.snapshot()
+                    var configuration: [String: String] = [:]
+                    if let effort = context.effort { configuration["effort"] = effort }
                     return AgentRunResult(
-                        metadata: AgentMetadata(agent: adapter.identifier, model: context.model),
-                        terminationReason: .timeout
+                        metadata: AgentMetadata(
+                            agent: adapter.identifier,
+                            model: context.model,
+                            configuration: configuration
+                        ),
+                        terminationReason: .timeout,
+                        usage: progress.usage,
+                        finalResponse: progress.finalResponse
                     )
                 }
                 throw BenchmarkFailure.agentLaunchFailure("Agent task ended without a result")

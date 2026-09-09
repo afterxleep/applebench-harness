@@ -190,4 +190,20 @@ enum XcodebuildSupport {
         }
         return candidate
     }
+
+    /// A non-existing artifact filename preserving the preferred extension.
+    static func uniqueLogName(_ preferred: String, context: GradingContext) -> String {
+        let preferredURL = URL(fileURLWithPath: preferred)
+        let stem = preferredURL.deletingPathExtension().lastPathComponent
+        let ext = preferredURL.pathExtension
+        var candidate = preferred
+        var counter = 2
+        while FileManager.default.fileExists(
+            atPath: context.artifactsDirectoryURL.appendingPathComponent(candidate).path
+        ) {
+            candidate = ext.isEmpty ? "\(stem)-\(counter)" : "\(stem)-\(counter).\(ext)"
+            counter += 1
+        }
+        return candidate
+    }
 }

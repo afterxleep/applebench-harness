@@ -12,6 +12,10 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
     public var text: String?
     /// No element's label or value contains this text.
     public var absent: String?
+    /// An ISO calendar day that must be shown using any standard date style
+    /// for `locale`. This grades the date a user reads, not one exact string.
+    public var localizedDate: String?
+    public var locale: String?
     /// These labels appear, and appear in this order reading down the screen.
     /// This is the ordering claim: sort, reorder, and insert-position defects
     /// are exactly "the right rows, in the wrong sequence".
@@ -45,6 +49,8 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
     public init(
         text: String? = nil,
         absent: String? = nil,
+        localizedDate: String? = nil,
+        locale: String? = nil,
         order: [String]? = nil,
         id: String? = nil,
         label: String? = nil,
@@ -57,6 +63,8 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
     ) {
         self.text = text
         self.absent = absent
+        self.localizedDate = localizedDate
+        self.locale = locale
         self.order = order
         self.id = id
         self.label = label
@@ -69,7 +77,8 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case text, absent, order, id, label, orientation, above
+        case text, absent, locale, order, id, label, orientation, above
+        case localizedDate = "localized_date"
         case insideWindow = "inside_window"
         case minWidth = "min_width"
         case minHeight = "min_height"
@@ -77,11 +86,28 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
     }
 
     public func validate() throws {
-        let hasClause = text != nil || absent != nil || order != nil || orientation != nil
+        let hasClause = text != nil || absent != nil || localizedDate != nil
+            || order != nil || orientation != nil
             || insideWindow != nil || minWidth != nil || minHeight != nil || notOverlapping != nil
             || above != nil
         guard hasClause else {
             throw BenchmarkFailure.invalidTask("A uiflow assertion states nothing")
+        }
+        if let localizedDate {
+            guard let locale, !locale.isEmpty else {
+                throw BenchmarkFailure.invalidTask(
+                    "A localized_date assertion needs a locale"
+                )
+            }
+            guard Self.isoDate(localizedDate) != nil else {
+                throw BenchmarkFailure.invalidTask(
+                    "uiflow localized_date '\(localizedDate)' is not YYYY-MM-DD"
+                )
+            }
+        } else if locale != nil {
+            throw BenchmarkFailure.invalidTask(
+                "A uiflow assertion locale is only meaningful with localized_date"
+            )
         }
         let geometric = insideWindow != nil || minWidth != nil || minHeight != nil
             || notOverlapping != nil || above != nil
@@ -99,6 +125,14 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
         }
         if let absent, let found = snapshot.elements.first(where: { $0.searchableText.contains(absent) }) {
             return "\"\(absent)\" is on screen, in \"\(found.searchableText)\""
+        }
+        if let localizedDate, let locale,
+           let failure = localizedDateFailure(
+               localizedDate,
+               locale: locale,
+               snapshot: snapshot
+           ) {
+            return failure
         }
         if let order, let failure = orderFailure(order, in: snapshot) {
             return failure
@@ -176,5 +210,86 @@ public struct UIFlowAssertion: Sendable, Codable, Equatable {
 
     private func describe(_ frame: UIFlowSnapshot.Frame) -> String {
         "(\(frame.x), \(frame.y)) \(frame.width)x\(frame.height)"
+    }
+
+    private func localizedDateFailure(
+        _ iso: String,
+        locale: String,
+        snapshot: UIFlowSnapshot
+    ) -> String? {
+        guard let expected = Self.isoDate(iso) else {
+            return "localized date \"\(iso)\" is not a valid calendar day"
+        }
+        let candidates: [UIFlowSnapshot.Element]
+        if id != nil || label != nil {
+            guard let element = snapshot.element(id: id, label: label) else {
+                return "no element \"\(id ?? label ?? "?")\" on screen"
+            }
+            candidates = [element]
+        } else {
+            candidates = snapshot.elements
+        }
+
+        let calendar = Self.gregorianUTC
+        let styles: [DateFormatter.Style] = [.short, .medium, .long, .full]
+        let presentationLocales = Self.presentationLocales(for: locale)
+        for candidate in candidates {
+            for text in [candidate.label, candidate.value].compactMap({ $0 }) {
+                for presentationLocale in presentationLocales {
+                    for style in styles {
+                        let formatter = DateFormatter()
+                        formatter.locale = presentationLocale
+                        formatter.calendar = calendar
+                        formatter.timeZone = calendar.timeZone
+                        formatter.dateStyle = style
+                        formatter.timeStyle = .none
+                        formatter.isLenient = false
+                        guard let date = formatter.date(from: text) else { continue }
+                        let components = calendar.dateComponents([.year, .month, .day], from: date)
+                        if components == expected { return nil }
+                    }
+                }
+            }
+        }
+        return "no addressed element shows calendar day \"\(iso)\" in locale \"\(locale)\""
+    }
+
+    /// An app without a localization for the device language keeps its base
+    /// language while adopting the user's region. Foundation then formats a
+    /// German-region date with an English month name (for example,
+    /// "4. Mar 2026"). Keep the requested region when accepting that standard
+    /// presentation so numeric day/month order cannot drift to another region.
+    private static func presentationLocales(for identifier: String) -> [Locale] {
+        let requested = Locale(identifier: identifier)
+        guard let region = requested.region?.identifier else { return [requested] }
+        let baseLanguage = Locale(identifier: "en_\(region)")
+        guard baseLanguage.identifier != requested.identifier else { return [requested] }
+        return [requested, baseLanguage]
+    }
+
+    private static var gregorianUTC: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        return calendar
+    }
+
+    private static func isoDate(_ text: String) -> DateComponents? {
+        let parts = text.split(separator: "-", omittingEmptySubsequences: false)
+        guard parts.count == 3,
+              parts[0].count == 4,
+              parts[1].count == 2,
+              parts[2].count == 2,
+              let year = Int(parts[0]),
+              let month = Int(parts[1]),
+              let day = Int(parts[2])
+        else { return nil }
+        var components = DateComponents()
+        components.calendar = gregorianUTC
+        components.timeZone = gregorianUTC.timeZone
+        components.year = year
+        components.month = month
+        components.day = day
+        guard components.date != nil else { return nil }
+        return DateComponents(year: year, month: month, day: day)
     }
 }

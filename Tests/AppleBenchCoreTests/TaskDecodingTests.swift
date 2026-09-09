@@ -31,6 +31,7 @@ struct TaskDecodingTests {
         environment:
           xcode: "27.0"
           platform: ios
+          screen_recording: true
           simulator:
             device: "iPhone 17 Pro"
             runtime: "iOS 27.0"
@@ -72,6 +73,7 @@ struct TaskDecodingTests {
         #expect(task.tags == ["navigation", "swiftui"])
         #expect(task.repository.commit == "4a91abc")
         #expect(task.environment.xcode == "27.0")
+        #expect(task.environment.screenRecording)
         #expect(task.environment.simulator?.device == "iPhone 17 Pro")
         #expect(task.limits.timeoutSeconds == 900)
         #expect(task.limits.maxCostUSD == 5)

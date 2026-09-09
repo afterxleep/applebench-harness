@@ -28,6 +28,9 @@ public struct RunContext: Sendable {
     public let sandbox: AgentSandbox?
     public let limits: RunLimits
     public let environment: EnvironmentSnapshot
+    /// Live structured usage retained even if the runner's timeout backstop
+    /// cancels the adapter before it can return an `AgentRunResult`.
+    public let agentProgress: AgentProgressTracker
 
     public init(
         runID: String,
@@ -39,7 +42,8 @@ public struct RunContext: Sendable {
         environmentAllowlist: [String] = [],
         sandbox: AgentSandbox? = nil,
         limits: RunLimits,
-        environment: EnvironmentSnapshot
+        environment: EnvironmentSnapshot,
+        agentProgress: AgentProgressTracker = AgentProgressTracker()
     ) {
         self.runID = runID
         self.workspaceURL = workspaceURL
@@ -51,6 +55,7 @@ public struct RunContext: Sendable {
         self.sandbox = sandbox
         self.limits = limits
         self.environment = environment
+        self.agentProgress = agentProgress
     }
 
     /// Builds the child environment for an agent process: a minimal base plus
@@ -89,6 +94,12 @@ public struct RunContext: Sendable {
             environment["XDG_CONFIG_HOME"] = hermeticHome.appendingPathComponent(".config").path
             environment["XDG_CACHE_HOME"] = hermeticHome.appendingPathComponent(".cache").path
             environment["XDG_DATA_HOME"] = hermeticHome.appendingPathComponent(".local/share").path
+            let temporaryDirectory = hermeticHome.appendingPathComponent("tmp", isDirectory: true)
+            try? FileManager.default.createDirectory(
+                at: temporaryDirectory,
+                withIntermediateDirectories: true
+            )
+            environment["TMPDIR"] = temporaryDirectory.path
         } else {
             environment["HOME"] = parent["HOME"]
         }
@@ -97,6 +108,18 @@ public struct RunContext: Sendable {
         }
         for (key, value) in extra {
             environment[key] = value
+        }
+        if sandbox != nil {
+            // SwiftPM and Xcode normally apply child sandboxes to manifests,
+            // build-tool plugins and macros. Seatbelt profiles cannot be
+            // nested, so those children fail before any project code runs.
+            // The outer AppleBench profile remains the security boundary.
+            environment["XBS_DISABLE_SANDBOXED_BUILDS"] = "1"
+            let flag = "-disable-sandbox"
+            let existing = environment["OTHER_SWIFT_FLAGS"] ?? ""
+            if !existing.split(separator: " ").contains(Substring(flag)) {
+                environment["OTHER_SWIFT_FLAGS"] = existing.isEmpty ? flag : existing + " " + flag
+            }
         }
         if let path = environment["PATH"] ?? parent["PATH"] {
             environment["PATH"] = Self.filterWrapperCLIs(

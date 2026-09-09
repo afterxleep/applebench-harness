@@ -50,6 +50,14 @@ public struct XCTestGrader: Grader {
         }
 
         var (result, logArtifact, resultBundle) = try await attempt("")
+        var evidence = [logArtifact]
+        if FileManager.default.fileExists(atPath: resultBundle.path) {
+            evidence.append(Artifact(name: resultBundle.lastPathComponent, path: "logs/\(resultBundle.lastPathComponent)"))
+        }
+        var summaryData = await XcodebuildSupport.testSummary(
+            xcresultURL: resultBundle,
+            context: context
+        )
 
         // Installing the app or attaching the runner sometimes fails outright,
         // most often when simulators have been churning through back-to-back UI
@@ -57,20 +65,21 @@ public struct XCTestGrader: Grader {
         // failing, and charging it to the agent turns a benchmark score into a
         // coin flip. One retry costs a couple of minutes and removes the false
         // verdict.
-        if Self.isHostFailure(result) {
+        if Self.isHostFailure(result) || Self.executedTestCount(in: summaryData) == 0 {
             await context.recorder.record(.warning, payload: .object([
                 "grader": .string(identifier),
                 "message": .string("run failed before any test could execute; retrying once before recording a verdict"),
             ]))
             (result, logArtifact, resultBundle) = try await attempt("-retry")
+            evidence.append(logArtifact)
+            if FileManager.default.fileExists(atPath: resultBundle.path) {
+                evidence.append(Artifact(name: resultBundle.lastPathComponent, path: "logs/\(resultBundle.lastPathComponent)"))
+            }
+            summaryData = await XcodebuildSupport.testSummary(
+                xcresultURL: resultBundle,
+                context: context
+            )
         }
-
-        var evidence = [logArtifact]
-        if FileManager.default.fileExists(atPath: resultBundle.path) {
-            evidence.append(Artifact(name: resultBundle.lastPathComponent, path: "logs/\(resultBundle.lastPathComponent)"))
-        }
-
-        let summaryData = await XcodebuildSupport.testSummary(xcresultURL: resultBundle, context: context)
 
         let passed: Bool
         let summaryText: String
@@ -118,6 +127,11 @@ public struct XCTestGrader: Grader {
             || output.contains("Simulator device failed to install the application")
             || output.contains("Unable to boot the Simulator")
             || output.contains("Failed to load the test bundle")
+    }
+
+    private static func executedTestCount(in summary: XcodebuildSupport.TestSummary?) -> Int? {
+        guard let summary else { return nil }
+        return (summary.totalTestCount ?? 0) - (summary.skippedTests ?? 0)
     }
 
 }

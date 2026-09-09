@@ -184,10 +184,16 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
             prompt: task.prompt
         )
 
+        let home = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-home-\(UUID().uuidString)", isDirectory: true)
+        try? FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
+        hermeticHome = home
+
         var environment = context.agentEnvironment(
             extra: [
                 "OPENCODE_CONFIG": Self.configURL(for: context).path
-            ]
+            ],
+            hermeticHome: home
         )
         if let harnessPath = environment["PATH"] {
             do {
@@ -204,6 +210,10 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
                 )
             }
         }
+        if context.sandbox != nil {
+            let shimDirectory = try Self.installToolchainShims(in: home)
+            environment["PATH"] = shimDirectory.path + ":" + (environment["PATH"] ?? "")
+        }
 
         // HOME is redirected to a fresh temp dir so the agent cannot
         // auto-load user-installed skills (e.g. `flowdeck`) that would
@@ -214,19 +224,6 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
         // provider. (Skills are still absent because the symlink is to
         // the auth dir only, not to ~/.config/opencode/skills.)
         do {
-            let home = URL(fileURLWithPath: NSTemporaryDirectory())
-                .appendingPathComponent("applebench-home-\(UUID().uuidString)", isDirectory: true)
-            try? FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
-            hermeticHome = home
-            for key in ["HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME"] {
-                switch key {
-                case "HOME": environment["HOME"] = home.path
-                case "XDG_CONFIG_HOME": environment[key] = home.appendingPathComponent(".config").path
-                case "XDG_CACHE_HOME": environment[key] = home.appendingPathComponent(".cache").path
-                case "XDG_DATA_HOME": environment[key] = home.appendingPathComponent(".local/share").path
-                default: break
-                }
-            }
             // Carry auth over so the agent can still reach its
             // provider. OpenCode stores its auth at
             // ~/.local/share/opencode/auth.json. Symlink just that
@@ -262,9 +259,14 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
             // config lives there too, and it cannot start without reading it.
             var sealed = sandbox.allowingRead([Self.configURL(for: context)])
             if let home = hermeticHome {
-                // OpenCode unpacks ripgrep here on first use; its grep tool
-                // is dead if the sandbox refuses to run it.
-                sealed = sealed.allowingExecution([home.appendingPathComponent(".cache/opencode/bin")])
+                // OpenCode unpacks ripgrep here, and SwiftPM compiles package
+                // manifests under the hermetic TMPDIR. Both are products of
+                // this run and must be executable under the outer seal.
+                sealed = sealed.allowingExecution([home])
+            }
+            if let path = environment["PATH"],
+               let ripgrep = Self.helperExecutable(named: "rg", path: path) {
+                sealed = sealed.allowingExecution(of: [ripgrep])
             }
             guard let wrapped = try sealed.wrap(
                 executable: executable,
@@ -325,7 +327,8 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
             terminationReason: CLIAgentSession.terminationReason(for: outcome),
             exitCode: outcome.processResult.exitCode,
             usage: outcome.usage,
-            finalResponse: outcome.finalResponse
+            finalResponse: outcome.finalResponse,
+            startupFailure: outcome.reportedFailure
         )
     }
 
@@ -342,6 +345,47 @@ public final class OpenCodeAdapter: AgentAdapter, @unchecked Sendable {
 
     static func configURL(for context: RunContext) -> URL {
         context.runDirectoryURL.appendingPathComponent("opencode.json")
+    }
+
+    static func helperExecutable(named name: String, path: String) -> URL? {
+        let fileManager = FileManager.default
+        for directory in path.split(separator: ":").map(String.init) {
+            let candidate = URL(fileURLWithPath: directory).appendingPathComponent(name)
+            if fileManager.isExecutableFile(atPath: candidate.path) {
+                return candidate
+            }
+        }
+        return nil
+    }
+
+    /// Installs transparent toolchain shims required only because AppleBench
+    /// already runs the agent under a Seatbelt profile.
+    ///
+    /// Xcode's package loader applies its own manifest sandbox even when its
+    /// parent is already sandboxed, and macOS refuses nested Seatbelt
+    /// profiles. Passing the Xcode user-default argument disables that inner
+    /// layer; AppleBench's outer answer-isolation profile remains in force.
+    static func installToolchainShims(in home: URL) throws -> URL {
+        let directory = home.appendingPathComponent(".applebench/bin", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let xcodebuild = directory.appendingPathComponent("xcodebuild")
+        let script = """
+        #!/bin/sh
+        exec /usr/bin/xcodebuild \
+          -IDEPackageSupportDisableManifestSandbox=1 \
+          -IDEPackageSupportDisablePluginExecutionSandbox=1 \
+          "$@"
+        """
+        guard FileManager.default.createFile(
+            atPath: xcodebuild.path,
+            contents: Data(script.utf8),
+            attributes: [.posixPermissions: 0o755]
+        ) else {
+            throw BenchmarkFailure.agentLaunchFailure(
+                "Could not install the sealed-run xcodebuild shim"
+            )
+        }
+        return directory
     }
 
     /// Benchmark-owned OpenCode configuration: hermetic and non-interactive.
@@ -419,6 +463,8 @@ struct OpenCodeOutputParser: AgentOutputParser {
         var kind: ParsedAgentEvent.Kind = .other
         if type.contains("tool") {
             kind = .toolCall
+        } else if type == "error" {
+            kind = .error
         } else if type == "text" || type == "reasoning" || type.contains("message") {
             kind = .message
         } else if type.contains("finish") || type.contains("step") {
@@ -465,6 +511,28 @@ struct OpenCodeOutputParser: AgentOutputParser {
             finalResponse = text
         }
 
-        return ParsedAgentEvent(kind: kind, payload: value, usage: usage, finalResponse: finalResponse)
+        var failure: AgentReportedFailure?
+        if type == "error", let data = value["error"]?["data"],
+           let message = data["message"]?.stringValue {
+            let isRetryable: Bool
+            if case .bool(let value)? = data["isRetryable"] {
+                isRetryable = value
+            } else {
+                isRetryable = true
+            }
+            failure = AgentReportedFailure(
+                message: message,
+                statusCode: data["statusCode"]?.intValue,
+                isRetryable: isRetryable
+            )
+        }
+
+        return ParsedAgentEvent(
+            kind: kind,
+            payload: value,
+            usage: usage,
+            finalResponse: finalResponse,
+            failure: failure
+        )
     }
 }

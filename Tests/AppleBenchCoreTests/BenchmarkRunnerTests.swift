@@ -65,6 +65,39 @@ struct ScriptedAdapter: AgentAdapter {
     func cleanup(context: RunContext) async {}
 }
 
+private struct IntegerUsageParser: AgentOutputParser {
+    func parse(line: String) -> ParsedAgentEvent? {
+        guard let tokens = Int(line) else { return nil }
+        return ParsedAgentEvent(
+            kind: .usage,
+            payload: .object([:]),
+            usage: AgentUsage(totalTokens: tokens)
+        )
+    }
+}
+
+private struct HangingAdapter: AgentAdapter {
+    let identifier = "hanging"
+    let telemetry = AgentTelemetryCapability.structured
+
+    func prepare(context: RunContext) async throws {}
+
+    func run(
+        task: BenchmarkTask,
+        context: RunContext,
+        recorder: EventRecorder
+    ) async throws -> AgentRunResult {
+        context.agentProgress.observe("17\n23\n", parser: IntegerUsageParser())
+        try await Task.sleep(for: .seconds(3_600))
+        return AgentRunResult(
+            metadata: AgentMetadata(agent: identifier, model: context.model),
+            terminationReason: .completed
+        )
+    }
+
+    func cleanup(context: RunContext) async {}
+}
+
 private final class StartupFailureCounter: @unchecked Sendable {
     private let lock = NSLock()
     private var remainingFailures: Int
@@ -94,6 +127,12 @@ private struct FlakyStartupAdapter: AgentAdapter {
     let identifier = "flaky-startup"
     let telemetry = AgentTelemetryCapability.plainText
     let counter: StartupFailureCounter
+    var startupFailure: AgentReportedFailure?
+
+    init(counter: StartupFailureCounter, startupFailure: AgentReportedFailure? = nil) {
+        self.counter = counter
+        self.startupFailure = startupFailure
+    }
 
     func prepare(context: RunContext) async throws {}
 
@@ -102,7 +141,8 @@ private struct FlakyStartupAdapter: AgentAdapter {
             return AgentRunResult(
                 metadata: AgentMetadata(agent: identifier, model: context.model),
                 terminationReason: .failed,
-                exitCode: 1
+                exitCode: 1,
+                startupFailure: startupFailure
             )
         }
         await recorder.record(.agentOutput, payload: .object(["text": .string("worked")]))
@@ -231,7 +271,10 @@ struct RunnerHarness {
         return RunnerHarness(repoURL: repoURL, runsRoot: runsRoot, task: task)
     }
 
-    func makeRunner(grader: FakeGrader = FakeGrader()) -> BenchmarkRunner {
+    func makeRunner(
+        grader: FakeGrader = FakeGrader(),
+        timeoutBackstopSlack: Duration = .seconds(30)
+    ) -> BenchmarkRunner {
         var registry = GraderRegistry()
         registry.register { _ in grader }
         return BenchmarkRunner(
@@ -239,7 +282,8 @@ struct RunnerHarness {
             workspaceManager: WorkspaceManager(),
             simulatorManager: SimulatorManager(),
             processRunner: ProcessRunner(),
-            graderRegistry: registry
+            graderRegistry: registry,
+            timeoutBackstopSlack: timeoutBackstopSlack
         )
     }
 
@@ -389,6 +433,26 @@ struct BenchmarkRunnerTests {
         #expect(result.result.passed)
     }
 
+    @Test("The timeout backstop preserves requested effort and observed usage")
+    func timeoutBackstopPreservesMetadataAndUsage() async throws {
+        let harness = try await RunnerHarness.make()
+        defer { harness.cleanUp() }
+        var task = harness.task
+        task.limits = RunLimits(timeoutSeconds: 0)
+        var options = harness.options
+        options.effort = "max"
+
+        let result = try await harness.makeRunner(timeoutBackstopSlack: .milliseconds(100)).run(
+            task: task,
+            adapter: HangingAdapter(),
+            options: options
+        )
+
+        #expect(result.result.agentTermination == .timeout)
+        #expect(result.agent.effort == "max")
+        #expect(result.usage.totalTokens == 40)
+    }
+
     @Test("Adapter prepare failures surface as agent launch failures")
     func prepareFailure() async throws {
         let harness = try await RunnerHarness.make()
@@ -516,6 +580,43 @@ struct RunCoordinatorTests {
         #expect(report.agents.first?.attempted == 0)
         #expect(report.agents.first?.errored == 1)
         #expect(report.results.isEmpty)
+    }
+
+    @Test("A non-retryable provider rejection stops after one attempt with its real reason")
+    func nonRetryableStartupFailureStopsImmediately() async throws {
+        let harness = try await RunnerHarness.make()
+        defer { harness.cleanUp() }
+        let counter = StartupFailureCounter(failures: 4)
+        let trace = StartupRetryTrace()
+
+        let coordinator = RunCoordinator(
+            runner: harness.makeRunner(),
+            sleepBeforeAgentStartupRetry: { delay in trace.recordDelay(delay) }
+        )
+        let report = await coordinator.runSuite(
+            suite: BenchmarkSuite(id: "unit", name: "Unit", tasks: ["unit-001"]),
+            tasks: [harness.task],
+            entries: [.init(adapter: FlakyStartupAdapter(
+                counter: counter,
+                startupFailure: AgentReportedFailure(
+                    message: "User not found.",
+                    statusCode: 401,
+                    isRetryable: false
+                )
+            ))],
+            runs: 1,
+            options: harness.options,
+            progress: { trace.record($0) }
+        )
+
+        #expect(counter.runIDs.count == 1)
+        #expect(trace.notices.isEmpty)
+        #expect(trace.delays.isEmpty)
+        #expect(trace.abandonmentReasons.first?.contains("after 1 attempt") == true)
+        #expect(trace.abandonmentReasons.first?.contains("User not found. (HTTP 401)") == true)
+        #expect(trace.errors.first?.contains("User not found. (HTTP 401)") == true)
+        #expect(report.agents.first?.attempted == 0)
+        #expect(report.agents.first?.errored == 1)
     }
 
     @Test("Aggregates completion across repeated runs")

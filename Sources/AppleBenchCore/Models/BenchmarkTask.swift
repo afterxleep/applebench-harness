@@ -119,11 +119,32 @@ public struct EnvironmentRequirements: Sendable, Codable, Equatable {
     public var xcode: String?
     public var platform: BenchmarkPlatform
     public var simulator: SimulatorRequirement?
+    /// Whether the task must capture the real macOS display.
+    public var screenRecording: Bool
 
-    public init(xcode: String? = nil, platform: BenchmarkPlatform, simulator: SimulatorRequirement? = nil) {
+    public init(
+        xcode: String? = nil,
+        platform: BenchmarkPlatform,
+        simulator: SimulatorRequirement? = nil,
+        screenRecording: Bool = false
+    ) {
         self.xcode = xcode
         self.platform = platform
         self.simulator = simulator
+        self.screenRecording = screenRecording
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case xcode, platform, simulator
+        case screenRecording = "screen_recording"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        xcode = try container.decodeIfPresent(String.self, forKey: .xcode)
+        platform = try container.decode(BenchmarkPlatform.self, forKey: .platform)
+        simulator = try container.decodeIfPresent(SimulatorRequirement.self, forKey: .simulator)
+        screenRecording = try container.decodeIfPresent(Bool.self, forKey: .screenRecording) ?? false
     }
 }
 

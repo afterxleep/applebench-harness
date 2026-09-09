@@ -219,9 +219,9 @@ public struct RunCoordinator: Sendable {
                                     options: options
                                 )
                                 errorMessage = nil
-                            } catch BenchmarkFailure.agentNeverRan(let why) {
-                                errorMessage = "\(BenchmarkFailure.agentNeverRan(why))"
-                                if startupAttempt < totalStartupAttempts {
+                            } catch BenchmarkFailure.agentNeverRan(let why, let retryable) {
+                                errorMessage = "\(BenchmarkFailure.agentNeverRan(message: why, retryable: retryable))"
+                                if retryable && startupAttempt < totalStartupAttempts {
                                     let nextAttempt = startupAttempt + 1
                                     let delaySeconds = Self.startupRetryDelaySeconds(
                                         afterFailedAttempt: startupAttempt
@@ -245,9 +245,10 @@ public struct RunCoordinator: Sendable {
                                 // be published as model failures.
                                 if !cursor.wasAbandoned {
                                     cursor.abandon()
+                                    let attemptWord = startupAttempt == 1 ? "attempt" : "attempts"
                                     progress(.suiteAbandoned(
                                         reason: "the agent never reached its model on "
-                                            + "\(job.task.id) after \(startupAttempt) attempts: \(why)"
+                                            + "\(job.task.id) after \(startupAttempt) \(attemptWord): \(why)"
                                     ))
                                 }
                                 break

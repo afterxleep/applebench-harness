@@ -499,6 +499,12 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
     /// Precise drags run after the steps: swipe-to-delete on a particular row,
     /// or a drag-to-reorder, which needs a hold before it engages.
     public var gestures: [UIFlowGesture]
+    /// Batch steps run after every precise gesture has completed.
+    ///
+    /// This is the observable sequence needed for flows such as deleting a row
+    /// and then revealing another section. Keeping it explicit avoids judging
+    /// an intermediate screen or pretending YAML key order controls execution.
+    public var postGestureSteps: [JSONValue]
     /// Permission changes applied after the app is installed and before it is
     /// launched. `simctl privacy` needs the app on the device to name it.
     public var privacy: [UIFlowPrivacyChange]
@@ -537,6 +543,7 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         settleSeconds: Int = 2,
         relaunch: Bool = false,
         gestures: [UIFlowGesture] = [],
+        postGestureSteps: [JSONValue] = [],
         appearanceMustDiffer: Bool = false,
         appearanceRegion: String? = nil,
         privacy: [UIFlowPrivacyChange] = [],
@@ -559,6 +566,7 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         self.settleSeconds = settleSeconds
         self.relaunch = relaunch
         self.gestures = gestures
+        self.postGestureSteps = postGestureSteps
         self.appearanceMustDiffer = appearanceMustDiffer
         self.appearanceRegion = appearanceRegion
         self.privacy = privacy
@@ -573,6 +581,7 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         case project, workspace, scheme, steps, buttons, assertions, relaunch
         case privacy, push, reinstall, gestures
         case afterSteps = "after_steps"
+        case postGestureSteps = "post_gesture_steps"
         case clearState = "clear_state"
         case appearanceMustDiffer = "appearance_must_differ"
         case appearanceRegion = "appearance_region"
@@ -600,6 +609,9 @@ public struct UIFlowGraderConfiguration: Sendable, Codable, Equatable {
         relaunch = try container.decodeIfPresent(Bool.self, forKey: .relaunch) ?? false
         privacy = try container.decodeIfPresent([UIFlowPrivacyChange].self, forKey: .privacy) ?? []
         gestures = try container.decodeIfPresent([UIFlowGesture].self, forKey: .gestures) ?? []
+        postGestureSteps = try container.decodeIfPresent(
+            [JSONValue].self, forKey: .postGestureSteps
+        ) ?? []
         appearanceMustDiffer = try container.decodeIfPresent(
             Bool.self, forKey: .appearanceMustDiffer
         ) ?? false

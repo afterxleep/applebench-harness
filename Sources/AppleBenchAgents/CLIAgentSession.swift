@@ -24,6 +24,7 @@ enum CLIAgentSession {
         var processResult: ProcessExecutionResult
         var usage: AgentUsage
         var finalResponse: String?
+        var reportedFailure: AgentReportedFailure?
         var parsedEventCount: Int
         /// True when the run was stopped for spending its token budget rather
         /// than for running out of time or finishing.
@@ -62,6 +63,9 @@ enum CLIAgentSession {
                     command,
                     timeout: .seconds(context.limits.timeoutSeconds)
                 ) { stream, text in
+                    if let parser = invocation.parser, stream == .stdout {
+                        context.agentProgress.observe(text, parser: parser)
+                    }
                     // Live raw capture; structured extraction happens post-exit.
                     Task {
                         await recorder.record(.agentOutput, payload: .object([
@@ -115,6 +119,7 @@ enum CLIAgentSession {
 
         var usage = AgentUsage()
         var finalResponse: String?
+        var reportedFailure: AgentReportedFailure?
         var parsedCount = 0
         if let parser = invocation.parser {
             for line in result.standardOutput.split(separator: "\n", omittingEmptySubsequences: true) {
@@ -130,6 +135,9 @@ enum CLIAgentSession {
                 if let response = event.finalResponse {
                     finalResponse = response
                 }
+                if let failure = event.failure {
+                    reportedFailure = failure
+                }
             }
         }
         if finalResponse == nil, invocation.parser == nil {
@@ -143,6 +151,7 @@ enum CLIAgentSession {
             processResult: result,
             usage: usage,
             finalResponse: finalResponse,
+            reportedFailure: reportedFailure,
             parsedEventCount: parsedCount,
             budgetExceeded: budgetExceeded
         )

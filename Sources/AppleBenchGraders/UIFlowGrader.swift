@@ -43,9 +43,10 @@ public struct UIFlowGrader: Grader {
             context: context
         )
         buildArguments.append("build")
+        let buildLogName = XcodebuildSupport.uniqueLogName("uiflow-build.log", context: context)
         let (buildResult, buildLog) = try await XcodebuildSupport.run(
             arguments: buildArguments,
-            logName: "uiflow-build.log",
+            logName: buildLogName,
             context: context
         )
         guard buildResult.exitCode == 0 else {
@@ -105,30 +106,15 @@ public struct UIFlowGrader: Grader {
             )
             try? await Task.sleep(for: .seconds(configuration.settleSeconds))
 
-            // A state change that reboots the device leaves SpringBoard racing
-            // the launch: `simctl launch` reports a pid, SpringBoard finishes
-            // coming up, and the app is behind the home screen. Grading that
-            // reads the home screen's icons as the app's UI and reports a
-            // sound task as passing unfixed. Confirm the app is actually in
-            // front, and relaunch once if it is not.
-            if state.reboots {
-                for attempt in 0..<3 {
-                    let screen = try await readScreen(udid: udid, context: context)
-                    if !Self.looksLikeHomeScreen(screen) { break }
-                    guard attempt < 2 else {
-                        throw BenchmarkFailure.graderFailure(
-                            grader: identifier,
-                            message: "The app never came to the front after the device restarted; "
-                                + "the home screen was still showing after three launches."
-                        )
-                    }
-                    _ = try? await simulatorManager.launch(
-                        udid: udid,
-                        bundleIdentifier: configuration.bundleIdentifier
-                    )
-                    try? await Task.sleep(for: .seconds(configuration.settleSeconds + 3))
-                }
-            }
+            // A successful launch command only proves a process was created.
+            // SpringBoard can still be in front during ordinary simulator
+            // churn as well as after a reboot, so verify every launch before
+            // judging the screen.
+            try await ensureAppIsForeground(
+                udid: udid,
+                context: context,
+                afterReboot: state.reboots
+            )
 
             if let openURL = configuration.openURL {
                 try await require(UIFlowCommands.openURL(openURL, udid: udid), context: context)
@@ -143,7 +129,12 @@ public struct UIFlowGrader: Grader {
             } else {
                 let response = try await runBatch(configuration.steps, udid: udid, context: context)
                 stepFailure = response.stepFailure
-                snapshot = response.snapshot
+                if stepFailure == nil {
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                    snapshot = try await readScreen(udid: udid, context: context)
+                } else {
+                    snapshot = response.snapshot
+                }
             }
 
             guard stepFailure == nil else {
@@ -166,11 +157,22 @@ public struct UIFlowGrader: Grader {
                     if let failure = response.stepFailure {
                         return Outcome(stepFailure: failure, snapshot: response.snapshot)
                     }
-                    snapshot = response.snapshot
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                    snapshot = try await readScreen(udid: udid, context: context)
                 }
                 for gesture in configuration.gestures {
                     try await require(UIFlowCommands.swipe(gesture, udid: udid), context: context)
                     try? await Task.sleep(for: .seconds(1))
+                }
+                if !configuration.postGestureSteps.isEmpty {
+                    let response = try await runBatch(
+                        configuration.postGestureSteps, udid: udid, context: context
+                    )
+                    if let failure = response.stepFailure {
+                        return Outcome(stepFailure: failure, snapshot: response.snapshot)
+                    }
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                    snapshot = try await readScreen(udid: udid, context: context)
                 }
                 for button in configuration.buttons {
                     try await require(UIFlowCommands.button(button, udid: udid), context: context)
@@ -213,7 +215,8 @@ public struct UIFlowGrader: Grader {
                         bundleIdentifier: configuration.bundleIdentifier
                     )
                 }
-                if !configuration.buttons.isEmpty || !configuration.gestures.isEmpty
+                if !configuration.buttons.isEmpty
+                    || (!configuration.gestures.isEmpty && configuration.postGestureSteps.isEmpty)
                     || configuration.relaunch
                     || configuration.reinstall || configuration.push != nil
                     || configuration.memoryWarning {
@@ -284,6 +287,31 @@ public struct UIFlowGrader: Grader {
     static func looksLikeHomeScreen(_ snapshot: UIFlowSnapshot) -> Bool {
         let labels = Set(snapshot.elements.compactMap(\.label))
         return labels.contains("Files") && labels.contains("Contacts")
+    }
+
+    private func ensureAppIsForeground(
+        udid: String,
+        context: GradingContext,
+        afterReboot: Bool
+    ) async throws {
+        for attempt in 0..<3 {
+            let screen = try await readScreen(udid: udid, context: context)
+            if !Self.looksLikeHomeScreen(screen) { return }
+            guard attempt < 2 else {
+                throw BenchmarkFailure.graderFailure(
+                    grader: identifier,
+                    message: "The app never came to the front; the home screen was still showing after three launches."
+                )
+            }
+            _ = try await simulatorManager.launch(
+                udid: udid,
+                bundleIdentifier: configuration.bundleIdentifier
+            )
+            let rebootAllowance = afterReboot ? 3 : 0
+            try? await Task.sleep(
+                for: .seconds(configuration.settleSeconds + rebootAllowance)
+            )
+        }
     }
 
     /// Runs a command the flow depends on. A device instruction that did not

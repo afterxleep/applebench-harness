@@ -14,6 +14,8 @@
 #   --attempt all|first|latest|best   Which attempt counts when a task was run
 #                                     more than once (default: first)
 #   --model <id>                      Publish only this model's runs
+#   --base-report <json>              Previous report used as an immutable
+#                                     baseline; live runs replace matching ids
 #
 # Writes:
 #   Reports/<slug>.csv          full per-run detail
@@ -44,12 +46,14 @@ suite=""
 attempt="first"
 model=""
 suite_files=()
+base_reports=()
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --attempt) attempt="$2"; shift 2 ;;
         --model)   model="$2";   shift 2 ;;
         --suite-file) suite_files+=("$2"); shift 2 ;;
+        --base-report) base_reports+=("$2"); shift 2 ;;
         -*)        echo "unknown option: $1" >&2; exit 2 ;;
         *)
             if   [ -z "$slug" ];     then slug="$1"
@@ -85,6 +89,7 @@ selection=(--attempt "$attempt")
 # directory holds whatever was run in it. Naming the suite is what keeps the
 # public sample tasks — which are never scored — out of a published number.
 for file in "${suite_files[@]+"${suite_files[@]}"}"; do selection+=(--suite "$file"); done
+for file in "${base_reports[@]+"${base_reports[@]}"}"; do selection+=(--base-report "$file"); done
 
 "$binary" results "$runs_dir" "${selection[@]}" --format csv  --output "$root/Reports/$slug.csv"
 "$binary" results "$runs_dir" "${selection[@]}" --format json --output "$root/Reports/$slug.json"

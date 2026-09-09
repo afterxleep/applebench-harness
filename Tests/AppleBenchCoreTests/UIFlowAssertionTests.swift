@@ -37,6 +37,24 @@ struct UIFlowAssertionTests {
         #expect(UIFlowAssertion(text: "42").failure(against: snapshot) == nil)
     }
 
+    @Test("Localized-date assertions accept standard presentation styles and reject the wrong day")
+    func localizedDateIsSemantic() {
+        let short = rows(["04.03.26"])
+        let long = rows(["4. März 2026"])
+        let englishAppInGermany = rows(["4. Mar 2026"])
+        let wrong = rows(["3. April 2026"])
+        let assertion = UIFlowAssertion(
+            localizedDate: "2026-03-04",
+            locale: "de_DE",
+            id: "row-0"
+        )
+
+        #expect(assertion.failure(against: short) == nil)
+        #expect(assertion.failure(against: long) == nil)
+        #expect(assertion.failure(against: englishAppInGermany) == nil)
+        #expect(assertion.failure(against: wrong) != nil)
+    }
+
     @Test("Absent fails when the text is on screen")
     func textAbsent() {
         let snapshot = rows(["Alpha", "Error: could not load"])
@@ -133,6 +151,9 @@ struct UIFlowAssertionTests {
     func emptyAssertionIsInvalid() {
         #expect(throws: BenchmarkFailure.self) { try UIFlowAssertion().validate() }
         #expect(throws: Never.self) { try UIFlowAssertion(text: "x").validate() }
+        #expect(throws: BenchmarkFailure.self) {
+            try UIFlowAssertion(localizedDate: "2026-03-04").validate()
+        }
     }
 
     @Test("Above catches a control the keyboard has covered")

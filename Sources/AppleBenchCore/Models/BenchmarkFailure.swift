@@ -21,7 +21,7 @@ public enum BenchmarkFailure: Error, Sendable {
     /// launch failure because it is almost never about this task: a denied
     /// path, a bad key or a provider outage will do the same to every task
     /// after it, so a suite stops rather than spending an hour proving it.
-    case agentNeverRan(String)
+    case agentNeverRan(message: String, retryable: Bool)
     /// The agent exceeded the wall-clock limit and was terminated. Grading
     /// still runs; this failure is recorded as the termination reason rather
     /// than aborting the run.
@@ -43,7 +43,7 @@ extension BenchmarkFailure: CustomStringConvertible {
             "Repository failure: \(message)"
         case .agentLaunchFailure(let message):
             "Agent launch failure: \(message)"
-        case .agentNeverRan(let message):
+        case .agentNeverRan(let message, _):
             "Agent never reached its model: \(message)"
         case .agentTimeout:
             "Agent exceeded wall-clock timeout"

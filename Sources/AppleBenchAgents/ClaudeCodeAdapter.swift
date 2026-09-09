@@ -70,9 +70,15 @@ public final class ClaudeCodeAdapter: AgentAdapter, @unchecked Sendable {
         // front of PATH. That way the original `claude` directory
         // (which also contains `flowdeck`) is removed entirely from
         // PATH, while the agent's binary is still reachable.
-        var environment = context.agentEnvironment(extra: [
-            "CLAUDE_CODE_DISABLE_TELEMETRY": "1",
-        ])
+        let home = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-home-\(UUID().uuidString)", isDirectory: true)
+        try? FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
+        hermeticHome = home
+
+        var environment = context.agentEnvironment(
+            extra: ["CLAUDE_CODE_DISABLE_TELEMETRY": "1"],
+            hermeticHome: home
+        )
         if let harnessPath = environment["PATH"] {
             do {
                 let sanitized = try RunContext.sanitizedPath(
@@ -97,17 +103,6 @@ public final class ClaudeCodeAdapter: AgentAdapter, @unchecked Sendable {
         // shortcut as the binary, reached a different way. Auth must come
         // from `ANTHROPIC_API_KEY` (already passed through
         // `agentEnvironment`).
-        do {
-            let home = URL(fileURLWithPath: NSTemporaryDirectory())
-                .appendingPathComponent("applebench-home-\(UUID().uuidString)", isDirectory: true)
-            try? FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
-            hermeticHome = home
-            environment["HOME"] = home.path
-            environment["XDG_CONFIG_HOME"] = home.appendingPathComponent(".config").path
-            environment["XDG_CACHE_HOME"] = home.appendingPathComponent(".cache").path
-            environment["XDG_DATA_HOME"] = home.appendingPathComponent(".local/share").path
-        }
-
         let outcome = try await CLIAgentSession.execute(
             invocation: .init(
                 executable: executable,
@@ -138,7 +133,8 @@ public final class ClaudeCodeAdapter: AgentAdapter, @unchecked Sendable {
             terminationReason: CLIAgentSession.terminationReason(for: outcome),
             exitCode: outcome.processResult.exitCode,
             usage: outcome.usage,
-            finalResponse: outcome.finalResponse
+            finalResponse: outcome.finalResponse,
+            startupFailure: outcome.reportedFailure
         )
     }
 

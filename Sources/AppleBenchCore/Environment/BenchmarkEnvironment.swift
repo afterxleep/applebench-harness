@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// Inspects the machine and validates that a task's environment requirements
@@ -21,9 +22,14 @@ extension BenchmarkEnvironment {
 /// `xcode-select`, `xcodebuild` and `simctl`.
 public struct XcodeEnvironment: BenchmarkEnvironment {
     private let processRunner: any ProcessRunning
+    private let screenCaptureAllowed: @Sendable () -> Bool
 
-    public init(processRunner: any ProcessRunning = ProcessRunner()) {
+    public init(
+        processRunner: any ProcessRunning = ProcessRunner(),
+        screenCaptureAllowed: @escaping @Sendable () -> Bool = { CGPreflightScreenCaptureAccess() }
+    ) {
         self.processRunner = processRunner
+        self.screenCaptureAllowed = screenCaptureAllowed
     }
 
     public func snapshot() async throws -> EnvironmentSnapshot {
@@ -53,6 +59,11 @@ public struct XcodeEnvironment: BenchmarkEnvironment {
     }
 
     public func validate(task: BenchmarkTask, against snapshot: EnvironmentSnapshot) throws {
+        if task.environment.screenRecording, !screenCaptureAllowed() {
+            throw BenchmarkFailure.environmentUnavailable(
+                "Task requires macOS Screen Recording permission, but the process running AppleBench does not have it"
+            )
+        }
         if let requiredXcode = task.environment.xcode {
             guard snapshot.xcodeVersion == requiredXcode
                 || snapshot.xcodeVersion.hasPrefix("\(requiredXcode).")

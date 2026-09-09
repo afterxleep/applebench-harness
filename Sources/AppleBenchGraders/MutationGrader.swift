@@ -108,6 +108,37 @@ public struct MutationGrader: Grader {
             )
         }
 
+        var arguments = XcodebuildSupport.baseArguments(
+            project: configuration.project,
+            workspace: configuration.workspace,
+            scheme: configuration.scheme,
+            configuration: nil,
+            destination: configuration.destination,
+            context: context
+        )
+        arguments.append("test")
+        for identifier in configuration.tests { arguments += ["-only-testing:\(identifier)"] }
+        for identifier in configuration.skipTests { arguments += ["-skip-testing:\(identifier)"] }
+
+        // A mutation is meaningful only when the same tests first pass against
+        // the workspace the model actually returned. Otherwise a syntax error,
+        // missing target, or already-failing assertion would be misreported as
+        // proof that the test noticed our deliberate break.
+        let (baseline, baselineLog) = try await XcodebuildSupport.run(
+            arguments: arguments,
+            logName: "mutation-baseline.log",
+            context: context
+        )
+        guard baseline.exitCode == 0 else {
+            return GradingResult(
+                grader: identifier,
+                passed: false,
+                duration: start.duration(to: .now),
+                summary: "The unmutated tests did not pass, so their failure cannot prove that the mutation was detected",
+                evidence: [baselineLog]
+            )
+        }
+
         var sources: [String: String?] = [:]
         for mutation in configuration.mutations where sources[mutation.path] == nil {
             let url = context.workspaceURL.appendingPathComponent(mutation.path)
@@ -139,18 +170,6 @@ public struct MutationGrader: Grader {
             try one.mutated.write(to: url, atomically: true, encoding: .utf8)
         }
 
-        var arguments = XcodebuildSupport.baseArguments(
-            project: configuration.project,
-            workspace: configuration.workspace,
-            scheme: configuration.scheme,
-            configuration: nil,
-            destination: configuration.destination,
-            context: context
-        )
-        arguments.append("test")
-        for identifier in configuration.tests { arguments += ["-only-testing:\(identifier)"] }
-        for identifier in configuration.skipTests { arguments += ["-skip-testing:\(identifier)"] }
-
         let (result, log) = try await XcodebuildSupport.run(
             arguments: arguments,
             logName: "mutation-test.log",
@@ -166,7 +185,7 @@ public struct MutationGrader: Grader {
             summary: broke
                 ? "The tests failed against a deliberately broken app, so they test the behaviour they claim (\(described))"
                 : "The tests still passed with the app broken (\(described)), so they do not assert the behaviour the task asked for",
-            evidence: [log]
+            evidence: [baselineLog, log]
         )
     }
 }

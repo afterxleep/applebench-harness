@@ -299,6 +299,244 @@ struct AgentSandboxTests {
         #expect(process.terminationStatus == 0, "a tool the agent fetched was refused")
     }
 
+    @Test("SwiftPM can execute a generated package manifest in a sealed run")
+    func swiftPackageManifestMayRun() throws {
+        let scratch = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-swiftpm-\(UUID().uuidString)")
+        let run = scratch.appendingPathComponent(".applebench/runs/r1")
+        let workspace = run.appendingPathComponent("workspace")
+        let siblingResult = scratch.appendingPathComponent(
+            ".applebench/runs/r2/result.json"
+        )
+        let home = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-swiftpm-home-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(
+            at: workspace.appendingPathComponent("Sources/Probe"),
+            withIntermediateDirectories: true
+        )
+        try FileManager.default.createDirectory(
+            at: siblingResult.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try "answer".write(to: siblingResult, atomically: true, encoding: .utf8)
+        try FileManager.default.createDirectory(
+            at: home.appendingPathComponent("tmp"),
+            withIntermediateDirectories: true
+        )
+        defer {
+            try? FileManager.default.removeItem(at: scratch)
+            try? FileManager.default.removeItem(at: home)
+        }
+
+        try """
+        // swift-tools-version: 6.0
+        import PackageDescription
+        let package = Package(name: "Probe", targets: [.executableTarget(name: "Probe")])
+        """.write(
+            to: workspace.appendingPathComponent("Package.swift"),
+            atomically: true,
+            encoding: .utf8
+        )
+        try "print(\"probe\")\n".write(
+            to: workspace.appendingPathComponent("Sources/Probe/main.swift"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let box = AgentSandbox.standard(
+            harnessRoot: scratch,
+            taskSetRoot: nil,
+            workspaceURL: workspace,
+            runDirectory: run
+        ).allowingExecution([home])
+        let context = RunContext(
+            runID: "test",
+            workspaceURL: workspace,
+            runDirectoryURL: run,
+            logsDirectoryURL: run.appendingPathComponent("logs"),
+            model: nil,
+            sandbox: box,
+            limits: RunLimits(),
+            environment: EnvironmentSnapshot(
+                macosVersion: "26.5",
+                architecture: "arm64",
+                xcodePath: "/Applications/Xcode.app/Contents/Developer",
+                xcodeVersion: "27.0",
+                xcodeBuildNumber: "27A0000"
+            )
+        )
+        let environment = context.agentEnvironment(hermeticHome: home)
+        let siblingCommand = try #require(try box.wrap(
+            executable: "/bin/cat",
+            arguments: [siblingResult.path],
+            profileURL: scratch.appendingPathComponent("sibling.sb")
+        ))
+        let siblingProcess = Process()
+        siblingProcess.executableURL = URL(fileURLWithPath: siblingCommand.executable)
+        siblingProcess.arguments = siblingCommand.arguments
+        siblingProcess.environment = environment
+        siblingProcess.standardOutput = FileHandle.nullDevice
+        siblingProcess.standardError = FileHandle.nullDevice
+        try siblingProcess.run()
+        siblingProcess.waitUntilExit()
+        #expect(
+            siblingProcess.terminationStatus != 0,
+            "Allowing SwiftPM reopened another run's result"
+        )
+
+        let chdirCommand = try #require(try box.wrap(
+            executable: "/bin/sh",
+            arguments: ["-c", "cd \"$1\" && /bin/pwd", "sh", workspace.path],
+            profileURL: scratch.appendingPathComponent("chdir.sb")
+        ))
+        let chdirProcess = Process()
+        chdirProcess.executableURL = URL(fileURLWithPath: chdirCommand.executable)
+        chdirProcess.arguments = chdirCommand.arguments
+        chdirProcess.environment = environment
+        let chdirErrors = Pipe()
+        chdirProcess.standardOutput = FileHandle.nullDevice
+        chdirProcess.standardError = chdirErrors
+        try chdirProcess.run()
+        chdirProcess.waitUntilExit()
+        let chdirErrorText = String(
+            decoding: chdirErrors.fileHandleForReading.readDataToEndOfFile(),
+            as: UTF8.self
+        )
+        #expect(
+            chdirProcess.terminationStatus == 0,
+            "A sealed child could not enter its workspace: \(chdirErrorText)"
+        )
+
+        let targetInfoCommand = try #require(try box.wrap(
+            executable: "/usr/bin/swiftc",
+            arguments: ["-print-target-info"],
+            profileURL: scratch.appendingPathComponent("target-info.sb")
+        ))
+        let targetInfoProcess = Process()
+        targetInfoProcess.executableURL = URL(fileURLWithPath: targetInfoCommand.executable)
+        targetInfoProcess.arguments = targetInfoCommand.arguments
+        targetInfoProcess.environment = environment
+        targetInfoProcess.currentDirectoryURL = workspace
+        let targetInfoOutput = Pipe()
+        let targetInfoErrors = Pipe()
+        targetInfoProcess.standardOutput = targetInfoOutput
+        targetInfoProcess.standardError = targetInfoErrors
+        try targetInfoProcess.run()
+        targetInfoProcess.waitUntilExit()
+        let targetInfoText = String(
+            decoding: targetInfoOutput.fileHandleForReading.readDataToEndOfFile(),
+            as: UTF8.self
+        ) + String(
+            decoding: targetInfoErrors.fileHandleForReading.readDataToEndOfFile(),
+            as: UTF8.self
+        )
+        #expect(
+            targetInfoProcess.terminationStatus == 0,
+            "The sealed Swift compiler could not inspect its target: \(targetInfoText)"
+        )
+
+        let command = try #require(try box.wrap(
+            executable: "/usr/bin/swift",
+            arguments: ["build", "--disable-sandbox", "--package-path", workspace.path],
+            profileURL: scratch.appendingPathComponent("agent.sb")
+        ))
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: command.executable)
+        process.arguments = command.arguments
+        process.environment = environment
+        let errors = Pipe()
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = errors
+        try process.run()
+        process.waitUntilExit()
+        let errorText = String(
+            decoding: errors.fileHandleForReading.readDataToEndOfFile(),
+            as: UTF8.self
+        )
+
+        #expect(process.terminationStatus == 0, "SwiftPM was blocked by the outer seal: \(errorText)")
+    }
+
+    @Test("Xcode can resolve a local package in a sealed run")
+    func xcodeCanResolveLocalPackage() throws {
+        let repositoryRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let fixture = repositoryRoot.appendingPathComponent(
+            ".applebench/fixtures/LinkErrorFixture"
+        )
+        guard FileManager.default.fileExists(atPath: fixture.path) else { return }
+
+        let scratch = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-xcode-\(UUID().uuidString)")
+        let run = scratch.appendingPathComponent(".applebench/runs/r1")
+        let workspace = run.appendingPathComponent("workspace")
+        let home = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-xcode-home-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: run, withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: fixture, to: workspace)
+        try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
+        defer {
+            try? FileManager.default.removeItem(at: scratch)
+            try? FileManager.default.removeItem(at: home)
+        }
+
+        let box = AgentSandbox.standard(
+            harnessRoot: scratch,
+            taskSetRoot: nil,
+            workspaceURL: workspace,
+            runDirectory: run
+        ).allowingExecution([home])
+        let context = RunContext(
+            runID: "test",
+            workspaceURL: workspace,
+            runDirectoryURL: run,
+            logsDirectoryURL: run.appendingPathComponent("logs"),
+            model: nil,
+            sandbox: box,
+            limits: RunLimits(),
+            environment: EnvironmentSnapshot(
+                macosVersion: "26.5",
+                architecture: "arm64",
+                xcodePath: "/Applications/Xcode.app/Contents/Developer",
+                xcodeVersion: "27.0",
+                xcodeBuildNumber: "27A0000"
+            )
+        )
+        let command = try #require(try box.wrap(
+            executable: "/bin/sh",
+            arguments: [
+                "-c",
+                "/usr/bin/xcodebuild "
+                    + "-IDEPackageSupportDisableManifestSandbox=1 "
+                    + "-IDEPackageSupportDisablePluginExecutionSandbox=1 "
+                    + "-project LinkErrorFixture.xcodeproj -list"
+            ],
+            profileURL: scratch.appendingPathComponent("agent.sb")
+        ))
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: command.executable)
+        process.arguments = command.arguments
+        process.currentDirectoryURL = workspace
+        process.environment = context.agentEnvironment(hermeticHome: home)
+        let output = Pipe()
+        process.standardOutput = output
+        process.standardError = output
+        try process.run()
+        process.waitUntilExit()
+        let text = String(
+            decoding: output.fileHandleForReading.readDataToEndOfFile(),
+            as: UTF8.self
+        )
+        #expect(
+            process.terminationStatus == 0
+                && !text.contains("sandbox_apply")
+                && !text.contains("Unable to set working directory"),
+            "Xcode package resolution was blocked by the outer seal: \(text)"
+        )
+    }
+
     @Test("A binary somewhere the agent does not control still cannot run")
     func strayBinariesCannotRun() throws {
         // Denying wrappers by name is defeated by fetching one. Copying a
@@ -363,6 +601,16 @@ struct AgentSandboxTests {
         let deny = try #require(profile.range(of: "(deny process-exec*)"))
         let allow = try #require(profile.range(of: "(allow process-exec (subpath \"/tmp/home/.cache/opencode/bin\"))"))
         #expect(deny.lowerBound < allow.lowerBound)
+    }
+
+    @Test("An adapter can allow one helper executable without opening its directory")
+    func adapterAddsExactExecutable() {
+        let box = sandbox(execRoots: ["/usr/bin"])
+            .allowingExecution(of: [URL(fileURLWithPath: "/opt/runtime/bin/rg")])
+        let profile = box.profile()
+
+        #expect(profile.contains("(allow process-exec (literal \"/opt/runtime/bin/rg\"))"))
+        #expect(!profile.contains("(allow process-exec (subpath \"/opt/runtime/bin\"))"))
     }
 
     @Test("Adding an execution root to an open sandbox keeps it open")

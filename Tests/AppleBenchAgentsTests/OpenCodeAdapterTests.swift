@@ -59,6 +59,19 @@ struct OpenCodeAdapterTests {
         #expect(parser.parse(line: "") == nil)
     }
 
+    @Test("Provider errors preserve their message and retryability")
+    func providerError() throws {
+        let parser = OpenCodeOutputParser()
+        let line = #"{"type":"error","error":{"name":"APIError","data":{"message":"User not found.","statusCode":401,"isRetryable":false}}}"#
+
+        let event = try #require(parser.parse(line: line))
+
+        #expect(event.kind == .error)
+        #expect(event.failure?.message == "User not found.")
+        #expect(event.failure?.statusCode == 401)
+        #expect(event.failure?.isRetryable == false)
+    }
+
     @Test("Configuration without a provider override is the hermetic base verbatim")
     func configurationWithoutProvider() throws {
         let config = try OpenCodeAdapter.configuration(providerJSON: nil)
@@ -162,6 +175,40 @@ struct OpenCodeAdapterTests {
         // A prompt that drifted in front of a flag would be read as its value.
         #expect(arguments.last == "Fix it.")
         #expect(arguments.contains(["--think", "hard"]))
+    }
+
+    @Test("OpenCode resolves the ripgrep executable used by its file tools")
+    func resolvesRipgrepHelper() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("applebench-rg-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let helper = directory.appendingPathComponent("rg")
+        FileManager.default.createFile(
+            atPath: helper.path,
+            contents: Data(),
+            attributes: [.posixPermissions: 0o755]
+        )
+
+        #expect(OpenCodeAdapter.helperExecutable(named: "rg", path: directory.path) == helper)
+        #expect(OpenCodeAdapter.helperExecutable(named: "rg", path: "/usr/bin") == nil)
+    }
+
+    @Test("The Xcode shim disables only the nested package manifest sandbox")
+    func installsXcodeShim() throws {
+        let home = FileManager.default.temporaryDirectory
+            .appendingPathComponent("applebench-shim-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: home) }
+
+        let directory = try OpenCodeAdapter.installToolchainShims(in: home)
+        let shim = directory.appendingPathComponent("xcodebuild")
+        let contents = try String(contentsOf: shim, encoding: .utf8)
+
+        #expect(FileManager.default.isExecutableFile(atPath: shim.path))
+        #expect(contents.contains("/usr/bin/xcodebuild"))
+        #expect(contents.contains("-IDEPackageSupportDisableManifestSandbox=1"))
+        #expect(contents.contains("-IDEPackageSupportDisablePluginExecutionSandbox=1"))
+        #expect(!contents.contains("sandbox-exec"))
     }
 
 }

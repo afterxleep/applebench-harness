@@ -55,6 +55,28 @@ the charts.
 published number depends on which attempt counts, say so on the page. That
 sentence changes the headline and a reader cannot infer it from the data.
 
+### Recalibration without rewriting history
+
+Keep every original `result.json` immutable. When a grader is later proven
+wrong, place an `adjudication.json` beside that run with the corrected grader
+verdict, the evidence, and the source run ID. Aggregation applies the correction
+while retaining the original artifact for audit.
+
+When only some tasks are rerun, merge those live artifacts into the last
+published report instead of rebuilding a model from an incomplete directory:
+
+```bash
+./Scripts/publish-report.sh minimax-m3 .applebench/runs gold \
+  --attempt latest \
+  --model minimax/MiniMax-M3 \
+  --suite-file .applebench/taskset/Examples/Suites/gold.yaml \
+  --base-report Reports/minimax-m3.json
+```
+
+Live runs replace matching run IDs; untouched tasks stay frozen from the base
+report. Use an adjudication only when saved evidence proves the grader was
+wrong. Rerun the model when the task contract itself changed.
+
 ## Charts
 
 Server-rendered CSS and inline SVG. No chart library, no client-side data

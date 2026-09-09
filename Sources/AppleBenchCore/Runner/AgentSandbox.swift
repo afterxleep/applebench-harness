@@ -33,6 +33,10 @@ public struct AgentSandbox: Sendable {
     /// The one place the agent is expected to work, allowed back after the
     /// denials above so a workspace living under a denied root still opens.
     public let workspaceURL: URL
+    /// The current run whose workspace may be read while every sibling run
+    /// remains sealed. Kept separate because denying their common parent also
+    /// prevents Swift's driver from operating inside the allowed workspace.
+    public let runDirectoryURL: URL?
     /// Roots the agent may execute from. Everything else is refused.
     ///
     /// This is the rule that survives an agent with imagination. Denying a
@@ -40,6 +44,9 @@ public struct AgentSandbox: Sendable {
     /// everywhere except the toolchain means a copy, a download, a build of
     /// its own, and a script it writes in /tmp all fail the same way.
     public let executableRoots: [URL]
+    /// Individual adapter-owned helper binaries allowed without opening the
+    /// rest of the directory that contains them.
+    public let executablePaths: [URL]
     /// Places the agent must never write, whatever else is allowed.
     ///
     /// The toolchain needs a temp directory, so writes cannot be confined to
@@ -51,12 +58,16 @@ public struct AgentSandbox: Sendable {
         deniedReadPaths: [URL],
         workspaceURL: URL,
         executableRoots: [URL] = [],
+        executablePaths: [URL] = [],
         allowedReadPaths: [URL] = [],
-        deniedWritePaths: [URL] = []
+        deniedWritePaths: [URL] = [],
+        runDirectoryURL: URL? = nil
     ) {
         self.deniedReadPaths = deniedReadPaths
         self.workspaceURL = workspaceURL
+        self.runDirectoryURL = runDirectoryURL
         self.executableRoots = executableRoots
+        self.executablePaths = executablePaths
         self.allowedReadPaths = allowedReadPaths
         self.deniedWritePaths = deniedWritePaths
     }
@@ -74,8 +85,25 @@ public struct AgentSandbox: Sendable {
             deniedReadPaths: deniedReadPaths,
             workspaceURL: workspaceURL,
             executableRoots: executableRoots.isEmpty ? [] : executableRoots + roots,
+            executablePaths: executablePaths,
             allowedReadPaths: allowedReadPaths,
-            deniedWritePaths: deniedWritePaths
+            deniedWritePaths: deniedWritePaths,
+            runDirectoryURL: runDirectoryURL
+        )
+    }
+
+    /// A copy that lets the agent execute only the named helper files.
+    public func allowingExecution(of paths: [URL]) -> AgentSandbox {
+        AgentSandbox(
+            deniedReadPaths: deniedReadPaths,
+            workspaceURL: workspaceURL,
+            executableRoots: executableRoots,
+            executablePaths: executableRoots.isEmpty && executablePaths.isEmpty
+                ? []
+                : executablePaths + paths,
+            allowedReadPaths: allowedReadPaths,
+            deniedWritePaths: deniedWritePaths,
+            runDirectoryURL: runDirectoryURL
         )
     }
 
@@ -88,8 +116,10 @@ public struct AgentSandbox: Sendable {
             deniedReadPaths: deniedReadPaths,
             workspaceURL: workspaceURL,
             executableRoots: executableRoots,
+            executablePaths: executablePaths,
             allowedReadPaths: allowedReadPaths + paths,
-            deniedWritePaths: deniedWritePaths
+            deniedWritePaths: deniedWritePaths,
+            runDirectoryURL: runDirectoryURL
         )
     }
 
@@ -254,7 +284,8 @@ public struct AgentSandbox: Sendable {
             executableRoots: toolchainRoots(
                 agentExecutable: agentExecutable, runDirectory: runDirectory
             ),
-            deniedWritePaths: [harnessRoot] + (taskSetRoot.map { [$0] } ?? [])
+            deniedWritePaths: [harnessRoot] + (taskSetRoot.map { [$0] } ?? []),
+            runDirectoryURL: runDirectory
         )
     }
 
@@ -272,6 +303,26 @@ public struct AgentSandbox: Sendable {
         ]
         let fm = FileManager.default
         for path in deniedReadPaths {
+            if let runDirectoryURL,
+               Self.realPath(of: path)
+                == Self.realPath(of: runDirectoryURL.deletingLastPathComponent()) {
+                // Do not deny the common run root and then try to allow the
+                // current run back. Swift's driver reports permissionDenied
+                // when any ancestor of its working directory is blanket
+                // denied, even when a later rule opens the workspace. Hide
+                // the root listing and every sibling path instead, including
+                // siblings created after this profile was written.
+                for spelling in spellings(of: path) {
+                    lines.append("(deny file-read-data (literal \(quote(spelling))))")
+                    for pattern in Self.siblingDenialPatterns(
+                        root: spelling,
+                        allowedChild: runDirectoryURL.lastPathComponent
+                    ) {
+                        lines.append("(deny file-read* (regex \(quote(pattern))))")
+                    }
+                }
+                continue
+            }
             var isDirectory: ObjCBool = false
             let exists = fm.fileExists(atPath: path.path, isDirectory: &isDirectory)
             // `subpath` on a file matches nothing, so a binary needs `literal`.
@@ -295,6 +346,17 @@ public struct AgentSandbox: Sendable {
                 lines.append("(allow file-read* (literal \(quote(spelling))))")
             }
         }
+        // A compiler or package-manifest process starts after the seal is in
+        // place and must open every parent directory before it can chdir into
+        // the workspace. Literal allowances open those directory nodes only;
+        // the denied subpaths still prevent opening sibling run artifacts.
+        var ancestor = workspaceURL.deletingLastPathComponent()
+        while ancestor.path != "/" && !ancestor.path.isEmpty {
+            for spelling in spellings(of: ancestor) {
+                lines.append("(allow file-read* (literal \(quote(spelling))))")
+            }
+            ancestor.deleteLastPathComponent()
+        }
         // Writing is confined to the workspace. Eleven tasks in one suite put
         // their deliverable somewhere else, six of them straight into the
         // operator's own checkout: the grader looked in the workspace, found
@@ -302,7 +364,9 @@ public struct AgentSandbox: Sendable {
         // loudly enough for the agent to try again in the right place.
         lines.append("(deny file-write*)")
         for spelling in spellings(of: workspaceURL) {
+            lines.append("(allow file-read* (literal \(quote(spelling))))")
             lines.append("(allow file-read* (subpath \(quote(spelling))))")
+            lines.append("(allow file-write* (literal \(quote(spelling))))")
             lines.append("(allow file-write* (subpath \(quote(spelling))))")
         }
         // The agent's own scratch space and its run directory still have to
@@ -324,7 +388,7 @@ public struct AgentSandbox: Sendable {
         // Execution last, and as an allowlist. Refusing every binary outside
         // the toolchain is what stops the agent routing around a denied
         // wrapper: copying it, downloading another, or writing its own.
-        if !executableRoots.isEmpty {
+        if !executableRoots.isEmpty || !executablePaths.isEmpty {
             lines.append("(deny process-exec*)")
             for root in executableRoots {
                 // Same resolved-path problem as the read rules: an allowance
@@ -333,6 +397,11 @@ public struct AgentSandbox: Sendable {
                 // through.
                 for spelling in spellings(of: root) {
                     lines.append("(allow process-exec (subpath \(quote(spelling))))")
+                }
+            }
+            for path in executablePaths {
+                for spelling in spellings(of: path) {
+                    lines.append("(allow process-exec (literal \(quote(spelling))))")
                 }
             }
         }
@@ -412,6 +481,43 @@ public struct AgentSandbox: Sendable {
         guard let buffer = realpath(path, nil) else { return nil }
         defer { free(buffer) }
         return String(cString: buffer)
+    }
+
+    /// Regular expressions covering every child of `root` except one.
+    ///
+    /// Seatbelt's regex dialect does not support negative lookahead, so the
+    /// complement is expressed at the first differing character, plus the
+    /// proper-prefix and longer-name cases. Run IDs are sanitized path
+    /// components, but escaping here keeps the helper correct on arbitrary
+    /// inputs and makes the profile safe to serialize.
+    static func siblingDenialPatterns(root: String, allowedChild: String) -> [String] {
+        let characters = Array(allowedChild)
+        guard !characters.isEmpty else { return ["^\(regexEscape(root))/[^/]+(/|$)"] }
+        let escapedRoot = regexEscape(root)
+        var patterns: [String] = []
+
+        for index in characters.indices {
+            let prefix = regexEscape(String(characters[..<index]))
+            let excluded = regexCharacterClassEscape(characters[index])
+            patterns.append("^\(escapedRoot)/\(prefix)[^/\(excluded)][^/]*(/|$)")
+        }
+        for length in 1..<characters.count {
+            let prefix = regexEscape(String(characters.prefix(length)))
+            patterns.append("^\(escapedRoot)/\(prefix)(/|$)")
+        }
+        patterns.append("^\(escapedRoot)/\(regexEscape(allowedChild))[^/]+(/|$)")
+        return patterns
+    }
+
+    private static func regexEscape(_ value: String) -> String {
+        NSRegularExpression.escapedPattern(for: value)
+    }
+
+    private static func regexCharacterClassEscape(_ character: Character) -> String {
+        switch character {
+        case "\\", "]", "^", "-": return "\\\(character)"
+        default: return String(character)
+        }
     }
 
     /// SBPL string literal. A path with a quote in it would otherwise end the

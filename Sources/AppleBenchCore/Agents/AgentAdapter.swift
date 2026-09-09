@@ -157,19 +157,23 @@ public struct AgentRunResult: Sendable {
     public var usage: AgentUsage
     /// The agent's final textual response, when the CLI surfaces one.
     public var finalResponse: String?
+    /// A structured provider or agent failure emitted before any model work.
+    public var startupFailure: AgentReportedFailure?
 
     public init(
         metadata: AgentMetadata,
         terminationReason: AgentTerminationReason,
         exitCode: Int32? = nil,
         usage: AgentUsage = AgentUsage(),
-        finalResponse: String? = nil
+        finalResponse: String? = nil,
+        startupFailure: AgentReportedFailure? = nil
     ) {
         self.metadata = metadata
         self.terminationReason = terminationReason
         self.exitCode = exitCode
         self.usage = usage
         self.finalResponse = finalResponse
+        self.startupFailure = startupFailure
     }
 
     /// True when the agent process died without ever reaching the model.

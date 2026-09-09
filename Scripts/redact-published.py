@@ -17,6 +17,7 @@ Usage:
 from __future__ import annotations
 
 import csv
+import io
 import json
 import pathlib
 import re
@@ -116,10 +117,14 @@ def redact_csv(path: pathlib.Path) -> int:
             row[key] = joined
             changed += 1
     with path.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv_writer(handle, fields)
         writer.writeheader()
         writer.writerows(rows)
     return changed
+
+
+def csv_writer(handle, fields):
+    return csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
 
 
 def self_test() -> int:
@@ -151,6 +156,14 @@ def self_test() -> int:
         if got != expected:
             failures += 1
             print(f"FAIL\n  given:    {given}\n  expected: {expected}\n  got:      {got}")
+
+    csv_buffer = io.StringIO(newline="")
+    writer = csv_writer(csv_buffer, ["value"])
+    writer.writeheader()
+    writer.writerow({"value": "one"})
+    if csv_buffer.getvalue() != "value\none\n":
+        failures += 1
+        print("FAIL\n  published CSV does not use LF line endings")
     print("self-test:", "ok" if failures == 0 else f"{failures} failure(s)")
     return 1 if failures else 0
 

@@ -116,7 +116,8 @@ public struct TartOpenCodeAdapter: AgentAdapter {
             terminationReason: CLIAgentSession.terminationReason(for: outcome),
             exitCode: outcome.processResult.exitCode,
             usage: outcome.usage,
-            finalResponse: outcome.finalResponse
+            finalResponse: outcome.finalResponse,
+            startupFailure: outcome.reportedFailure
         )
     }
 

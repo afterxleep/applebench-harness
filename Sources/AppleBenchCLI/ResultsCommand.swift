@@ -43,6 +43,13 @@ struct ResultsCommand: AsyncParsableCommand {
 
     @Option(
         name: .long,
+        parsing: .singleValue,
+        help: "Previous report JSON used as an immutable baseline (repeatable). Live run artifacts with the same run id take precedence."
+    )
+    var baseReport: [String] = []
+
+    @Option(
+        name: .long,
         help: "Path to a suite YAML. Only tasks listed in it are included, so an export cannot quietly carry a run of something outside the scored set. Repeat it when a score spans several suites."
     )
     var suite: [String] = []
@@ -73,7 +80,10 @@ struct ResultsCommand: AsyncParsableCommand {
 
     func run() async throws {
         let root = URL(fileURLWithPath: path ?? Wiring.defaultRunsRoot().path)
-        let collected = Self.collectResults(under: root)
+        let collected = try ResultCollection.merged(
+            baseReports: baseReport.map { URL(fileURLWithPath: $0) },
+            live: Self.collectResults(under: root)
+        )
         guard !collected.isEmpty else {
             FileHandle.standardError.write(Data("No result.json files found under \(root.path)\n".utf8))
             throw ExitCode.failure
@@ -226,7 +236,7 @@ struct ResultsCommand: AsyncParsableCommand {
         var results: [BenchmarkRunResult] = []
         let direct = root.appendingPathComponent("result.json")
         if FileManager.default.fileExists(atPath: direct.path),
-           let result = try? BenchmarkRunResult.read(from: direct) {
+           let result = try? BenchmarkRunResult.readForAggregation(from: direct) {
             return [result]
         }
         guard let enumerator = FileManager.default.enumerator(
@@ -235,7 +245,7 @@ struct ResultsCommand: AsyncParsableCommand {
             options: [.skipsHiddenFiles]
         ) else { return [] }
         for case let url as URL in enumerator where url.lastPathComponent == "result.json" {
-            if let result = try? BenchmarkRunResult.read(from: url) {
+            if let result = try? BenchmarkRunResult.readForAggregation(from: url) {
                 results.append(result)
             }
         }

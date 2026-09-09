@@ -44,7 +44,7 @@ struct UIFlowCommandsTests {
         #expect(argv(UIFlowCommands.push(payload: "Payloads/shipped.json", bundleIdentifier: bundle, udid: udid))
             == ["flowdeck", "simulator", "push", "Payloads/shipped.json", "--bundle-id", bundle, "-S", udid])
         #expect(argv(UIFlowCommands.clearState(bundleIdentifier: bundle, udid: udid))
-            == ["flowdeck", "ui", "simulator", "clear-state", "--bundle-id", bundle, "-S", udid])
+            == ["flowdeck", "ui", "simulator", "clear-state", bundle, "-S", udid])
         #expect(argv(UIFlowCommands.openURL("fixture://orders/4471", udid: udid))
             == ["flowdeck", "ui", "simulator", "open-url", "fixture://orders/4471", "-S", udid])
         #expect(argv(UIFlowCommands.memoryWarning(udid: udid))

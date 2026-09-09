@@ -66,7 +66,7 @@ public enum UIFlowCommands {
 
     /// Wipes the app's container, so the next launch is a first run.
     public static func clearState(bundleIdentifier: String, udid: String) -> ProcessCommand {
-        flowdeck(["ui", "simulator", "clear-state", "--bundle-id", bundleIdentifier], udid)
+        flowdeck(["ui", "simulator", "clear-state", bundleIdentifier], udid)
     }
 
     public static func openURL(_ url: String, udid: String) -> ProcessCommand {

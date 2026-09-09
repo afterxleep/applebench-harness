@@ -123,6 +123,7 @@ func makeGradingContext(
     processRunner: any ProcessRunning,
     workspace: URL? = nil,
     derivedData: URL? = nil,
+    simulatorUDID: String? = nil,
     changedFiles: [String] = []
 ) async throws -> (GradingContext, URL) {
     let workspaceURL = workspace
@@ -137,7 +138,7 @@ func makeGradingContext(
         runDirectoryURL: workspaceURL,
         artifactsDirectoryURL: workspaceURL,
         derivedDataURL: derivedData ?? workspaceURL.appendingPathComponent("DerivedData"),
-        simulatorUDID: nil,
+        simulatorUDID: simulatorUDID,
         destination: "platform=iOS Simulator,name=iPhone 17,OS=26.5",
         changedFiles: changedFiles,
         processRunner: processRunner,
