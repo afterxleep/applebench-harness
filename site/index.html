@@ -13,128 +13,97 @@ description: >-
 {%- assign category_count = current_suite.category_tasks | size -%}
 
 <section class="hero">
-  <div class="wrap">
-    <p class="eyebrow"><span class="eyebrow__dot"></span> {{ scoring_tasks }} scoring tasks · {{ category_count }} areas · checked after the agent stops</p>
-    <h1>Can an AI agent fix a real Apple app?</h1>
-    <p class="hero__lede">
-      AppleBench gives an AI coding agent a real Xcode project with a real bug.
-      The agent must find the problem, fix it, and leave the project working.
-    </p>
-    <p class="hero__lede" style="margin-top:.8rem">
-      AppleBench records every command and file change. After the agent stops,
-      it builds the project from scratch, runs the tests, launches the app, and
-      checks it on a simulator.
-      <strong>{{ app_run_tasks }} of {{ scoring_tasks }} tasks cannot pass unless the app runs.</strong>
-    </p>
-    <p class="hero__lede" style="margin-top:.8rem"><strong>The agent never grades its own work.</strong></p>
-    <div class="button-row">
-      <a class="button button--primary" href="{{ '/benchmarks/' | relative_url }}">See the results</a>
-      <a class="button button--ghost" href="{{ '/benchmark/' | relative_url }}">How it works</a>
+  <div class="wrap hero__grid">
+    <div class="hero__main">
+      <p class="eyebrow">Independent benchmark <span>2026 edition</span></p>
+      <h1>Can an AI agent ship a <em>working Apple app?</em></h1>
+      <p class="hero__lede">
+        Give it a broken Xcode project. Let it diagnose and repair the problem.
+        Then check the app it leaves behind—not the answer it claims to have.
+      </p>
+      <div class="button-row">
+        <a class="button button--primary" href="{{ '/benchmarks/' | relative_url }}">Read the results <span aria-hidden="true">↗</span></a>
+        <a class="button button--ghost" href="{{ '/benchmark/' | relative_url }}">See the benchmark</a>
+      </div>
     </div>
+
+    <aside class="hero__proof" aria-label="Current benchmark facts">
+      <p class="hero__proof-label">Gold suite / current</p>
+      <dl>
+        <div><dt>{{ scoring_tasks }}</dt><dd>scoring tasks</dd></div>
+        <div><dt>{{ category_count }}</dt><dd>areas of Apple development</dd></div>
+        <div><dt>{{ app_run_tasks }}</dt><dd>tasks require a running app</dd></div>
+      </dl>
+      <p>Fresh builds. Independent graders. Simulator evidence. No self-reported passes.</p>
+    </aside>
   </div>
 </section>
 
 <section class="section">
-  <div class="wrap">
+  <div class="wrap section-split">
     <div class="section__head">
-      <h2>Why another benchmark</h2>
-      <p>Writing code is only part of the job.</p>
+      <p class="section__index">01 / The premise</p>
+      <h2>Code is not the finished product.</h2>
     </div>
-
-<pre><code>understand → fix → build → run → test → verify</code></pre>
-
-    <p style="color:var(--ink-2); max-width:64ch">
-      Many coding benchmarks stop after an agent edits some files. AppleBench
-      checks what those edits actually produce. If the project does not build,
-      the app crashes, or a required check fails, the task fails.
-    </p>
-    <p style="color:var(--ink-2); max-width:64ch">
-      For each task, every model gets the same project, request, Xcode setup,
-      simulator, and limits. The results show how many tasks it completed and
-      what each run cost.
-    </p>
-  </div>
-</section>
-
-<section class="section section--tinted">
-  <div class="wrap">
-    <div class="section__head">
-      <h2>What it measures</h2>
-      <p>{{ scoring_tasks }} tasks in {{ category_count }} clear areas.</p>
-    </div>
-    <div class="grid">
-      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.build }} task</span><h3>Build problems</h3><p>Fix a project that does not compile or link.</p></div>
-      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.tests }} tasks</span><h3>Failing tests</h3><p>Find the bug behind a failing test and leave every test passing.</p></div>
-      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.runtime }} tasks</span><h3>Runtime bugs</h3><p>Fix crashes and wrong behavior that only appear when the app runs.</p></div>
-      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.visual }} tasks</span><h3>UI and layout</h3><p>Fix screens that clip, overlap, or fail their design requirements.</p></div>
-      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.interaction }} tasks</span><h3>App interaction</h3><p>Launch the app, use it, and add UI tests that prove the flow works.</p></div>
-      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.project }} tasks</span><h3>Project setup</h3><p>Fix targets, property lists, assets, schemes, and Swift packages.</p></div>
-      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.frameworks }} tasks</span><h3>Frameworks and Swift</h3><p>Solve problems in Swift concurrency, SwiftData, Core Data, WidgetKit, App Intents, and more.</p></div>
-      <div class="card"><span class="card__tag">{{ current_suite.category_tasks.ops }} tasks</span><h3>Command-line work</h3><p>Use Apple's build, test, simulator, and device tools correctly.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="section__head">
-      <h2>How a run is checked</h2>
-      <p>The agent does the work. AppleBench checks the result.</p>
-    </div>
-    <div class="grid grid--2">
-      <div class="card">
-        <h3>Checks start after the agent stops</h3>
-        <p>
-          AppleBench uses a clean build and runs its own tests against the
-          project the agent left behind. The agent saying “it works” does not
-          count.
-        </p>
-      </div>
-      <div class="card">
-        <h3>Every task is proven possible</h3>
-        <p>
-          Before a task is added, the broken project must fail and a known
-          working fix must pass. All {{ scoring_tasks }} current tasks meet
-          both rules.
-        </p>
-      </div>
-      <div class="card">
-        <h3>No numbers are made up</h3>
-        <p>
-          Token counts and cost come from the agent tool. If it does not report
-          them, they stay empty. Timeouts and final project results are recorded
-          separately.
-        </p>
-      </div>
-      <div class="card">
-        <h3>Scoring is simple</h3>
-        <p>
-          Every task starts at 10 points. A failed task gets 0. A passed task
-          keeps all 10 points if it stays within 50,000 tokens; after that, its
-          points fall as token use rises.
-          <a href="{{ '/methodology/#scoring' | relative_url }}">How scoring works</a>.
-        </p>
-      </div>
-      <div class="card">
-        <h3>Scoring tasks stay private</h3>
-        <p>
-          The {{ scoring_tasks }} scoring tasks and their fixes are private.
-          For published scores, the agent runs on a separate virtual Mac with
-          no internet access, so it cannot look up the answers.
-        </p>
-      </div>
+    <div class="section__body">
+      <ol class="sequence" aria-label="The AppleBench verification sequence">
+        <li>Understand</li><li>Fix</li><li>Build</li><li>Run</li><li>Test</li><li>Verify</li>
+      </ol>
+      <p class="section__lede">
+        Many coding benchmarks stop at the diff. AppleBench keeps going. After
+        the agent exits, the harness rebuilds the project from scratch, runs
+        XCTest and XCUITest, resolves project settings, launches the app, and
+        checks it on a simulator.
+      </p>
+      <p class="pull-quote">The agent never grades its own work.</p>
     </div>
   </div>
 </section>
 
 <section class="section section--tinted">
   <div class="wrap">
+    <div class="section__head section__head--wide">
+      <p class="section__index">02 / The work</p>
+      <h2>One benchmark. Eight kinds of failure.</h2>
+      <p>The suite follows the work an Apple engineer actually has to finish.</p>
+    </div>
+    <div class="measure-grid">
+      <article class="measure"><span>01</span><strong>{{ current_suite.category_tasks.build }}</strong><h3>Build</h3><p>Compiler, availability, and linker failures.</p></article>
+      <article class="measure"><span>02</span><strong>{{ current_suite.category_tasks.tests }}</strong><h3>Tests</h3><p>Find the defect behind a failing test.</p></article>
+      <article class="measure"><span>03</span><strong>{{ current_suite.category_tasks.runtime }}</strong><h3>Runtime</h3><p>Crashes and behavior invisible at compile time.</p></article>
+      <article class="measure"><span>04</span><strong>{{ current_suite.category_tasks.visual }}</strong><h3>Interface</h3><p>Layout, accessibility, language, and device state.</p></article>
+      <article class="measure"><span>05</span><strong>{{ current_suite.category_tasks.interaction }}</strong><h3>Interaction</h3><p>Real flows driven through the running app.</p></article>
+      <article class="measure"><span>06</span><strong>{{ current_suite.category_tasks.project }}</strong><h3>Project</h3><p>Targets, assets, schemes, plists, and packages.</p></article>
+      <article class="measure"><span>07</span><strong>{{ current_suite.category_tasks.frameworks }}</strong><h3>Swift + SDKs</h3><p>Concurrency, persistence, widgets, intents, and more.</p></article>
+      <article class="measure"><span>08</span><strong>{{ current_suite.category_tasks.ops }}</strong><h3>Operations</h3><p>Build, test, simulator, and device toolchains.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap section-split">
     <div class="section__head">
-      <h2>Latest results</h2>
-      <p>Open any run to see the result for every task.</p>
+      <p class="section__index">03 / The standard</p>
+      <h2>A pass has to survive inspection.</h2>
+    </div>
+    <ol class="principles">
+      <li><div><h3>Grade the workspace, not the transcript</h3><p>A clean build and independent tests run only after the agent stops.</p></div></li>
+      <li><div><h3>Prove every task is solvable</h3><p>The broken fixture must fail and its reference repair must pass before admission.</p></div></li>
+      <li><div><h3>Ask the device when the device matters</h3><p>{{ app_run_tasks }} tasks require the app to launch and behave correctly on a simulator.</p></div></li>
+      <li><div><h3>Publish the inconvenient numbers</h3><p>Failures, timeouts, tokens, cost, and grader evidence stay visible.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section section--results">
+  <div class="wrap">
+    <div class="section__head section__head--wide">
+      <p class="section__index">04 / Latest measurements</p>
+      <h2>Results, with receipts.</h2>
+      <p>Open a run to inspect every task, grader, token, and dollar.</p>
     </div>
     {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
-    <ul class="entry-list">
+    <ul class="entry-list entry-list--featured">
       {%- for run in runs limit: 3 -%}
         {%- assign rows = site.data.benchmarks[run.data] -%}
         {%- assign hits = rows | where: "passed", "true" -%}
@@ -146,60 +115,42 @@ description: >-
         {%- endfor -%}
         <li>
           <a class="entry" href="{{ run.url | relative_url }}">
-            <p class="entry__meta">
-              <time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time>
-              <span>{{ run.suite }}</span>
-              {%- if rows -%}
-                <span class="entry__score">{{ points | round }}/{{ available }} points</span>
-                <span>{{ hits.size }}/{{ rows.size }} passed</span>
-              {%- endif -%}
-            </p>
-            <h3 class="entry__title">{{ run.title }}</h3>
-            <p class="entry__excerpt">{{ run.lede | default: run.excerpt | strip_html | truncate: 190 }}</p>
+            <p class="entry__number">0{{ forloop.index }}</p>
+            <div class="entry__body">
+              <p class="entry__meta"><time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time><span>{{ run.suite }} suite</span></p>
+              <h3 class="entry__title">{{ run.model }}</h3>
+              <p class="entry__excerpt">{{ hits.size }} of {{ rows.size }} tasks passed</p>
+            </div>
+            <p class="entry__result"><strong>{{ points | round }}</strong><span>/ {{ available }} points</span></p>
+            <span class="entry__arrow" aria-hidden="true">↗</span>
           </a>
         </li>
       {%- else -%}
-        <li><p style="color:var(--ink-2)">No runs published yet.</p></li>
+        <li><p>No runs published yet.</p></li>
       {%- endfor -%}
     </ul>
-    <p style="margin-top:1.6rem"><a href="{{ '/benchmarks/' | relative_url }}">All results →</a></p>
+    <p class="text-link"><a href="{{ '/benchmarks/' | relative_url }}">Compare every published run <span aria-hidden="true">→</span></a></p>
   </div>
 </section>
 
-<section class="section">
-  <div class="wrap">
-    <div class="section__head">
-      <h2>The harness is public. The answers are not.</h2>
-      <p>Anyone can inspect and run the benchmark code.</p>
+<section class="section section--closing">
+  <div class="wrap closing-grid">
+    <div>
+      <p class="section__index">05 / Trust</p>
+      <h2>The harness is public.<br><em>The answers are not.</em></h2>
     </div>
-
-    <div class="wrap wrap--narrow" style="padding:0">
+    <div>
       <p>
-        The public repository includes the runner, the graders, and
-        {{ sample_tasks }} sample tasks. The samples show exactly how a run
-        works, but they never count toward a published score.
+        Anyone can inspect the runner, graders, and {{ sample_tasks }} sample
+        tasks. The {{ scoring_tasks }} scored tasks and their reference repairs
+        remain private, and published runs execute on an isolated Mac without
+        web access.
       </p>
-      <p>
-        The {{ scoring_tasks }} scoring tasks and their reference fixes stay
-        private. If the answers were online, a model could memorize or search
-        for them, and the score would stop meaning much.
-      </p>
-      <p>
-        During a published scoring run, the agent works on a separate virtual
-        Mac. It can use the project and Apple's developer tools, but it cannot
-        use the internet. Every result records whether this protection was
-        active.
-      </p>
-    </div>
-
-    <div class="button-row">
-      {%- if site.github_url -%}
-      <a class="button button--primary" href="{{ site.github_url }}">Get the harness</a>
-      <a class="button button--ghost" href="{{ '/methodology/' | relative_url }}">How it grades</a>
-      {%- else -%}
-      <a class="button button--primary" href="{{ '/methodology/' | relative_url }}">How it grades</a>
-      <a class="button button--ghost" href="{{ '/benchmarks/' | relative_url }}">Results</a>
-      {%- endif -%}
+      <p>That keeps the benchmark inspectable without turning its answer key into training data.</p>
+      <div class="button-row">
+        {%- if site.github_url -%}<a class="button button--primary" href="{{ site.github_url }}">Browse the source <span aria-hidden="true">↗</span></a>{%- endif -%}
+        <a class="button button--ghost" href="{{ '/methodology/' | relative_url }}">Read the methodology</a>
+      </div>
     </div>
   </div>
 </section>

@@ -5,24 +5,25 @@ permalink: /benchmarks/
 description: Published AppleBench runs, with full per-task data and charts.
 ---
 
-<div class="wrap wrap--narrow">
+<div class="wrap">
   <div class="article-header">
+    <p class="section__index">Measured results / current suite</p>
     <h1>Results</h1>
     <p class="article-header__lede">
-      How the models compare. First: how many tasks they finished. Then: how
-      many points those finishes were worth. Then: what they cost. Open a run
-      for every task.
+      What finished, what it cost, and what the graders saw. Every headline
+      number opens into the full task-level record.
     </p>
   </div>
 </div>
 
-<div class="wrap wrap--narrow">
+<div class="wrap results-dashboard">
   {%- assign ranked_runs = site.benchmarks | sort: "date" | reverse -%}
   {%- include chart-leaderboard.html runs=ranked_runs -%}
 </div>
 
-<div class="wrap wrap--narrow">
-  <ul class="entry-list">
+<div class="wrap results-archive">
+  <p class="section__index">Run archive</p>
+  <ul class="entry-list entry-list--archive">
     {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
     {%- for run in runs -%}
       {%- assign rows = site.data.benchmarks[run.data] -%}

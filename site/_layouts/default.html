@@ -1,21 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0a0a0c" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#171714" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f2efe7" media="(prefers-color-scheme: light)">
   {%- seo -%}
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
   <link rel="icon" href="{{ '/assets/img/favicon.svg' | relative_url }}" type="image/svg+xml">
   {%- feed_meta -%}
   <script>
-    // Applied before first paint so a light-mode reader never sees a dark flash.
+    // Applied before first paint so a returning reader keeps their selection.
     (function () {
       try {
         var saved = localStorage.getItem("applebench-theme");
-        var prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
-        document.documentElement.dataset.theme = saved || (prefersLight ? "light" : "dark");
+        document.documentElement.dataset.theme = saved || "light";
       } catch (e) {}
     })();
   </script>
