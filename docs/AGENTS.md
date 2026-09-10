@@ -52,7 +52,14 @@ no internet access, and auto-allows the remaining permissions:
 **Environment.** The agent gets a minimal environment, `PATH`, `HOME`,
 `USER`, `TMPDIR`, `SHELL`, `TERM`, `LANG`, `LC_ALL`, plus only the variables
 explicitly allowlisted via repeated `--allow-env NAME`. Nothing else from the
-host shell leaks in.
+host shell leaks in. The suite wrapper infers the credential variable from the
+model prefix (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `MINIMAX_API_KEY`, or
+`OPENROUTER_API_KEY`) when `--api-key` or `--api-key-file` is used. An explicit
+`--api-key-env` overrides that mapping for custom providers.
+
+Use this adapter for model comparisons. The separate `claude` adapter invokes
+Claude Code's own agent loop, so its results measure a different harness and
+must not be treated as a model-only comparison with OpenCode results.
 
 **Telemetry capability:** `structured`, tool events, messages, and per-step
 token usage are all parsed from the JSON stream.
