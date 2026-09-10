@@ -60,12 +60,13 @@
 #                           run is one command on a fresh machine.
 #       --task-set-dir <d>  Where that clone lives (default:
 #                           .applebench/taskset)
-#       --api-key <key>     OpenRouter key to run with. Exposed to the agent
-#                           as OPENROUTER_API_KEY; no need to export it or
-#                           pass --allow-env yourself.
+#       --api-key <key>     Provider key to run with. The environment variable
+#                           is inferred from the model provider; no need to
+#                           export it or pass --allow-env yourself.
 #       --api-key-file <p>  Read that key from a file instead. Prefer this:
 #                           an argument is visible in `ps` to every process
 #                           on the machine and lands in your shell history.
+#       --api-key-env <n>   Override the inferred provider key variable.
 #       --allow-env <NAME>  Expose an environment variable to the agent
 #                           (repeatable). Needed for an API key when
 #                           --strip-wrapper-clis is on, because that mode
@@ -91,6 +92,22 @@
 # APPLEBENCH_OPENCODE_PROVIDER with an OpenCode provider block (inline JSON
 # or a path to a JSON file) before invoking this script.
 set -euo pipefail
+
+provider_key_environment_variable() {
+    local model_id="$1"
+    local override="${2:-}"
+    if [ -n "$override" ]; then
+        printf '%s\n' "$override"
+        return
+    fi
+
+    case "$model_id" in
+        openai/*) printf '%s\n' "OPENAI_API_KEY" ;;
+        anthropic/*) printf '%s\n' "ANTHROPIC_API_KEY" ;;
+        minimax/*) printf '%s\n' "MINIMAX_API_KEY" ;;
+        *) printf '%s\n' "OPENROUTER_API_KEY" ;;
+    esac
+}
 
 # The whole script is one function, called on the last line. Bash reads a
 # script as it runs it, so editing this file while a suite is mid-flight
@@ -121,7 +138,7 @@ seal="--seal-answers"
 allow_env=()
 api_key=""
 api_key_file=""
-api_key_variable="OPENROUTER_API_KEY"
+api_key_variable=""
 task_set_repo="${APPLEBENCH_TASKSET_REPO:-}"
 task_set_dir=""
 vm=""
@@ -154,14 +171,20 @@ while [ $# -gt 0 ]; do
         --task-set-dir) task_set_dir="$2"; shift 2 ;;
         --api-key) api_key="$2"; shift 2 ;;
         --api-key-file) api_key_file="$2"; shift 2 ;;
+        --api-key-env) api_key_variable="$2"; shift 2 ;;
         --vm) vm="$2"; shift 2 ;;
         --vm-allow) vm_allow+=(--vm-allow "$2"); shift 2 ;;
         --vm-user) vm_user="$2"; shift 2 ;;
         --vm-password) vm_password="$2"; shift 2 ;;
-        -h|--help) sed -n '2,50p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help)
+            sed -n '2,/^set -euo pipefail$/p' "$0" | sed '$d; s/^# \{0,1\}//'
+            exit 0
+            ;;
         *) echo "unknown option: $1" >&2; exit 2 ;;
     esac
 done
+
+api_key_variable="$(provider_key_environment_variable "$model" "$api_key_variable")"
 
 # No model named: offer the catalogue rather than guess one. Everything in it
 # is reachable and priced, so a pick cannot land on a name the gateway does not
@@ -184,6 +207,32 @@ elif [ -z "$model" ]; then
     echo "error: no --model given and no terminal to pick one on." >&2
     echo "       Pass --model <id>, or run interactively to choose from the catalog." >&2
     exit 2
+fi
+
+# A key given on the command line or in a file must be available before model
+# validation asks OpenCode which models it can reach. Exporting it afterwards
+# makes a clean installation reject the provider before the run starts.
+if [ -n "$api_key" ] && [ -n "$api_key_file" ]; then
+    echo "error: pass --api-key or --api-key-file, not both." >&2
+    exit 2
+fi
+if [ -n "$api_key_file" ]; then
+    if [ ! -r "$api_key_file" ]; then
+        echo "error: --api-key-file cannot be read: $api_key_file" >&2
+        exit 2
+    fi
+    api_key="$(tr -d '[:space:]' < "$api_key_file")"
+    if [ -z "$api_key" ]; then
+        echo "error: --api-key-file is empty: $api_key_file" >&2
+        exit 2
+    fi
+fi
+if [ -n "$api_key" ]; then
+    export "$api_key_variable=$api_key"
+    case " ${allow_env[*]-} " in
+        *" $api_key_variable "*) ;;
+        *) allow_env+=(--allow-env "$api_key_variable") ;;
+    esac
 fi
 
 # Check the model before spending an hour on it. A name the agent cannot reach
@@ -222,34 +271,6 @@ fi
 # shellcheck source=Scripts/taskset.sh
 . "$(dirname "$0")/taskset.sh"
 
-
-# A key given on the command line or in a file is put into the environment here
-# and allowlisted automatically, so the caller does not have to remember to do
-# both. Getting only one of the two right is the failure that looks like a bad
-# model: the agent launches, cannot authenticate, and every task fails.
-if [ -n "$api_key" ] && [ -n "$api_key_file" ]; then
-    echo "error: pass --api-key or --api-key-file, not both." >&2
-    exit 2
-fi
-if [ -n "$api_key_file" ]; then
-    if [ ! -r "$api_key_file" ]; then
-        echo "error: --api-key-file cannot be read: $api_key_file" >&2
-        exit 2
-    fi
-    api_key="$(tr -d '[:space:]' < "$api_key_file")"
-    if [ -z "$api_key" ]; then
-        echo "error: --api-key-file is empty: $api_key_file" >&2
-        exit 2
-    fi
-fi
-if [ -n "$api_key" ]; then
-    export "$api_key_variable=$api_key"
-    # Do not allowlist it twice if the caller also passed --allow-env for it.
-    case " ${allow_env[*]-} " in
-        *" $api_key_variable "*) ;;
-        *) allow_env+=(--allow-env "$api_key_variable") ;;
-    esac
-fi
 
 # --vm-allow without --vm reads as "isolated except for this range" and is in
 # fact a completely unisolated run, so refuse it rather than run the wrong thing.
@@ -457,4 +478,6 @@ fi
 exit "$suite_status"
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi

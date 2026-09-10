@@ -103,8 +103,8 @@ swift run applebench run runtime-002 --agent fake
 # The reference fix. The same task must now PASS.
 swift run applebench run runtime-002 --agent solution
 
-# A real model. The agent is OpenCode and any model it can reach works,
-# so an OpenRouter id is passed straight through.
+# Real models use the same OpenCode harness, including direct vendor APIs.
+swift run applebench run runtime-002 --model openai/gpt-5.3-codex
 swift run applebench run runtime-002 --model anthropic/claude-sonnet-5
 swift run applebench run runtime-002 --model openrouter/minimax/minimax-m3
 
@@ -119,11 +119,16 @@ swift run applebench run runtime-002 --model openrouter/minimax/minimax-m3
   --vm applebench-runner:latest --vm-allow 203.0.113.0/24
 ```
 
-`--api-key` puts the key in the environment and allowlists it for the agent, so
-there is no separate export to remember; `--api-key-file` does the same from a
-file and is the one to prefer, since an argument is visible in `ps`. Use
-`--api-key-env` when the provider names something other than
-`OPENROUTER_API_KEY`.
+`--api-key` puts the key in the provider's standard environment variable and
+allowlists it for the agent, so there is no separate export to remember;
+`--api-key-file` does the same from a file and is the one to prefer, since an
+argument is visible in `ps`. The wrapper recognizes `openai/`, `anthropic/`,
+`minimax/`, and `openrouter/` model IDs. Use `--api-key-env` for a custom
+provider or proxy.
+
+Keep model comparisons on `--agent opencode` (the default). `--agent claude`
+invokes Claude Code's own agent loop and therefore measures a different
+harness, not merely a different model.
 
 `--effort` sets reasoning effort where the model has it, forwarded as OpenCode's
 model variant. Effort changes the number, so it is recorded on the run and two

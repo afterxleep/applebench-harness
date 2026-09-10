@@ -137,8 +137,11 @@ hours and proves every task still fails unfixed and passes fixed:
 
 ## Run
 
-The model identifier is passed through to OpenCode, so an OpenRouter model is
-named `openrouter/<publisher>/<model>`.
+The model identifier is passed through to OpenCode. Direct vendor models use
+IDs such as `openai/<model>` and `anthropic/<model>`; gateway models use
+`openrouter/<publisher>/<model>`. Keeping all of them on the default
+`--agent opencode` makes the model the variable while the agent loop stays
+fixed.
 
 ```bash
 ./Scripts/run-benchmark.sh \
@@ -205,15 +208,21 @@ detail: each run records it as `variant` in its metadata, and two runs at
 different efforts are not comparable. `--agent-arg` forwards anything else to
 the agent CLI verbatim, repeatably, for knobs `--effort` does not cover.
 
-`--api-key-file` reads the key, puts it in the environment as
-`OPENROUTER_API_KEY`, and allowlists it for the agent. `--api-key <key>` takes
-it inline instead, at the cost of putting a secret where `ps` and your shell
-history can see it. Either way you no longer have to remember to export the
-variable *and* pass `--allow-env` for it, which is the mistake that looks
-exactly like a bad model: the agent launches, cannot authenticate, and every
-task fails.
+`--api-key-file` reads the key, puts it in the standard variable inferred from
+the model prefix, and allowlists it for the agent. The built-in mappings are
+`openai/` → `OPENAI_API_KEY`, `anthropic/` → `ANTHROPIC_API_KEY`, `minimax/` →
+`MINIMAX_API_KEY`, and `openrouter/` → `OPENROUTER_API_KEY`. `--api-key <key>`
+takes the value inline instead, at the cost of putting a secret where `ps` and
+your shell history can see it. Use `--api-key-env NAME` for a custom provider
+or proxy.
 
-Setting `OPENROUTER_API_KEY` yourself and passing `--allow-env` still works.
+OpenCode can also reuse providers connected with `opencode auth login`; the
+benchmark copies only OpenCode's authentication file into its hermetic home.
+OpenAI offers ChatGPT subscription authentication or an API key through that
+flow. Anthropic model runs require API billing; Claude Pro/Max authentication
+plugins are not supported by OpenCode. In either case, do not select
+`--agent claude` for a model comparison: that invokes Claude Code's different
+agent scaffold.
 
 `--strip-wrapper-clis` hides `flowdeck`, `tuist`, `fastlane`, `xcodegen` and
 friends from the agent's `PATH`. Use it: the benchmark is about driving the
