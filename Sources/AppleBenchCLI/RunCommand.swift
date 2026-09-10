@@ -49,7 +49,7 @@ struct RunCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Stop the task once it has spent this many tokens. Tightens the task's own budget, never loosens it.")
     var maxTokens: Int?
 
-    @Option(name: .long, help: "Ceiling on the task's wall-clock timeout, in seconds (default: 1200). Tightens, never loosens.")
+    @Option(name: .long, help: "Ceiling on the task's wall-clock timeout, in seconds (default: 3600). Tightens, never loosens.")
     var timeoutCap: Int?
 
     @Option(name: .long, help: "Tart image to run the agent in (isolated VM, no internet). Omit to run locally.")

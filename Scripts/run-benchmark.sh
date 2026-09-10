@@ -24,15 +24,16 @@
 #                           (minimal, low, medium, high, max), so the value
 #                           is passed through rather than validated. Recorded
 #                           on the run, since effort changes the number.
-#       --max-tokens <n>    Stop a task once it has spent this many tokens.
+#       --max-tokens <n>    Stop a task once it has spent this many tokens
+#                           (default: 1000000).
 #                           The wall clock is a poor proxy for spend: a model
 #                           can burn a budget in two minutes or idle for
 #                           twenty. Tightens each task's own limit, never
 #                           loosens it.
 #       --timeout-cap <s>   Ceiling on every task's wall-clock timeout, in
-#                           seconds. Defaults to 1200, twenty minutes: far
-#                           more than any measured task needs, and enough to
-#                           bound one that has stopped making progress.
+#                           seconds. Defaults to 3600, one hour, to preserve
+#                           the measured composition workload while bounding
+#                           a task that has stopped making progress.
 #                           Tightening only: a task that asks for less keeps
 #                           what its author gave it.
 #       --agent-arg <arg>   Extra argument forwarded verbatim to the agent CLI
@@ -387,7 +388,7 @@ fi
 
 
 echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} effort=${effort:-<default>} parallel=$parallel"
-echo "  caps:   tokens=${max_tokens:-unlimited} timeout=${timeout_cap:-1200}s"
+echo "  caps:   tokens=${max_tokens:-1000000} timeout=${timeout_cap:-3600}s"
 echo "  runs:   $runs_dir"
 echo "  report: $out"
 if [ -n "$vm" ]; then

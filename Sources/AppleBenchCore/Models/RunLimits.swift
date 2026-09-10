@@ -69,18 +69,11 @@ public struct LimitCaps: Sendable, Equatable {
 
     /// Applied when a run names no caps of its own.
     ///
-    /// Twenty minutes. Long enough that no task measured so far comes close,
-    /// since successful runs finish in one to two, and short enough to bound
-    /// a task that has stopped making progress. It tightens only the handful
-    /// of tasks written with more, whose limits track difficulty barely at
-    /// all, and leaves everything else exactly as its author set it.
-    ///
-    /// Tokens are deliberately uncapped. The only measurements available come
-    /// from one model on the easier sample suite, and a token default guessed
-    /// too low would truncate real work while reporting an ordinary failure,
-    /// which is the kind of error a benchmark cannot see in its own numbers.
-    /// Pass `--max-tokens` once a run has measured what tasks actually spend.
-    public static let standard = LimitCaps(timeoutSeconds: 1_200)
+    /// Composition runs measured up to 630k tokens before the previous
+    /// 20-minute wall-clock cap stopped them. An hour and one million tokens
+    /// preserve room above that observed workload while still bounding a
+    /// stalled or runaway run. Tasks with smaller authored limits keep them.
+    public static let standard = LimitCaps(timeoutSeconds: 3_600, maxTokens: 1_000_000)
 }
 
 extension RunLimits {
