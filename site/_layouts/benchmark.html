@@ -2,6 +2,7 @@
 layout: default
 ---
 {%- assign rows = site.data.benchmarks[page.data] -%}
+{%- assign report = site.data.reports[page.data] -%}
 {%- assign passed = rows | where: "passed", "true" -%}
 {%- assign total = rows.size -%}
 {%- assign rate = 0 -%}
@@ -16,15 +17,13 @@ layout: default
 {%- assign list_cost = 0 -%}
 {%- assign tokens = 0 -%}
 {%- assign seconds = 0 -%}
-{%- assign points = 0 -%}
-{%- assign available = 0 -%}
+{%- assign points = report.score.points | default: 0 -%}
+{%- assign available = report.score.available | default: 0 -%}
 {%- for row in rows -%}
   {%- assign cost = cost | plus: row.cost_usd -%}
   {%- assign list_cost = list_cost | plus: row.list_cost_usd -%}
   {%- assign tokens = tokens | plus: row.total_tokens -%}
   {%- assign seconds = seconds | plus: row.duration_seconds -%}
-  {%- assign points = points | plus: row.points -%}
-  {%- assign available = available | plus: row.face_value -%}
 {%- endfor -%}
 {%- assign share = 0 -%}
 {%- if available > 0 %}{% assign share = points | times: 1000 | divided_by: available | times: 0.1 %}{% endif -%}
@@ -92,7 +91,6 @@ layout: default
     </div>
   </div>
 
-  {%- assign report = site.data.reports[page.data] -%}
   <p style="color:var(--ink-3); font-size:.88rem; margin:0 0 2.5rem">
     Each task is worth 10 points. A finish keeps all 10 below
     ${{ report.score.reference_cost_usd | default: 0.025 }} and
@@ -179,7 +177,7 @@ layout: default
   {%- endif -%}
 
   <div class="benchmark-chart-stack">
-    {%- include chart-points-by-category.html rows=rows -%}
+    {%- include chart-points-by-category.html categories=report.categories -%}
     {%- include chart-pass-by-category.html rows=rows -%}
   </div>
 

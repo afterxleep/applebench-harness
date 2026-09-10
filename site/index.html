@@ -116,13 +116,10 @@ description: >-
     <ul class="entry-list entry-list--featured">
       {%- for run in runs limit: 3 -%}
         {%- assign rows = site.data.benchmarks[run.data] -%}
+        {%- assign report = site.data.reports[run.data] -%}
         {%- assign hits = rows | where: "passed", "true" -%}
-        {%- assign points = 0 -%}
-        {%- assign available = 0 -%}
-        {%- for row in rows -%}
-          {%- assign points = points | plus: row.points -%}
-          {%- assign available = available | plus: row.face_value -%}
-        {%- endfor -%}
+        {%- assign points = report.score.points | default: 0 -%}
+        {%- assign available = report.score.available | default: 0 -%}
         <li>
           <a class="entry" href="{{ run.url | relative_url }}">
             <p class="entry__number">0{{ forloop.index }}</p>

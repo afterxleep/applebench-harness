@@ -4,27 +4,23 @@ series · magnitude by length, so a single sequential hue and no legend.
 
 This is the pass-rate chart's harder sibling: a category can pass most of its
 tasks and still score badly here, which is the whole reason the score exists.
-Params: rows (the run rows).
+Params: categories (the report's exact category aggregates).
 {%- endcomment -%}
 <figure class="figure">
   <figcaption>
     <h3 class="figure__title">Points by category</h3>
     <p class="figure__subtitle">
       Points in each kind of work, worst first. If this bar is much shorter
-      than pass rate next to it, the model finished the tasks but spent a lot
-      of tokens doing it.
+      than pass rate next to it, the model finished the tasks but cost more or
+      took longer doing it.
     </p>
   </figcaption>
 
-  {%- assign groups = include.rows | group_by: "category" -%}
+  {%- assign groups = include.categories -%}
   {%- assign ranked = "" | split: "" -%}
   {%- for group in groups -%}
-    {%- assign earned = 0 -%}
-    {%- assign available = 0 -%}
-    {%- for row in group.items -%}
-      {%- assign earned = earned | plus: row.points -%}
-      {%- assign available = available | plus: row.face_value -%}
-    {%- endfor -%}
+    {%- assign earned = group.score.points | default: 0 -%}
+    {%- assign available = group.score.available | default: 0 -%}
     {%- assign share = 0 -%}
     {%- if available > 0 %}{% assign share = earned | times: 10000 | divided_by: available %}{% endif -%}
     {%- comment -%}
@@ -32,7 +28,7 @@ Params: rows (the run rows).
       before dividing would shift a category's share by a tenth of a percent
       against the export the table below reads.
     {%- endcomment -%}
-    {%- capture packed -%}{{ share | round | prepend: "00000" | slice: -5, 5 }}|{{ group.name }}|{{ earned | round: 1 }}|{{ available }}{%- endcapture -%}
+    {%- capture packed -%}{{ share | round | prepend: "00000" | slice: -5, 5 }}|{{ group.category }}|{{ earned | round: 1 }}|{{ available }}{%- endcapture -%}
     {%- assign ranked = ranked | push: packed -%}
   {%- endfor -%}
   {%- assign ranked = ranked | sort -%}

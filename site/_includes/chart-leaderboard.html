@@ -19,6 +19,7 @@ Params: runs (site.benchmarks).
 
 {%- for run in include.runs -%}
   {%- assign rows = site.data.benchmarks[run.data] -%}
+  {%- assign report = site.data.reports[run.data] -%}
   {%- assign comparable = true -%}
   {%- if current and run.suite_revision != current.id %}{% assign comparable = false %}{% endif -%}
   {%- if run.score_spec != "points-v3" %}{% assign comparable = false %}{% endif -%}
@@ -26,13 +27,11 @@ Params: runs (site.benchmarks).
     {%- assign left_out = left_out | push: run -%}
   {%- endunless -%}
   {%- if rows and comparable -%}
-    {%- assign earned = 0 -%}
-    {%- assign available = 0 -%}
+    {%- assign earned = report.score.points | default: 0 -%}
+    {%- assign available = report.score.available | default: 0 -%}
     {%- assign list_cost = 0 -%}
     {%- assign hits = rows | where: "passed", "true" -%}
     {%- for row in rows -%}
-      {%- assign earned = earned | plus: row.points -%}
-      {%- assign available = available | plus: row.face_value -%}
       {%- assign list_cost = list_cost | plus: row.list_cost_usd -%}
     {%- endfor -%}
     {%- assign solve_cost = 0 -%}
