@@ -8,9 +8,12 @@ struct BenchmarkScoreTests {
         task: String,
         difficulty: Int? = 5,
         passed: Bool = true,
-        tokens: Int? = 10_000
+        costUSD: Double? = 0.01,
+        activeTimeSeconds: Double? = 120
     ) -> BenchmarkRunResult {
-        BenchmarkRunResult(
+        var metrics = TrajectoryMetrics(events: [])
+        metrics.agentDurationSeconds = activeTimeSeconds
+        return BenchmarkRunResult(
             runID: "2026-01-01T000000-\(task)-opencode",
             task: task,
             category: .build,
@@ -19,8 +22,8 @@ struct BenchmarkScoreTests {
             agent: AgentMetadata(agent: "opencode", model: "vendor/model-1"),
             environment: .init(macos: "27.0", architecture: "arm64", xcode: "27.0", xcodeBuild: "27A1"),
             result: .init(passed: passed, durationSeconds: 1, agentTermination: .completed),
-            usage: AgentUsage(totalTokens: tokens),
-            metrics: nil,
+            usage: AgentUsage(totalTokens: 10_000, estimatedCostUSD: costUSD),
+            metrics: metrics,
             graders: [],
             git: .init(baseCommit: "abc123", filesChanged: 1, insertions: 1, deletions: 0),
             artifacts: .init(events: "events.jsonl")
@@ -37,44 +40,45 @@ struct BenchmarkScoreTests {
         #expect(AppleBenchScore.faceValue() == AppleBenchScore.pointsPerTask)
     }
 
-    @Test("A solve inside the token allowance keeps its full face value")
+    @Test("A solve inside the cost and time allowances keeps its full face value")
     func solvesInsideBudgetScoreInFull() {
-        #expect(AppleBenchScore.efficiency(totalTokens: 1) == 1)
-        #expect(AppleBenchScore.efficiency(totalTokens: AppleBenchScore.referenceTokenBudget) == 1)
-        #expect(AppleBenchScore.points(passed: true, totalTokens: 20_000)
+        #expect(AppleBenchScore.efficiency(costUSD: 0.001, activeTimeSeconds: 1) == 1)
+        #expect(AppleBenchScore.efficiency(
+            costUSD: AppleBenchScore.referenceCostUSD,
+            activeTimeSeconds: AppleBenchScore.referenceActiveTimeSeconds
+        ) == 1)
+        #expect(AppleBenchScore.points(passed: true, costUSD: 0.01, activeTimeSeconds: 120)
             == Double(AppleBenchScore.pointsPerTask))
     }
 
-    @Test("Points fall in proportion to the overspend beyond the allowance")
-    func pointsDecayAboveBudget() {
-        let budget = AppleBenchScore.referenceTokenBudget
-        #expect(abs(AppleBenchScore.efficiency(totalTokens: budget * 2) - 0.5) < 0.0001)
-        // Twice the allowance: half the points.
-        #expect(abs(AppleBenchScore.points(passed: true, totalTokens: budget * 2) - 5) < 0.0001)
+    @Test("Cost dominates the efficiency adjustment")
+    func costDominatesEfficiency() {
+        let cost = AppleBenchScore.referenceCostUSD * 2
+        let efficiency = AppleBenchScore.efficiency(costUSD: cost, activeTimeSeconds: 1)
+        #expect(abs(efficiency - 0.6) < 0.0001)
+        #expect(abs(AppleBenchScore.points(passed: true, costUSD: cost, activeTimeSeconds: 1) - 6) < 0.0001)
     }
 
     @Test("A wasteful solve still outscores a failure, down to the floor")
     func efficiencyIsFloored() {
-        let runaway = AppleBenchScore.referenceTokenBudget * 100
-        #expect(AppleBenchScore.efficiency(totalTokens: runaway) == AppleBenchScore.minimumEfficiency)
-        #expect(AppleBenchScore.points(passed: true, totalTokens: runaway) > 0)
+        #expect(AppleBenchScore.efficiency(costUSD: 100, activeTimeSeconds: 100_000)
+            == AppleBenchScore.minimumEfficiency)
+        #expect(AppleBenchScore.points(passed: true, costUSD: 100, activeTimeSeconds: 100_000) > 0)
     }
 
-    @Test("Unreported tokens take the floor rather than full marks")
+    @Test("Unreported cost and time take the floor rather than full marks")
     func absentUsageNeverImprovesTheScore() {
-        // The harness cannot verify an efficiency it was never told about, and
-        // a model whose telemetry is missing must not score above one whose
-        // telemetry is complete.
-        #expect(AppleBenchScore.efficiency(totalTokens: nil) == AppleBenchScore.minimumEfficiency)
-        #expect(AppleBenchScore.efficiency(totalTokens: 0) == AppleBenchScore.minimumEfficiency)
+        #expect(AppleBenchScore.efficiency(costUSD: nil, activeTimeSeconds: nil)
+            == AppleBenchScore.minimumEfficiency)
+        #expect(AppleBenchScore.efficiency(costUSD: 0, activeTimeSeconds: 0) == 1)
     }
 
     @Test("A failed task scores nothing but still costs its face value")
     func failuresScoreZeroAndStayInTheDenominator() {
-        #expect(AppleBenchScore.points(passed: false, totalTokens: 100) == 0)
+        #expect(AppleBenchScore.points(passed: false, costUSD: 0.001, activeTimeSeconds: 1) == 0)
 
         let total = AppleBenchScore.total(for: [
-            makeResult(task: "build-001", difficulty: 9, passed: false, tokens: 100)
+            makeResult(task: "build-001", difficulty: 9, passed: false)
         ])
         #expect(total.points == 0)
         #expect(total.available == AppleBenchScore.pointsPerTask)
@@ -100,12 +104,12 @@ struct BenchmarkScoreTests {
         // published. If this ever stops holding, every published total has to
         // be re-run instead.
         let gold = [
-            makeResult(task: "build-001", difficulty: 3, passed: true, tokens: 12_000),
-            makeResult(task: "ops-001", difficulty: 6, passed: false, tokens: 400_000),
+            makeResult(task: "build-001", difficulty: 3, passed: true, costUSD: 0.012),
+            makeResult(task: "ops-001", difficulty: 6, passed: false, costUSD: 0.40),
         ]
         let goldTwo = [
-            makeResult(task: "widget-001", difficulty: 8, passed: true, tokens: 150_000),
-            makeResult(task: "swiftdata-001", difficulty: 2, passed: true, tokens: nil),
+            makeResult(task: "widget-001", difficulty: 8, passed: true, costUSD: 0.15),
+            makeResult(task: "swiftdata-001", difficulty: 2, passed: true, costUSD: nil),
         ]
 
         let first = AppleBenchScore.total(for: gold)

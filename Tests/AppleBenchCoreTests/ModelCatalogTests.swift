@@ -277,16 +277,12 @@ struct ModelCatalogTests {
         #expect(AgentUsage().promptTokens == nil)
     }
 
-    @Test("The score-bearing total excludes cache, so scoring stays comparable")
+    @Test("The legacy total excludes cache")
     func totalTokensExcludeCache() {
-        // total feeds the points efficiency multiplier. Folding cache into it
-        // would rescore future runs against a different definition than every
-        // published one.
         let usage = AgentUsage(
             inputTokens: 10_000, outputTokens: 2_000,
             cacheReadTokens: 500_000, totalTokens: 12_000
         )
         #expect(usage.totalTokens == 12_000)
-        #expect(AppleBenchScore.efficiency(totalTokens: usage.totalTokens) == 1.0)
     }
 }

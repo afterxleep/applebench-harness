@@ -485,11 +485,10 @@ struct OpenCodeOutputParser: AgentOutputParser {
             let cache = tokens["cache"]
             let cacheRead = cache?["read"]?.intValue
             let cacheWrite = cache?["write"]?.intValue
-            // `total` deliberately excludes cache: it feeds the points score's
-            // efficiency multiplier, and folding cache reads into it would
-            // rescore every future run against a different definition than the
-            // published ones, making the two incomparable. Cache is carried in
-            // its own fields, where cost can price it without moving a score.
+            // `total` retains OpenCode's non-cache token definition for report
+            // continuity. Cache is carried separately so cost can price the
+            // complete request without flattening cheap reads into full-price
+            // input.
             let counted = [input, output, reasoning].compactMap { $0 }
             let total: Int? = counted.isEmpty ? nil : counted.reduce(0, +)
             var cost: Double?

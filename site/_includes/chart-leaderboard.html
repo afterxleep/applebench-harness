@@ -2,7 +2,7 @@
 Comparison of every published run that can be ranked together: current suite
 revision, current scoring specification. Pass rate leads, because it is how
 much of the suite was solved. Points and cost sit beside it, because a solve
-that burned the token budget is not the same achievement as one that did not.
+that cost far more or took much longer is not the same achievement as one that did not.
 
 Share, not raw totals, for any measure that grows with the suite. Each bar
 states its task count so two unequal sets are not read as like-for-like.
@@ -21,7 +21,7 @@ Params: runs (site.benchmarks).
   {%- assign rows = site.data.benchmarks[run.data] -%}
   {%- assign comparable = true -%}
   {%- if current and run.suite_revision != current.id %}{% assign comparable = false %}{% endif -%}
-  {%- if run.score_spec != "points-v2" %}{% assign comparable = false %}{% endif -%}
+  {%- if run.score_spec != "points-v3" %}{% assign comparable = false %}{% endif -%}
   {%- unless comparable -%}
     {%- assign left_out = left_out | push: run -%}
   {%- endunless -%}
@@ -154,9 +154,10 @@ Params: runs (site.benchmarks).
   <figcaption>
     <h3 class="figure__title">Points</h3>
     <p class="figure__subtitle">
-      Each finished task is worth 10 points. Stay under 50,000 tokens and you
-      keep all 10. Use more and you keep less, never below 2.5. A fail is 0,
-      but those 10 points still sit in the total.
+      Each finished task is worth 10 points. Cost supplies 80% of the efficiency
+      adjustment and active agent time 20%, with full credit through $0.025 and
+      300 seconds and a 2.5-point floor. A fail is 0, but those 10 points still
+      sit in the total.
     </p>
   </figcaption>
 
@@ -180,7 +181,7 @@ Params: runs (site.benchmarks).
 
   <p class="figure__note">
     If two models look close here but far apart on pass rate, the one with
-    more passes spent more tokens getting them.
+    more passes paid more or took longer getting them.
     <a href="{{ '/methodology/#scoring' | relative_url }}">How scoring works</a>.
   </p>
 

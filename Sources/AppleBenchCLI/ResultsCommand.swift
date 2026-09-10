@@ -168,7 +168,7 @@ struct ResultsCommand: AsyncParsableCommand {
 
         // Aggregate per agent+model configuration, so model comparisons through
         // a single harness stay separated. Everything but the score column is a
-        // raw sum or rate; the score is `points-v1`, computed per run.
+        // raw sum or rate; points are computed independently per run.
         let byAgent = Dictionary(grouping: results, by: { configurationLabel(of: $0) })
         let nameWidth = max(14, (byAgent.keys.map(\.count).max() ?? 0) + 2)
         print("\(Format.pad("", nameWidth))\(Format.pad("Points", 14))\(Format.pad("Passed", 9))\(Format.pad("Completion", 12))\(Format.pad("Tokens", 10))\(Format.pad("Cost", 10))Cost/solve")

@@ -94,11 +94,13 @@ layout: default
 
   {%- assign report = site.data.reports[page.data] -%}
   <p style="color:var(--ink-3); font-size:.88rem; margin:0 0 2.5rem">
-    Each task is worth 10 points. Finish it in under {{ report.score.reference_token_budget | default: 50000 | divided_by: 1000 }}k
-    tokens and you keep all 10. Use more and you keep less, never below
+    Each task is worth 10 points. A finish keeps all 10 below
+    ${{ report.score.reference_cost_usd | default: 0.025 }} and
+    {{ report.score.reference_active_time_seconds | default: 300 | round }} active seconds.
+    Above either allowance, cost drives {{ report.score.cost_weight | default: 0.8 | times: 100 | round }}% of the adjustment and time the rest, never below
     {{ report.score.minimum_efficiency | default: 0.25 | times: 100 | round }}%.
     Fail and you get 0, but those 10 points still sit in the total.
-    Rule used: <code>{{ report.score.specification | default: "points-v2" }}</code>,
+    Rule used: <code>{{ report.score.specification | default: "points-v3" }}</code>,
     attempt <code>{{ report.attempt | default: "all" }}</code>.
     <a href="{{ '/methodology/#scoring' | relative_url }}">How scoring works</a>.
   </p>
@@ -150,7 +152,7 @@ layout: default
         {%- endif -%}
         <tr><th scope="row">Harness</th><td>{{ page.harness }}{% for pair in first.agent.configuration %}, {{ pair[0] | replace: "_", " " }}: {{ pair[1] }}{% endfor %}</td></tr>
         <tr><th scope="row">Host</th><td>Xcode {{ first.environment.xcode }}{% if first.environment.xcode_build %} ({{ first.environment.xcode_build }}){% endif %}, macOS {{ first.environment.macos }}, {{ first.environment.architecture }}</td></tr>
-        <tr><th scope="row">Scoring</th><td><code>{{ report.score.specification }}</code>, attempt rule <code>{{ report.attempt }}</code>{% if report.score.solves_with_unreported_tokens > 0 %}, {{ report.score.solves_with_unreported_tokens }} solve(s) scored at the floor for want of reported tokens{% endif %}</td></tr>
+        <tr><th scope="row">Scoring</th><td><code>{{ report.score.specification }}</code>, attempt rule <code>{{ report.attempt }}</code>{% if report.score.solves_with_unreported_cost > 0 %}, {{ report.score.solves_with_unreported_cost }} solve(s) missing reported cost{% endif %}{% if report.score.solves_with_unreported_active_time > 0 %}, {{ report.score.solves_with_unreported_active_time }} solve(s) missing active time{% endif %}</td></tr>
       </tbody>
     </table>
   </div>
@@ -199,7 +201,7 @@ layout: default
   <h2>Every run</h2>
   <p>
     Each row is one task. <strong>Points</strong> is what it earned out of 10.
-    A ×0.50 next to the number means it used twice the token budget.
+    A ×0.50 next to the number means its blended cost/time efficiency was 50%.
   </p>
 </div>
 

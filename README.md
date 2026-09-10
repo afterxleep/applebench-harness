@@ -11,14 +11,14 @@ a simulator.
 
 Agents do not grade themselves.
 
-Under the `points-v2` scoring specification, every task is worth ten points.
+Under the `points-v3` scoring specification, every task is worth ten points.
 Authored difficulty remains descriptive metadata and does not affect scoring.
-A solve keeps all ten points when its reported usage is within the flat
-50,000-token allowance; beyond that, points fall in proportion, with a floor
-of 2.5 points. A solve with missing or nonpositive token usage also earns
-2.5 points. A failure earns zero, and every run contributes ten available
-points. Scores add: a task set added later is scored by running the new tasks
-alone. See the
+A solve keeps all ten when it costs no more than $0.025 and uses no more than
+300 seconds of active agent time. Beyond those allowances, cost supplies 80%
+of the efficiency adjustment and active time 20%, with a 2.5-point floor.
+Tokens remain reported but do not affect points. A failure earns zero, and
+every run contributes ten available points. Scores add: a task set added later
+is scored by running the new tasks alone. See the
 [scoring implementation](Sources/AppleBenchCore/Models/BenchmarkScore.swift).
 
 ## What is in this repository

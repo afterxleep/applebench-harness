@@ -6,82 +6,102 @@
       "completion_rate" : 1,
       "passed" : 1,
       "score" : {
+        "active_time_weight" : 0.2,
         "available" : 10,
-        "fraction_of_available" : 1,
+        "cost_weight" : 0.8,
+        "fraction_of_available" : 0.6707481235097146,
         "minimum_efficiency" : 0.25,
-        "points" : 10,
-        "reference_token_budget" : 50000,
+        "points" : 6.707481235097146,
+        "reference_active_time_seconds" : 300,
+        "reference_cost_usd" : 0.025,
         "scored_runs" : 1,
-        "solves_with_unreported_tokens" : 0,
-        "specification" : "points-v2",
+        "solves_with_unreported_active_time" : 0,
+        "solves_with_unreported_cost" : 0,
+        "specification" : "points-v3",
         "unscored_runs" : 0
       },
       "total" : 1
     },
     {
       "category" : "frameworks",
-      "completion_rate" : 0.6818181818181818,
+      "completion_rate" : 0.6338028169014085,
       "passed" : 45,
       "score" : {
-        "available" : 660,
-        "fraction_of_available" : 0.6818181818181818,
+        "active_time_weight" : 0.2,
+        "available" : 710,
+        "cost_weight" : 0.8,
+        "fraction_of_available" : 0.6318540547591505,
         "minimum_efficiency" : 0.25,
-        "points" : 450,
-        "reference_token_budget" : 50000,
-        "scored_runs" : 66,
-        "solves_with_unreported_tokens" : 0,
-        "specification" : "points-v2",
+        "points" : 448.61637887899684,
+        "reference_active_time_seconds" : 300,
+        "reference_cost_usd" : 0.025,
+        "scored_runs" : 71,
+        "solves_with_unreported_active_time" : 0,
+        "solves_with_unreported_cost" : 0,
+        "specification" : "points-v3",
         "unscored_runs" : 0
       },
-      "total" : 66
+      "total" : 71
     },
     {
       "category" : "interaction",
       "completion_rate" : 0.3333333333333333,
       "passed" : 9,
       "score" : {
+        "active_time_weight" : 0.2,
         "available" : 270,
-        "fraction_of_available" : 0.3333333333333333,
+        "cost_weight" : 0.8,
+        "fraction_of_available" : 0.3010513080113539,
         "minimum_efficiency" : 0.25,
-        "points" : 90,
-        "reference_token_budget" : 50000,
+        "points" : 81.28385316306554,
+        "reference_active_time_seconds" : 300,
+        "reference_cost_usd" : 0.025,
         "scored_runs" : 27,
-        "solves_with_unreported_tokens" : 0,
-        "specification" : "points-v2",
+        "solves_with_unreported_active_time" : 0,
+        "solves_with_unreported_cost" : 0,
+        "specification" : "points-v3",
         "unscored_runs" : 0
       },
       "total" : 27
     },
     {
       "category" : "ops",
-      "completion_rate" : 0.7142857142857143,
+      "completion_rate" : 0.7407407407407407,
       "passed" : 20,
       "score" : {
-        "available" : 280,
-        "fraction_of_available" : 0.6121163519818378,
+        "active_time_weight" : 0.2,
+        "available" : 270,
+        "cost_weight" : 0.8,
+        "fraction_of_available" : 0.4819377887767595,
         "minimum_efficiency" : 0.25,
-        "points" : 171.3925785549146,
-        "reference_token_budget" : 50000,
-        "scored_runs" : 28,
-        "solves_with_unreported_tokens" : 0,
-        "specification" : "points-v2",
+        "points" : 130.12320296972507,
+        "reference_active_time_seconds" : 300,
+        "reference_cost_usd" : 0.025,
+        "scored_runs" : 27,
+        "solves_with_unreported_active_time" : 0,
+        "solves_with_unreported_cost" : 0,
+        "specification" : "points-v3",
         "unscored_runs" : 0
       },
-      "total" : 28
+      "total" : 27
     },
     {
       "category" : "project",
       "completion_rate" : 0.75,
       "passed" : 3,
       "score" : {
+        "active_time_weight" : 0.2,
         "available" : 40,
-        "fraction_of_available" : 0.75,
+        "cost_weight" : 0.8,
+        "fraction_of_available" : 0.524181983517588,
         "minimum_efficiency" : 0.25,
-        "points" : 30,
-        "reference_token_budget" : 50000,
+        "points" : 20.96727934070352,
+        "reference_active_time_seconds" : 300,
+        "reference_cost_usd" : 0.025,
         "scored_runs" : 4,
-        "solves_with_unreported_tokens" : 0,
-        "specification" : "points-v2",
+        "solves_with_unreported_active_time" : 0,
+        "solves_with_unreported_cost" : 0,
+        "specification" : "points-v3",
         "unscored_runs" : 0
       },
       "total" : 4
@@ -91,14 +111,18 @@
       "completion_rate" : 0.8,
       "passed" : 4,
       "score" : {
+        "active_time_weight" : 0.2,
         "available" : 50,
+        "cost_weight" : 0.8,
         "fraction_of_available" : 0.8,
         "minimum_efficiency" : 0.25,
         "points" : 40,
-        "reference_token_budget" : 50000,
+        "reference_active_time_seconds" : 300,
+        "reference_cost_usd" : 0.025,
         "scored_runs" : 5,
-        "solves_with_unreported_tokens" : 0,
-        "specification" : "points-v2",
+        "solves_with_unreported_active_time" : 0,
+        "solves_with_unreported_cost" : 0,
+        "specification" : "points-v3",
         "unscored_runs" : 0
       },
       "total" : 5
@@ -108,14 +132,18 @@
       "completion_rate" : 0.3333333333333333,
       "passed" : 1,
       "score" : {
+        "active_time_weight" : 0.2,
         "available" : 30,
+        "cost_weight" : 0.8,
         "fraction_of_available" : 0.3333333333333333,
         "minimum_efficiency" : 0.25,
         "points" : 10,
-        "reference_token_budget" : 50000,
+        "reference_active_time_seconds" : 300,
+        "reference_cost_usd" : 0.025,
         "scored_runs" : 3,
-        "solves_with_unreported_tokens" : 0,
-        "specification" : "points-v2",
+        "solves_with_unreported_active_time" : 0,
+        "solves_with_unreported_cost" : 0,
+        "specification" : "points-v3",
         "unscored_runs" : 0
       },
       "total" : 3
@@ -125,61 +153,69 @@
       "completion_rate" : 0.6666666666666666,
       "passed" : 6,
       "score" : {
+        "active_time_weight" : 0.2,
         "available" : 90,
+        "cost_weight" : 0.8,
         "fraction_of_available" : 0.6666666666666666,
         "minimum_efficiency" : 0.25,
         "points" : 60,
-        "reference_token_budget" : 50000,
+        "reference_active_time_seconds" : 300,
+        "reference_cost_usd" : 0.025,
         "scored_runs" : 9,
-        "solves_with_unreported_tokens" : 0,
-        "specification" : "points-v2",
+        "solves_with_unreported_active_time" : 0,
+        "solves_with_unreported_cost" : 0,
+        "specification" : "points-v3",
         "unscored_runs" : 0
       },
       "total" : 9
     }
   ],
-  "completion_rate" : 0.6223776223776224,
+  "completion_rate" : 0.6054421768707483,
   "configurations" : [
     {
       "agent" : "opencode",
-      "completion_rate" : 0.6223776223776224,
-      "cost_per_solved_task_usd" : 0.058402602134831456,
+      "completion_rate" : 0.6054421768707483,
+      "cost_per_solved_task_usd" : 0.06278628808988762,
       "label" : "opencode · minimax/MiniMax-M2.7",
-      "median_duration_seconds" : 123.480614167,
+      "median_duration_seconds" : 126.463451875,
       "model" : "minimax/MiniMax-M2.7",
       "passed" : 89,
       "score" : {
-        "available" : 1430,
-        "fraction_of_available" : 0.6023724325558842,
+        "active_time_weight" : 0.2,
+        "available" : 1470,
+        "cost_weight" : 0.8,
+        "fraction_of_available" : 0.5426518337330531,
         "minimum_efficiency" : 0.25,
-        "points" : 861.3925785549145,
-        "reference_token_budget" : 50000,
-        "scored_runs" : 143,
-        "solves_with_unreported_tokens" : 0,
-        "specification" : "points-v2",
+        "points" : 797.6981955875881,
+        "reference_active_time_seconds" : 300,
+        "reference_cost_usd" : 0.025,
+        "scored_runs" : 147,
+        "solves_with_unreported_active_time" : 0,
+        "solves_with_unreported_cost" : 0,
+        "specification" : "points-v3",
         "unscored_runs" : 0
       },
-      "total" : 143,
-      "total_cost_usd" : 5.19783159,
-      "total_tokens" : 2109299
+      "total" : 147,
+      "total_cost_usd" : 5.587979639999999,
+      "total_tokens" : 2248768
     }
   ],
   "passed" : 89,
   "reasoning" : [
     {
       "at_maximum_effort" : false,
-      "cache_read_tokens" : 47847014,
-      "cache_write_tokens" : 3239714,
+      "cache_read_tokens" : 50776699,
+      "cache_write_tokens" : 3520948,
       "effort" : null,
-      "input_tokens" : 1576712,
-      "list_cost_usd" : 3.6792860399999996,
+      "input_tokens" : 1641666,
+      "list_cost_usd" : 3.9497237399999996,
       "maximum_effort" : null,
       "model" : "minimax/MiniMax-M2.7",
-      "output_tokens" : 279543,
+      "output_tokens" : 342185,
       "price_retrieved" : "2026-09-03",
       "price_source" : "https://models.dev/api.json",
-      "reported_cost_usd" : 5.19783159,
-      "runs" : 143
+      "reported_cost_usd" : 5.587979639999999,
+      "runs" : 147
     }
   ],
   "runs" : [
@@ -1021,6 +1057,683 @@
         "input_tokens" : 7602,
         "output_tokens" : 2370,
         "total_tokens" : 14089
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 9,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "6c72a3a231521b2f263836c8d17a0b8940995a40",
+        "deletions" : 22,
+        "files_changed" : 5,
+        "insertions" : 1019
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 11.396054459,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'FieldInspectionFixture'"
+        },
+        {
+          "duration_seconds" : 5.519222708,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            },
+            {
+              "name" : "xctest-retry.log",
+              "path" : "logs/xctest-retry.log"
+            },
+            {
+              "name" : "xctest-retry.xcresult",
+              "path" : "logs/xctest-retry.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        },
+        {
+          "duration_seconds" : 4.319733875,
+          "evidence" : [
+            {
+              "name" : "xcuitest.log",
+              "path" : "logs/xcuitest.log"
+            },
+            {
+              "name" : "xcuitest.xcresult",
+              "path" : "logs/xcuitest.xcresult"
+            },
+            {
+              "name" : "xcuitest-retry.log",
+              "path" : "logs/xcuitest-retry.log"
+            },
+            {
+              "name" : "xcuitest-retry.xcresult",
+              "path" : "logs/xcuitest-retry.xcresult"
+            }
+          ],
+          "name" : "xcuitest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 356.28340899944305,
+        "agent_events" : 101,
+        "agent_output_bytes" : 311374,
+        "agent_output_chunks" : 101,
+        "build_invocations" : 1,
+        "commands_executed" : 10,
+        "grading_duration_seconds" : 41.1536009311676,
+        "test_invocations" : 4,
+        "tool_calls" : 36,
+        "total_events" : 252
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 398.073796375,
+        "passed" : false
+      },
+      "run_id" : "2026-09-10T103228-composition-001-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "composition",
+        "swiftui",
+        "swiftdata",
+        "photos",
+        "pdf",
+        "persistence"
+      ],
+      "task" : "composition-001",
+      "usage" : {
+        "cache_read_tokens" : 722932,
+        "cache_write_tokens" : 70526,
+        "estimated_cost_usd" : 0.09627237,
+        "input_tokens" : 11272,
+        "output_tokens" : 17544,
+        "total_tokens" : 30495
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 9,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "6999fa3837f9e2cbf8eb194fd1cdfb88327cb426",
+        "deletions" : 57,
+        "files_changed" : 3,
+        "insertions" : 484
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 10.388429916,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'ExpenseLedgerFixture'"
+        },
+        {
+          "duration_seconds" : 5.28533675,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            },
+            {
+              "name" : "xctest-retry.log",
+              "path" : "logs/xctest-retry.log"
+            },
+            {
+              "name" : "xctest-retry.xcresult",
+              "path" : "logs/xctest-retry.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        },
+        {
+          "duration_seconds" : 5.25724125,
+          "evidence" : [
+            {
+              "name" : "xcuitest.log",
+              "path" : "logs/xcuitest.log"
+            },
+            {
+              "name" : "xcuitest.xcresult",
+              "path" : "logs/xcuitest.xcresult"
+            },
+            {
+              "name" : "xcuitest-retry.log",
+              "path" : "logs/xcuitest-retry.log"
+            },
+            {
+              "name" : "xcuitest-retry.xcresult",
+              "path" : "logs/xcuitest-retry.xcresult"
+            }
+          ],
+          "name" : "xcuitest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 223.07359302043915,
+        "agent_events" : 101,
+        "agent_output_bytes" : 235102,
+        "agent_output_chunks" : 101,
+        "build_invocations" : 1,
+        "commands_executed" : 10,
+        "grading_duration_seconds" : 40.00950002670288,
+        "test_invocations" : 4,
+        "tool_calls" : 38,
+        "total_events" : 250
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 263.705314833,
+        "passed" : false
+      },
+      "run_id" : "2026-09-10T103911-composition-002-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "composition",
+        "swiftui",
+        "swiftdata",
+        "charts",
+        "csv",
+        "documents"
+      ],
+      "task" : "composition-002",
+      "usage" : {
+        "cache_read_tokens" : 718301,
+        "cache_write_tokens" : 49362,
+        "estimated_cost_usd" : 0.07986591000000001,
+        "input_tokens" : 9305,
+        "output_tokens" : 10604,
+        "total_tokens" : 22193
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 9,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "63e8548e7526add9c816e76754140c72694fb196",
+        "deletions" : 21,
+        "files_changed" : 3,
+        "insertions" : 291
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 11.644609334,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'TripPlannerFixture'"
+        },
+        {
+          "duration_seconds" : 11.4182645,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "8 executed, 5 passed, 3 failed, 0 skipped. Failing: TripNavigationTests/testAStopLinkCannotSelectAStopFromAnotherTrip(), TripPlannerStoreTests/testOrderingAndFavoritesSurviveReopeningTheDiskStore(), TripPlannerStoreTests/testReorderAndRemovalPreserveTheOtherStopsAndChooseTheNextSelection()"
+        },
+        {
+          "duration_seconds" : 111.2878395,
+          "evidence" : [
+            {
+              "name" : "xcuitest.log",
+              "path" : "logs/xcuitest.log"
+            },
+            {
+              "name" : "xcuitest.xcresult",
+              "path" : "logs/xcuitest.xcresult"
+            }
+          ],
+          "name" : "xcuitest",
+          "passed" : false,
+          "summary" : "5 executed, 0 passed, 5 failed, 0 skipped. Failing: TripPlannerJourneyTests/testCreateFavoriteAndStopSurviveRelaunch(), TripPlannerJourneyTests/testRemovingTheCurrentStopRetainsAVisibleSelectionAndOtherStops(), TripPlannerJourneyTests/testReorderingStopsIsReachableAndPersistsAfterRelaunch(), TripPlannerJourneyTests/testSeededTripCanBeOpenedAndViewedOnTheMap(), TripPlannerJourneyTests/testWarmAndColdLinksOpenTheCorrectTripAndUnknownLinksRecover()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 322.3467890024185,
+        "agent_events" : 104,
+        "agent_output_bytes" : 316081,
+        "agent_output_chunks" : 105,
+        "build_invocations" : 1,
+        "commands_executed" : 6,
+        "grading_duration_seconds" : 159.62150704860687,
+        "test_invocations" : 2,
+        "tool_calls" : 36,
+        "total_events" : 245
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 482.610227542,
+        "passed" : false
+      },
+      "run_id" : "2026-09-10T104338-composition-003-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "composition",
+        "swiftui",
+        "swiftdata",
+        "mapkit",
+        "url-navigation",
+        "persistence"
+      ],
+      "task" : "composition-003",
+      "usage" : {
+        "cache_read_tokens" : 671601,
+        "cache_write_tokens" : 61884,
+        "estimated_cost_usd" : 0.08662206,
+        "input_tokens" : 21937,
+        "output_tokens" : 11239,
+        "total_tokens" : 35719
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 9,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "73f13806b5787bdab0211883179fb021d843e42a",
+        "deletions" : 23,
+        "files_changed" : 3,
+        "insertions" : 392
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 9.812571417000001,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'AudioLessonsFixture'"
+        },
+        {
+          "duration_seconds" : 5.379287209,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            },
+            {
+              "name" : "xctest-retry.log",
+              "path" : "logs/xctest-retry.log"
+            },
+            {
+              "name" : "xctest-retry.xcresult",
+              "path" : "logs/xctest-retry.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        },
+        {
+          "duration_seconds" : 4.56040725,
+          "evidence" : [
+            {
+              "name" : "xcuitest.log",
+              "path" : "logs/xcuitest.log"
+            },
+            {
+              "name" : "xcuitest.xcresult",
+              "path" : "logs/xcuitest.xcresult"
+            },
+            {
+              "name" : "xcuitest-retry.log",
+              "path" : "logs/xcuitest-retry.log"
+            },
+            {
+              "name" : "xcuitest-retry.xcresult",
+              "path" : "logs/xcuitest-retry.xcresult"
+            }
+          ],
+          "name" : "xcuitest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 225.90842401981354,
+        "agent_events" : 87,
+        "agent_output_bytes" : 140214,
+        "agent_output_chunks" : 87,
+        "build_invocations" : 1,
+        "commands_executed" : 10,
+        "grading_duration_seconds" : 40.603224992752075,
+        "test_invocations" : 4,
+        "tool_calls" : 32,
+        "total_events" : 222
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 267.139219708,
+        "passed" : false
+      },
+      "run_id" : "2026-09-10T105145-composition-004-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "composition",
+        "swiftui",
+        "avfoundation",
+        "persistence"
+      ],
+      "task" : "composition-004",
+      "usage" : {
+        "cache_read_tokens" : 366506,
+        "cache_write_tokens" : 38096,
+        "estimated_cost_usd" : 0.05062416000000001,
+        "input_tokens" : 6190,
+        "output_tokens" : 7292,
+        "total_tokens" : 16599
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M2.7",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 9,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "905273d93e880a964024d0b684463e559fcf0485",
+        "deletions" : 17,
+        "files_changed" : 5,
+        "insertions" : 886
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 9.743236541,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : false,
+          "summary" : "xcodebuild build failed (exit 65) for scheme 'ReadingInboxFixture'"
+        },
+        {
+          "duration_seconds" : 5.450944,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            },
+            {
+              "name" : "xctest-retry.log",
+              "path" : "logs/xctest-retry.log"
+            },
+            {
+              "name" : "xctest-retry.xcresult",
+              "path" : "logs/xctest-retry.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        },
+        {
+          "duration_seconds" : 4.33130775,
+          "evidence" : [
+            {
+              "name" : "xcuitest.log",
+              "path" : "logs/xcuitest.log"
+            },
+            {
+              "name" : "xcuitest.xcresult",
+              "path" : "logs/xcuitest.xcresult"
+            },
+            {
+              "name" : "xcuitest-retry.log",
+              "path" : "logs/xcuitest-retry.log"
+            },
+            {
+              "name" : "xcuitest-retry.xcresult",
+              "path" : "logs/xcuitest-retry.xcresult"
+            }
+          ],
+          "name" : "xcuitest",
+          "passed" : false,
+          "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 360.9729640483856,
+        "agent_events" : 80,
+        "agent_output_bytes" : 326210,
+        "agent_output_chunks" : 80,
+        "build_invocations" : 1,
+        "commands_executed" : 10,
+        "grading_duration_seconds" : 41.62372004985809,
+        "test_invocations" : 4,
+        "tool_calls" : 29,
+        "total_events" : 210
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 403.225743291,
+        "passed" : false
+      },
+      "run_id" : "2026-09-10T105617-composition-005-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "composition",
+        "swiftui",
+        "swiftdata",
+        "urlsession",
+        "webkit",
+        "offline"
+      ],
+      "task" : "composition-005",
+      "usage" : {
+        "cache_read_tokens" : 491147,
+        "cache_write_tokens" : 65464,
+        "estimated_cost_usd" : 0.08213681999999999,
+        "input_tokens" : 16250,
+        "output_tokens" : 16437,
+        "total_tokens" : 35620
       }
     },
     {
@@ -9447,95 +10160,6 @@
         "logs" : "logs"
       },
       "category" : "ops",
-      "difficulty" : 3,
-      "environment" : {
-        "architecture" : "arm64",
-        "macos" : "27.0",
-        "xcode" : "27.0",
-        "xcode_build" : "27A5252f"
-      },
-      "git" : {
-        "base_commit" : "cd3cd8016ed735c799e67a6fa837c995db35e701",
-        "deletions" : 0,
-        "files_changed" : 0,
-        "insertions" : 0
-      },
-      "graders" : [
-        {
-          "duration_seconds" : 0.00081675,
-          "evidence" : [
-
-          ],
-          "name" : "trajectory",
-          "passed" : true,
-          "summary" : "The agent's recorded commands show the work behind the deliverable (6 command(s))"
-        },
-        {
-          "duration_seconds" : 5.45e-05,
-          "evidence" : [
-
-          ],
-          "name" : "file",
-          "passed" : false,
-          "summary" : "macos-screen.png: expected to exist; macos-screen.png: unreadable or missing, cannot check PNG; macos-screencapture.md: expected to exist; macos-screencapture.md: unreadable or missing"
-        }
-      ],
-      "metrics" : {
-        "agent_duration_seconds" : 72.7004519701004,
-        "agent_events" : 19,
-        "agent_output_bytes" : 9465,
-        "agent_output_chunks" : 19,
-        "build_invocations" : 0,
-        "commands_executed" : 1,
-        "grading_duration_seconds" : 0.0013790130615234375,
-        "test_invocations" : 0,
-        "tool_calls" : 6,
-        "total_events" : 55
-      },
-      "result" : {
-        "agent_termination" : "timeout",
-        "duration_seconds" : 79.058892291,
-        "passed" : false
-      },
-      "run_id" : "2026-09-06T094322-ops-027-opencode",
-      "schema_version" : 1,
-      "tags" : [
-        "screencapture",
-        "sips",
-        "macos",
-        "operational"
-      ],
-      "task" : "ops-027",
-      "usage" : {
-        "cache_read_tokens" : 40802,
-        "cache_write_tokens" : 4098,
-        "estimated_cost_usd" : 0.00537327,
-        "input_tokens" : 0,
-        "output_tokens" : 474,
-        "total_tokens" : 1157
-      }
-    },
-    {
-      "agent" : {
-        "agent" : "opencode",
-        "configuration" : {
-          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
-          "isolation" : "none (host process)",
-          "mode" : "run --format json --pure --auto",
-          "network" : "unrestricted (host egress; --vm denies it)",
-          "plugins" : "disabled (--pure)",
-          "user_config" : "ignored (OPENCODE_CONFIG)",
-          "web_access" : "disabled (webfetch denied)"
-        },
-        "model" : "minimax/MiniMax-M2.7",
-        "version" : "1.18.27"
-      },
-      "artifacts" : {
-        "diff" : "diff.patch",
-        "events" : "events.jsonl",
-        "logs" : "logs"
-      },
-      "category" : "ops",
       "difficulty" : 7,
       "environment" : {
         "architecture" : "arm64",
@@ -15735,15 +16359,19 @@
     }
   ],
   "score" : {
-    "available" : 1430,
-    "fraction_of_available" : 0.6023724325558842,
+    "active_time_weight" : 0.2,
+    "available" : 1470,
+    "cost_weight" : 0.8,
+    "fraction_of_available" : 0.5426518337330531,
     "minimum_efficiency" : 0.25,
-    "points" : 861.3925785549145,
-    "reference_token_budget" : 50000,
-    "scored_runs" : 143,
-    "solves_with_unreported_tokens" : 0,
-    "specification" : "points-v2",
+    "points" : 797.6981955875881,
+    "reference_active_time_seconds" : 300,
+    "reference_cost_usd" : 0.025,
+    "scored_runs" : 147,
+    "solves_with_unreported_active_time" : 0,
+    "solves_with_unreported_cost" : 0,
+    "specification" : "points-v3",
     "unscored_runs" : 0
   },
-  "total" : 143
+  "total" : 147
 }

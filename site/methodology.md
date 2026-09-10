@@ -130,21 +130,22 @@ repository in a working state; both things are true, and the record says both.
 ## Scoring
 
 **Pass rate** is how many tasks the model finished. **Points** start from
-those same finishes and then drop if a task used more than 50,000 tokens.
+those same finishes and then account for what a successful run cost and how
+long the agent was actively working.
 
 Two models can pass the same task and not be alike. One reads the build log
-and edits two lines. The other rebuilds eleven times and burns most of a
-million tokens to get the same diff. Pass rate gives them the same tick.
-Points does not.
+and edits two lines. The other takes an hour and costs twenty times as much to
+get the same diff. Pass rate gives them the same tick. Points does not.
 
 That is why the results page shows pass rate first, then points. A model can
 finish more of the suite and still sit close on points if the extra finishes
 were expensive.
 
 ```text
-face value  = 10 points                           the same for every task
-budget      = 50,000 total tokens                 the same for every task
-efficiency  = clamp(budget / tokens, 0.25, 1.0)   unreported tokens → 0.25
+face value  = 10 points                              the same for every task
+cost part   = clamp($0.025 / actual cost, 0.25, 1)   80% of adjustment
+time part   = clamp(300s / active time, 0.25, 1)     20% of adjustment
+efficiency  = max(0.25, 0.8 × cost + 0.2 × time)     missing component → 0.25
 points      = passed ? face value × efficiency : 0
 
 score       = Σ points          available = 10 × number of tasks
@@ -168,17 +169,25 @@ model gets better or worse.
 **A wasteful solve still beats a failure.** The 0.25 floor is there because
 doing the work badly is not the same as not doing it.
 
-**Unreported tokens take the floor.** For the same reason a missing cost is left
-blank rather than written as `$0.00`: if absence took the favourable value, a
-model would score better the worse its telemetry was. The count of solves
-scored this way is published on the run's page.
+**Unreported cost or active time is conservative.** A missing component takes
+the floor for its share of the formula. A genuinely free run reports `$0.00`
+and keeps the full cost component; absence is not rewritten as free. The count
+of solves with missing telemetry is published on the run's page.
+
+**Tokens and tool calls do not deduct points.** Token prices differ enormously,
+so token volume is not resource cost. Raw tool-call counts also punish useful
+builds and tests and can be gamed by batching shell commands. Both remain in
+the export for diagnosis. Cost captures the dominant resource tradeoff; active
+time is deliberately the smaller guardrail because provider latency contributes
+to it.
 
 ### The constants are authored, and frozen
 
-50,000 tokens and the 0.25 floor are judgment, not measurement, chosen so an
-ordinary solve is not penalized and genuine overspend is. They are frozen under
-a specification id, currently `points-v2`. Every published run records which
-one it was scored under. Changing a constant is a scoring revision, and
+$0.025, 300 active seconds, the 80/20 weighting, and the 0.25 floor are frozen
+under a specification id, currently `points-v3`. The allowances sit just above
+the observed successful-run 75th percentiles of $0.022 and 275 seconds. Every
+published run records which specification scored it. Changing a constant is a
+scoring revision, and
 every published number is recomputed from its stored export. That does not
 require re-running any benchmark.
 
@@ -198,10 +207,9 @@ revision has always recorded.
 
 ### What points do not tell you
 
-They do not compare across suite revisions, they do not compare across scoring
-specifications, and they are not a dollar figure. Cost and wall-clock time are
-reported separately and unweighted, because provider pricing changes and a
-score that moved with it would be measuring the wrong thing.
+They do not compare across suite revisions or scoring specifications, and they
+are not a bill. Raw cost, list-price cost, tokens, wall-clock time, and tool
+calls remain visible beside the score so the adjustment can be audited.
 
 ## Grading against the device
 

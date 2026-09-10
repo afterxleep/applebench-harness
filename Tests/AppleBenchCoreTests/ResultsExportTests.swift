@@ -14,7 +14,9 @@ struct ResultsExportTests {
         tokens: Int? = 1500,
         cost: Double? = 0.0125
     ) -> BenchmarkRunResult {
-        BenchmarkRunResult(
+        var metrics = TrajectoryMetrics(events: [])
+        metrics.agentDurationSeconds = 42.5
+        return BenchmarkRunResult(
             runID: "2026-01-01T000000-\(task)-opencode",
             task: task,
             category: category,
@@ -24,7 +26,7 @@ struct ResultsExportTests {
             environment: .init(macos: "27.0", architecture: "arm64", xcode: "27.0", xcodeBuild: "27A1"),
             result: .init(passed: passed, durationSeconds: 42.5, agentTermination: .completed),
             usage: AgentUsage(inputTokens: 1200, outputTokens: 300, totalTokens: tokens, estimatedCostUSD: cost),
-            metrics: nil,
+            metrics: metrics,
             graders: [.init(name: "build", passed: passed, durationSeconds: 1, summary: summary, evidence: [])],
             git: .init(baseCommit: "abc123", filesChanged: 2, insertions: 10, deletions: 4),
             artifacts: .init(events: "events.jsonl")
@@ -156,16 +158,16 @@ struct ResultsExportTests {
         #expect(configurationScore["available"] as? Int == 20)
     }
 
-    @Test("A solve with no reported tokens is scored at the floor and counted")
+    @Test("A solve with no reported cost is scored conservatively and counted")
     func jsonCountsBlindSolves() throws {
         let root = try #require(
             try JSONSerialization.jsonObject(
-                with: ResultsExport.json(for: [makeResult(task: "ops-010", difficulty: 5, tokens: nil)])
+                with: ResultsExport.json(for: [makeResult(task: "ops-010", difficulty: 5, tokens: nil, cost: nil)])
             ) as? [String: Any]
         )
         let score = try #require(root["score"] as? [String: Any])
-        #expect(score["solves_with_unreported_tokens"] as? Int == 1)
-        #expect(abs((score["points"] as? Double ?? 0) - 2.5) < 0.0001)
+        #expect(score["solves_with_unreported_cost"] as? Int == 1)
+        #expect(abs((score["points"] as? Double ?? 0) - 4.0) < 0.0001)
     }
 
     @Test("Runs without a category are reported, not dropped")

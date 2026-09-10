@@ -3,6 +3,31 @@
 # and results are only comparable within one.
 # The current entry also drives the task totals shown on the homepage.
 
+- id: "2026-09-10"
+  name: "2026-09-10"
+  gold_tasks: 148
+  app_run_tasks: 53
+  public_sample_tasks: 8
+  category_tasks:
+    build: 1
+    tests: 3
+    runtime: 5
+    visual: 9
+    interaction: 27
+    project: 4
+    frameworks: 71
+    ops: 28
+  current: true
+  summary: >-
+    Five end-to-end composition tasks join the gold suite. Scoring moves to
+    points-v3, where successful-run cost is the dominant efficiency measure
+    and active agent time is a smaller guardrail.
+  changes:
+    - "Five composition tasks exercise complete product workflows across SwiftUI, persistence, networking, media, and UI automation."
+    - "Every composition fixture was calibrated fail-then-pass before model results were accepted."
+    - "Points use recorded cost and active agent time instead of token volume; tokens and tool calls remain diagnostic data."
+    - "Composition runs default to a 3,600-second wall-clock ceiling and a 1,000,000-token safety ceiling."
+
 - id: "2026-09-09"
   name: "2026-09-09"
   gold_tasks: 143
@@ -17,7 +42,7 @@
     project: 4
     frameworks: 66
     ops: 28
-  current: true
+  current: false
   summary: >-
     The 143-task gold set adds an Arabic right-to-left layout task. Harness and
     task corrections remove false UI, locale, startup, timeout, and sandbox

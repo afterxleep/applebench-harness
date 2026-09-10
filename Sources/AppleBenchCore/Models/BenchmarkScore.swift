@@ -3,29 +3,28 @@ import Foundation
 /// AppleBench's score: points earned against points available.
 ///
 /// A pass rate answers "how many did it get right" and stops there. Two models
-/// can complete the same task and be nothing alike — one reads the build log
-/// and edits two lines, the other rebuilds the project eleven times and burns
-/// three quarters of a million tokens arriving at the same diff. Both are a
-/// tick in the same column. Points separate them.
+/// can complete the same task and be nothing alike in price and elapsed work.
+/// Both are a tick in the same column. Points separate them.
 ///
 /// ```text
-/// face value  = 10 × difficulty                     difficulty 1–10 → 10–100 points
-/// budget      = 50,000 total tokens                 flat, the same for every task
-/// efficiency  = clamp(budget / tokens, 0.25, 1.0)   unreported tokens → 0.25
+/// face value  = 10 points                           the same for every task
+/// cost part   = clamp($0.025 / actual cost, 0.25, 1) 80% of adjustment
+/// time part   = clamp(300s / active time, 0.25, 1)   20% of adjustment
+/// efficiency  = max(0.25, 0.8 × cost + 0.2 × time)   missing telemetry → 0.25
 /// points      = passed ? face value × efficiency : 0
 /// ```
 ///
 /// Two properties are load-bearing and neither is an accident:
 ///
 /// **A task's points depend on that task alone** — its authored difficulty, its
-/// verdict, and its token spend. Nothing is normalized against the rest of the
+/// verdict, cost, and active time. Nothing is normalized against the rest of the
 /// set, against other models, or against the size of the suite. So the score of
 /// two task sets is the sum of their scores, and adding a task set later means
 /// running only its own tasks and adding the result to what is already
 /// published. Nothing already measured is re-run.
 ///
-/// **Absent telemetry never helps.** A solve that reported no token usage takes
-/// the floor rather than full marks, for the same reason the exports leave a
+/// **Absent telemetry never helps.** A missing cost or active-time component
+/// takes the floor rather than full marks, for the same reason exports leave a
 /// missing cost blank instead of writing `$0.00`: filling absence with the
 /// favorable value would make a model look better the worse its reporting is.
 ///
@@ -36,7 +35,7 @@ public enum AppleBenchScore {
     /// The frozen scoring specification these constants belong to. Published
     /// numbers are only comparable within one, the same way a pass rate is only
     /// comparable within one suite revision.
-    public static let specification = "points-v2"
+    public static let specification = "points-v3"
 
     /// What every task is worth. The same for all of them.
     ///
@@ -53,16 +52,13 @@ public enum AppleBenchScore {
     /// what it cost to solve it.
     public static let pointsPerTask = 10
 
-    /// The token allowance a solve may spend before it starts losing points.
-    ///
-    /// Flat, not scaled by difficulty. Measured spend does not track authored
-    /// difficulty — across the first scored run the median solve cost between
-    /// 14k and 26k tokens at every difficulty from 1 to 7 — so scaling the
-    /// allowance by difficulty would encode a relationship the data does not
-    /// show. Difficulty scales the reward; the allowance is the same for every
-    /// task. It sits above the 75th percentile of observed solves, so ordinary
-    /// work is not penalized and only genuine overspend is.
-    public static let referenceTokenBudget = 50_000
+    /// Clean values just above the observed 75th percentiles for successful
+    /// runs ($0.022 and 275 active seconds). Cost dominates because it captures
+    /// the real resource tradeoff even when a provider makes tokens cheap.
+    public static let referenceCostUSD = 0.025
+    public static let referenceActiveTimeSeconds = 300.0
+    public static let costWeight = 0.8
+    public static let activeTimeWeight = 0.2
 
     /// The least a verified solve can be worth, as a fraction of face value.
     /// A wasteful solve must still outscore a failure: it did the work.
@@ -75,23 +71,34 @@ public enum AppleBenchScore {
     /// task was rated.
     public static func faceValue() -> Int { pointsPerTask }
 
-    /// The fraction of face value a solve keeps, given what it spent.
-    public static func efficiency(totalTokens: Int?) -> Double {
-        guard let totalTokens, totalTokens > 0 else { return minimumEfficiency }
-        guard totalTokens > referenceTokenBudget else { return 1 }
-        let ratio = Double(referenceTokenBudget) / Double(totalTokens)
-        return max(minimumEfficiency, ratio)
+    private static func componentEfficiency(value: Double?, reference: Double) -> Double {
+        guard let value, value >= 0 else { return minimumEfficiency }
+        guard value > reference else { return 1 }
+        return max(minimumEfficiency, reference / value)
+    }
+
+    /// The fraction of face value a solve keeps, given its price and observed
+    /// active agent time. A genuinely free run is efficient; missing cost is
+    /// represented by `nil` and is conservative instead.
+    public static func efficiency(costUSD: Double?, activeTimeSeconds: Double?) -> Double {
+        let cost = componentEfficiency(value: costUSD, reference: referenceCostUSD)
+        let time = componentEfficiency(value: activeTimeSeconds, reference: referenceActiveTimeSeconds)
+        return max(minimumEfficiency, costWeight * cost + activeTimeWeight * time)
     }
 
     /// Points earned by one run. A failure earns nothing; its face value still
     /// counts toward what was available.
-    public static func points(passed: Bool, totalTokens: Int?) -> Double {
+    public static func points(passed: Bool, costUSD: Double?, activeTimeSeconds: Double?) -> Double {
         guard passed else { return 0 }
-        return Double(faceValue()) * efficiency(totalTokens: totalTokens)
+        return Double(faceValue()) * efficiency(costUSD: costUSD, activeTimeSeconds: activeTimeSeconds)
     }
 
     public static func points(for result: BenchmarkRunResult) -> Double {
-        points(passed: result.result.passed, totalTokens: result.usage.totalTokens)
+        points(
+            passed: result.result.passed,
+            costUSD: result.usage.estimatedCostUSD,
+            activeTimeSeconds: result.metrics?.agentDurationSeconds
+        )
     }
 
     /// Sums a set of runs. Because every term is independent, `total(for: a) +
@@ -105,13 +112,16 @@ public enum AppleBenchScore {
         public var specification: String
         public var points: Double
         public var available: Int
-        /// Runs that had an authored difficulty and could therefore be scored.
+        /// Runs included in the score.
         public var scoredRuns: Int
-        /// Runs with no authored difficulty, excluded from both sides.
+        /// Reserved for report compatibility; every current run is scorable.
         public var unscoredRuns: Int
-        /// Solves counted at the floor because the agent reported no usage.
-        public var solvesWithUnreportedTokens: Int
-        public var referenceTokenBudget: Int
+        public var solvesWithUnreportedCost: Int
+        public var solvesWithUnreportedActiveTime: Int
+        public var referenceCostUSD: Double
+        public var referenceActiveTimeSeconds: Double
+        public var costWeight: Double
+        public var activeTimeWeight: Double
         public var minimumEfficiency: Double
 
         public var fractionOfAvailable: Double {
@@ -123,8 +133,12 @@ public enum AppleBenchScore {
             case fractionOfAvailable = "fraction_of_available"
             case scoredRuns = "scored_runs"
             case unscoredRuns = "unscored_runs"
-            case solvesWithUnreportedTokens = "solves_with_unreported_tokens"
-            case referenceTokenBudget = "reference_token_budget"
+            case solvesWithUnreportedCost = "solves_with_unreported_cost"
+            case solvesWithUnreportedActiveTime = "solves_with_unreported_active_time"
+            case referenceCostUSD = "reference_cost_usd"
+            case referenceActiveTimeSeconds = "reference_active_time_seconds"
+            case costWeight = "cost_weight"
+            case activeTimeWeight = "active_time_weight"
             case minimumEfficiency = "minimum_efficiency"
         }
 
@@ -136,36 +150,48 @@ public enum AppleBenchScore {
             try container.encode(fractionOfAvailable, forKey: .fractionOfAvailable)
             try container.encode(scoredRuns, forKey: .scoredRuns)
             try container.encode(unscoredRuns, forKey: .unscoredRuns)
-            try container.encode(solvesWithUnreportedTokens, forKey: .solvesWithUnreportedTokens)
-            try container.encode(referenceTokenBudget, forKey: .referenceTokenBudget)
+            try container.encode(solvesWithUnreportedCost, forKey: .solvesWithUnreportedCost)
+            try container.encode(solvesWithUnreportedActiveTime, forKey: .solvesWithUnreportedActiveTime)
+            try container.encode(referenceCostUSD, forKey: .referenceCostUSD)
+            try container.encode(referenceActiveTimeSeconds, forKey: .referenceActiveTimeSeconds)
+            try container.encode(costWeight, forKey: .costWeight)
+            try container.encode(activeTimeWeight, forKey: .activeTimeWeight)
             try container.encode(minimumEfficiency, forKey: .minimumEfficiency)
         }
 
         init(results: [BenchmarkRunResult]) {
             specification = AppleBenchScore.specification
-            referenceTokenBudget = AppleBenchScore.referenceTokenBudget
+            referenceCostUSD = AppleBenchScore.referenceCostUSD
+            referenceActiveTimeSeconds = AppleBenchScore.referenceActiveTimeSeconds
+            costWeight = AppleBenchScore.costWeight
+            activeTimeWeight = AppleBenchScore.activeTimeWeight
             minimumEfficiency = AppleBenchScore.minimumEfficiency
 
             var earned = 0.0
             var possible = 0
             var scored = 0
-            var unscored = 0
-            var blindSolves = 0
+            let unscored = 0
+            var solvesMissingCost = 0
+            var solvesMissingTime = 0
             // Every run is scorable now. Nothing is excluded for lacking an
             // authored difficulty, because nothing is weighted by one.
             for result in results {
                 scored += 1
                 possible += AppleBenchScore.faceValue()
                 earned += AppleBenchScore.points(for: result)
-                if result.result.passed, (result.usage.totalTokens ?? 0) <= 0 {
-                    blindSolves += 1
+                if result.result.passed, result.usage.estimatedCostUSD == nil {
+                    solvesMissingCost += 1
+                }
+                if result.result.passed, result.metrics?.agentDurationSeconds == nil {
+                    solvesMissingTime += 1
                 }
             }
             points = earned
             available = possible
             scoredRuns = scored
             unscoredRuns = unscored
-            solvesWithUnreportedTokens = blindSolves
+            solvesWithUnreportedCost = solvesMissingCost
+            solvesWithUnreportedActiveTime = solvesMissingTime
         }
     }
 }

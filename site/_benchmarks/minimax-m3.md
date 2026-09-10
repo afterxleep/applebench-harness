@@ -1,20 +1,20 @@
 ---
-title: "minimax/MiniMax-M3, gold suite, 945 points"
+title: "minimax/MiniMax-M3, gold suite, 871 points"
 date: 2026-09-07
 suite: gold
-suite_revision: "2026-09-09"
-score_spec: "points-v2"
+suite_revision: "2026-09-10"
+score_spec: "points-v3"
 attempt: "latest"
 data: minimax-m3
 model: "minimax/MiniMax-M3"
 harness: "opencode, opencode 1.18.27, opencode 1.18.30"
-tasks: 143
+tasks: 148
 passed: 110
-points: 945
-points_available: 1430
+points: 871
+points_available: 1480
 description: >-
   AppleBench results for minimax/MiniMax-M3 on the gold suite:
-  945 of 1430 points and 110 of 143 tasks completed to a
+  871 of 1480 points and 110 of 148 tasks completed to a
   verified result, with per-category points, cost against wall-clock time,
   and every task.
 ---
@@ -49,8 +49,15 @@ Arabic, and file graders under provider-default reasoning.
 |---|---|
 | Public sample tasks | `build-002`, `ops-004`, `project-001`, `runtime-002`, `tests-003`, `visual-002`. They ship with the open harness and are never scored. |
 
-## Scored at the efficiency floor
+## September 10 composition expansion
+
+MiniMax M3 completed none of the five composition tasks. Three reached the old
+wall-clock cap, while two completed with invalid workspaces. No result was
+rerun.
+
+## Missing cost telemetry
 
 `ops-010`, `project-004`, `ui-auto-003` and `visual-004` hit the wall-clock
-limit and reported no token usage. All four workspaces graded clean, so all
-four are passes at the 0.25 floor.
+limit and reported no cost. All four workspaces graded clean; their cost
+component is conservatively scored at the floor while their recorded active
+time still contributes its 20% share.
