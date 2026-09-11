@@ -26,7 +26,8 @@ so a single sequential hue and no legend. Params: rows (the run rows).
       {%- assign bar_label = parts[1] -%}
       {%- assign bar_value = parts[2] -%}
       {%- assign bar_total = parts[3] -%}
-      {%- include bar-row.html label=bar_label value=bar_value total=bar_total color="series-1" -%}
+      {%- assign category = site.data.categories | where: "id", bar_label | first -%}
+      {%- include bar-row.html label=bar_label description=category.description value=bar_value total=bar_total color="series-1" -%}
     {%- endfor -%}
   </div>
 

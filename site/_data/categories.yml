@@ -1,0 +1,16 @@
+- id: build
+  description: Xcode and compiler failures specific to Apple platforms, including availability, linking, and packaging.
+- id: tests
+  description: Diagnosing a defect, fixing it, and proving the behavior against existing automated tests.
+- id: runtime
+  description: Problems that appear only when the app launches or runs, including crashes, lifecycle, and asynchronous state.
+- id: visual
+  description: Reading a visual specification and correcting layout, appearance, localization, or accessibility.
+- id: interaction
+  description: Exercising user flows and writing meaningful UI tests for navigation, forms, gestures, and controls.
+- id: project
+  description: Xcode project wiring such as target membership, Info.plist values, assets, schemes, and Swift packages.
+- id: frameworks
+  description: Correct use of Apple frameworks such as SwiftData, Core Data, WidgetKit, App Intents, and StoreKit.
+- id: ops
+  description: Operational developer-tool workflows that inspect, build, run, capture, or clean Apple projects.
