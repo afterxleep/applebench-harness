@@ -17,6 +17,7 @@ layout: default
 {%- assign cost = 0 -%}
 {%- assign list_cost = 0 -%}
 {%- assign missing_list_cost = 0 -%}
+{%- assign missing_timeout_telemetry = 0 -%}
 {%- assign tokens = 0 -%}
 {%- assign seconds = 0 -%}
 {%- for row in rows -%}
@@ -24,10 +25,14 @@ layout: default
   {%- assign list_cost = list_cost | plus: row.list_cost_usd -%}
   {%- if row.list_cost_usd == nil or row.list_cost_usd == empty -%}
     {%- assign missing_list_cost = missing_list_cost | plus: 1 -%}
+    {%- if row.agent_termination == "timeout" -%}
+      {%- assign missing_timeout_telemetry = missing_timeout_telemetry | plus: 1 -%}
+    {%- endif -%}
   {%- endif -%}
   {%- assign tokens = tokens | plus: row.total_tokens -%}
   {%- assign seconds = seconds | plus: row.duration_seconds -%}
 {%- endfor -%}
+{%- assign telemetry_covered = total | minus: missing_list_cost -%}
 {%- assign active_seconds = 0 -%}
 {%- for run in report.runs -%}
   {%- assign run_active = run.metrics.agent_duration_seconds | default: run.result.duration_seconds -%}
@@ -79,7 +84,7 @@ layout: default
     <div class="stat">
       <div class="stat__value">{% include money.html value=list_cost %}</div>
       <div class="stat__label">Recorded suite cost</div>
-      <p class="stat__note">model-owner list price, including cached input{% if missing_list_cost > 0 %}; excludes {{ missing_list_cost }} task{% if missing_list_cost != 1 %}s{% endif %} without complete token telemetry{% endif %}</p>
+      <p class="stat__note">model-owner list price, including cached input</p>
     </div>
     <div class="stat">
       <div class="stat__value">{{ tokens | times: 1.0 | divided_by: 1000000 | round: 2 }}M</div>
@@ -92,6 +97,16 @@ layout: default
       <p class="stat__note">agent phase plus grading</p>
     </div>
   </div>
+
+  {%- if missing_list_cost > 0 -%}
+  <p class="telemetry-coverage">
+    <strong>Telemetry coverage:</strong> all {{ total }} task outcomes count in the pass rate.
+    Cost and token totals cover {{ telemetry_covered }} of {{ total }} tasks;
+    {{ missing_list_cost }}{% if missing_timeout_telemetry == missing_list_cost %} timed-out{% endif %}
+    attempt{% if missing_list_cost != 1 %}s{% endif %} did not report complete telemetry and
+    {% if missing_list_cost == 1 %}is{% else %}are{% endif %} omitted from those totals, never treated as zero.
+  </p>
+  {%- endif -%}
 
   <p style="color:var(--ink-3); font-size:.88rem; margin:0 0 2.5rem">
     Capability, cost, and speed stay separate. Pass rate is the primary result;

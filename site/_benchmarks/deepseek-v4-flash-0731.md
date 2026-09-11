@@ -1,16 +1,16 @@
 ---
-title: "openrouter/deepseek/deepseek-v4-flash-0731, Gold Suite 1.2, 99/148 passed"
+title: "deepseek/deepseek-v4-flash-0731, Gold Suite 1.2, 99/148 passed"
 date: 2026-09-09
 suite: gold
 suite_revision: "2026-09-10"
 attempt: "latest"
 data: deepseek-v4-flash-0731
-model: "openrouter/deepseek/deepseek-v4-flash-0731"
+model: "deepseek/deepseek-v4-flash-0731"
 harness: "opencode, opencode 1.18.20, opencode 1.18.30"
 tasks: 148
 passed: 99
 description: >-
-  AppleBench results for openrouter/deepseek/deepseek-v4-flash-0731 on Gold Suite 1.2:
+  AppleBench results for deepseek/deepseek-v4-flash-0731 on Gold Suite 1.2:
   99 of 148 tasks completed to a verified result (66.9% pass rate),
   with cost, active time, per-category results,
   and every task.

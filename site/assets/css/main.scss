@@ -1165,7 +1165,7 @@ th {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   border-top: 1px solid var(--line-strong);
   border-bottom: 1px solid var(--line);
 }
@@ -1200,6 +1200,28 @@ th {
   color: var(--ink-3);
   font-size: 0.7rem;
   line-height: 1.4;
+}
+
+.telemetry-coverage {
+  margin: -0.25rem 0 1.5rem;
+  color: var(--ink-3);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 1100px) {
+  .stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .stat:nth-child(n + 4) {
+    border-top: 1px solid var(--line);
+  }
+
+  .stat:nth-child(4) {
+    padding-left: 0;
+    border-left: 0;
+  }
 }
 
 .data-table {
@@ -1315,20 +1337,6 @@ th {
   .figure figcaption {
     grid-template-columns: 1fr;
     gap: 0.8rem;
-  }
-
-  .stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .stat:nth-child(4) {
-    padding-left: 0;
-    border-left: 0;
-    border-top: 1px solid var(--line);
-  }
-
-  .stat:nth-child(5) {
-    border-top: 1px solid var(--line);
   }
 
   .site-footer__inner {

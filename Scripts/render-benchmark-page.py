@@ -23,6 +23,11 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
+def public_model_name(model: str) -> str:
+    """Remove a routing gateway while preserving the model owner's namespace."""
+    return model.removeprefix("openrouter/")
+
+
 def current_suite() -> tuple[str, str]:
     """The id and public name of the revision marked current."""
     revisions = ROOT / "site/_data/suite_revisions.yml"
@@ -59,7 +64,13 @@ def describe(report: dict) -> tuple[str, str]:
     than silently reporting the first.
     """
     configurations = report.get("configurations", [])
-    models = sorted({c.get("model", "") for c in configurations if c.get("model")})
+    models = sorted(
+        {
+            public_model_name(c.get("model", ""))
+            for c in configurations
+            if c.get("model")
+        }
+    )
 
     # Pair each agent with the version it ran at, rather than listing agents
     # and versions separately and leaving the reader to guess which is which.
@@ -79,6 +90,12 @@ def main() -> int:
         revision, name = current_suite()
         if not revision or not name:
             print("self-test: current suite id or public name is missing", file=sys.stderr)
+            return 1
+        if public_model_name("openrouter/z-ai/glm-5.3-flash") != "z-ai/glm-5.3-flash":
+            print("self-test: OpenRouter prefix was not removed", file=sys.stderr)
+            return 1
+        if public_model_name("openai/gpt-5.6-luna") != "openai/gpt-5.6-luna":
+            print("self-test: a model-owner namespace was removed", file=sys.stderr)
             return 1
         print(f"self-test: ok ({name}, {revision})")
         return 0
