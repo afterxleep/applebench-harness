@@ -18,6 +18,7 @@ struct AppleBenchCommand: AsyncParsableCommand {
             RunCommand.self,
             SuiteCommand.self,
             ResultsCommand.self,
+            ResetCommand.self,
         ]
     )
 }

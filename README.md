@@ -94,6 +94,16 @@ ever lands in this repository.
 
 ## Try it
 
+Reset all repository-local generated state before a completely fresh run:
+
+```bash
+swift run applebench reset
+```
+
+This removes `.applebench` (including cached fixtures, the task-set checkout,
+DerivedData, and prior runs), Swift build products, and Jekyll caches/output.
+It preserves source, configuration, `Data`, `Reports`, and published site data.
+
 ```bash
 ./Scripts/prepare-fixtures.sh
 
