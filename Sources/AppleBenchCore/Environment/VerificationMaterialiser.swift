@@ -8,6 +8,14 @@ import Foundation
 /// unique temporary directory, only its project specification and test suites
 /// are copied into the workspace, and the temporary checkout is removed.
 public struct VerificationMaterialiser: Sendable {
+    static let defaultFetchRetryDelays: [Duration] = [
+        .seconds(2),
+        .seconds(5),
+        .seconds(10),
+        .seconds(20),
+    ]
+    static var defaultFetchAttemptCount: Int { defaultFetchRetryDelays.count + 1 }
+
     public struct Source: Sendable, Equatable {
         public var repository: String
         public var revision: String
@@ -25,7 +33,7 @@ public struct VerificationMaterialiser: Sendable {
 
     public init(source: Source? = nil) {
         self.source = source
-        self.fetchRetryDelays = [.seconds(1), .seconds(2)]
+        self.fetchRetryDelays = Self.defaultFetchRetryDelays
     }
 
     init(source: Source?, fetchRetryDelays: [Duration]) {
@@ -78,6 +86,12 @@ public struct VerificationMaterialiser: Sendable {
             source: source
         )
         try await fetchVerification(
+            source: source,
+            in: checkout,
+            using: processRunner,
+            fixture: fixture
+        )
+        try await verifyFetchedRevision(
             source: source,
             in: checkout,
             using: processRunner,
@@ -157,24 +171,58 @@ public struct VerificationMaterialiser: Sendable {
         using processRunner: any ProcessRunning,
         fixture: String
     ) async throws {
-        for attempt in 0...fetchRetryDelays.count {
+        let attemptCount = fetchRetryDelays.count + 1
+        var failures: [FetchAttemptFailure] = []
+
+        for attempt in 0..<attemptCount {
             var arguments = ["fetch", "--depth=1"]
             if attempt == 0 {
                 arguments.append("--filter=blob:none")
             }
-            arguments.append(contentsOf: ["origin", source.revision])
+            arguments.append(contentsOf: ["--no-tags", "--force", "origin", source.revision])
 
             let result = try await executeGit(arguments, in: directory, using: processRunner)
             if result.succeeded { return }
+            failures.append(FetchAttemptFailure(attempt: attempt + 1, result: result))
             guard attempt < fetchRetryDelays.count else {
-                throw gitFailure(
-                    stage: "fetch the sealed verification after \(attempt + 1) attempts",
-                    result: result,
+                throw fetchFailure(
+                    failures: failures,
                     fixture: fixture,
                     source: source
                 )
             }
             try await Task.sleep(for: fetchRetryDelays[attempt])
+        }
+    }
+
+    private func verifyFetchedRevision(
+        source: Source,
+        in directory: URL,
+        using processRunner: any ProcessRunning,
+        fixture: String
+    ) async throws {
+        let result = try await executeGit(
+            ["rev-parse", "--verify", "FETCH_HEAD^{commit}"],
+            in: directory,
+            using: processRunner
+        )
+        guard result.succeeded else {
+            throw gitFailure(
+                stage: "verify the fetched sealed revision",
+                result: result,
+                fixture: fixture,
+                source: source
+            )
+        }
+
+        let fetchedRevision = result.standardOutput
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard fetchedRevision.caseInsensitiveCompare(source.revision) == .orderedSame else {
+            throw BenchmarkFailure.graderFailure(
+                grader: "verification",
+                message: "Fetched sealed verification revision \(fetchedRevision) instead of "
+                    + "the required revision \(source.revision) for \(fixture)."
+            )
         }
     }
 
@@ -185,6 +233,9 @@ public struct VerificationMaterialiser: Sendable {
     ) async throws -> ProcessExecutionResult {
         var environment = ProcessInfo.processInfo.environment
         environment["GIT_TERMINAL_PROMPT"] = "0"
+        environment["GIT_HTTP_LOW_SPEED_LIMIT"] = "1024"
+        environment["GIT_HTTP_LOW_SPEED_TIME"] = "60"
+        environment["GIT_TRACE"] = "1"
         return try await processRunner.run(
             ProcessCommand(
                 executable: "/usr/bin/git",
@@ -202,29 +253,62 @@ public struct VerificationMaterialiser: Sendable {
         fixture: String,
         source: Source
     ) -> BenchmarkFailure {
-        let termination: String
-        if result.timedOut {
-            termination = "timed out"
-        } else if let exitCode = result.exitCode {
-            termination = "exit code \(exitCode)"
-        } else if let signal = result.terminationSignal {
-            termination = "signal \(signal)"
-        } else {
-            termination = "unknown termination"
-        }
-
-        let combinedOutput = [result.standardError, result.standardOutput]
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-            .joined(separator: "\n")
-        let diagnostic = combinedOutput.isEmpty
-            ? "Git produced no diagnostic output."
-            : Self.redactedDiagnostic(combinedOutput, repository: source.repository)
+        let termination = terminationDescription(for: result)
+        let diagnostic = diagnosticDescription(for: result, repository: source.repository)
 
         return BenchmarkFailure.graderFailure(
             grader: "verification",
             message: "Could not \(stage) for \(fixture) (\(termination)). \(diagnostic)"
         )
+    }
+
+    private func fetchFailure(
+        failures: [FetchAttemptFailure],
+        fixture: String,
+        source: Source
+    ) -> BenchmarkFailure {
+        let attemptCount = failures.count
+        let diagnostics = failures.map { failure in
+            let termination = terminationDescription(for: failure.result)
+            let diagnostic = diagnosticDescription(for: failure.result, repository: source.repository)
+            return "attempt \(failure.attempt) of \(attemptCount): \(termination): \(diagnostic)"
+        }.joined(separator: "\n")
+
+        return BenchmarkFailure.graderFailure(
+            grader: "verification",
+            message: "Could not fetch the sealed verification after \(attemptCount) attempts for \(fixture).\n"
+                + diagnostics
+        )
+    }
+
+    private func terminationDescription(for result: ProcessExecutionResult) -> String {
+        if result.timedOut {
+            return "timed out"
+        } else if let exitCode = result.exitCode {
+            return "exit code \(exitCode)"
+        } else if let signal = result.terminationSignal {
+            return "signal \(signal)"
+        } else {
+            return "unknown termination"
+        }
+    }
+
+    private func diagnosticDescription(
+        for result: ProcessExecutionResult,
+        repository: String
+    ) -> String {
+        let combinedOutput = [result.standardError, result.standardOutput]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n")
+        return combinedOutput.isEmpty
+            ? "Git produced no diagnostic output."
+            : Self.redactedDiagnostic(combinedOutput, repository: repository)
+    }
+
+    private struct FetchAttemptFailure: Sendable {
+        var attempt: Int
+        var result: ProcessExecutionResult
     }
 
     private static func redactedDiagnostic(_ diagnostic: String, repository: String) -> String {

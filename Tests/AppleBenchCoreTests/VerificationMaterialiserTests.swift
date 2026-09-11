@@ -4,6 +4,11 @@ import Testing
 
 @Suite("Withheld verification lifecycle", .serialized)
 struct VerificationMaterialiserTests {
+    @Test("Sealed verification fetches have a five-attempt default budget")
+    func hasThoroughDefaultRetryBudget() {
+        #expect(VerificationMaterialiser.defaultFetchAttemptCount == 5)
+    }
+
     @Test("Tests are fetched from the sealed repository only when grading begins")
     func fetchesAfterAgentExit() async throws {
         let sealedRepository = FileManager.default.temporaryDirectory
@@ -125,6 +130,7 @@ struct VerificationMaterialiserTests {
 
         #expect(outcome.paths == ["Tests"])
         #expect(await runner.fetchAttempts == 2)
+        #expect(await runner.verifiedFetchHead)
     }
 
     @Test("A failed sealed fetch reports actionable diagnostics without credentials")
@@ -158,11 +164,74 @@ struct VerificationMaterialiserTests {
             #expect(!message.contains("secret-token"))
         }
     }
+
+    @Test("A failed sealed fetch reports every attempt, including silent timeouts")
+    func reportsAllFetchAttempts() async throws {
+        let workspace = FileManager.default.temporaryDirectory
+            .appendingPathComponent("applebench-verification-workspace-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: workspace) }
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+
+        let materialiser = VerificationMaterialiser(
+            source: .init(
+                repository: "https://example.com/sealed.git",
+                revision: "deadbeef",
+                fixtures: ["SecretFixture"]
+            ),
+            fetchRetryDelays: [.zero, .zero]
+        )
+
+        do {
+            _ = try await materialiser.materialise(
+                fixture: "SecretFixture",
+                into: workspace,
+                processRunner: SilentTimeoutFetchProcessRunner()
+            )
+            Issue.record("Expected the sealed fetch to fail")
+        } catch {
+            let message = String(describing: error)
+            #expect(message.contains("attempt 1 of 3: exit code 128: remote closed the connection"))
+            #expect(message.contains("attempt 2 of 3: timed out: Git produced no diagnostic output."))
+            #expect(message.contains("attempt 3 of 3: exit code 128: final network failure"))
+        }
+    }
+
+    @Test("A fetched sealed revision is checked before verification files are copied")
+    func rejectsMismatchedFetchedRevision() async throws {
+        let workspace = FileManager.default.temporaryDirectory
+            .appendingPathComponent("applebench-verification-workspace-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: workspace) }
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+
+        let materialiser = VerificationMaterialiser(
+            source: .init(
+                repository: "https://example.com/sealed.git",
+                revision: "deadbeef",
+                fixtures: ["SecretFixture"]
+            ),
+            fetchRetryDelays: []
+        )
+
+        do {
+            _ = try await materialiser.materialise(
+                fixture: "SecretFixture",
+                into: workspace,
+                processRunner: MismatchedRevisionProcessRunner()
+            )
+            Issue.record("Expected the mismatched revision to fail")
+        } catch {
+            let message = String(describing: error)
+            #expect(message.contains("cafebabe"))
+            #expect(message.contains("deadbeef"))
+            #expect(message.contains("SecretFixture"))
+        }
+    }
 }
 
 private actor TransientFetchProcessRunner: ProcessRunning {
     private let runner = ProcessRunner()
     private(set) var fetchAttempts = 0
+    private(set) var verifiedFetchHead = false
 
     func run(
         _ command: ProcessCommand,
@@ -180,6 +249,9 @@ private actor TransientFetchProcessRunner: ProcessRunning {
                     timedOut: false
                 )
             }
+        }
+        if command.arguments.starts(with: ["rev-parse", "--verify", "FETCH_HEAD^{commit}"]) {
+            verifiedFetchHead = true
         }
         return try await runner.run(command, timeout: timeout, outputHandler: outputHandler)
     }
@@ -218,5 +290,95 @@ private actor FailedFetchProcessRunner: ProcessRunning {
                 timedOut: false
             )
         }
+    }
+}
+
+private actor SilentTimeoutFetchProcessRunner: ProcessRunning {
+    private var fetchAttempts = 0
+
+    func run(
+        _ command: ProcessCommand,
+        timeout: Duration?,
+        outputHandler: (@Sendable (ProcessOutputStream, String) -> Void)?
+    ) async throws -> ProcessExecutionResult {
+        switch command.arguments.first {
+        case "init", "remote":
+            return ProcessExecutionResult(
+                exitCode: 0,
+                standardOutput: "",
+                standardError: "",
+                duration: .zero,
+                timedOut: false
+            )
+        case "fetch":
+            fetchAttempts += 1
+            switch fetchAttempts {
+            case 1:
+                return ProcessExecutionResult(
+                    exitCode: 128,
+                    standardOutput: "",
+                    standardError: "remote closed the connection",
+                    duration: .seconds(1),
+                    timedOut: false
+                )
+            case 2:
+                return ProcessExecutionResult(
+                    terminationSignal: 15,
+                    standardOutput: "",
+                    standardError: "",
+                    duration: .seconds(300),
+                    timedOut: true
+                )
+            default:
+                return ProcessExecutionResult(
+                    exitCode: 128,
+                    standardOutput: "",
+                    standardError: "final network failure",
+                    duration: .seconds(1),
+                    timedOut: false
+                )
+            }
+        default:
+            Issue.record("Unexpected command: \(command.displayString)")
+            return ProcessExecutionResult(
+                exitCode: 1,
+                standardOutput: "",
+                standardError: "",
+                duration: .zero,
+                timedOut: false
+            )
+        }
+    }
+}
+
+private actor MismatchedRevisionProcessRunner: ProcessRunning {
+    func run(
+        _ command: ProcessCommand,
+        timeout: Duration?,
+        outputHandler: (@Sendable (ProcessOutputStream, String) -> Void)?
+    ) async throws -> ProcessExecutionResult {
+        let output: String
+        switch command.arguments.first {
+        case "init", "remote", "fetch":
+            output = ""
+        case "rev-parse":
+            output = "cafebabe\n"
+        default:
+            Issue.record("Unexpected command: \(command.displayString)")
+            return ProcessExecutionResult(
+                exitCode: 1,
+                standardOutput: "",
+                standardError: "",
+                duration: .zero,
+                timedOut: false
+            )
+        }
+        return ProcessExecutionResult(
+            exitCode: 0,
+            standardOutput: output,
+            standardError: "",
+            duration: .zero,
+            timedOut: false
+        )
     }
 }
