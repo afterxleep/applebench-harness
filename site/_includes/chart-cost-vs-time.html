@@ -8,11 +8,16 @@ chart. Params: rows.
 
 {%- assign max_cost = 0 -%}
 {%- assign max_time = 0 -%}
+{%- assign missing_cost = 0 -%}
 {%- for row in include.rows -%}
-  {%- assign c = row.list_cost_usd | times: 1.0 -%}
-  {%- assign t = row.duration_seconds | times: 1.0 -%}
-  {%- if c > max_cost %}{% assign max_cost = c %}{% endif -%}
-  {%- if t > max_time %}{% assign max_time = t %}{% endif -%}
+  {%- if row.list_cost_usd and row.list_cost_usd != empty -%}
+    {%- assign c = row.list_cost_usd | times: 1.0 -%}
+    {%- assign t = row.duration_seconds | times: 1.0 -%}
+    {%- if c > max_cost %}{% assign max_cost = c %}{% endif -%}
+    {%- if t > max_time %}{% assign max_time = t %}{% endif -%}
+  {%- else -%}
+    {%- assign missing_cost = missing_cost | plus: 1 -%}
+  {%- endif -%}
 {%- endfor -%}
 {%- if max_cost <= 0 %}{% assign max_cost = 1 %}{% endif -%}
 {%- if max_time <= 0 %}{% assign max_time = 1 %}{% endif -%}
@@ -28,8 +33,8 @@ chart. Params: rows.
   <figcaption>
     <h3 class="figure__title">Cost vs time</h3>
     <p class="figure__subtitle">
-      Each mark is one task. Bottom-left is cheap and fast. A square far to
-      the right spent a long time and still failed.
+      Each mark is one task with complete list-price telemetry. Bottom-left is
+      cheap and fast. A square far to the right spent a long time and failed.
     </p>
   </figcaption>
 
@@ -63,9 +68,9 @@ chart. Params: rows.
 
     {%- comment -%} Failures first so a passing mark is never hidden underneath one. {%- endcomment -%}
     {%- for row in include.rows -%}
-      {%- if row.passed != "true" -%}
+      {%- if row.passed != "true" and row.list_cost_usd and row.list_cost_usd != empty -%}
         {%- assign px = row.duration_seconds | times: 1.0 | divided_by: max_time | times: span_x | plus: x0 -%}
-        {%- assign cost = row.list_cost_usd | default: 0 | times: 1.0 -%}
+        {%- assign cost = row.list_cost_usd | times: 1.0 -%}
         {%- assign py = cost | divided_by: max_cost | times: span_y -%}
         {%- assign py = y1 | minus: py -%}
         <rect x="{{ px | minus: 4.5 }}" y="{{ py | minus: 4.5 }}" width="9" height="9"
@@ -76,9 +81,9 @@ chart. Params: rows.
     {%- endfor -%}
 
     {%- for row in include.rows -%}
-      {%- if row.passed == "true" -%}
+      {%- if row.passed == "true" and row.list_cost_usd and row.list_cost_usd != empty -%}
         {%- assign px = row.duration_seconds | times: 1.0 | divided_by: max_time | times: span_x | plus: x0 -%}
-        {%- assign cost = row.list_cost_usd | default: 0 | times: 1.0 -%}
+        {%- assign cost = row.list_cost_usd | times: 1.0 -%}
         {%- assign py = cost | divided_by: max_cost | times: span_y -%}
         {%- assign py = y1 | minus: py -%}
         <circle class="scatter__dot" cx="{{ px }}" cy="{{ py }}" r="5.5" fill="var(--pass)">
@@ -89,7 +94,9 @@ chart. Params: rows.
   </svg>
 
   <p class="figure__note">
-    Costs use the model owner's pinned list price. A $0.00 mark means usage
-    was not reported, not that the task was free.
+    Costs use the model owner's pinned list price.{% if missing_cost > 0 %}
+    {{ missing_cost }} task{% if missing_cost != 1 %}s are{% else %} is{% endif %}
+    omitted because complete token telemetry was not reported; omitted does
+    not mean free.{% endif %}
   </p>
 </figure>

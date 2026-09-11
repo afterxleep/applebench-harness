@@ -1,5 +1,5 @@
 ---
-title: "minimax/MiniMax-M2.7, gold suite, 90/148 passed"
+title: "minimax/MiniMax-M2.7, Gold Suite 1.2, 90/148 passed"
 date: 2026-09-06
 suite: gold
 suite_revision: "2026-09-10"
@@ -10,7 +10,7 @@ harness: "opencode, opencode 1.18.27, opencode 1.18.30"
 tasks: 148
 passed: 90
 description: >-
-  AppleBench results for minimax/MiniMax-M2.7 on the gold suite:
+  AppleBench results for minimax/MiniMax-M2.7 on Gold Suite 1.2:
   90 of 148 tasks completed to a verified result (60.8% pass rate),
   with cost, active time, per-category results,
   and every task.
@@ -44,7 +44,7 @@ window in English, so the model failure is retained.
 
 | | |
 |---|---|
-| Public sample tasks | `build-002`, `ops-004`, `project-001`, `runtime-002`, `tests-003`, `visual-002`. They ship with the open harness and are never scored. |
+| Public sample tasks | `build-002`, `ops-004`, `project-001`, `runtime-002`, `tests-003`, `visual-002`. They ship with the open harness and are not included in published measurements. |
 | `ops-027` | Rerun after Screen Recording permission was granted. The model produced a valid 5120×2880 PNG and passed both trajectory and file grading. |
 | Cost coverage | `ops-003` is a failed task with no recoverable list-price telemetry, so the recorded suite-cost total excludes that attempt rather than treating it as free. |
 

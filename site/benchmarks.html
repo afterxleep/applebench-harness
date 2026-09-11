@@ -7,12 +7,13 @@ description: Published AppleBench runs, with full per-task data and charts.
 
 <div class="wrap">
   <header class="article-header article-header--editorial">
-    <p class="section__index">Measured results / current suite</p>
+    {%- assign current_suite = site.data.suite_revisions | where: "current", true | first -%}
+    <p class="section__index">Measured results / {{ current_suite.name }}</p>
     <div class="article-header__grid">
       <h1>Results</h1>
       <p class="article-header__lede">
-        What finished, what it cost, and what the graders saw. Every headline
-        number opens into the full task-level record.
+        Pass rate, list-price cost, and active time for {{ current_suite.name }}.
+        Every headline number opens into the full task-level record.
       </p>
     </div>
   </header>
@@ -29,13 +30,14 @@ description: Published AppleBench runs, with full per-task data and charts.
     {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
     {%- for run in runs -%}
       {%- assign rows = site.data.benchmarks[run.data] -%}
+      {%- assign run_revision = site.data.suite_revisions | where: "id", run.suite_revision | first -%}
       {%- assign hits = rows | where: "passed", "true" -%}
       {%- assign rate = hits.size | times: 100.0 | divided_by: rows.size -%}
       <li>
         <a class="entry" href="{{ run.url | relative_url }}">
           <p class="entry__meta">
             <time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time>
-            <span>{{ run.suite }} suite</span>
+            <span>{% if run_revision %}{{ run_revision.name }}{% else %}{{ run.suite }} suite{% endif %}</span>
             {%- if rows -%}
               <span class="entry__score">{{ rate | round: 1 }}% pass rate</span>
               <span>{{ hits.size }}/{{ rows.size }} passed</span>

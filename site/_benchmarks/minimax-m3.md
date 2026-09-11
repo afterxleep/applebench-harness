@@ -1,5 +1,5 @@
 ---
-title: "minimax/MiniMax-M3, gold suite, 110/148 passed"
+title: "minimax/MiniMax-M3, Gold Suite 1.2, 110/148 passed"
 date: 2026-09-07
 suite: gold
 suite_revision: "2026-09-10"
@@ -10,7 +10,7 @@ harness: "opencode, opencode 1.18.27, opencode 1.18.30"
 tasks: 148
 passed: 110
 description: >-
-  AppleBench results for minimax/MiniMax-M3 on the gold suite:
+  AppleBench results for minimax/MiniMax-M3 on Gold Suite 1.2:
   110 of 148 tasks completed to a verified result (74.3% pass rate),
   with cost, active time, per-category results,
   and every task.
@@ -40,11 +40,11 @@ check, and mutation grading. On the new `g2-visual-001` task, M3 used a
 different implementation from the reference solution and passed the English,
 Arabic, and file graders under provider-default reasoning.
 
-## Excluded from the score
+## Coverage notes
 
 | | |
 |---|---|
-| Public sample tasks | `build-002`, `ops-004`, `project-001`, `runtime-002`, `tests-003`, `visual-002`. They ship with the open harness and are never scored. |
+| Public sample tasks | `build-002`, `ops-004`, `project-001`, `runtime-002`, `tests-003`, `visual-002`. They ship with the open harness and are not included in published measurements. |
 
 ## September 10 composition expansion
 
@@ -54,7 +54,7 @@ rerun.
 
 ## Missing cost telemetry
 
-`ops-010`, `project-004`, `ui-auto-003` and `visual-004` hit the wall-clock
-limit and reported no cost. All four workspaces graded clean; their cost
-component is conservatively scored at the floor while their recorded active
-time still contributes its 20% share.
+Eight tasks have no complete list-price telemetry: `ops-010`, `ops-012`,
+`ops-018`, `ops-024`, `project-004`, `storekit-001`, `ui-auto-003`, and
+`visual-004`. The reported suite cost excludes those attempts rather than
+treating them as free, while their pass/fail outcomes remain in the pass rate.

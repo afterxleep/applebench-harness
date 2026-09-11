@@ -13,6 +13,7 @@ front matter and leaves what anyone wrote below it alone.
 
 Usage:
     render-benchmark-page.py <slug> [suite]
+    render-benchmark-page.py --self-test
 """
 import json
 import pathlib
@@ -22,19 +23,23 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
-def current_suite_revision() -> str:
-    """The revision marked current in the site's revision list."""
+def current_suite() -> tuple[str, str]:
+    """The id and public name of the revision marked current."""
     revisions = ROOT / "site/_data/suite_revisions.yml"
     if not revisions.exists():
-        return ""
-    identifier = ""
+        return "", ""
+    identifier = name = ""
     for line in revisions.read_text().splitlines():
         found = re.match(r'^-\s*id:\s*"?([^"\s]+)"?', line)
         if found:
             identifier = found.group(1)
+            name = ""
+        found = re.match(r'^\s*name:\s*"?([^"\n]+?)"?\s*$', line)
+        if found:
+            name = found.group(1)
         if re.match(r"^\s*current:\s*true", line):
-            return identifier
-    return ""
+            return identifier, name
+    return "", ""
 
 
 def date_from(slug: str, report: dict) -> str:
@@ -70,6 +75,13 @@ def describe(report: dict) -> tuple[str, str]:
 
 
 def main() -> int:
+    if len(sys.argv) == 2 and sys.argv[1] == "--self-test":
+        revision, name = current_suite()
+        if not revision or not name:
+            print("self-test: current suite id or public name is missing", file=sys.stderr)
+            return 1
+        print(f"self-test: ok ({name}, {revision})")
+        return 0
     if len(sys.argv) < 2:
         print(__doc__, file=sys.stderr)
         return 2
@@ -104,13 +116,15 @@ def main() -> int:
             ):
                 lede = found.group(1).rstrip("\n")
 
-    title = f"{model or harness or slug}, {suite} suite, {passed}/{total} passed"
+    revision, suite_name = current_suite()
+    public_suite_name = suite_name if suite == "gold" and suite_name else f"{suite} suite"
+    title = f"{model or harness or slug}, {public_suite_name}, {passed}/{total} passed"
     front = [
         "---",
         f'title: "{title}"',
         f"date: {date_from(slug, report)}",
         f"suite: {suite}",
-        f'suite_revision: "{current_suite_revision()}"',
+        f'suite_revision: "{revision}"',
         f'attempt: "{attempt}"',
         f"data: {slug}",
         f'model: "{model}"',
@@ -118,7 +132,7 @@ def main() -> int:
         f"tasks: {total}",
         f"passed: {passed}",
         "description: >-",
-        f"  AppleBench results for {model or harness or slug} on the {suite} suite:",
+        f"  AppleBench results for {model or harness or slug} on {public_suite_name}:",
         f"  {passed} of {total} tasks completed to a verified result ({rate:.1f}% pass rate),",
         "  with cost, active time, per-category results,",
         "  and every task.",

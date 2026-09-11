@@ -1,5 +1,5 @@
 ---
-title: "openrouter/z-ai/glm-5.3-flash, gold suite, 127/148 passed"
+title: "openrouter/z-ai/glm-5.3-flash, Gold Suite 1.2, 127/148 passed"
 date: 2026-09-09
 suite: gold
 suite_revision: "2026-09-10"
@@ -10,7 +10,7 @@ harness: "opencode, opencode 1.18.20, opencode 1.18.30"
 tasks: 148
 passed: 127
 description: >-
-  AppleBench results for openrouter/z-ai/glm-5.3-flash on the gold suite:
+  AppleBench results for openrouter/z-ai/glm-5.3-flash on Gold Suite 1.2:
   127 of 148 tasks completed to a verified result (85.8% pass rate),
   with cost, active time, per-category results,
   and every task.

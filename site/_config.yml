@@ -1,9 +1,9 @@
 title: AppleBench
 tagline: A benchmark for AI agents that build Apple apps
 description: >-
-  AppleBench tests whether an AI coding agent can fix a real broken Xcode
-  project and leave an app that builds, passes its tests, and works on a
-  simulator.
+  AppleBench Gold Suite 1.2 tests whether an AI coding agent can repair a real
+  broken Xcode project and leave an app that builds, passes independent tests,
+  and works on a simulator.
 
 url: https://afterxleep.github.io
 baseurl: /applebench-harness

@@ -1,6 +1,7 @@
 # AppleBench site
 
-The Jekyll site published at <https://afterxleep.github.io/AppleBench>.
+The Jekyll site for AppleBench Gold Suite 1.2, published at
+<https://afterxleep.github.io/AppleBench>.
 Deployed by `.github/workflows/pages.yml` on every push to `main` that touches
 this directory.
 
@@ -49,6 +50,10 @@ lede: One or two sentences on what the run showed.
 The `benchmark` layout reads `_data/benchmarks/<data>.csv` and renders the
 stat tiles, charts, and full table from it. The prose in the file goes below
 the charts.
+
+The current public suite name and immutable report revision live in
+`_data/suite_revisions.yml`. Gold Suite 1.2 retains revision id `2026-09-10`,
+which is the value already embedded in its published reports.
 
 **State the selection rule.** If a task was attempted more than once and the
 published number depends on which attempt counts, say so on the page. That

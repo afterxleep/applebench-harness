@@ -4,7 +4,9 @@
 # The current entry also drives the task totals shown on the homepage.
 
 - id: "2026-09-10"
-  name: "2026-09-10"
+  name: "Gold Suite 1.2"
+  version: "1.2"
+  released: "2026-09-10"
   gold_tasks: 148
   app_run_tasks: 53
   public_sample_tasks: 8
@@ -19,13 +21,17 @@
     ops: 28
   current: true
   summary: >-
-    Five end-to-end composition tasks join the gold suite. Published results
-    keep capability, list-price cost, and active agent time as separate measures.
+    Gold Suite 1.2 adds five end-to-end composition tasks and strengthens
+    answer isolation. Withheld tests are fetched from the sealed task repository
+    only after the agent exits. Published results keep capability, list-price
+    cost, and active agent time as separate measures.
   changes:
     - "Five composition tasks exercise complete product workflows across SwiftUI, persistence, networking, media, and UI automation."
     - "Every composition fixture was calibrated fail-then-pass before model results were accepted."
     - "Pass rate, recorded cost, and active agent time are reported separately; tokens and tool calls remain diagnostic data."
     - "Composition runs default to a 3,600-second wall-clock ceiling and a 1,000,000-token safety ceiling."
+    - "Withheld tests do not exist in the agent-visible harness state; the runner fetches the exact task-set revision into a temporary grading checkout after the agent exits."
+    - "The agent sandbox denies the complete .applebench state tree, including cached fixtures, solutions, task files, and other runs."
 
 - id: "2026-09-09"
   name: "2026-09-09"
@@ -48,7 +54,7 @@
     failures while preserving the model's original workspace and evidence for
     review.
   changes:
-    - "A previously unlisted Arabic right-to-left badge task now fails unchanged, passes its reference solution in English and Arabic, and is scored for every published model."
+    - "A previously unlisted Arabic right-to-left badge task now fails unchanged, passes its reference solution in English and Arabic, and is measured for every published model."
     - "UI flow grading now reads a fresh settled accessibility tree, clears state where flows must be isolated, and accepts valid region-aware localized date renderings."
     - "The ledger baseline no longer depends on a flaky toggle tap, and the enrolment automation task now requires an explicit assertion that the keyboard disappeared."
     - "Reviewed adjudications can correct a grader verdict without rewriting result.json, and targeted reports can build on an immutable prior baseline instead of rerunning unaffected work."
@@ -78,7 +84,7 @@
   changes:
     - "Six deterministic Swift concurrency tasks added at difficulties 8 through 10, with 33 hidden tests across their final contracts."
     - "Every asynchronous observation is explicitly ordered and bounded, so a broken solution fails locally instead of hanging or relying on elapsed-time scheduling."
-    - "MiniMax M2.7 and MiniMax M3 were rerun under sealed answer isolation, and their latest authoritative attempts are included in the published scores."
+    - "MiniMax M2.7 and MiniMax M3 were rerun under sealed answer isolation, and their latest authoritative attempts are included in the published results."
 
 - id: "2026-09-06"
   name: "2026-09-06"

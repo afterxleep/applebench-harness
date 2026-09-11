@@ -15,7 +15,7 @@ description: >-
 <section class="hero">
   <div class="wrap hero__grid">
     <div class="hero__main">
-      <p class="eyebrow">AppleBench <span>Gold suite, 2026</span></p>
+      <p class="eyebrow">AppleBench <span>{{ current_suite.name }}</span></p>
       <h1>Can an AI agent ship a <em>working Apple app?</em></h1>
       <p class="hero__lede">
         Give it a broken Xcode project. Let it diagnose and repair the problem.
@@ -36,11 +36,11 @@ description: >-
           <li><span>02</span>Clean build</li>
           <li><span>03</span>Tests run</li>
           <li><span>04</span>App launches</li>
-          <li><span>05</span>Score recorded</li>
+          <li><span>05</span>Verdict recorded</li>
         </ol>
       </div>
       <dl>
-        <div><dt>{{ scoring_tasks }}</dt><dd>scoring tasks</dd></div>
+        <div><dt>{{ scoring_tasks }}</dt><dd>{{ current_suite.name }} tasks</dd></div>
         <div><dt>{{ category_count }}</dt><dd>areas of Apple development</dd></div>
         <div><dt>{{ app_run_tasks }}</dt><dd>tasks require a running app</dd></div>
       </dl>
@@ -116,13 +116,14 @@ description: >-
     <ul class="entry-list entry-list--featured">
       {%- for run in runs limit: 3 -%}
         {%- assign rows = site.data.benchmarks[run.data] -%}
+        {%- assign run_revision = site.data.suite_revisions | where: "id", run.suite_revision | first -%}
         {%- assign hits = rows | where: "passed", "true" -%}
         {%- assign rate = hits.size | times: 100.0 | divided_by: rows.size -%}
         <li>
           <a class="entry" href="{{ run.url | relative_url }}">
             <p class="entry__number">0{{ forloop.index }}</p>
             <div class="entry__body">
-              <p class="entry__meta"><time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time><span>{{ run.suite }} suite</span></p>
+              <p class="entry__meta"><time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time><span>{% if run_revision %}{{ run_revision.name }}{% else %}{{ run.suite }} suite{% endif %}</span></p>
               <h3 class="entry__title">{{ run.model }}</h3>
               <p class="entry__excerpt">{{ hits.size }} of {{ rows.size }} tasks passed</p>
             </div>
@@ -168,9 +169,10 @@ description: >-
     <div>
       <p>
         Anyone can inspect the runner, graders, and {{ sample_tasks }} sample
-        tasks. The {{ scoring_tasks }} scored tasks and their reference repairs
-        remain private, and published runs execute on an isolated Mac without
-        web access.
+        tasks. The {{ scoring_tasks }} {{ current_suite.name }} tasks and their
+        reference repairs remain private. Published runs use a macOS answer
+        sandbox; third-party web tools are disabled while provider traffic
+        remains available.
       </p>
       <p>That keeps the benchmark inspectable without turning its answer key into training data.</p>
       <div class="button-row">

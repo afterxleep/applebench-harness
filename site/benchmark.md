@@ -3,8 +3,8 @@ title: The benchmark
 permalink: /benchmark/
 kicker: AppleBench / The benchmark
 lede: >-
-  What AppleBench contains, how a task is built, and what a passing result
-  actually proves.
+  What Gold Suite 1.2 contains, how a task is validated, and what a passing
+  result actually proves.
 description: >-
   The AppleBench task set: eight categories of operational Apple-platform work,
   graded independently after the agent exits.
@@ -39,7 +39,8 @@ the project configuration actually resolve the way it claims to.
 
 ## The shape of the set
 
-{{ scoring_tasks }} scoring tasks across {{ category_count }} categories. Each one is a small,
+**{{ current_suite.name }}** contains {{ scoring_tasks }} tasks across
+{{ category_count }} categories. Each one is a small,
 self-contained Xcode project with a planted defect. The prompt describes the
 **symptom**, but does not reveal the cause or the file. Finding the cause is
 part of the task.
@@ -115,7 +116,7 @@ The prompt says the app dies and nothing else. It does not say why, or which
 file to open. Working that out is the task.
 
 A task passes only if **every** grader passes. There is no partial credit and
-no composite score.
+no composite rating.
 
 ## The graders
 
@@ -125,8 +126,11 @@ no composite score.
 | `xctest` | Fresh `xcodebuild test` passes; totals parsed from the `.xcresult` bundle, not scraped from terminal output. Zero executed tests is a FAIL |
 | `xcuitest` | Same contract, for UI test bundles, on the run's dedicated simulator |
 | `runtime` | The app builds, installs, launches, and survives an observation window; a screenshot is captured as evidence |
+| `uiflow` | The simulator is placed into a declared language, appearance, orientation, accessibility, permission, or lifecycle state; the app is driven and its accessibility tree or rendered state is checked |
 | `file` | Deterministic assertions about the final workspace: existence, contents, regex, whether the diff touched a path |
 | `xcodeproj` | Project configuration as it *resolves*, never as `project.pbxproj` text |
+| `mutation` | An agent-authored test first passes, then fails after the grader deliberately breaks the behavior it claims to cover |
+| `trajectory` | Harness-owned events prove an operational deliverable was produced by the required work rather than merely asserted in a report |
 
 The `xcodeproj` grader is the one worth dwelling on. Build settings are
 answered by `xcodebuild -showBuildSettings -json`; `Info.plist` keys and bundle
@@ -137,8 +141,8 @@ does not actually take effect cannot pass.
 ## Are the tasks sound?
 
 A benchmark result only means something if the task is genuinely broken and
-genuinely solvable. Two in-process agents establish both halves before a task
-ships:
+genuinely solvable. Two controlled harness adapters establish both halves
+before a task ships:
 
 - **`fake`** changes nothing, so a sound task must **FAIL**.
 - **`solution`** applies the fixture's reference patch, so a sound task must
@@ -151,26 +155,37 @@ runtime-002            FAIL       PASS       ok
 build-002              FAIL       PASS       ok
 ```
 
-The reference patch lives outside every checkout, so a real agent working in
-the workspace never sees it. `solution` is never reported as a benchmark
-result; it exists only to prove the other half of the contract.
+The reference patch lives outside every agent checkout, so a measured model
+never sees it. `solution` is never reported as a benchmark result; it exists
+only to prove the other half of the contract. The suite gate also rejects
+comments that disclose the planted defect and confirms that isolated fixture
+snapshots contain neither graded tests nor test targets.
 
 ## Public harness, private answers
 
 The set is partitioned:
 
-- **`gold`**: {{ scoring_tasks }} scoring tasks. Prompts, fixtures and expected outputs stay
-  unpublished. Published scores come from this suite only.
+- **`gold`**: {{ current_suite.name }}, with {{ scoring_tasks }} measured tasks.
+  Prompts, fixtures, private assertions, and reference repairs stay unpublished.
+  Published pass rates come from this suite only.
 - **`dev`**: {{ sample_tasks }} sample tasks that ship with the open harness and are
-  **never scored**.
+  **never included in published measurements**.
 
 These defend against different threats. Keeping the answers off the internet
-is the only thing that stops pretraining contamination, the slow leak
-measured in months. It does nothing about an agent that searches mid-run, so
-scoring runs are sandboxed too: the agent runs in a VM that default-denies
-every network destination and mounts only its workspace, leaving the standard
-Apple toolchain and nothing else. Each run records whether it was isolated
-that way.
+limits pretraining contamination, the slow leak measured in months. It does
+nothing about an agent searching the host mid-run, so Gold Suite 1.2 also uses
+a macOS sandbox. The agent can write only its workspace and cannot read task
+files, reference solutions, graders, cached fixtures, or other runs. Web tools
+are disabled, but a local run still permits the provider connection needed to
+reach the model. The optional Tart VM mode adds host separation and
+default-deny network egress. Each run records which isolation mode and network
+policy it used.
+
+For fixtures with withheld tests, those tests do not exist anywhere in the
+agent-visible harness state. Only after the agent process exits does the runner
+fetch the exact task-set commit into a unique temporary checkout, copy the
+fixture's test material into the grading workspace, regenerate the project,
+and delete the temporary checkout.
 
 Neither substitutes for the other, and both have a shelf life. Rotation is the
 actual long-term defense: fixtures are XcodeGen manifests with templated
@@ -185,7 +200,6 @@ transcript stops being a valid key.
 - **No entitlement or capability tasks.** Fixtures build with
   `CODE_SIGNING_ALLOWED = NO`, so entitlements cannot be honestly verified,
   and a grader that cannot honestly verify something should not exist.
-- **No composite score, leaderboard, or significance testing.** The harness
-  emits raw per-run variables and stops there. Weighting eight categories into
-  one number is a claim about what matters, and that claim belongs to whoever
-  is asking the question, not to the benchmark.
+- **No composite rating or significance claim.** The results page orders models
+  by pass rate and shows list-price cost and active time beside it. Those
+  measurements are not blended into a synthetic rating.

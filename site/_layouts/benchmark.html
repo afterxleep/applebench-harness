@@ -3,6 +3,7 @@ layout: default
 ---
 {%- assign rows = site.data.benchmarks[page.data] -%}
 {%- assign report = site.data.reports[page.data] -%}
+{%- assign revision = site.data.suite_revisions | where: "id", page.suite_revision | first -%}
 {%- assign passed = rows | where: "passed", "true" -%}
 {%- assign total = rows.size -%}
 {%- assign rate = 0 -%}
@@ -15,11 +16,15 @@ layout: default
 
 {%- assign cost = 0 -%}
 {%- assign list_cost = 0 -%}
+{%- assign missing_list_cost = 0 -%}
 {%- assign tokens = 0 -%}
 {%- assign seconds = 0 -%}
 {%- for row in rows -%}
   {%- assign cost = cost | plus: row.cost_usd -%}
   {%- assign list_cost = list_cost | plus: row.list_cost_usd -%}
+  {%- if row.list_cost_usd == nil or row.list_cost_usd == empty -%}
+    {%- assign missing_list_cost = missing_list_cost | plus: 1 -%}
+  {%- endif -%}
   {%- assign tokens = tokens | plus: row.total_tokens -%}
   {%- assign seconds = seconds | plus: row.duration_seconds -%}
 {%- endfor -%}
@@ -39,14 +44,13 @@ layout: default
   <div class="article-header">
     <p class="entry__meta">
       <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
-      <span>{{ page.suite }} suite</span>
+      <span>{% if revision %}{{ revision.name }}{% else %}{{ page.suite }} suite{% endif %}</span>
       <span>{{ total }} tasks</span>
-      {%- if page.suite_revision %}<span>suite {{ page.suite_revision }}</span>{% endif -%}
+      {%- if revision and revision.released %}<span>released {{ revision.released }}</span>{% endif -%}
     </p>
     <h1>{{ page.title }}</h1>
     {%- if page.lede %}<p class="article-header__lede">{{ page.lede }}</p>{% endif -%}
 
-    {%- assign revision = site.data.suite_revisions | where: "id", page.suite_revision | first -%}
     {%- if revision and revision.current != true %}
     <div class="callout callout--warning">
       <p><strong>Measured on suite {{ revision.name }}.</strong> {{ revision.summary }}</p>
@@ -75,7 +79,7 @@ layout: default
     <div class="stat">
       <div class="stat__value">{% include money.html value=list_cost %}</div>
       <div class="stat__label">Recorded suite cost</div>
-      <p class="stat__note">model-owner list price, including cached input</p>
+      <p class="stat__note">model-owner list price, including cached input{% if missing_list_cost > 0 %}; excludes {{ missing_list_cost }} task{% if missing_list_cost != 1 %}s{% endif %} without complete token telemetry{% endif %}</p>
     </div>
     <div class="stat">
       <div class="stat__value">{{ tokens | times: 1.0 | divided_by: 1000000 | round: 2 }}M</div>
@@ -105,10 +109,10 @@ layout: default
   <div class="figure" style="margin-bottom:2.5rem">
     <table style="margin:0">
       <tbody>
-        <tr><th scope="row">Suite</th><td><code>{{ page.suite }}</code>, {{ total }} tasks{% if page.suite_revision %}, revision {{ page.suite_revision }}{% endif %}</td></tr>
+        <tr><th scope="row">Suite</th><td>{% if revision %}{{ revision.name }}{% else %}<code>{{ page.suite }}</code>{% endif %}, {{ total }} tasks{% if page.suite_revision %} (<code>{{ page.suite_revision }}</code>){% endif %}</td></tr>
         <tr><th scope="row">Model</th><td><code>{{ page.model }}</code></td></tr>
         {%- comment -%}
-          Effort changes both what a model scores and what it costs, so a run
+          Effort changes both what a model completes and what it costs, so a run
           that does not state it cannot be reproduced or compared. Every model
           is benchmarked at the strongest reasoning it offers; where a model
           offers no effort ladder at all, that is said rather than dressed up
@@ -216,8 +220,8 @@ layout: default
               {%- endif -%}
             </td>
             <td>{{ row.duration_seconds | divided_by: 60 | round }}m</td>
-            <td>{% if row.total_tokens != "" %}{{ row.total_tokens }}{% else %}n/a{% endif %}</td>
-            <td>{% if row.list_cost_usd != "" %}${{ row.list_cost_usd }}{% else %}n/a{% endif %}</td>
+            <td>{% if row.total_tokens and row.total_tokens != empty %}{{ row.total_tokens }}{% else %}n/a{% endif %}</td>
+            <td>{% if row.list_cost_usd and row.list_cost_usd != empty %}${{ row.list_cost_usd }}{% else %}n/a{% endif %}</td>
             <td><code style="font-size:.76rem">{{ row.graders }}</code></td>
           </tr>
         {%- endfor -%}
