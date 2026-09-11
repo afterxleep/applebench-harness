@@ -9,7 +9,7 @@ chart. Params: rows.
 {%- assign max_cost = 0 -%}
 {%- assign max_time = 0 -%}
 {%- for row in include.rows -%}
-  {%- assign c = row.cost_usd | times: 1.0 -%}
+  {%- assign c = row.list_cost_usd | times: 1.0 -%}
   {%- assign t = row.duration_seconds | times: 1.0 -%}
   {%- if c > max_cost %}{% assign max_cost = c %}{% endif -%}
   {%- if t > max_time %}{% assign max_time = t %}{% endif -%}
@@ -65,7 +65,7 @@ chart. Params: rows.
     {%- for row in include.rows -%}
       {%- if row.passed != "true" -%}
         {%- assign px = row.duration_seconds | times: 1.0 | divided_by: max_time | times: span_x | plus: x0 -%}
-        {%- assign cost = row.cost_usd | default: 0 | times: 1.0 -%}
+        {%- assign cost = row.list_cost_usd | default: 0 | times: 1.0 -%}
         {%- assign py = cost | divided_by: max_cost | times: span_y -%}
         {%- assign py = y1 | minus: py -%}
         <rect x="{{ px | minus: 4.5 }}" y="{{ py | minus: 4.5 }}" width="9" height="9"
@@ -78,7 +78,7 @@ chart. Params: rows.
     {%- for row in include.rows -%}
       {%- if row.passed == "true" -%}
         {%- assign px = row.duration_seconds | times: 1.0 | divided_by: max_time | times: span_x | plus: x0 -%}
-        {%- assign cost = row.cost_usd | default: 0 | times: 1.0 -%}
+        {%- assign cost = row.list_cost_usd | default: 0 | times: 1.0 -%}
         {%- assign py = cost | divided_by: max_cost | times: span_y -%}
         {%- assign py = y1 | minus: py -%}
         <circle class="scatter__dot" cx="{{ px }}" cy="{{ py }}" r="5.5" fill="var(--pass)">
@@ -89,6 +89,7 @@ chart. Params: rows.
   </svg>
 
   <p class="figure__note">
-    A cost of $0.00 means no usage was reported, not that the task was free.
+    Costs use the model owner's pinned list price. A $0.00 mark means usage
+    was not reported, not that the task was free.
   </p>
 </figure>

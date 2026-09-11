@@ -1,8 +1,7 @@
 {%- comment -%}
-Comparison of every published run that can be ranked together: current suite
-revision, current scoring specification. Pass rate leads, because it is how
-much of the suite was solved. Points and cost sit beside it, because a solve
-that cost far more or took much longer is not the same achievement as one that did not.
+Comparison of every published run on the current suite revision. Pass rate
+leads because it is how much of the suite was solved. Cost and active time sit
+beside it rather than being blended into a synthetic score.
 
 Share, not raw totals, for any measure that grows with the suite. Each bar
 states its task count so two unequal sets are not read as like-for-like.
@@ -16,23 +15,26 @@ Params: runs (site.benchmarks).
 {%- assign max_list_cost = 0 -%}
 {%- assign max_solve_cost = 0 -%}
 {%- assign max_task_cost = 0 -%}
+{%- assign max_active_per_solve = 0 -%}
 
 {%- for run in include.runs -%}
   {%- assign rows = site.data.benchmarks[run.data] -%}
   {%- assign report = site.data.reports[run.data] -%}
   {%- assign comparable = true -%}
   {%- if current and run.suite_revision != current.id %}{% assign comparable = false %}{% endif -%}
-  {%- if run.score_spec != "points-v3" %}{% assign comparable = false %}{% endif -%}
   {%- unless comparable -%}
     {%- assign left_out = left_out | push: run -%}
   {%- endunless -%}
   {%- if rows and comparable -%}
-    {%- assign earned = report.score.points | default: 0 -%}
-    {%- assign available = report.score.available | default: 0 -%}
     {%- assign list_cost = 0 -%}
+    {%- assign active_seconds = 0 -%}
     {%- assign hits = rows | where: "passed", "true" -%}
     {%- for row in rows -%}
       {%- assign list_cost = list_cost | plus: row.list_cost_usd -%}
+    {%- endfor -%}
+    {%- for measured in report.runs -%}
+      {%- assign measured_active = measured.metrics.agent_duration_seconds | default: measured.result.duration_seconds -%}
+      {%- assign active_seconds = active_seconds | plus: measured_active -%}
     {%- endfor -%}
     {%- assign solve_cost = 0 -%}
     {%- if hits.size > 0 -%}
@@ -42,11 +44,16 @@ Params: runs (site.benchmarks).
     {%- if rows.size > 0 -%}
       {%- assign task_cost = list_cost | times: 1.0 | divided_by: rows.size -%}
     {%- endif -%}
+    {%- assign active_per_solve = 0 -%}
+    {%- if hits.size > 0 -%}
+      {%- assign active_per_solve = active_seconds | times: 1.0 | divided_by: hits.size -%}
+    {%- endif -%}
     {%- if list_cost > max_list_cost %}{% assign max_list_cost = list_cost %}{% endif -%}
     {%- if solve_cost > max_solve_cost %}{% assign max_solve_cost = solve_cost %}{% endif -%}
     {%- if task_cost > max_task_cost %}{% assign max_task_cost = task_cost %}{% endif -%}
+    {%- if active_per_solve > max_active_per_solve %}{% assign max_active_per_solve = active_per_solve %}{% endif -%}
     {%- assign name = run.model | split: "/" | last -%}
-    {%- capture packed -%}{{ name }}|{{ earned }}|{{ available }}|{{ hits.size }}|{{ rows.size }}|{{ run.url }}|{{ list_cost }}|{{ solve_cost }}|{{ task_cost }}{%- endcapture -%}
+    {%- capture packed -%}{{ name }}|{{ active_seconds }}|{{ active_per_solve }}|{{ hits.size }}|{{ rows.size }}|{{ run.url }}|{{ list_cost }}|{{ solve_cost }}|{{ task_cost }}{%- endcapture -%}
     {%- assign comparison = comparison | push: packed -%}
   {%- endif -%}
 {%- endfor -%}
@@ -54,34 +61,32 @@ Params: runs (site.benchmarks).
 {%- if max_list_cost <= 0 %}{% assign max_list_cost = 1 %}{% endif -%}
 {%- if max_solve_cost <= 0 %}{% assign max_solve_cost = 1 %}{% endif -%}
 {%- if max_task_cost <= 0 %}{% assign max_task_cost = 1 %}{% endif -%}
+{%- if max_active_per_solve <= 0 %}{% assign max_active_per_solve = 1 %}{% endif -%}
 
 {%- assign by_pass = "" | split: "" -%}
-{%- assign by_points = "" | split: "" -%}
+{%- assign by_active = "" | split: "" -%}
 {%- assign by_solve_cost = "" | split: "" -%}
 {%- assign by_task_cost = "" | split: "" -%}
 {%- for packed in comparison -%}
   {%- assign parts = packed | split: "|" -%}
   {%- assign hits = parts[3] | plus: 0 -%}
   {%- assign tasks = parts[4] | plus: 0 -%}
-  {%- assign earned = parts[1] | plus: 0 -%}
-  {%- assign available = parts[2] | plus: 0 -%}
   {%- assign pass_key = 0 -%}
   {%- if tasks > 0 %}{% assign pass_key = hits | times: 10000 | divided_by: tasks | round %}{% endif -%}
-  {%- assign point_key = 0 -%}
-  {%- if available > 0 %}{% assign point_key = earned | times: 10000 | divided_by: available | round %}{% endif -%}
+  {%- assign active_key = parts[2] | times: 1000 | round -%}
   {%- assign solve_key = parts[7] | times: 100000 | round -%}
   {%- assign task_key = parts[8] | times: 100000 | round -%}
   {%- capture pass_row -%}{{ pass_key | prepend: "00000" | slice: -5, 5 }}|{{ packed }}{%- endcapture -%}
-  {%- capture point_row -%}{{ point_key | prepend: "00000" | slice: -5, 5 }}|{{ packed }}{%- endcapture -%}
+  {%- capture active_row -%}{{ active_key | prepend: "000000000" | slice: -9, 9 }}|{{ packed }}{%- endcapture -%}
   {%- capture solve_row -%}{{ solve_key | prepend: "00000000" | slice: -8, 8 }}|{{ packed }}{%- endcapture -%}
   {%- capture task_row -%}{{ task_key | prepend: "00000000" | slice: -8, 8 }}|{{ packed }}{%- endcapture -%}
   {%- assign by_pass = by_pass | push: pass_row -%}
-  {%- assign by_points = by_points | push: point_row -%}
+  {%- assign by_active = by_active | push: active_row -%}
   {%- assign by_solve_cost = by_solve_cost | push: solve_row -%}
   {%- assign by_task_cost = by_task_cost | push: task_row -%}
 {%- endfor -%}
 {%- assign by_pass = by_pass | sort | reverse -%}
-{%- assign by_points = by_points | sort | reverse -%}
+{%- assign by_active = by_active | sort -%}
 {%- assign by_solve_cost = by_solve_cost | sort -%}
 {%- assign by_task_cost = by_task_cost | sort -%}
 {%- assign by_name = comparison | sort -%}
@@ -151,37 +156,37 @@ Params: runs (site.benchmarks).
 
 <figure class="figure">
   <figcaption>
-    <h3 class="figure__title">Points</h3>
+    <h3 class="figure__title">Active time per verified pass</h3>
     <p class="figure__subtitle">
-      Each finished task is worth 10 points. Cost supplies 80% of the efficiency
-      adjustment and active agent time 20%, with full credit through $0.025 and
-      300 seconds and a 2.5-point floor. A fail is 0, but those 10 points still
-      sit in the total.
+      Total time spent in the agent phase divided by verified passes. Lower is
+      better, but provider latency contributes to this measurement.
     </p>
   </figcaption>
 
   <div class="bars bars--leaderboard">
-    {%- for packed in by_points -%}
+    {%- for packed in by_active -%}
       {%- assign parts = packed | split: "|" -%}
-      {%- assign bar_value = parts[2] | plus: 0 | round -%}
-      {%- assign bar_total = parts[3] -%}
-      {%- capture bar_label %}{{ parts[1] }} · {{ parts[5] }} tasks{% endcapture -%}
-      {%- capture bar_printed %}{{ bar_value }}/{{ bar_total }}{% endcapture -%}
+      {%- assign active_per_pass = parts[3] | times: 1.0 -%}
+      {%- assign bar_value = active_per_pass -%}
+      {%- assign bar_total = max_active_per_solve -%}
+      {%- capture bar_label %}{{ parts[1] }} · {{ parts[4] }} passes{% endcapture -%}
+      {%- capture bar_printed %}{{ active_per_pass | divided_by: 60 | round: 1 }}m / pass{% endcapture -%}
       {%- assign bar_link = parts[6] | relative_url -%}
+      {%- assign hide_percent = true -%}
       {%- include bar-row.html
           label=bar_label
           value=bar_value
           total=bar_total
           value_label=bar_printed
           link=bar_link
-          color="series-1" -%}
+          color="series-3"
+          hide_percent=hide_percent -%}
     {%- endfor -%}
   </div>
 
   <p class="figure__note">
-    If two models look close here but far apart on pass rate, the one with
-    more passes paid more or took longer getting them.
-    <a href="{{ '/methodology/#scoring' | relative_url }}">How scoring works</a>.
+    This is operational evidence, not a capability adjustment. Compare it
+    beside pass rate and cost rather than combining the three.
   </p>
 
   <details class="data-table">
@@ -190,21 +195,19 @@ Params: runs (site.benchmarks).
       <thead>
         <tr>
           <th scope="col">Run</th>
-          <th scope="col">Points</th>
-          <th scope="col">Available</th>
-          <th scope="col">Share</th>
+          <th scope="col">Active / pass</th>
+          <th scope="col">Total active time</th>
           <th scope="col">Passed</th>
           <th scope="col">Tasks</th>
         </tr>
       </thead>
       <tbody>
-        {%- for packed in by_points -%}
+        {%- for packed in by_active -%}
           {%- assign parts = packed | split: "|" -%}
           <tr>
             <td><a href="{{ parts[6] | relative_url }}">{{ parts[1] }}</a></td>
-            <td>{{ parts[2] | plus: 0 | round }}</td>
-            <td>{{ parts[3] }}</td>
-            <td>{{ parts[2] | times: 1.0 | divided_by: parts[3] | times: 100 | round: 1 }}%</td>
+            <td>{{ parts[3] | divided_by: 60 | round: 1 }}m</td>
+            <td>{{ parts[2] | divided_by: 3600 | round: 1 }}h</td>
             <td>{{ parts[4] }}</td>
             <td>{{ parts[5] }}</td>
           </tr>
@@ -216,10 +219,10 @@ Params: runs (site.benchmarks).
 
 <figure class="figure">
   <figcaption>
-    <h3 class="figure__title">Cost per solved task</h3>
+    <h3 class="figure__title">Cost per verified pass</h3>
     <p class="figure__subtitle">
-      What one successful task cost. Cheapest first. Failed tasks are left out
-      of this average.
+      Total recorded suite spend divided by verified passes. Cheapest first;
+      spend on failed tasks remains in the numerator.
     </p>
   </figcaption>
 
@@ -229,8 +232,8 @@ Params: runs (site.benchmarks).
       {%- assign solve_cost = parts[8] | times: 1.0 -%}
       {%- assign bar_value = solve_cost -%}
       {%- assign bar_total = max_solve_cost -%}
-      {%- capture bar_label %}{{ parts[1] }} · {{ parts[4] }} solves{% endcapture -%}
-      {%- capture bar_printed -%}{% include money.html value=solve_cost places=3 %} / solve{%- endcapture -%}
+      {%- capture bar_label %}{{ parts[1] }} · {{ parts[4] }} passes{% endcapture -%}
+      {%- capture bar_printed -%}{% include money.html value=solve_cost places=3 %} / pass{%- endcapture -%}
       {%- assign bar_link = parts[6] | relative_url -%}
       {%- assign hide_percent = true -%}
       {%- include bar-row.html
@@ -245,8 +248,7 @@ Params: runs (site.benchmarks).
   </div>
 
   <p class="figure__note">
-    List price at the time of the run. A task with no reported cost is left
-    out, not counted as free.
+    Model-owner list price from the pinned catalog, including cached input.
   </p>
 
   <details class="data-table">
@@ -255,7 +257,7 @@ Params: runs (site.benchmarks).
       <thead>
         <tr>
           <th scope="col">Run</th>
-          <th scope="col">Cost / solve</th>
+          <th scope="col">Cost / pass</th>
           <th scope="col">Cost / task</th>
           <th scope="col">Suite cost</th>
           <th scope="col">Passed</th>
@@ -347,7 +349,7 @@ Params: runs (site.benchmarks).
         {%- assign label_x = px | minus: 12 -%}
         {%- assign label_anchor = "end" -%}
       {%- endif -%}
-      <circle class="scatter__dot" cx="{{ px }}" cy="{{ py }}" r="6"
+      <circle class="scatter__dot" cx="{{ px }}" cy="{{ py }}" r="4.5"
               style="fill:var(--{{ series_names[idx] }})">
         <title>{{ parts[0] }} · {{ rate | round: 1 }}% · {% include money.html value=list_cost %}</title>
       </circle>
@@ -368,9 +370,8 @@ Params: runs (site.benchmarks).
         <tr>
           <th scope="col">Run</th>
           <th scope="col">Pass rate</th>
-          <th scope="col">Points share</th>
           <th scope="col">Suite cost</th>
-          <th scope="col">Cost / solve</th>
+          <th scope="col">Cost / pass</th>
           <th scope="col">Cost / task</th>
         </tr>
       </thead>
@@ -383,7 +384,6 @@ Params: runs (site.benchmarks).
           <tr>
             <td><a href="{{ parts[6] | relative_url }}">{{ parts[1] }}</a></td>
             <td>{{ parts[4] | times: 1.0 | divided_by: parts[5] | times: 100 | round: 1 }}%</td>
-            <td>{{ parts[2] | times: 1.0 | divided_by: parts[3] | times: 100 | round: 1 }}%</td>
             <td>{% include money.html value=list_cost %}</td>
             <td>{% include money.html value=solve_cost places=3 %}</td>
             <td>{% include money.html value=task_cost places=3 %}</td>

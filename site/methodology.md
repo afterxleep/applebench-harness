@@ -127,89 +127,31 @@ Similarly, an agent timing out and the final workspace passing are recorded as
 two separate facts. An agent can exceed its budget and still have left the
 repository in a working state; both things are true, and the record says both.
 
-## Scoring
+## Reading the results
 
-**Pass rate** is how many tasks the model finished. **Points** start from
-those same finishes and then account for what a successful run cost and how
-long the agent was actively working.
+AppleBench does not collapse capability, money, and time into one authored
+score. The results keep those measurements separate:
 
-Two models can pass the same task and not be alike. One reads the build log
-and edits two lines. The other takes an hour and costs twenty times as much to
-get the same diff. Pass rate gives them the same tick. Points does not.
+- **Pass rate** is the primary capability result: verified passes divided by
+  attempted tasks.
+- **Cost per verified pass** is total recorded list-price spend divided by
+  verified passes. Failed attempts remain in the numerator because they still
+  cost money.
+- **Active time per verified pass** is total time in the agent phase divided by
+  verified passes. It is operational evidence, not a capability penalty,
+  because provider latency contributes to it.
+- **Suite cost and wall-clock time** show the absolute resources consumed.
 
-That is why the results page shows pass rate first, then points. A model can
-finish more of the suite and still sit close on points if the extra finishes
-were expensive.
+Tokens and tool calls remain available for diagnosis. They are not ranking
+inputs: token prices vary by model, and raw tool-call counts can punish useful
+build/test loops or be reduced by batching unrelated shell work.
 
-```text
-face value  = 10 points                              the same for every task
-cost part   = clamp($0.025 / actual cost, 0.25, 1)   80% of adjustment
-time part   = clamp(300s / active time, 0.25, 1)     20% of adjustment
-efficiency  = max(0.25, 0.8 × cost + 0.2 × time)     missing component → 0.25
-points      = passed ? face value × efficiency : 0
+The leaderboard is ordered by pass rate. Cost and active time sit beside it so
+their tradeoffs remain visible without choosing arbitrary weights. Results are
+only compared within the same suite revision and attempt rule.
 
-score       = Σ points          available = 10 × number of tasks
-```
-
-**Every task is worth the same.** Face value used to be ten points per step of
-authored difficulty. Checking that rating against what runs actually cost
-showed it was wrong task by task: three tasks rated 6 were solved in under
-1,200 tokens, while tasks rated 1 cost twenty times that. Weighting the score
-by it paid sixty points for a one-line fix and ten for an afternoon's work.
-
-A task still carries a difficulty, because it tells a reader what kind of
-problem it is. It no longer decides what solving it is worth. What remains in
-the score is measured rather than authored: the task was solved, and this is
-what solving it cost.
-
-**A failure earns nothing and still counts its ten points in the total.** The
-total is a property of the suite, not of the model, so it does not move as a
-model gets better or worse.
-
-**A wasteful solve still beats a failure.** The 0.25 floor is there because
-doing the work badly is not the same as not doing it.
-
-**Unreported cost or active time is conservative.** A missing component takes
-the floor for its share of the formula. A genuinely free run reports `$0.00`
-and keeps the full cost component; absence is not rewritten as free. The count
-of solves with missing telemetry is published on the run's page.
-
-**Tokens and tool calls do not deduct points.** Token prices differ enormously,
-so token volume is not resource cost. Raw tool-call counts also punish useful
-builds and tests and can be gamed by batching shell commands. Both remain in
-the export for diagnosis. Cost captures the dominant resource tradeoff; active
-time is deliberately the smaller guardrail because provider latency contributes
-to it.
-
-### The constants are authored, and frozen
-
-$0.025, 300 active seconds, the 80/20 weighting, and the 0.25 floor are frozen
-under a specification id, currently `points-v3`. The allowances sit just above
-the observed successful-run 75th percentiles of $0.022 and 275 seconds. Every
-published run records which specification scored it. Changing a constant is a
-scoring revision, and
-every published number is recomputed from its stored export. That does not
-require re-running any benchmark.
-
-### Why the score is a plain sum
-
-Every term depends only on the task it belongs to: its verdict, and what that
-run spent. Nothing is normalized against the rest of the
-set, against other models, or against how many tasks the suite happens to hold.
-
-That is deliberate, and it is what makes the suite extensible. When a task set
-is added, the existing models are run **against the new tasks only**, and their
-points are added to what is already published. Nothing already measured is
-re-run, and no previously published per-task number changes. A model that has
-not been run against the new set is not silently penalized either. It is
-reported against the set it was actually measured on, which is what the suite
-revision has always recorded.
-
-### What points do not tell you
-
-They do not compare across suite revisions or scoring specifications, and they
-are not a bill. Raw cost, list-price cost, tokens, wall-clock time, and tool
-calls remain visible beside the score so the adjustment can be audited.
+A task still carries an authored difficulty label to describe the kind of work.
+That label does not change its contribution to pass rate.
 
 ## Grading against the device
 
@@ -312,9 +254,8 @@ they are the majority of what an agentic run reads: roughly seven cached tokens
 for every fresh one here.
 
 That ratio is why the token figure on a run page is input and output only, and
-excludes cache. It is the number the points score's efficiency multiplier is
-measured against, and it means "what the model produced and was newly given"
-rather than "how long the conversation got".
+excludes cache. It means "what the model produced and was newly given" rather
+than "how long the conversation got"; cost still includes cached input.
 
 A caution learned the hard way: a cost computed from a token count that is
 missing a category is wrong by multiples, not by rounding. This benchmark

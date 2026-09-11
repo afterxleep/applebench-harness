@@ -2,8 +2,8 @@
 """Writes the site page for a published run, entirely from its exported data.
 
 A run's numbers and conditions are already recorded — the model, the harness
-and how it was configured, the host, the score and the specification it was
-computed under, the attempt rule, the per-task results. Restating them by hand
+and how it was configured, the host, the attempt rule, and the per-task
+results. Restating them by hand
 is how a published page comes to disagree with the data it links to, so the
 page is generated and the layout reads the rest at build time.
 
@@ -87,10 +87,6 @@ def main() -> int:
     rate = report.get("completion_rate", 0) * 100
     model, harness = describe(report)
 
-    score = report.get("score", {})
-    points = round(score.get("points", 0))
-    available = score.get("available", 0)
-    specification = score.get("specification", "")
     attempt = report.get("attempt", "all")
 
     page = ROOT / f"site/_benchmarks/{slug}.md"
@@ -108,26 +104,23 @@ def main() -> int:
             ):
                 lede = found.group(1).rstrip("\n")
 
-    title = f"{model or harness or slug}, {suite} suite, {points} points"
+    title = f"{model or harness or slug}, {suite} suite, {passed}/{total} passed"
     front = [
         "---",
         f'title: "{title}"',
         f"date: {date_from(slug, report)}",
         f"suite: {suite}",
         f'suite_revision: "{current_suite_revision()}"',
-        f'score_spec: "{specification}"',
         f'attempt: "{attempt}"',
         f"data: {slug}",
         f'model: "{model}"',
         f'harness: "{harness}"',
         f"tasks: {total}",
         f"passed: {passed}",
-        f"points: {points}",
-        f"points_available: {available}",
         "description: >-",
         f"  AppleBench results for {model or harness or slug} on the {suite} suite:",
-        f"  {points} of {available} points and {passed} of {total} tasks completed to a",
-        "  verified result, with per-category points, cost against wall-clock time,",
+        f"  {passed} of {total} tasks completed to a verified result ({rate:.1f}% pass rate),",
+        "  with cost, active time, per-category results,",
         "  and every task.",
     ]
     if lede:
@@ -137,7 +130,7 @@ def main() -> int:
         "",
     ]
     page.write_text("\n".join(front) + body)
-    print(f"  wrote site/_benchmarks/{slug}.md ({points}/{available} points, {passed}/{total}, {rate:.1f}%)")
+    print(f"  wrote site/_benchmarks/{slug}.md ({passed}/{total}, {rate:.1f}%)")
     return 0
 
 

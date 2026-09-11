@@ -61,6 +61,13 @@ jobs:
       - name: Build
         run: bundle exec jekyll build --trace
 
+      - name: Reject point scoring
+        run: |
+          if grep -REIni --include='*.html' '\bpoints\b|point scor' _site; then
+            echo "The public site must report pass rate, cost, and time without point scoring."
+            exit 1
+          fi
+
       - name: Reject em dashes
         run: |
           if grep -REIn --exclude-dir=_site --exclude-dir=vendor --exclude=Gemfile.lock '—|&mdash;|&#8212;|&#x2014;' .; then

@@ -116,10 +116,8 @@ description: >-
     <ul class="entry-list entry-list--featured">
       {%- for run in runs limit: 3 -%}
         {%- assign rows = site.data.benchmarks[run.data] -%}
-        {%- assign report = site.data.reports[run.data] -%}
         {%- assign hits = rows | where: "passed", "true" -%}
-        {%- assign points = report.score.points | default: 0 -%}
-        {%- assign available = report.score.available | default: 0 -%}
+        {%- assign rate = hits.size | times: 100.0 | divided_by: rows.size -%}
         <li>
           <a class="entry" href="{{ run.url | relative_url }}">
             <p class="entry__number">0{{ forloop.index }}</p>
@@ -128,7 +126,7 @@ description: >-
               <h3 class="entry__title">{{ run.model }}</h3>
               <p class="entry__excerpt">{{ hits.size }} of {{ rows.size }} tasks passed</p>
             </div>
-            <p class="entry__result"><strong>{{ points | round }}</strong><span>/ {{ available }} points</span></p>
+            <p class="entry__result"><strong>{{ rate | round: 1 }}%</strong><span>{{ hits.size }} / {{ rows.size }} passed</span></p>
             <span class="entry__arrow" aria-hidden="true">↗</span>
           </a>
         </li>
@@ -152,7 +150,7 @@ description: >-
         New tasks are added as Swift, Xcode, Apple frameworks, and agent
         workflows change.
       </p>
-      <div class="evolving-points">
+      <div class="evolving-items">
         <article><span>01</span><h3>New failure modes</h3><p>Fresh tasks cover real problems that current agents and toolchains expose.</p></article>
         <article><span>02</span><h3>Versioned suites</h3><p>Every result names the exact task set used, so comparisons stay honest.</p></article>
         <article><span>03</span><h3>Recalibrated evidence</h3><p>Fixtures and graders are checked again as platforms and models evolve.</p></article>

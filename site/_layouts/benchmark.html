@@ -17,16 +17,23 @@ layout: default
 {%- assign list_cost = 0 -%}
 {%- assign tokens = 0 -%}
 {%- assign seconds = 0 -%}
-{%- assign points = report.score.points | default: 0 -%}
-{%- assign available = report.score.available | default: 0 -%}
 {%- for row in rows -%}
   {%- assign cost = cost | plus: row.cost_usd -%}
   {%- assign list_cost = list_cost | plus: row.list_cost_usd -%}
   {%- assign tokens = tokens | plus: row.total_tokens -%}
   {%- assign seconds = seconds | plus: row.duration_seconds -%}
 {%- endfor -%}
-{%- assign share = 0 -%}
-{%- if available > 0 %}{% assign share = points | times: 1000 | divided_by: available | times: 0.1 %}{% endif -%}
+{%- assign active_seconds = 0 -%}
+{%- for run in report.runs -%}
+  {%- assign run_active = run.metrics.agent_duration_seconds | default: run.result.duration_seconds -%}
+  {%- assign active_seconds = active_seconds | plus: run_active -%}
+{%- endfor -%}
+{%- assign cost_per_pass = 0 -%}
+{%- assign active_minutes_per_pass = 0 -%}
+{%- if passed.size > 0 -%}
+  {%- assign cost_per_pass = list_cost | divided_by: passed.size -%}
+  {%- assign active_minutes_per_pass = active_seconds | divided_by: passed.size | divided_by: 60 -%}
+{%- endif -%}
 
 <div class="wrap">
   <div class="article-header">
@@ -51,33 +58,24 @@ layout: default
 
   <div class="stats" style="margin-bottom:1.25rem">
     <div class="stat">
-      <div class="stat__value">{{ points | round }}</div>
-      <div class="stat__label">AppleBench points</div>
-      <p class="stat__note">of {{ available }} available · {{ share | round: 1 }}%</p>
-    </div>
-    <div class="stat">
       <div class="stat__value">{{ rate | round: 1 }}%</div>
       <div class="stat__label">Pass rate</div>
       <p class="stat__note">{{ passed.size }} of {{ total }} tasks</p>
     </div>
-    {%- comment -%}
-      The agent CLI's figure, which is the model owner's list price: it agrees
-      to the cent with the same tokens priced from models.dev. Earlier this
-      page showed a figure computed here instead, and it was far too low.
-      Cached prompt tokens were not being counted, and on an agentic run they
-      are most of the prompt.
-    {%- endcomment -%}
     <div class="stat">
-      <div class="stat__value">{% include money.html value=cost %}</div>
-      <div class="stat__label">Cost at list price</div>
-      <p class="stat__note">
-        {%- if passed.size > 0 -%}
-          {%- assign per_solve = cost | divided_by: passed.size -%}
-          {% include money.html value=per_solve places=3 %} per solved task
-        {%- else -%}
-          no solved tasks
-        {%- endif -%}
-      </p>
+      <div class="stat__value">{% include money.html value=cost_per_pass places=3 %}</div>
+      <div class="stat__label">Cost per verified pass</div>
+      <p class="stat__note">recorded list-price spend / passes</p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{{ active_minutes_per_pass | round: 1 }}m</div>
+      <div class="stat__label">Active time per verified pass</div>
+      <p class="stat__note">all agent time / passes; provider-influenced</p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{% include money.html value=list_cost %}</div>
+      <div class="stat__label">Recorded suite cost</div>
+      <p class="stat__note">model-owner list price, including cached input</p>
     </div>
     <div class="stat">
       <div class="stat__value">{{ tokens | times: 1.0 | divided_by: 1000000 | round: 2 }}M</div>
@@ -92,15 +90,10 @@ layout: default
   </div>
 
   <p style="color:var(--ink-3); font-size:.88rem; margin:0 0 2.5rem">
-    Each task is worth 10 points. A finish keeps all 10 below
-    ${{ report.score.reference_cost_usd | default: 0.025 }} and
-    {{ report.score.reference_active_time_seconds | default: 300 | round }} active seconds.
-    Above either allowance, cost drives {{ report.score.cost_weight | default: 0.8 | times: 100 | round }}% of the adjustment and time the rest, never below
-    {{ report.score.minimum_efficiency | default: 0.25 | times: 100 | round }}%.
-    Fail and you get 0, but those 10 points still sit in the total.
-    Rule used: <code>{{ report.score.specification | default: "points-v3" }}</code>,
-    attempt <code>{{ report.attempt | default: "all" }}</code>.
-    <a href="{{ '/methodology/#scoring' | relative_url }}">How scoring works</a>.
+    Capability, cost, and speed stay separate. Pass rate is the primary result;
+    cost and active time are divided by verified passes so their tradeoffs stay
+    visible. Attempt rule: <code>{{ report.attempt | default: "all" }}</code>.
+    <a href="{{ '/methodology/#reading-the-results' | relative_url }}">How to read these results</a>.
   </p>
 
   {%- comment -%}
@@ -150,7 +143,7 @@ layout: default
         {%- endif -%}
         <tr><th scope="row">Harness</th><td>{{ page.harness }}{% for pair in first.agent.configuration %}, {{ pair[0] | replace: "_", " " }}: {{ pair[1] }}{% endfor %}</td></tr>
         <tr><th scope="row">Host</th><td>Xcode {{ first.environment.xcode }}{% if first.environment.xcode_build %} ({{ first.environment.xcode_build }}){% endif %}, macOS {{ first.environment.macos }}, {{ first.environment.architecture }}</td></tr>
-        <tr><th scope="row">Scoring</th><td><code>{{ report.score.specification }}</code>, attempt rule <code>{{ report.attempt }}</code>{% if report.score.solves_with_unreported_cost > 0 %}, {{ report.score.solves_with_unreported_cost }} solve(s) missing reported cost{% endif %}{% if report.score.solves_with_unreported_active_time > 0 %}, {{ report.score.solves_with_unreported_active_time }} solve(s) missing active time{% endif %}</td></tr>
+        <tr><th scope="row">Selection</th><td>attempt rule <code>{{ report.attempt }}</code></td></tr>
       </tbody>
     </table>
   </div>
@@ -161,12 +154,11 @@ layout: default
     <p style="margin-top:0"><strong>More than one configuration ran here.</strong>
       A total over the whole directory mixes them, so each is broken out.</p>
     <table style="margin:0">
-      <thead><tr><th scope="col">Configuration</th><th scope="col">Points</th><th scope="col">Passed</th><th scope="col">Rate</th></tr></thead>
+      <thead><tr><th scope="col">Configuration</th><th scope="col">Passed</th><th scope="col">Rate</th></tr></thead>
       <tbody>
         {%- for configuration in report.configurations -%}
         <tr>
           <td><code>{{ configuration.label }}</code></td>
-          <td>{{ configuration.score.points | round }} / {{ configuration.score.available }}</td>
           <td>{{ configuration.passed }} / {{ configuration.total }}</td>
           <td>{{ configuration.completion_rate | times: 100 | round: 1 }}%</td>
         </tr>
@@ -177,15 +169,8 @@ layout: default
   {%- endif -%}
 
   <div class="benchmark-chart-stack">
-    {%- include chart-points-by-category.html categories=report.categories -%}
     {%- include chart-pass-by-category.html rows=rows -%}
   </div>
-
-  {%- comment -%}
-    The pass rate stays below the score rather than being replaced by it. The
-    two answer different questions, and the gap between a category's two bars
-    is the finding: work that got done, expensively.
-  {%- endcomment -%}
 
   {%- include chart-cost-vs-time.html rows=rows -%}
   {%- include chart-task-matrix.html rows=rows -%}
@@ -198,8 +183,8 @@ layout: default
 
   <h2>Every run</h2>
   <p>
-    Each row is one task. <strong>Points</strong> is what it earned out of 10.
-    A ×0.50 next to the number means its blended cost/time efficiency was 50%.
+    Each row is one task. Cost uses the model owner's pinned list price and
+    includes cached prompt input when the provider reported it.
   </p>
 </div>
 
@@ -211,7 +196,6 @@ layout: default
           <th scope="col">Task</th>
           <th scope="col">Category</th>
           <th scope="col">Result</th>
-          <th scope="col">Points</th>
           <th scope="col">Time</th>
           <th scope="col">Tokens</th>
           <th scope="col">Cost</th>
@@ -231,15 +215,9 @@ layout: default
                 <span class="pill pill--fail">Fail</span>
               {%- endif -%}
             </td>
-            <td>
-              {{ row.points }} <span style="color:var(--ink-3)">/ {{ row.face_value }}</span>
-              {%- if row.passed == "true" and row.efficiency != "1.00" %}
-              <span style="color:var(--ink-3); font-size:.8rem">×{{ row.efficiency }}</span>
-              {%- endif -%}
-            </td>
             <td>{{ row.duration_seconds | divided_by: 60 | round }}m</td>
             <td>{% if row.total_tokens != "" %}{{ row.total_tokens }}{% else %}n/a{% endif %}</td>
-            <td>{% if row.cost_usd != "" %}${{ row.cost_usd }}{% else %}n/a{% endif %}</td>
+            <td>{% if row.list_cost_usd != "" %}${{ row.list_cost_usd }}{% else %}n/a{% endif %}</td>
             <td><code style="font-size:.76rem">{{ row.graders }}</code></td>
           </tr>
         {%- endfor -%}

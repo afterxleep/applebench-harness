@@ -697,33 +697,33 @@ th {
   min-width: 0;
 }
 
-.evolving-points {
+.evolving-items {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   border-top: 1px solid var(--line-strong);
 }
 
-.evolving-points article {
+.evolving-items article {
   min-width: 0;
   padding: 1.4rem 1.4rem 0 0;
 }
 
-.evolving-points article + article {
+.evolving-items article + article {
   padding-left: 1.4rem;
   border-left: 1px solid var(--line);
 }
 
-.evolving-points span {
+.evolving-items span {
   color: var(--blue);
   font-family: var(--mono);
   font-size: 0.68rem;
 }
 
-.evolving-points h3 {
+.evolving-items h3 {
   margin: 1.4rem 0 0.65rem;
 }
 
-.evolving-points p {
+.evolving-items p {
   margin: 0;
   color: var(--ink-2);
   font-size: 0.88rem;
@@ -1071,6 +1071,14 @@ th {
   white-space: nowrap;
 }
 
+.bars--leaderboard .bar-row__label {
+  font-size: 0.76rem;
+}
+
+.bars--leaderboard .bar-row__value {
+  font-size: 0.74rem;
+}
+
 .bars--money .bar-row__fill {
   background: #477eac;
 }
@@ -1151,7 +1159,7 @@ th {
 
 .scatter__label {
   fill: var(--model-color, var(--ink-2));
-  font-size: 9px;
+  font-size: 7.5px;
   font-weight: 600;
 }
 
@@ -1431,7 +1439,7 @@ th {
   }
 
   .measure-grid,
-  .evolving-points {
+  .evolving-items {
     grid-template-columns: 1fr;
   }
 
@@ -1442,8 +1450,8 @@ th {
     border-left: 0;
   }
 
-  .evolving-points article,
-  .evolving-points article + article {
+  .evolving-items article,
+  .evolving-items article + article {
     padding: 1.35rem 0;
     border-left: 0;
     border-bottom: 1px solid var(--line);
@@ -1490,7 +1498,7 @@ th {
 
   .scatter__axis-title,
   .scatter__label {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .scatter__tick {

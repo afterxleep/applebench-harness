@@ -5,168 +5,48 @@
       "category": "build",
       "completion_rate": 1,
       "passed": 1,
-      "score": {
-        "active_time_weight": 0.2,
-        "available": 10,
-        "cost_weight": 0.8,
-        "fraction_of_available": 1,
-        "minimum_efficiency": 0.25,
-        "points": 10,
-        "reference_active_time_seconds": 300,
-        "reference_cost_usd": 0.025,
-        "scored_runs": 1,
-        "solves_with_unreported_active_time": 0,
-        "solves_with_unreported_cost": 0,
-        "specification": "points-v3",
-        "unscored_runs": 0
-      },
       "total": 1
     },
     {
       "category": "frameworks",
       "completion_rate": 0.7464788732394366,
       "passed": 53,
-      "score": {
-        "active_time_weight": 0.2,
-        "available": 710,
-        "cost_weight": 0.8,
-        "fraction_of_available": 0.6998622882472822,
-        "minimum_efficiency": 0.25,
-        "points": 496.90222465557036,
-        "reference_active_time_seconds": 300,
-        "reference_cost_usd": 0.025,
-        "scored_runs": 71,
-        "solves_with_unreported_active_time": 0,
-        "solves_with_unreported_cost": 0,
-        "specification": "points-v3",
-        "unscored_runs": 0
-      },
       "total": 71
     },
     {
       "category": "interaction",
       "completion_rate": 0.5555555555555556,
       "passed": 15,
-      "score": {
-        "active_time_weight": 0.2,
-        "available": 270,
-        "cost_weight": 0.8,
-        "fraction_of_available": 0.3225634669840111,
-        "minimum_efficiency": 0.25,
-        "points": 87.092136085683,
-        "reference_active_time_seconds": 300,
-        "reference_cost_usd": 0.025,
-        "scored_runs": 27,
-        "solves_with_unreported_active_time": 0,
-        "solves_with_unreported_cost": 1,
-        "specification": "points-v3",
-        "unscored_runs": 0
-      },
       "total": 27
     },
     {
       "category": "ops",
       "completion_rate": 0.7857142857142857,
       "passed": 22,
-      "score": {
-        "active_time_weight": 0.2,
-        "available": 280,
-        "cost_weight": 0.8,
-        "fraction_of_available": 0.4733578352212236,
-        "minimum_efficiency": 0.25,
-        "points": 132.5401938619426,
-        "reference_active_time_seconds": 300,
-        "reference_cost_usd": 0.025,
-        "scored_runs": 28,
-        "solves_with_unreported_active_time": 0,
-        "solves_with_unreported_cost": 1,
-        "specification": "points-v3",
-        "unscored_runs": 0
-      },
       "total": 28
     },
     {
       "category": "project",
       "completion_rate": 1,
       "passed": 4,
-      "score": {
-        "active_time_weight": 0.2,
-        "available": 40,
-        "cost_weight": 0.8,
-        "fraction_of_available": 0.5444924858931037,
-        "minimum_efficiency": 0.25,
-        "points": 21.779699435724147,
-        "reference_active_time_seconds": 300,
-        "reference_cost_usd": 0.025,
-        "scored_runs": 4,
-        "solves_with_unreported_active_time": 0,
-        "solves_with_unreported_cost": 1,
-        "specification": "points-v3",
-        "unscored_runs": 0
-      },
       "total": 4
     },
     {
       "category": "runtime",
       "completion_rate": 0.8,
       "passed": 4,
-      "score": {
-        "active_time_weight": 0.2,
-        "available": 50,
-        "cost_weight": 0.8,
-        "fraction_of_available": 0.5812839141641252,
-        "minimum_efficiency": 0.25,
-        "points": 29.064195708206256,
-        "reference_active_time_seconds": 300,
-        "reference_cost_usd": 0.025,
-        "scored_runs": 5,
-        "solves_with_unreported_active_time": 0,
-        "solves_with_unreported_cost": 0,
-        "specification": "points-v3",
-        "unscored_runs": 0
-      },
       "total": 5
     },
     {
       "category": "tests",
       "completion_rate": 1,
       "passed": 3,
-      "score": {
-        "active_time_weight": 0.2,
-        "available": 30,
-        "cost_weight": 0.8,
-        "fraction_of_available": 1,
-        "minimum_efficiency": 0.25,
-        "points": 30,
-        "reference_active_time_seconds": 300,
-        "reference_cost_usd": 0.025,
-        "scored_runs": 3,
-        "solves_with_unreported_active_time": 0,
-        "solves_with_unreported_cost": 0,
-        "specification": "points-v3",
-        "unscored_runs": 0
-      },
       "total": 3
     },
     {
       "category": "visual",
       "completion_rate": 0.8888888888888888,
       "passed": 8,
-      "score": {
-        "active_time_weight": 0.2,
-        "available": 90,
-        "cost_weight": 0.8,
-        "fraction_of_available": 0.7097825896172408,
-        "minimum_efficiency": 0.25,
-        "points": 63.88043306555167,
-        "reference_active_time_seconds": 300,
-        "reference_cost_usd": 0.025,
-        "scored_runs": 9,
-        "solves_with_unreported_active_time": 0,
-        "solves_with_unreported_cost": 1,
-        "specification": "points-v3",
-        "unscored_runs": 0
-      },
       "total": 9
     }
   ],
@@ -180,21 +60,6 @@
       "median_duration_seconds": 173.25483987500002,
       "model": "minimax/MiniMax-M3",
       "passed": 110,
-      "score": {
-        "active_time_weight": 0.2,
-        "available": 1480,
-        "cost_weight": 0.8,
-        "fraction_of_available": 0.5886884343328905,
-        "minimum_efficiency": 0.25,
-        "points": 871.258882812678,
-        "reference_active_time_seconds": 300,
-        "reference_cost_usd": 0.025,
-        "scored_runs": 148,
-        "solves_with_unreported_active_time": 0,
-        "solves_with_unreported_cost": 4,
-        "specification": "points-v3",
-        "unscored_runs": 0
-      },
       "total": 148,
       "total_cost_usd": 12.684212160000003,
       "total_tokens": 7997373
@@ -16124,20 +15989,5 @@
       }
     }
   ],
-  "score": {
-    "active_time_weight": 0.2,
-    "available": 1480,
-    "cost_weight": 0.8,
-    "fraction_of_available": 0.5886884343328905,
-    "minimum_efficiency": 0.25,
-    "points": 871.258882812678,
-    "reference_active_time_seconds": 300,
-    "reference_cost_usd": 0.025,
-    "scored_runs": 148,
-    "solves_with_unreported_active_time": 0,
-    "solves_with_unreported_cost": 4,
-    "specification": "points-v3",
-    "unscored_runs": 0
-  },
   "total": 148
 }

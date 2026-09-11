@@ -19,13 +19,12 @@
     ops: 28
   current: true
   summary: >-
-    Five end-to-end composition tasks join the gold suite. Scoring moves to
-    points-v3, where successful-run cost is the dominant efficiency measure
-    and active agent time is a smaller guardrail.
+    Five end-to-end composition tasks join the gold suite. Published results
+    keep capability, list-price cost, and active agent time as separate measures.
   changes:
     - "Five composition tasks exercise complete product workflows across SwiftUI, persistence, networking, media, and UI automation."
     - "Every composition fixture was calibrated fail-then-pass before model results were accepted."
-    - "Points use recorded cost and active agent time instead of token volume; tokens and tool calls remain diagnostic data."
+    - "Pass rate, recorded cost, and active agent time are reported separately; tokens and tool calls remain diagnostic data."
     - "Composition runs default to a 3,600-second wall-clock ceiling and a 1,000,000-token safety ceiling."
 
 - id: "2026-09-09"
@@ -89,8 +88,8 @@
     The graders judge outcomes, not routes. Prompts say what has to be true
     when the work is done and no longer name the tools or the commands;
     nothing in a grader asks which command was run or how many. Two visual
-    tasks join the suite. Scoring moves to points-v2, where every task is
-    worth the same.
+    tasks join the suite. The reporting method was simplified so every task
+    contributed equally to pass rate.
   changes:
     - "Thirty-five operational prompts stop dictating commands and stop fencing off third-party tools, which the harness now denies unconditionally. Naming them was a hint."
     - "Seventeen mutation graders match by pattern rather than by an identifier the agent is free to rename, so a renamed identifier fails the test instead of breaking the grader."

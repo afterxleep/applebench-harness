@@ -29,17 +29,15 @@ description: Published AppleBench runs, with full per-task data and charts.
     {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
     {%- for run in runs -%}
       {%- assign rows = site.data.benchmarks[run.data] -%}
-      {%- assign report = site.data.reports[run.data] -%}
       {%- assign hits = rows | where: "passed", "true" -%}
-      {%- assign points = report.score.points | default: 0 -%}
-      {%- assign available = report.score.available | default: 0 -%}
+      {%- assign rate = hits.size | times: 100.0 | divided_by: rows.size -%}
       <li>
         <a class="entry" href="{{ run.url | relative_url }}">
           <p class="entry__meta">
             <time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time>
             <span>{{ run.suite }} suite</span>
             {%- if rows -%}
-              <span class="entry__score">{{ points | round }}/{{ available }} points</span>
+              <span class="entry__score">{{ rate | round: 1 }}% pass rate</span>
               <span>{{ hits.size }}/{{ rows.size }} passed</span>
             {%- endif -%}
           </p>

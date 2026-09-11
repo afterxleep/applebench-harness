@@ -1,24 +1,20 @@
 ---
-title: "openrouter/deepseek/deepseek-v4-flash-0731, gold suite, 827 points"
+title: "openrouter/deepseek/deepseek-v4-flash-0731, gold suite, 99/148 passed"
 date: 2026-09-09
 suite: gold
 suite_revision: "2026-09-10"
-score_spec: "points-v3"
 attempt: "latest"
 data: deepseek-v4-flash-0731
 model: "openrouter/deepseek/deepseek-v4-flash-0731"
 harness: "opencode, opencode 1.18.20, opencode 1.18.30"
 tasks: 148
 passed: 99
-points: 827
-points_available: 1480
 description: >-
   AppleBench results for openrouter/deepseek/deepseek-v4-flash-0731 on the gold suite:
-  827 of 1480 points and 99 of 148 tasks completed to a
-  verified result, with per-category points, cost against wall-clock time,
+  99 of 148 tasks completed to a verified result (66.9% pass rate),
+  with cost, active time, per-category results,
   and every task.
 ---
-
 ## September 10 composition expansion
 
 DeepSeek completed `composition-001` and `composition-004`, finishing the new

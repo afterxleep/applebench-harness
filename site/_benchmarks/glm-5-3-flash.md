@@ -1,21 +1,18 @@
 ---
-title: "openrouter/z-ai/glm-5.3-flash, gold suite, 1211 points"
+title: "openrouter/z-ai/glm-5.3-flash, gold suite, 127/148 passed"
 date: 2026-09-09
 suite: gold
 suite_revision: "2026-09-10"
-score_spec: "points-v3"
 attempt: "latest"
 data: glm-5-3-flash
 model: "openrouter/z-ai/glm-5.3-flash"
 harness: "opencode, opencode 1.18.20, opencode 1.18.30"
 tasks: 148
 passed: 127
-points: 1211
-points_available: 1480
 description: >-
   AppleBench results for openrouter/z-ai/glm-5.3-flash on the gold suite:
-  1211 of 1480 points and 127 of 148 tasks completed to a
-  verified result, with per-category points, cost against wall-clock time,
+  127 of 148 tasks completed to a verified result (85.8% pass rate),
+  with cost, active time, per-category results,
   and every task.
 ---
 This report uses the latest valid attempt for each task. Four tasks affected by

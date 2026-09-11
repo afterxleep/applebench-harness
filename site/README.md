@@ -83,10 +83,10 @@ fetch, and no chart that depends on JavaScript having run. The only script on
 the site is the theme toggle.
 
 The results index (`benchmarks.html`) compares every run on the current suite
-with four figures: pass rate, points, cost per solved task, and pass rate vs
-total cost. Pass rate is how many tasks finished. Points are those finishes
-after spend. `_includes/chart-leaderboard.html` owns that comparison. Per-run
-pages keep their own category, cost-vs-time, and task-matrix charts.
+with pass rate, cost per verified pass, active time per verified pass, and pass
+rate vs total cost. These stay separate so an authored weighting cannot hide a
+tradeoff. `_includes/chart-leaderboard.html` owns that comparison. Per-run pages
+keep their own category, cost-vs-time, and task-matrix charts.
 
 Series colors come from a CVD-validated categorical palette defined as custom
 properties in `assets/css/main.scss`. Both themes are separately chosen sets,

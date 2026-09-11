@@ -22,6 +22,7 @@ import json
 import pathlib
 import re
 import sys
+import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -78,6 +79,11 @@ def redact(summary: str) -> str:
 def redact_json(path: pathlib.Path) -> int:
     document = json.loads(path.read_text())
     changed = 0
+    if document.pop("score", None) is not None:
+        changed += 1
+    for aggregate in document.get("categories", []) + document.get("configurations", []):
+        if aggregate.pop("score", None) is not None:
+            changed += 1
     for run in document.get("runs", []):
         for grader in run.get("graders", []):
             before = grader.get("summary", "")
@@ -91,11 +97,12 @@ def redact_json(path: pathlib.Path) -> int:
 
 def redact_csv(path: pathlib.Path) -> int:
     with path.open(newline="") as handle:
-        rows = list(csv.DictReader(handle))
-        fields = handle and rows and list(rows[0].keys())
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        fields = [field for field in (reader.fieldnames or []) if field not in {"face_value", "efficiency", "points"}]
     if not rows:
         return 0
-    changed = 0
+    changed = sum(field in (reader.fieldnames or []) for field in {"face_value", "efficiency", "points"})
     for row in rows:
         cell = row.get("grader_summaries") or row.get("graders_detail") or ""
         key = "grader_summaries" if "grader_summaries" in row else ("graders_detail" if "graders_detail" in row else None)
@@ -119,7 +126,7 @@ def redact_csv(path: pathlib.Path) -> int:
     with path.open("w", newline="") as handle:
         writer = csv_writer(handle, fields)
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows({field: row.get(field, "") for field in fields} for row in rows)
     return changed
 
 
@@ -164,6 +171,28 @@ def self_test() -> int:
     if csv_buffer.getvalue() != "value\none\n":
         failures += 1
         print("FAIL\n  published CSV does not use LF line endings")
+
+    with tempfile.TemporaryDirectory() as directory:
+        report = pathlib.Path(directory) / "report.json"
+        report.write_text(json.dumps({
+            "score": 99,
+            "categories": [{"category": "ops", "score": 10}],
+            "configurations": [{"model": "example", "score": 11}],
+            "runs": [],
+        }))
+        redact_json(report)
+        published = json.loads(report.read_text())
+        if "score" in published or "score" in published["categories"][0] or "score" in published["configurations"][0]:
+            failures += 1
+            print("FAIL\n  published JSON still contains legacy score fields")
+
+        table = pathlib.Path(directory) / "table.csv"
+        table.write_text("task,face_value,efficiency,points,passed\nexample,10,0.5,5,true\n")
+        redact_csv(table)
+        published_fields = next(csv.reader(io.StringIO(table.read_text())))
+        if set(published_fields) & {"face_value", "efficiency", "points"}:
+            failures += 1
+            print("FAIL\n  published CSV still contains legacy point columns")
     print("self-test:", "ok" if failures == 0 else f"{failures} failure(s)")
     return 1 if failures else 0
 
@@ -182,7 +211,7 @@ def main() -> int:
         total += redact_json(report)
     if table.exists():
         total += redact_csv(table)
-    print(f"  redacted {total} grader summar{'y' if total == 1 else 'ies'} in the site copies of {slug}")
+    print(f"  sanitized {total} private or legacy field(s) in the site copies of {slug}")
     return 0
 
 
