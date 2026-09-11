@@ -92,8 +92,10 @@ struct AgentSandboxTests {
         )
         let denied = box.deniedReadPaths.map(\.path)
         for expected in [
+            "/h/.applebench",
             "/h/.applebench/solutions", "/h/.applebench/fixtures",
             "/h/.applebench/runs", "/h/.applebench/taskset",
+            "/h/.applebench/verification",
             "/h/Sources/AppleBenchGraders", "/tasks",
         ] {
             #expect(denied.contains(expected), "missing \(expected)")

@@ -244,6 +244,9 @@ public struct AgentSandbox: Sendable {
         runDirectory: URL? = nil
     ) -> AgentSandbox {
         var denied: [URL] = [
+            // Everything the harness cached or measured. Only the current
+            // run is opened back up below, one ancestor at a time.
+            harnessRoot.appendingPathComponent(".applebench"),
             // Reference fixes, applied by the `solution` agent.
             harnessRoot.appendingPathComponent(".applebench/solutions"),
             // The prepared fixtures, which carry `.solution` with them.
@@ -253,6 +256,9 @@ public struct AgentSandbox: Sendable {
             harnessRoot.appendingPathComponent(".applebench/runs"),
             // The task set clone, when it lives inside the harness.
             harnessRoot.appendingPathComponent(".applebench/taskset"),
+            // Prepared grader workspaces contain the withheld tests after
+            // materialisation. Their paths and contents are answer material.
+            harnessRoot.appendingPathComponent(".applebench/verification"),
             // The graders themselves. Knowing exactly what is asserted is
             // most of the way to satisfying it without doing the work.
             harnessRoot.appendingPathComponent("Sources/AppleBenchGraders"),
@@ -304,19 +310,22 @@ public struct AgentSandbox: Sendable {
         let fm = FileManager.default
         for path in deniedReadPaths {
             if let runDirectoryURL,
-               Self.realPath(of: path)
-                == Self.realPath(of: runDirectoryURL.deletingLastPathComponent()) {
-                // Do not deny the common run root and then try to allow the
-                // current run back. Swift's driver reports permissionDenied
-                // when any ancestor of its working directory is blanket
-                // denied, even when a later rule opens the workspace. Hide
-                // the root listing and every sibling path instead, including
-                // siblings created after this profile was written.
+               let allowedChild = Self.childContaining(
+                descendant: runDirectoryURL,
+                beneath: path
+               ) {
+                // Do not blanket-deny an ancestor of the current run. Swift's
+                // driver reports permissionDenied when any ancestor of its
+                // working directory is denied, even when a later rule opens
+                // the workspace. Hide the ancestor listing and every sibling
+                // except the one branch leading to this run. Repeating this
+                // for `.applebench` and `.applebench/runs` leaves no legacy
+                // cache or sibling run visible.
                 for spelling in spellings(of: path) {
                     lines.append("(deny file-read-data (literal \(quote(spelling))))")
                     for pattern in Self.siblingDenialPatterns(
                         root: spelling,
-                        allowedChild: runDirectoryURL.lastPathComponent
+                        allowedChild: allowedChild
                     ) {
                         lines.append("(deny file-read* (regex \(quote(pattern))))")
                     }
@@ -507,6 +516,14 @@ public struct AgentSandbox: Sendable {
         }
         patterns.append("^\(escapedRoot)/\(regexEscape(allowedChild))[^/]+(/|$)")
         return patterns
+    }
+
+    private static func childContaining(descendant: URL, beneath ancestor: URL) -> String? {
+        let ancestorPath = realPath(of: ancestor).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let descendantPath = realPath(of: descendant).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard descendantPath.hasPrefix(ancestorPath + "/") else { return nil }
+        let remainder = descendantPath.dropFirst(ancestorPath.count + 1)
+        return remainder.split(separator: "/", maxSplits: 1).first.map(String.init)
     }
 
     private static func regexEscape(_ value: String) -> String {

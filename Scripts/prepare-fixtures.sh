@@ -14,7 +14,7 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 . "$(dirname "$0")/taskset.sh"
 dest="$root/.applebench/fixtures"
 solutions="$root/.applebench/solutions"
-verification="$root/.applebench/verification"
+verification_manifest="$root/.applebench/verification-fixtures.txt"
 
 if ! command -v xcodegen >/dev/null 2>&1; then
     echo "error: xcodegen is required (brew install xcodegen)" >&2
@@ -34,6 +34,10 @@ else
 fi
 
 mkdir -p "$solutions"
+rm -rf "$root/.applebench/verification"
+manifest_staging="${verification_manifest}.tmp.$$"
+: > "$manifest_staging"
+trap 'rm -f "$manifest_staging"' EXIT
 
 # On a full run, drop snapshots whose fixture no longer exists. A retired
 # fixture otherwise lingers under .applebench/ forever, and the leak check
@@ -44,7 +48,7 @@ if [ "$#" -eq 0 ] && [ -d "$dest" ]; then
         name="$(basename "$snapshot")"
         if [ ! -d "$taskset_fixtures/$name" ]; then
             echo "Removing retired snapshot $name..."
-            rm -rf "$snapshot" "$verification/$name" "$solutions/$name.patch"
+            rm -rf "$snapshot" "$solutions/$name.patch"
         fi
     done
 fi
@@ -92,17 +96,10 @@ for fixture in "${fixtures[@]}"; do
             fi
 
             if [ -n "$withheld" ]; then
-                # Keep the real project and the graded tests outside every
-                # checkout. The runner overlays them back onto the workspace
-                # after the agent has exited and its diff is captured.
-                bundle="$verification/$fixture"
-                rm -rf "$bundle"
-                mkdir -p "$bundle"
-                cp -R "$fixture.xcodeproj" "$bundle/"
-                cp project.yml "$bundle/"
-                for suite in Tests UITests; do
-                    if [ -d "$suite" ]; then cp -R "$suite" "$bundle/"; fi
-                done
+                # Record only the fixture name. The tests remain exclusively
+                # in the sealed task repository until the agent exits; the
+                # runner fetches this exact fixture immediately before grading.
+                printf '%s\n' "$fixture" >> "$manifest_staging"
 
                 # Regenerate the project the agent receives, with no test
                 # target in it at all.
@@ -134,5 +131,10 @@ for fixture in "${fixtures[@]}"; do
     )
 done
 
+sort -u "$manifest_staging" > "$verification_manifest"
+rm -f "$manifest_staging"
+trap - EXIT
+
 echo "Fixtures ready under $dest"
 echo "Solutions ready under $solutions"
+echo "Verification manifest ready at $verification_manifest"

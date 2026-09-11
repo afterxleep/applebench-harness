@@ -75,12 +75,27 @@ enum ReferenceResolver {
 enum Wiring {
     static func makeRunner() -> BenchmarkRunner {
         let processRunner = ProcessRunner()
+        let environment = ProcessInfo.processInfo.environment
+        let verificationSource: VerificationMaterialiser.Source?
+        if let repository = environment["APPLEBENCH_VERIFICATION_REPOSITORY"],
+           let revision = environment["APPLEBENCH_VERIFICATION_REVISION"],
+           let manifest = environment["APPLEBENCH_VERIFICATION_MANIFEST"],
+           let contents = try? String(contentsOfFile: manifest, encoding: .utf8) {
+            verificationSource = .init(
+                repository: repository,
+                revision: revision,
+                fixtures: Set(contents.split(whereSeparator: \.isNewline).map(String.init))
+            )
+        } else {
+            verificationSource = nil
+        }
         return BenchmarkRunner(
             environment: XcodeEnvironment(processRunner: processRunner),
             workspaceManager: WorkspaceManager(processRunner: processRunner),
             simulatorManager: SimulatorManager(processRunner: processRunner),
             processRunner: processRunner,
-            graderRegistry: GraderCatalog.defaultRegistry()
+            graderRegistry: GraderCatalog.defaultRegistry(),
+            verificationMaterialiser: VerificationMaterialiser(source: verificationSource)
         )
     }
 

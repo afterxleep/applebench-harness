@@ -341,6 +341,13 @@ if ! "$(dirname "$0")/prepare-fixtures.sh" >"$out/prepare.log" 2>&1; then
     exit 1
 fi
 
+# The agent never receives a local verification bundle. The runner uses this
+# sealed source only after each agent process exits, fetching the exact task-set
+# revision into a temporary grading checkout that is deleted immediately.
+export APPLEBENCH_VERIFICATION_REPOSITORY="$(git -C "$taskset_root" remote get-url origin)"
+export APPLEBENCH_VERIFICATION_REVISION="$(git -C "$taskset_root" rev-parse HEAD)"
+export APPLEBENCH_VERIFICATION_MANIFEST="$root/.applebench/verification-fixtures.txt"
+
 # Always build, never only when the binary is missing. A machine that pulls a
 # harness change and still has last week's binary runs the old grader against
 # the new tasks, and the failure it produces — "invalid String value uiflow" —
