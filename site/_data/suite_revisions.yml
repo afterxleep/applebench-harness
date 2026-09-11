@@ -3,6 +3,33 @@
 # and results are only comparable within one.
 # The current entry also drives the task totals shown on the homepage.
 
+- id: "2026-09-11"
+  name: "Gold Suite 1.3"
+  version: "1.3"
+  released: "2026-09-11"
+  gold_tasks: 173
+  app_run_tasks: 53
+  public_sample_tasks: 8
+  category_tasks:
+    build: 1
+    tests: 28
+    runtime: 5
+    visual: 9
+    interaction: 27
+    project: 4
+    frameworks: 71
+    ops: 28
+  current: true
+  summary: >-
+    Gold Suite 1.3 adds 25 difficult pure Swift problems covering advanced
+    algorithms, data structures, graphs, strings, geometry, and optimization.
+    Each task has a calibrated reference implementation and a one-hour agent
+    allowance.
+  changes:
+    - "Twenty-five pure Swift capability tasks join the private gold suite."
+    - "Every new task fails unchanged and passes its complete hidden test suite with the reference implementation."
+    - "The new tasks allow up to 3,600 seconds of agent time and use only the Swift standard library."
+
 - id: "2026-09-10"
   name: "Gold Suite 1.2"
   version: "1.2"
@@ -19,7 +46,7 @@
     project: 4
     frameworks: 71
     ops: 28
-  current: true
+  current: false
   summary: >-
     Gold Suite 1.2 adds five end-to-end composition tasks and strengthens
     answer isolation. Withheld tests are fetched from the sealed task repository
