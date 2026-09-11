@@ -21,9 +21,16 @@ public struct VerificationMaterialiser: Sendable {
     }
 
     private let source: Source?
+    private let fetchRetryDelays: [Duration]
 
     public init(source: Source? = nil) {
         self.source = source
+        self.fetchRetryDelays = [.seconds(1), .seconds(2)]
+    }
+
+    init(source: Source?, fetchRetryDelays: [Duration]) {
+        self.source = source
+        self.fetchRetryDelays = fetchRetryDelays
     }
 
     public struct Outcome: Sendable, Equatable {
@@ -54,24 +61,35 @@ public struct VerificationMaterialiser: Sendable {
         try FileManager.default.createDirectory(at: checkout, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: checkout) }
 
-        try await runGit(["init", "--quiet"], in: checkout, using: processRunner, fixture: fixture)
         try await runGit(
-            ["remote", "add", "origin", source.repository],
+            ["init", "--quiet"],
+            stage: "initialise the verification checkout",
             in: checkout,
             using: processRunner,
-            fixture: fixture
+            fixture: fixture,
+            source: source
         )
         try await runGit(
-            ["fetch", "--quiet", "--depth=1", "--filter=blob:none", "origin", source.revision],
+            ["remote", "add", "origin", source.repository],
+            stage: "configure the sealed repository",
+            in: checkout,
+            using: processRunner,
+            fixture: fixture,
+            source: source
+        )
+        try await fetchVerification(
+            source: source,
             in: checkout,
             using: processRunner,
             fixture: fixture
         )
         try await runGit(
             ["checkout", "--quiet", "FETCH_HEAD", "--", "Fixtures/\(fixture)"],
+            stage: "check out the verification fixture",
             in: checkout,
             using: processRunner,
-            fixture: fixture
+            fixture: fixture,
+            source: source
         )
 
         let fetchedFixture = checkout.appendingPathComponent("Fixtures/\(fixture)", isDirectory: true)
@@ -121,24 +139,107 @@ public struct VerificationMaterialiser: Sendable {
 
     private func runGit(
         _ arguments: [String],
+        stage: String,
+        in directory: URL,
+        using processRunner: any ProcessRunning,
+        fixture: String,
+        source: Source
+    ) async throws {
+        let result = try await executeGit(arguments, in: directory, using: processRunner)
+        guard result.succeeded else {
+            throw gitFailure(stage: stage, result: result, fixture: fixture, source: source)
+        }
+    }
+
+    private func fetchVerification(
+        source: Source,
         in directory: URL,
         using processRunner: any ProcessRunning,
         fixture: String
     ) async throws {
-        let result = try await processRunner.run(
+        for attempt in 0...fetchRetryDelays.count {
+            var arguments = ["fetch", "--depth=1"]
+            if attempt == 0 {
+                arguments.append("--filter=blob:none")
+            }
+            arguments.append(contentsOf: ["origin", source.revision])
+
+            let result = try await executeGit(arguments, in: directory, using: processRunner)
+            if result.succeeded { return }
+            guard attempt < fetchRetryDelays.count else {
+                throw gitFailure(
+                    stage: "fetch the sealed verification after \(attempt + 1) attempts",
+                    result: result,
+                    fixture: fixture,
+                    source: source
+                )
+            }
+            try await Task.sleep(for: fetchRetryDelays[attempt])
+        }
+    }
+
+    private func executeGit(
+        _ arguments: [String],
+        in directory: URL,
+        using processRunner: any ProcessRunning
+    ) async throws -> ProcessExecutionResult {
+        var environment = ProcessInfo.processInfo.environment
+        environment["GIT_TERMINAL_PROMPT"] = "0"
+        return try await processRunner.run(
             ProcessCommand(
                 executable: "/usr/bin/git",
                 arguments: arguments,
-                workingDirectory: directory
+                workingDirectory: directory,
+                environment: environment
             ),
             timeout: .seconds(300)
         )
-        guard result.exitCode == 0 else {
-            throw BenchmarkFailure.graderFailure(
-                grader: "verification",
-                message: "Could not fetch sealed verification for \(fixture): \(result.standardError)"
-            )
+    }
+
+    private func gitFailure(
+        stage: String,
+        result: ProcessExecutionResult,
+        fixture: String,
+        source: Source
+    ) -> BenchmarkFailure {
+        let termination: String
+        if result.timedOut {
+            termination = "timed out"
+        } else if let exitCode = result.exitCode {
+            termination = "exit code \(exitCode)"
+        } else if let signal = result.terminationSignal {
+            termination = "signal \(signal)"
+        } else {
+            termination = "unknown termination"
         }
+
+        let combinedOutput = [result.standardError, result.standardOutput]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n")
+        let diagnostic = combinedOutput.isEmpty
+            ? "Git produced no diagnostic output."
+            : Self.redactedDiagnostic(combinedOutput, repository: source.repository)
+
+        return BenchmarkFailure.graderFailure(
+            grader: "verification",
+            message: "Could not \(stage) for \(fixture) (\(termination)). \(diagnostic)"
+        )
+    }
+
+    private static func redactedDiagnostic(_ diagnostic: String, repository: String) -> String {
+        let withoutRepository = diagnostic.replacingOccurrences(
+            of: repository,
+            with: "[sealed repository]"
+        )
+        let pattern = #"(?i)(https?://)[^/@\s]+@"#
+        let range = NSRange(withoutRepository.startIndex..., in: withoutRepository)
+        let redacted = (try? NSRegularExpression(pattern: pattern))?.stringByReplacingMatches(
+            in: withoutRepository,
+            range: range,
+            withTemplate: "$1[redacted]@"
+        ) ?? withoutRepository
+        return String(redacted.prefix(2_000))
     }
 
     public static func fixtureName(for task: BenchmarkTask) -> String {
