@@ -46,7 +46,7 @@ window in English, so the model failure is retained.
 |---|---|
 | Public sample tasks | `build-002`, `ops-004`, `project-001`, `runtime-002`, `tests-003`, `visual-002`. They ship with the open harness and are not included in published measurements. |
 | `ops-027` | Rerun after Screen Recording permission was granted. The model produced a valid 5120×2880 PNG and passed both trajectory and file grading. |
-| Cost coverage | `ops-003` is a failed task with no recoverable list-price telemetry, so the recorded suite-cost total excludes that attempt rather than treating it as free. |
+| Cost coverage | Complete for all 173 tasks. The timed-out `ops-003` run was recovered from 215 usage events preserved identically in its event stream and raw agent log, then priced from the pinned model-owner rates used for every other task. |
 
 ## September 10 composition expansion
 

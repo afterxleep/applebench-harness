@@ -175,7 +175,7 @@
     {
       "agent" : "opencode",
       "completion_rate" : 0.5260115606936416,
-      "cost_per_solved_task_usd" : 0.08456487725274724,
+      "cost_per_solved_task_usd" : 0.1020678585164835,
       "label" : "opencode · minimax/MiniMax-M2.7",
       "median_duration_seconds" : 157.788295166,
       "model" : "minimax/MiniMax-M2.7",
@@ -196,25 +196,25 @@
         "unscored_runs" : 0
       },
       "total" : 173,
-      "total_cost_usd" : 7.695403829999998,
-      "total_tokens" : 3120872
+      "total_cost_usd" : 9.288175124999999,
+      "total_tokens" : 3260834
     }
   ],
   "passed" : 91,
   "reasoning" : [
     {
       "at_maximum_effort" : false,
-      "cache_read_tokens" : 60052573,
-      "cache_write_tokens" : 5010286,
+      "cache_read_tokens" : 83058380,
+      "cache_write_tokens" : 5257391,
       "effort" : null,
-      "input_tokens" : 1701838,
-      "list_cost_usd" : 4.66279818,
+      "input_tokens" : 1755389,
+      "list_cost_usd" : 6.081593100000001,
       "maximum_effort" : null,
       "model" : "minimax/MiniMax-M2.7",
-      "output_tokens" : 457577,
+      "output_tokens" : 476228,
       "price_retrieved" : "2026-09-03",
       "price_source" : "https://models.dev/api.json",
-      "reported_cost_usd" : 7.695403829999998,
+      "reported_cost_usd" : 9.288175124999999,
       "runs" : 173
     }
   ],
@@ -7750,7 +7750,12 @@
       ],
       "task" : "ops-003",
       "usage" : {
-
+        "cache_read_tokens" : 23005807,
+        "cache_write_tokens" : 247105,
+        "estimated_cost_usd" : 1.592771295,
+        "input_tokens" : 53551,
+        "output_tokens" : 18651,
+        "total_tokens" : 139962
       }
     },
     {
