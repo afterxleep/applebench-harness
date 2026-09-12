@@ -24,24 +24,24 @@
     },
     {
       "category" : "frameworks",
-      "completion_rate" : 0.7857142857142857,
-      "passed" : 55,
+      "completion_rate" : 0.7887323943661971,
+      "passed" : 56,
       "score" : {
         "active_time_weight" : 0.2,
-        "available" : 700,
+        "available" : 710,
         "cost_weight" : 0.8,
-        "fraction_of_available" : 0.7788744775261343,
+        "fraction_of_available" : 0.7819889215046394,
         "minimum_efficiency" : 0.25,
-        "points" : 545.212134268294,
+        "points" : 555.212134268294,
         "reference_active_time_seconds" : 300,
         "reference_cost_usd" : 0.025,
-        "scored_runs" : 70,
+        "scored_runs" : 71,
         "solves_with_unreported_active_time" : 0,
         "solves_with_unreported_cost" : 0,
         "specification" : "points-v3",
         "unscored_runs" : 0
       },
-      "total" : 70
+      "total" : 71
     },
     {
       "category" : "interaction",
@@ -170,52 +170,52 @@
       "total" : 9
     }
   ],
-  "completion_rate" : 0.7687074829931972,
+  "completion_rate" : 0.7702702702702703,
   "configurations" : [
     {
       "agent" : "opencode",
-      "completion_rate" : 0.7687074829931972,
+      "completion_rate" : 0.7702702702702703,
       "cost_per_solved_task_usd" : 0,
       "label" : "opencode · openai/gpt-5.6-luna",
-      "median_duration_seconds" : 260.262122791,
+      "median_duration_seconds" : 259.0907776455,
       "model" : "openai/gpt-5.6-luna",
-      "passed" : 113,
+      "passed" : 114,
       "score" : {
         "active_time_weight" : 0.2,
-        "available" : 1470,
+        "available" : 1480,
         "cost_weight" : 0.8,
-        "fraction_of_available" : 0.7534186937279603,
+        "fraction_of_available" : 0.7550847836352038,
         "minimum_efficiency" : 0.25,
-        "points" : 1107.5254797801017,
+        "points" : 1117.5254797801017,
         "reference_active_time_seconds" : 300,
         "reference_cost_usd" : 0.025,
-        "scored_runs" : 147,
+        "scored_runs" : 148,
         "solves_with_unreported_active_time" : 0,
         "solves_with_unreported_cost" : 0,
         "specification" : "points-v3",
         "unscored_runs" : 0
       },
-      "total" : 147,
+      "total" : 148,
       "total_cost_usd" : 0,
-      "total_tokens" : 11476185
+      "total_tokens" : 11543661
     }
   ],
-  "passed" : 113,
+  "passed" : 114,
   "reasoning" : [
     {
       "at_maximum_effort" : true,
-      "cache_read_tokens" : 82981888,
+      "cache_read_tokens" : 83193344,
       "cache_write_tokens" : 0,
       "effort" : "max",
-      "input_tokens" : 10127331,
-      "list_cost_usd" : 4.317988760000001,
+      "input_tokens" : 10189076,
+      "list_cost_usd" : 4.337989280000001,
       "maximum_effort" : "max",
       "model" : "openai/gpt-5.6-luna",
-      "output_tokens" : 527404,
+      "output_tokens" : 530256,
       "price_retrieved" : "2026-09-03",
       "price_source" : "https://models.dev/api.json",
       "reported_cost_usd" : 0,
-      "runs" : 147
+      "runs" : 148
     }
   ],
   "runs" : [
@@ -6919,6 +6919,111 @@
         "input_tokens" : 32877,
         "output_tokens" : 1280,
         "total_tokens" : 35725
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "effort" : "max",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "openai/gpt-5.6-luna",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "frameworks",
+      "difficulty" : 4,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "7c25e6e3669692f49196da891d0babf4a82021b5",
+        "deletions" : 0,
+        "files_changed" : 1,
+        "insertions" : 1
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 5.124586709,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'Networking004Fixture'"
+        },
+        {
+          "duration_seconds" : 16.8364925,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : true,
+          "summary" : "2 executed, 2 passed, 0 failed, 0 skipped"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 148.80858492851257,
+        "agent_events" : 72,
+        "agent_output_bytes" : 181785,
+        "agent_output_chunks" : 73,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 22.26561200618744,
+        "test_invocations" : 1,
+        "tool_calls" : 32,
+        "total_events" : 172
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 179.647759708,
+        "passed" : true
+      },
+      "run_id" : "2026-09-12T153925-networking-004-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "urlsession",
+        "jsondecoder",
+        "dates"
+      ],
+      "task" : "networking-004",
+      "usage" : {
+        "cache_read_tokens" : 211456,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0,
+        "input_tokens" : 61745,
+        "output_tokens" : 2852,
+        "total_tokens" : 67476
       }
     },
     {
@@ -16471,18 +16576,18 @@
   ],
   "score" : {
     "active_time_weight" : 0.2,
-    "available" : 1470,
+    "available" : 1480,
     "cost_weight" : 0.8,
-    "fraction_of_available" : 0.7534186937279603,
+    "fraction_of_available" : 0.7550847836352038,
     "minimum_efficiency" : 0.25,
-    "points" : 1107.5254797801017,
+    "points" : 1117.5254797801017,
     "reference_active_time_seconds" : 300,
     "reference_cost_usd" : 0.025,
-    "scored_runs" : 147,
+    "scored_runs" : 148,
     "solves_with_unreported_active_time" : 0,
     "solves_with_unreported_cost" : 0,
     "specification" : "points-v3",
     "unscored_runs" : 0
   },
-  "total" : 147
+  "total" : 148
 }
