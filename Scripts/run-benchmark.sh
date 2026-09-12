@@ -22,8 +22,8 @@
 #   -e, --effort <level>    Reasoning effort, forwarded to OpenCode as the
 #                           model variant. Valid levels are per-provider
 #                           (minimal, low, medium, high, max), so the value
-#                           is passed through rather than validated. Recorded
-#                           on the run, since effort changes the number.
+#                           is passed through rather than validated. Effort
+#                           defaults to max and is recorded on the run.
 #       --max-tokens <n>    Stop a task once it has spent this many tokens
 #                           (default: 1000000).
 #                           The wall clock is a poor proxy for spend: a model
@@ -69,9 +69,8 @@
 #                           on the machine and lands in your shell history.
 #       --api-key-env <n>   Override the inferred provider key variable.
 #       --allow-env <NAME>  Expose an environment variable to the agent
-#                           (repeatable). Needed for an API key when
-#                           --strip-wrapper-clis is on, because that mode
-#                           gives the agent a hermetic HOME and any
+#                           (repeatable). Wrapper CLI stripping is always
+#                           enforced, which gives the agent a hermetic HOME;
 #                           credentials stored under the real one go with it.
 #       --vm <image>        Run the agent inside a Tart VM instead of on this
 #                           host. Egress is denied at the network layer, the
@@ -110,6 +109,10 @@ provider_key_environment_variable() {
     esac
 }
 
+publishable_suite_status() {
+    [ "$1" -eq 0 ] || [ "$1" -eq 1 ]
+}
+
 # The whole script is one function, called on the last line. Bash reads a
 # script as it runs it, so editing this file while a suite is mid-flight
 # shifts what the running copy reads next: one such edit made a run skip
@@ -125,7 +128,7 @@ pending_mode=""
 publish=""
 agent="opencode"
 model=""
-effort=""
+effort="max"
 max_tokens=""
 timeout_cap=""
 agent_arg=()
@@ -456,9 +459,9 @@ echo "  $log"
 # Exit code 3 means the suite stopped because the agent never reached its
 # model. Publishing then would rewrite the model's page from whatever runs
 # happened to be in the tree already, and report a score nothing just earned.
-if [ "$suite_status" -eq 3 ]; then
+if ! publishable_suite_status "$suite_status"; then
     echo
-    echo "Not publishing: the suite stopped before it measured anything." >&2
+    echo "Not publishing: the benchmark invocation did not produce a resumable suite result." >&2
 elif [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" != "no" ]; }; then
     if [ -z "$model" ]; then
         echo "note: --publish needs --model to know which report to rewrite; skipping." >&2
@@ -468,6 +471,13 @@ elif [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" 
         for file in "$taskset_suites"/gold*.yaml; do
             [ -e "$file" ] && suite_args+=(--suite-file "$file")
         done
+        base_args=()
+        published_report="$root/Reports/$slug.json"
+        if [ -f "$published_report" ]; then
+            base_report="$out/base-report.json"
+            cp "$published_report" "$base_report"
+            base_args+=(--base-report "$base_report")
+        fi
         echo
         echo "Publishing $slug from ${runs_dir}..."
         # Latest, not first. `first` is the honest rule when the same task is
@@ -477,7 +487,9 @@ elif [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" 
         # model against tasks it was never asked to solve, and would silently
         # discard everything `--changed` just spent an hour running.
         "$root/Scripts/publish-report.sh" "$slug" "$runs_dir" gold \
-            --attempt latest --model "$model" "${suite_args[@]+"${suite_args[@]}"}" \
+            --attempt latest --model "$model" \
+            "${base_args[@]+"${base_args[@]}"}" \
+            "${suite_args[@]+"${suite_args[@]}"}" \
             || echo "note: publish failed; the run itself is intact in $out" >&2
     fi
 fi

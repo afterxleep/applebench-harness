@@ -48,6 +48,26 @@ struct BenchmarkScriptTests {
         #expect(process.terminationStatus == 0)
         #expect(text.contains("--api-key-file"))
         #expect(text.contains("--api-key-env"))
+        #expect(text.contains("defaults to max"))
+        #expect(text.contains("Wrapper CLI stripping is always"))
+    }
+
+    @Test("Only successful and resumable suite exits may publish")
+    func publishableSuiteStatuses() throws {
+        let repository = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let script = repository.appendingPathComponent("Scripts/run-benchmark.sh").path
+
+        for (status, expected) in [(0, 0), (1, 0), (2, 1), (3, 1), (64, 1)] {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/bin/bash")
+            process.arguments = ["-c", "source \"$1\"; publishable_suite_status \"$2\"", "test", script, "\(status)"]
+            try process.run()
+            process.waitUntilExit()
+            #expect(process.terminationStatus == Int32(expected))
+        }
     }
 
     @Test("Changed selection prefers the complete published model report")
