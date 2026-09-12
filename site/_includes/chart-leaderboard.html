@@ -112,7 +112,7 @@ Params: runs (site.benchmarks).
       {%- assign parts = packed | split: "|" -%}
       {%- assign bar_value = parts[4] -%}
       {%- assign bar_total = parts[5] -%}
-      {%- capture bar_label %}{{ parts[1] }} · {{ parts[10] }} · {{ parts[5] }} tasks{% endcapture -%}
+      {%- capture bar_label %}{{ parts[1] }} {{ parts[10] }}{% endcapture -%}
       {%- capture bar_printed %}{{ parts[4] }}/{{ parts[5] }}{% endcapture -%}
       {%- assign bar_link = parts[6] | relative_url -%}
       {%- include bar-row.html
@@ -145,7 +145,7 @@ Params: runs (site.benchmarks).
             {%- break -%}
           {%- endif -%}
         {%- endfor -%}
-        {%- capture pending_label %}{{ pending_name }} · {{ pending_effort }} · {{ pending_rows.size }} tasks{% endcapture -%}
+        {%- capture pending_label %}{{ pending_name }} {{ pending_effort }}{% endcapture -%}
         {%- capture pending_printed %}{{ pending_hits.size }}/{{ pending_rows.size }}{% endcapture -%}
         {%- assign pending_link = run.url | relative_url -%}
         {%- include bar-row.html
@@ -205,7 +205,7 @@ Params: runs (site.benchmarks).
       {%- assign active_per_pass = parts[3] | times: 1.0 -%}
       {%- assign bar_value = active_per_pass -%}
       {%- assign bar_total = max_active_per_solve -%}
-      {%- capture bar_label %}{{ parts[1] }} · {{ parts[10] }} · {{ parts[4] }} passes{% endcapture -%}
+      {%- capture bar_label %}{{ parts[1] }} {{ parts[10] }}{% endcapture -%}
       {%- capture bar_printed %}{{ active_per_pass | divided_by: 60 | round: 1 }}m / pass{% endcapture -%}
       {%- assign bar_link = parts[6] | relative_url -%}
       {%- assign hide_percent = true -%}
@@ -268,7 +268,7 @@ Params: runs (site.benchmarks).
       {%- assign solve_cost = parts[8] | times: 1.0 -%}
       {%- assign bar_value = solve_cost -%}
       {%- assign bar_total = max_solve_cost -%}
-      {%- capture bar_label %}{{ parts[1] }} · {{ parts[10] }} · {{ parts[4] }} passes{% endcapture -%}
+      {%- capture bar_label %}{{ parts[1] }} {{ parts[10] }}{% endcapture -%}
       {%- capture bar_printed -%}{% include money.html value=solve_cost places=3 %} / pass{%- endcapture -%}
       {%- assign bar_link = parts[6] | relative_url -%}
       {%- assign hide_percent = true -%}
@@ -334,7 +334,7 @@ Params: runs (site.benchmarks).
       {%- assign idx = forloop.index0 | modulo: 8 -%}
       <li>
         <span class="legend__swatch" style="--swatch: var(--{{ series_names[idx] }})"></span>
-        {{ parts[0] }} · {{ parts[9] }}
+        {{ parts[0] }} {{ parts[9] }}
       </li>
     {%- endfor -%}
   </ul>
@@ -387,7 +387,7 @@ Params: runs (site.benchmarks).
       {%- endif -%}
       <circle class="scatter__dot" cx="{{ px }}" cy="{{ py }}" r="4.5"
               style="fill:var(--{{ series_names[idx] }})">
-        <title>{{ parts[0] }} · {{ parts[9] }} · {{ rate | round: 1 }}% · {% include money.html value=list_cost %}</title>
+        <title>{{ parts[0] }} {{ parts[9] }} · {{ rate | round: 1 }}% · {% include money.html value=list_cost %}</title>
       </circle>
       <text class="scatter__label" x="{{ label_x }}" y="{{ py | plus: 3 }}"
             text-anchor="{{ label_anchor }}"

@@ -1142,6 +1142,8 @@ th {
 
 .bars--leaderboard .bar-row__label {
   font-size: 0.76rem;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .bars--leaderboard .bar-row__value {
