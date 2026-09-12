@@ -24,24 +24,24 @@
     },
     {
       "category" : "frameworks",
-      "completion_rate" : 0.7887323943661971,
-      "passed" : 56,
+      "completion_rate" : 0.7857142857142857,
+      "passed" : 55,
       "score" : {
         "active_time_weight" : 0.2,
-        "available" : 710,
+        "available" : 700,
         "cost_weight" : 0.8,
-        "fraction_of_available" : 0.7819889215046394,
+        "fraction_of_available" : 0.7788744775261343,
         "minimum_efficiency" : 0.25,
-        "points" : 555.212134268294,
+        "points" : 545.212134268294,
         "reference_active_time_seconds" : 300,
         "reference_cost_usd" : 0.025,
-        "scored_runs" : 71,
+        "scored_runs" : 70,
         "solves_with_unreported_active_time" : 0,
         "solves_with_unreported_cost" : 0,
         "specification" : "points-v3",
         "unscored_runs" : 0
       },
-      "total" : 71
+      "total" : 70
     },
     {
       "category" : "interaction",
@@ -170,52 +170,52 @@
       "total" : 9
     }
   ],
-  "completion_rate" : 0.7702702702702703,
+  "completion_rate" : 0.7687074829931972,
   "configurations" : [
     {
       "agent" : "opencode",
-      "completion_rate" : 0.7702702702702703,
+      "completion_rate" : 0.7687074829931972,
       "cost_per_solved_task_usd" : 0,
       "label" : "opencode · openai/gpt-5.6-luna",
-      "median_duration_seconds" : 259.0907776455,
+      "median_duration_seconds" : 260.262122791,
       "model" : "openai/gpt-5.6-luna",
-      "passed" : 114,
+      "passed" : 113,
       "score" : {
         "active_time_weight" : 0.2,
-        "available" : 1480,
+        "available" : 1470,
         "cost_weight" : 0.8,
-        "fraction_of_available" : 0.7550847836352038,
+        "fraction_of_available" : 0.7534186937279603,
         "minimum_efficiency" : 0.25,
-        "points" : 1117.5254797801017,
+        "points" : 1107.5254797801017,
         "reference_active_time_seconds" : 300,
         "reference_cost_usd" : 0.025,
-        "scored_runs" : 148,
+        "scored_runs" : 147,
         "solves_with_unreported_active_time" : 0,
         "solves_with_unreported_cost" : 0,
         "specification" : "points-v3",
         "unscored_runs" : 0
       },
-      "total" : 148,
+      "total" : 147,
       "total_cost_usd" : 0,
-      "total_tokens" : 11312087
+      "total_tokens" : 11476185
     }
   ],
-  "passed" : 114,
+  "passed" : 113,
   "reasoning" : [
     {
       "at_maximum_effort" : true,
-      "cache_read_tokens" : 75387904,
+      "cache_read_tokens" : 82981888,
       "cache_write_tokens" : 0,
       "effort" : "max",
-      "input_tokens" : 9999769,
-      "list_cost_usd" : 4.123585480000002,
+      "input_tokens" : 10127331,
+      "list_cost_usd" : 4.317988760000001,
       "maximum_effort" : "max",
       "model" : "openai/gpt-5.6-luna",
-      "output_tokens" : 513228,
+      "output_tokens" : 527404,
       "price_retrieved" : "2026-09-03",
       "price_source" : "https://models.dev/api.json",
       "reported_cost_usd" : 0,
-      "runs" : 148
+      "runs" : 147
     }
   ],
   "runs" : [
@@ -1178,9 +1178,17 @@
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-          "effort" : "max"
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "effort" : "max",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
         },
-        "model" : "openai/gpt-5.6-luna"
+        "model" : "openai/gpt-5.6-luna",
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -1191,21 +1199,21 @@
       "difficulty" : 9,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "8894bc65ec1bf425de71090e4609fd60eabc29ab",
-        "deletions" : 67,
+        "base_commit" : "8ec9c16214f8404a7975eb11e9c8b6a3627d90ef",
+        "deletions" : 68,
         "files_changed" : 5,
-        "insertions" : 807
+        "insertions" : 890
       },
       "graders" : [
         {
-          "duration_seconds" : 41.464929917,
+          "duration_seconds" : 12.415510542,
           "evidence" : [
             {
               "name" : "build.log",
@@ -1221,7 +1229,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'ExpenseLedgerFixture'"
         },
         {
-          "duration_seconds" : 63.297129666000004,
+          "duration_seconds" : 18.518724875,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -1234,10 +1242,10 @@
           ],
           "name" : "xctest",
           "passed" : false,
-          "summary" : "7 executed, 6 passed, 1 failed, 0 skipped. Failing: ExpenseLedgerJourneysTests/testMalformedCSVAndInvalidEuroValuesCannotEnterTheLedger()"
+          "summary" : "7 executed, 5 passed, 2 failed, 0 skipped. Failing: ExpenseLedgerJourneysTests/testFiltersChartSummaryAndExportDescribeTheSameVisibleExpenses(), ExpenseLedgerJourneysTests/testMalformedCSVAndInvalidEuroValuesCannotEnterTheLedger()"
         },
         {
-          "duration_seconds" : 117.263241917,
+          "duration_seconds" : 69.420826083,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -1254,23 +1262,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 1263.4530220031738,
-        "agent_events" : 141,
-        "agent_output_bytes" : 667005,
-        "agent_output_chunks" : 141,
+        "agent_duration_seconds" : 1457.1822320222855,
+        "agent_events" : 180,
+        "agent_output_bytes" : 1213485,
+        "agent_output_chunks" : 187,
         "build_invocations" : 1,
         "commands_executed" : 6,
-        "grading_duration_seconds" : 284.65739595890045,
+        "grading_duration_seconds" : 130.32461202144623,
         "test_invocations" : 2,
-        "tool_calls" : 60,
-        "total_events" : 320
+        "tool_calls" : 78,
+        "total_events" : 405
       },
       "result" : {
-        "agent_termination" : "timeout",
-        "duration_seconds" : 1549.484757542,
+        "agent_termination" : "completed",
+        "duration_seconds" : 1604.15090575,
         "passed" : false
       },
-      "run_id" : "2026-09-11T041055-composition-002-opencode",
+      "run_id" : "2026-09-12T083315-composition-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "composition",
@@ -1282,12 +1290,12 @@
       ],
       "task" : "composition-002",
       "usage" : {
-        "cache_read_tokens" : 2142720,
+        "cache_read_tokens" : 4802560,
         "cache_write_tokens" : 0,
         "estimated_cost_usd" : 0,
-        "input_tokens" : 253692,
-        "output_tokens" : 17440,
-        "total_tokens" : 296027
+        "input_tokens" : 223638,
+        "output_tokens" : 20986,
+        "total_tokens" : 289221
       }
     },
     {
@@ -1420,7 +1428,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "openai/gpt-5.6-luna",
-        "version" : "1.18.20"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -1431,21 +1439,21 @@
       "difficulty" : 9,
       "environment" : {
         "architecture" : "arm64",
-        "macos" : "26.6.2",
+        "macos" : "27.0",
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
-        "xcode" : "26.5",
-        "xcode_build" : "17F42"
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "8917afd82fdce17ea925b31086521c074d7eefae",
+        "base_commit" : "75dc3442edbfd56eb3a6917c8cebd5100824579e",
         "deletions" : 24,
-        "files_changed" : 3,
-        "insertions" : 549
+        "files_changed" : 6,
+        "insertions" : 906
       },
       "graders" : [
         {
-          "duration_seconds" : 36.287505459,
+          "duration_seconds" : 14.9464785,
           "evidence" : [
             {
               "name" : "build.log",
@@ -1461,7 +1469,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'AudioLessonsFixture'"
         },
         {
-          "duration_seconds" : 269.98598875,
+          "duration_seconds" : 20.103617458,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -1473,11 +1481,11 @@
             }
           ],
           "name" : "xctest",
-          "passed" : true,
-          "summary" : "12 executed, 12 passed, 0 failed, 0 skipped"
+          "passed" : false,
+          "summary" : "12 executed, 11 passed, 1 failed, 0 skipped. Failing: AudioPlaybackContractTests/testFavoritesQueueAndMissingMediaExposeRecoverableState()"
         },
         {
-          "duration_seconds" : 660.437430167,
+          "duration_seconds" : 37.82101775,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -1490,27 +1498,27 @@
           ],
           "name" : "xcuitest",
           "passed" : false,
-          "summary" : "3 executed, 0 passed, 3 failed, 0 skipped. Failing: AudioLessonsScreenTests/testQueueReorderRemovalAndFavoritesPreserveTheSelectedLesson(), AudioLessonsScreenTests/testRelaunchRestoresSavedLessonAndSeekPosition(), AudioLessonsScreenTests/testSelectsAndPausesALesson()"
+          "summary" : "3 executed, 1 passed, 2 failed, 0 skipped. Failing: AudioLessonsScreenTests/testQueueReorderRemovalAndFavoritesPreserveTheSelectedLesson(), AudioLessonsScreenTests/testRelaunchRestoresSavedLessonAndSeekPosition()"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 1096.6582421064377,
-        "agent_events" : 175,
-        "agent_output_bytes" : 651608,
-        "agent_output_chunks" : 175,
+        "agent_duration_seconds" : 1520.8199009895325,
+        "agent_events" : 256,
+        "agent_output_bytes" : 1908516,
+        "agent_output_chunks" : 269,
         "build_invocations" : 1,
         "commands_executed" : 6,
-        "grading_duration_seconds" : 1044.6628979444504,
+        "grading_duration_seconds" : 126.97967100143433,
         "test_invocations" : 2,
-        "tool_calls" : 69,
-        "total_events" : 386
+        "tool_calls" : 101,
+        "total_events" : 564
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 2142.665026458,
+        "duration_seconds" : 1664.058282209,
         "passed" : false
       },
-      "run_id" : "2026-09-11T050414-composition-004-opencode",
+      "run_id" : "2026-09-12T090004-composition-004-opencode",
       "schema_version" : 1,
       "tags" : [
         "composition",
@@ -1520,12 +1528,12 @@
       ],
       "task" : "composition-004",
       "usage" : {
-        "cache_read_tokens" : 3565568,
+        "cache_read_tokens" : 8882688,
         "cache_write_tokens" : 0,
         "estimated_cost_usd" : 0,
-        "input_tokens" : 145479,
-        "output_tokens" : 14385,
-        "total_tokens" : 195762
+        "input_tokens" : 405671,
+        "output_tokens" : 28428,
+        "total_tokens" : 475483
       }
     },
     {
@@ -6911,111 +6919,6 @@
         "input_tokens" : 32877,
         "output_tokens" : 1280,
         "total_tokens" : 35725
-      }
-    },
-    {
-      "agent" : {
-        "agent" : "opencode",
-        "configuration" : {
-          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
-          "effort" : "max",
-          "isolation" : "none (host process)",
-          "mode" : "run --format json --pure --auto",
-          "network" : "unrestricted (host egress; --vm denies it)",
-          "plugins" : "disabled (--pure)",
-          "user_config" : "ignored (OPENCODE_CONFIG)",
-          "web_access" : "disabled (webfetch denied)"
-        },
-        "model" : "openai/gpt-5.6-luna",
-        "version" : "1.18.30"
-      },
-      "artifacts" : {
-        "diff" : "diff.patch",
-        "events" : "events.jsonl",
-        "logs" : "logs"
-      },
-      "category" : "frameworks",
-      "difficulty" : 4,
-      "environment" : {
-        "architecture" : "arm64",
-        "macos" : "27.0",
-        "runtime" : "iOS 26.5",
-        "simulator" : "iPhone 17",
-        "xcode" : "27.0",
-        "xcode_build" : "27A266a"
-      },
-      "git" : {
-        "base_commit" : "48882775d53dd2bfef9d0426e94214ab571d2d6f",
-        "deletions" : 0,
-        "files_changed" : 1,
-        "insertions" : 1
-      },
-      "graders" : [
-        {
-          "duration_seconds" : 6.082664459,
-          "evidence" : [
-            {
-              "name" : "build.log",
-              "path" : "logs/build.log"
-            },
-            {
-              "name" : "build.xcresult",
-              "path" : "logs/build.xcresult"
-            }
-          ],
-          "name" : "build",
-          "passed" : true,
-          "summary" : "xcodebuild build succeeded for scheme 'Networking004Fixture'"
-        },
-        {
-          "duration_seconds" : 20.582690167,
-          "evidence" : [
-            {
-              "name" : "xctest.log",
-              "path" : "logs/xctest.log"
-            },
-            {
-              "name" : "xctest.xcresult",
-              "path" : "logs/xctest.xcresult"
-            }
-          ],
-          "name" : "xctest",
-          "passed" : true,
-          "summary" : "2 executed, 2 passed, 0 failed, 0 skipped"
-        }
-      ],
-      "metrics" : {
-        "agent_duration_seconds" : 166.9503129720688,
-        "agent_events" : 87,
-        "agent_output_bytes" : 296163,
-        "agent_output_chunks" : 88,
-        "build_invocations" : 1,
-        "commands_executed" : 4,
-        "grading_duration_seconds" : 26.997658014297485,
-        "test_invocations" : 1,
-        "tool_calls" : 46,
-        "total_events" : 202
-      },
-      "result" : {
-        "agent_termination" : "completed",
-        "duration_seconds" : 194.451008459,
-        "passed" : true
-      },
-      "run_id" : "2026-09-11T062219-networking-004-opencode",
-      "schema_version" : 1,
-      "tags" : [
-        "urlsession",
-        "jsondecoder",
-        "dates"
-      ],
-      "task" : "networking-004",
-      "usage" : {
-        "cache_read_tokens" : 382976,
-        "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0,
-        "input_tokens" : 102576,
-        "output_tokens" : 3413,
-        "total_tokens" : 108817
       }
     },
     {
@@ -16568,18 +16471,18 @@
   ],
   "score" : {
     "active_time_weight" : 0.2,
-    "available" : 1480,
+    "available" : 1470,
     "cost_weight" : 0.8,
-    "fraction_of_available" : 0.7550847836352038,
+    "fraction_of_available" : 0.7534186937279603,
     "minimum_efficiency" : 0.25,
-    "points" : 1117.5254797801017,
+    "points" : 1107.5254797801017,
     "reference_active_time_seconds" : 300,
     "reference_cost_usd" : 0.025,
-    "scored_runs" : 148,
+    "scored_runs" : 147,
     "solves_with_unreported_active_time" : 0,
     "solves_with_unreported_cost" : 0,
     "specification" : "points-v3",
     "unscored_runs" : 0
   },
-  "total" : 148
+  "total" : 147
 }

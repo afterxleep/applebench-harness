@@ -1,17 +1,17 @@
 ---
-title: "minimax/MiniMax-M2.7, Gold Suite 1.3, 91/173 passed"
+title: "minimax/MiniMax-M2.7, Gold Suite 1.2, 90/148 passed"
 date: 2026-09-06
 suite: gold
-suite_revision: "2026-09-11"
+suite_revision: "2026-09-10"
 attempt: "latest"
 data: minimax-m2-7
 model: "minimax/MiniMax-M2.7"
 harness: "opencode, opencode 1.18.27, opencode 1.18.30"
-tasks: 173
-passed: 91
+tasks: 148
+passed: 90
 description: >-
-  AppleBench results for minimax/MiniMax-M2.7 on Gold Suite 1.3:
-  91 of 173 tasks completed to a verified result (52.6% pass rate),
+  AppleBench results for minimax/MiniMax-M2.7 on Gold Suite 1.2:
+  90 of 148 tasks completed to a verified result (60.8% pass rate),
   with cost, active time, per-category results,
   and every task.
 ---
@@ -46,16 +46,10 @@ window in English, so the model failure is retained.
 |---|---|
 | Public sample tasks | `build-002`, `ops-004`, `project-001`, `runtime-002`, `tests-003`, `visual-002`. They ship with the open harness and are not included in published measurements. |
 | `ops-027` | Rerun after Screen Recording permission was granted. The model produced a valid 5120×2880 PNG and passed both trajectory and file grading. |
-| Cost coverage | Complete for all 173 tasks. The timed-out `ops-003` run was recovered from 215 usage events preserved identically in its event stream and raw agent log, then priced from the pinned model-owner rates used for every other task. |
+| Cost coverage | Complete for all 148 tasks. The timed-out `ops-003` run was recovered from 215 usage events preserved identically in its event stream and raw agent log, then priced from the pinned model-owner rates used for every other task. |
 
 ## September 10 composition expansion
 
 MiniMax M2.7 completed none of the five composition tasks. All five agents
 finished before the old wall-clock cap; four left test targets that did not
 compile and one left an app build failure. No result was rerun.
-
-## September 11 pure Swift expansion
-
-Gold Suite 1.3 adds 25 difficult pure Swift tasks with a 3,600-second allowance
-per task. MiniMax M2.7 completed `swift-hard-007` and failed the other 24 tasks,
-finishing the addition 1/25. Every result uses the latest recorded attempt.
