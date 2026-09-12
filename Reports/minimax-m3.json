@@ -108,15 +108,15 @@
     },
     {
       "category" : "runtime",
-      "completion_rate" : 0.8,
-      "passed" : 4,
+      "completion_rate" : 0.6,
+      "passed" : 3,
       "score" : {
         "active_time_weight" : 0.2,
         "available" : 50,
         "cost_weight" : 0.8,
-        "fraction_of_available" : 0.5812839141641252,
+        "fraction_of_available" : 0.3812839141641251,
         "minimum_efficiency" : 0.25,
-        "points" : 29.064195708206256,
+        "points" : 19.064195708206256,
         "reference_active_time_seconds" : 300,
         "reference_cost_usd" : 0.025,
         "scored_runs" : 5,
@@ -129,24 +129,24 @@
     },
     {
       "category" : "tests",
-      "completion_rate" : 1,
-      "passed" : 3,
+      "completion_rate" : 0.39285714285714285,
+      "passed" : 11,
       "score" : {
         "active_time_weight" : 0.2,
-        "available" : 30,
+        "available" : 280,
         "cost_weight" : 0.8,
-        "fraction_of_available" : 1,
+        "fraction_of_available" : 0.1957949585837377,
         "minimum_efficiency" : 0.25,
-        "points" : 30,
+        "points" : 54.82258840344655,
         "reference_active_time_seconds" : 300,
         "reference_cost_usd" : 0.025,
-        "scored_runs" : 3,
+        "scored_runs" : 28,
         "solves_with_unreported_active_time" : 0,
         "solves_with_unreported_cost" : 0,
         "specification" : "points-v3",
         "unscored_runs" : 0
       },
-      "total" : 3
+      "total" : 28
     },
     {
       "category" : "visual",
@@ -170,52 +170,52 @@
       "total" : 9
     }
   ],
-  "completion_rate" : 0.7432432432432432,
+  "completion_rate" : 0.6763005780346821,
   "configurations" : [
     {
       "agent" : "opencode",
-      "completion_rate" : 0.7432432432432432,
-      "cost_per_solved_task_usd" : 0.11531101963636367,
+      "completion_rate" : 0.6763005780346821,
+      "cost_per_solved_task_usd" : 0.12750114256410253,
       "label" : "opencode · minimax/MiniMax-M3",
-      "median_duration_seconds" : 173.25483987500002,
+      "median_duration_seconds" : 204.119228583,
       "model" : "minimax/MiniMax-M3",
-      "passed" : 110,
+      "passed" : 117,
       "score" : {
         "active_time_weight" : 0.2,
-        "available" : 1480,
+        "available" : 1730,
         "cost_weight" : 0.8,
-        "fraction_of_available" : 0.5886884343328905,
+        "fraction_of_available" : 0.5121858215122108,
         "minimum_efficiency" : 0.25,
-        "points" : 871.258882812678,
+        "points" : 886.0814712161247,
         "reference_active_time_seconds" : 300,
         "reference_cost_usd" : 0.025,
-        "scored_runs" : 148,
+        "scored_runs" : 173,
         "solves_with_unreported_active_time" : 0,
         "solves_with_unreported_cost" : 4,
         "specification" : "points-v3",
         "unscored_runs" : 0
       },
-      "total" : 148,
-      "total_cost_usd" : 12.684212160000003,
-      "total_tokens" : 7997373
+      "total" : 173,
+      "total_cost_usd" : 14.917633679999994,
+      "total_tokens" : 9473860
     }
   ],
-  "passed" : 110,
+  "passed" : 117,
   "reasoning" : [
     {
       "at_maximum_effort" : false,
-      "cache_read_tokens" : 151512346,
+      "cache_read_tokens" : 167829408,
       "cache_write_tokens" : 0,
       "effort" : null,
-      "input_tokens" : 6670418,
-      "list_cost_usd" : 12.094510560000002,
+      "input_tokens" : 7245292,
+      "list_cost_usd" : 13.91141808,
       "maximum_effort" : null,
       "model" : "minimax/MiniMax-M3",
-      "output_tokens" : 835537,
+      "output_tokens" : 1390055,
       "price_retrieved" : "2026-09-03",
       "price_source" : "https://models.dev/api.json",
-      "reported_cost_usd" : 12.684212160000003,
-      "runs" : 148
+      "reported_cost_usd" : 14.917633679999994,
+      "runs" : 173
     }
   ],
   "runs" : [
@@ -975,7 +975,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "minimax/MiniMax-M3",
-        "version" : "1.18.27"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -990,17 +990,17 @@
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
         "xcode" : "27.0",
-        "xcode_build" : "27A5252f"
+        "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "90b1040657fa9f6665d922ddc9c525b6553d3cb2",
+        "base_commit" : "8c2a3d88019c2a596d9c4ecbeb0f90b50e8acabd",
         "deletions" : 2,
         "files_changed" : 1,
         "insertions" : 1
       },
       "graders" : [
         {
-          "duration_seconds" : 6.10116175,
+          "duration_seconds" : 7.799806916,
           "evidence" : [
             {
               "name" : "build.log",
@@ -1014,35 +1014,26 @@
           "name" : "build",
           "passed" : true,
           "summary" : "xcodebuild build succeeded for scheme 'LinkErrorFixture'"
-        },
-        {
-          "duration_seconds" : 2.525e-05,
-          "evidence" : [
-
-          ],
-          "name" : "file",
-          "passed" : true,
-          "summary" : "1 file assertion(s) satisfied"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 37.301674008369446,
-        "agent_events" : 67,
-        "agent_output_bytes" : 88321,
-        "agent_output_chunks" : 67,
+        "agent_duration_seconds" : 50.96196806430817,
+        "agent_events" : 47,
+        "agent_output_bytes" : 178811,
+        "agent_output_chunks" : 49,
         "build_invocations" : 1,
         "commands_executed" : 2,
-        "grading_duration_seconds" : 6.388045072555542,
+        "grading_duration_seconds" : 8.17787504196167,
         "test_invocations" : 0,
-        "tool_calls" : 21,
-        "total_events" : 155
+        "tool_calls" : 19,
+        "total_events" : 115
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 44.159629416,
+        "duration_seconds" : 59.702204375,
         "passed" : true
       },
-      "run_id" : "2026-09-06T212650-build-005-opencode",
+      "run_id" : "2026-09-11T210356-build-005-opencode",
       "schema_version" : 1,
       "tags" : [
         "linker",
@@ -1051,12 +1042,12 @@
       ],
       "task" : "build-005",
       "usage" : {
-        "cache_read_tokens" : 243830,
+        "cache_read_tokens" : 157568,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.024358800000000003,
-        "input_tokens" : 19234,
-        "output_tokens" : 1582,
-        "total_tokens" : 22533
+        "estimated_cost_usd" : 0.021907379999999997,
+        "input_tokens" : 34959,
+        "output_tokens" : 1638,
+        "total_tokens" : 36597
       }
     },
     {
@@ -1186,9 +1177,16 @@
       "agent" : {
         "agent" : "opencode",
         "configuration" : {
-
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
         },
-        "model" : "minimax/MiniMax-M3"
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -1206,14 +1204,14 @@
         "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "e6174c298f6e72a4562af850de4278ad6643e449",
-        "deletions" : 58,
-        "files_changed" : 8,
-        "insertions" : 888
+        "base_commit" : "81ff7374706dfb43969b065e339575451fd138b1",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
       },
       "graders" : [
         {
-          "duration_seconds" : 11.943855584,
+          "duration_seconds" : 12.853071083,
           "evidence" : [
             {
               "name" : "build.log",
@@ -1229,7 +1227,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'ExpenseLedgerFixture'"
         },
         {
-          "duration_seconds" : 13.644617834,
+          "duration_seconds" : 19.410737333,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -1241,11 +1239,11 @@
             }
           ],
           "name" : "xctest",
-          "passed" : true,
-          "summary" : "7 executed, 7 passed, 0 failed, 0 skipped"
+          "passed" : false,
+          "summary" : "7 executed, 1 passed, 6 failed, 0 skipped. Failing: ExpenseLedgerJourneysTests/testBadImportPreservesExistingLedgerAndReportsRejectedRows(), ExpenseLedgerJourneysTests/testEditDeleteAndPersistenceKeepExactEuroValues(), ExpenseLedgerJourneysTests/testFailedSavePreservesPublishedLedgerAndImportCanBeRetried(), ExpenseLedgerJourneysTests/testFiltersChartSummaryAndExportDescribeTheSameVisibleExpenses(), ExpenseLedgerJourneysTests/testImportReviewAcceptsQuotedDataAndReimportDoesNotDuplicateRecords(), ExpenseLedgerJourneysTests/testMalformedCSVAndInvalidEuroValuesCannotEnterTheLedger()"
         },
         {
-          "duration_seconds" : 75.227950083,
+          "duration_seconds" : 69.859321042,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -1258,27 +1256,27 @@
           ],
           "name" : "xcuitest",
           "passed" : false,
-          "summary" : "5 executed, 4 passed, 1 failed, 0 skipped. Failing: ExpenseLedgerScreenTests/testDeletingEveryExpenseKeepsTheLedgerEmptyAfterRelaunch()"
+          "summary" : "5 executed, 0 passed, 5 failed, 0 skipped. Failing: ExpenseLedgerScreenTests/testDeletingEveryExpenseKeepsTheLedgerEmptyAfterRelaunch(), ExpenseLedgerScreenTests/testEditorAllowsSavingAnExpenseFromTheVisibleFlow(), ExpenseLedgerScreenTests/testImportReviewCommitAndRelaunchKeepImportedRecordVisible(), ExpenseLedgerScreenTests/testMonthAndCategoryControlsFilterTheVisibleLedger(), ExpenseLedgerScreenTests/testSeededLedgerShowsAReadableTotalAndCategoryChart()"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 1263.609789967537,
-        "agent_events" : 296,
-        "agent_output_bytes" : 574422,
-        "agent_output_chunks" : 296,
+        "agent_duration_seconds" : 331.53913700580597,
+        "agent_events" : 38,
+        "agent_output_bytes" : 94022,
+        "agent_output_chunks" : 38,
         "build_invocations" : 1,
         "commands_executed" : 6,
-        "grading_duration_seconds" : 174.34741508960724,
+        "grading_duration_seconds" : 139.0787400007248,
         "test_invocations" : 2,
-        "tool_calls" : 97,
-        "total_events" : 634
+        "tool_calls" : 12,
+        "total_events" : 109
       },
       "result" : {
-        "agent_termination" : "timeout",
-        "duration_seconds" : 1442.945546584,
+        "agent_termination" : "completed",
+        "duration_seconds" : 488.913211625,
         "passed" : false
       },
-      "run_id" : "2026-09-10T110746-composition-002-opencode",
+      "run_id" : "2026-09-11T210456-composition-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "composition",
@@ -1290,12 +1288,12 @@
       ],
       "task" : "composition-002",
       "usage" : {
-        "cache_read_tokens" : 4173440,
+        "cache_read_tokens" : 121186,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.3294743999999999,
-        "input_tokens" : 179580,
-        "output_tokens" : 20995,
-        "total_tokens" : 200575
+        "estimated_cost_usd" : 0.05168346,
+        "input_tokens" : 16893,
+        "output_tokens" : 775,
+        "total_tokens" : 49680
       }
     },
     {
@@ -1445,14 +1443,14 @@
         "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "153ae29f0f6850c9f8f43dfaef0bb71a28f1fae4",
-        "deletions" : 27,
-        "files_changed" : 4,
-        "insertions" : 573
+        "base_commit" : "5adf7c46ad00168241b55b6de46fa77b6489b4f7",
+        "deletions" : 24,
+        "files_changed" : 3,
+        "insertions" : 646
       },
       "graders" : [
         {
-          "duration_seconds" : 12.089712209,
+          "duration_seconds" : 11.471851375,
           "evidence" : [
             {
               "name" : "build.log",
@@ -1468,7 +1466,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'AudioLessonsFixture'"
         },
         {
-          "duration_seconds" : 7.865988542,
+          "duration_seconds" : 8.16722925,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -1492,7 +1490,7 @@
           "summary" : "0 executed, 0 passed, 0 failed, 0 skipped. No tests executed"
         },
         {
-          "duration_seconds" : 5.049530875,
+          "duration_seconds" : 5.9951539579999995,
           "evidence" : [
             {
               "name" : "xcuitest.log",
@@ -1517,23 +1515,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 301.3363069295883,
-        "agent_events" : 281,
-        "agent_output_bytes" : 512774,
-        "agent_output_chunks" : 281,
+        "agent_duration_seconds" : 718.6608259677887,
+        "agent_events" : 330,
+        "agent_output_bytes" : 1213900,
+        "agent_output_chunks" : 339,
         "build_invocations" : 1,
         "commands_executed" : 10,
-        "grading_duration_seconds" : 51.03218603134155,
+        "grading_duration_seconds" : 63.815560936927795,
         "test_invocations" : 4,
-        "tool_calls" : 92,
-        "total_events" : 611
+        "tool_calls" : 107,
+        "total_events" : 717
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 353.063365125,
+        "duration_seconds" : 798.963343833,
         "passed" : false
       },
-      "run_id" : "2026-09-10T115550-composition-004-opencode",
+      "run_id" : "2026-09-11T211310-composition-004-opencode",
       "schema_version" : 1,
       "tags" : [
         "composition",
@@ -1543,12 +1541,12 @@
       ],
       "task" : "composition-004",
       "usage" : {
-        "cache_read_tokens" : 3892392,
+        "cache_read_tokens" : 5457879,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.31788552,
-        "input_tokens" : 91940,
-        "output_tokens" : 16838,
-        "total_tokens" : 139240
+        "estimated_cost_usd" : 0.4253906399999999,
+        "input_tokens" : 136441,
+        "output_tokens" : 33102,
+        "total_tokens" : 183929
       }
     },
     {
@@ -1904,7 +1902,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "minimax/MiniMax-M3",
-        "version" : "1.18.27"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -1919,17 +1917,17 @@
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
         "xcode" : "27.0",
-        "xcode_build" : "27A5252f"
+        "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "326d960b111d3a9b63cf7bbfdafbb4d0bba07a5f",
+        "base_commit" : "88e3c4a9f1174ad304b1d1bea70f82b8b6443ecc",
         "deletions" : 1,
         "files_changed" : 1,
-        "insertions" : 3
+        "insertions" : 1
       },
       "graders" : [
         {
-          "duration_seconds" : 5.466915917,
+          "duration_seconds" : 5.754803958,
           "evidence" : [
             {
               "name" : "build.log",
@@ -1945,7 +1943,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'Concurrency003Fixture'"
         },
         {
-          "duration_seconds" : 9.535660584,
+          "duration_seconds" : 16.442851334,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -1957,28 +1955,28 @@
             }
           ],
           "name" : "xctest",
-          "passed" : false,
-          "summary" : "3 executed, 2 passed, 1 failed, 0 skipped. Failing: TelemetryFeedTests/testABacklogDoesNotGrowWithoutLimit()"
+          "passed" : true,
+          "summary" : "3 executed, 3 passed, 0 failed, 0 skipped"
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 54.04904496669769,
-        "agent_events" : 46,
-        "agent_output_bytes" : 95606,
-        "agent_output_chunks" : 46,
+        "agent_duration_seconds" : 33.313520073890686,
+        "agent_events" : 28,
+        "agent_output_bytes" : 33320,
+        "agent_output_chunks" : 28,
         "build_invocations" : 1,
         "commands_executed" : 4,
-        "grading_duration_seconds" : 15.312671065330505,
+        "grading_duration_seconds" : 22.520975947380066,
         "test_invocations" : 1,
-        "tool_calls" : 14,
-        "total_events" : 119
+        "tool_calls" : 8,
+        "total_events" : 83
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 69.819344042,
-        "passed" : false
+        "duration_seconds" : 63.321100917,
+        "passed" : true
       },
-      "run_id" : "2026-09-07T053530-concurrency-003-opencode",
+      "run_id" : "2026-09-11T212633-concurrency-003-opencode",
       "schema_version" : 1,
       "tags" : [
         "asyncstream",
@@ -1987,12 +1985,12 @@
       ],
       "task" : "concurrency-003",
       "usage" : {
-        "cache_read_tokens" : 183424,
+        "cache_read_tokens" : 68352,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.01919124,
-        "input_tokens" : 16386,
-        "output_tokens" : 2725,
-        "total_tokens" : 19111
+        "estimated_cost_usd" : 0.00829122,
+        "input_tokens" : 8075,
+        "output_tokens" : 808,
+        "total_tokens" : 9548
       }
     },
     {
@@ -4663,7 +4661,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "minimax/MiniMax-M3",
-        "version" : "1.18.27"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -4678,17 +4676,17 @@
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
         "xcode" : "27.0",
-        "xcode_build" : "27A5252f"
+        "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "b5e9678c6c5422f8130691ea783dd09aa95fc232",
-        "deletions" : 5,
-        "files_changed" : 2,
-        "insertions" : 45
+        "base_commit" : "8129400b84bdda9bf5285d05222d6aae7f6cc0e6",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
       },
       "graders" : [
         {
-          "duration_seconds" : 29.902857834,
+          "duration_seconds" : 36.174050083,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -4701,14 +4699,14 @@
           ],
           "name" : "uiflow",
           "passed" : true,
-          "summary" : "1 UI assertion holds in an isolated default-state replay of the saved workspace"
+          "summary" : "1 UI assertion(s) hold in default"
         },
         {
-          "duration_seconds" : 23.828391333,
+          "duration_seconds" : 25.916006458,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -4716,28 +4714,28 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : true,
-          "summary" : "2 UI assertions hold after memory warning and relaunch in an isolated replay of the saved workspace"
+          "passed" : false,
+          "summary" : "2 of 2 UI assertion(s) failed in default: no element on screen shows \"ferry\"; \"Nothing saved\" is on screen, in \"Nothing saved\""
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 202.36786997318268,
-        "agent_events" : 40,
-        "agent_output_bytes" : 32537,
-        "agent_output_chunks" : 40,
+        "agent_duration_seconds" : 3.9263020753860474,
+        "agent_events" : 3,
+        "agent_output_bytes" : 1183,
+        "agent_output_chunks" : 3,
         "build_invocations" : 2,
-        "commands_executed" : 8,
-        "grading_duration_seconds" : 83.97306597232819,
+        "commands_executed" : 14,
+        "grading_duration_seconds" : 92.0149439573288,
         "test_invocations" : 0,
-        "tool_calls" : 12,
-        "total_events" : 117
+        "tool_calls" : 0,
+        "total_events" : 53
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 286.91515075,
-        "passed" : true
+        "duration_seconds" : 96.470340625,
+        "passed" : false
       },
-      "run_id" : "2026-09-07T062732-g2-lifecycle-002-opencode",
+      "run_id" : "2026-09-11T212738-g2-lifecycle-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "memory",
@@ -4747,12 +4745,12 @@
       ],
       "task" : "g2-lifecycle-002",
       "usage" : {
-        "cache_read_tokens" : 137472,
+        "cache_read_tokens" : 1936,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.02319192,
-        "input_tokens" : 7332,
-        "output_tokens" : 1851,
-        "total_tokens" : 17952
+        "estimated_cost_usd" : 0.00206046,
+        "input_tokens" : 5225,
+        "output_tokens" : 34,
+        "total_tokens" : 5539
       }
     },
     {
@@ -5103,7 +5101,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "minimax/MiniMax-M3",
-        "version" : "1.18.27"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -5118,17 +5116,17 @@
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
         "xcode" : "27.0",
-        "xcode_build" : "27A5252f"
+        "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "139b214181e6891210a57127b79b1776851a269d",
-        "deletions" : 7,
+        "base_commit" : "a1752613cdba430ce5a77e612bcd061f422a4cee",
+        "deletions" : 1,
         "files_changed" : 1,
-        "insertions" : 6
+        "insertions" : 1
       },
       "graders" : [
         {
-          "duration_seconds" : 48.758354875,
+          "duration_seconds" : 62.118617375,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -5140,15 +5138,15 @@
             }
           ],
           "name" : "uiflow",
-          "passed" : true,
-          "summary" : "2 localized date assertions hold in language=en locale=en_US"
+          "passed" : false,
+          "summary" : "2 of 2 UI assertion(s) failed in language=en locale=en_US: no addressed element shows calendar day \"2026-03-04\" in locale \"en_US\"; no addressed element shows calendar day \"2026-11-09\" in locale \"en_US\""
         },
         {
-          "duration_seconds" : 29.158569834,
+          "duration_seconds" : 53.9588445,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -5157,10 +5155,10 @@
           ],
           "name" : "uiflow",
           "passed" : true,
-          "summary" : "2 localized date assertions hold in language=de locale=de_DE"
+          "summary" : "2 UI assertion(s) hold in language=de locale=de_DE"
         },
         {
-          "duration_seconds" : 0.000537875,
+          "duration_seconds" : 0.000584875,
           "evidence" : [
 
           ],
@@ -5170,23 +5168,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 64.23259198665619,
-        "agent_events" : 34,
-        "agent_output_bytes" : 37247,
-        "agent_output_chunks" : 34,
+        "agent_duration_seconds" : 43.155941009521484,
+        "agent_events" : 29,
+        "agent_output_bytes" : 29554,
+        "agent_output_chunks" : 29,
         "build_invocations" : 2,
         "commands_executed" : 15,
-        "grading_duration_seconds" : 205.5261069536209,
+        "grading_duration_seconds" : 147.05480098724365,
         "test_invocations" : 0,
-        "tool_calls" : 10,
-        "total_events" : 120
+        "tool_calls" : 8,
+        "total_events" : 110
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 271.959795,
-        "passed" : true
+        "duration_seconds" : 190.764331458,
+        "passed" : false
       },
-      "run_id" : "2026-09-07T064455-g2-locale-004-opencode",
+      "run_id" : "2026-09-11T212918-g2-locale-004-opencode",
       "schema_version" : 1,
       "tags" : [
         "locale",
@@ -5196,12 +5194,12 @@
       ],
       "task" : "g2-locale-004",
       "usage" : {
-        "cache_read_tokens" : 93526,
+        "cache_read_tokens" : 81792,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.01605246,
-        "input_tokens" : 13919,
-        "output_tokens" : 1582,
-        "total_tokens" : 19140
+        "estimated_cost_usd" : 0.011086919999999997,
+        "input_tokens" : 7766,
+        "output_tokens" : 869,
+        "total_tokens" : 10974
       }
     },
     {
@@ -5347,7 +5345,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "minimax/MiniMax-M3",
-        "version" : "1.18.27"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -5362,17 +5360,17 @@
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
         "xcode" : "27.0",
-        "xcode_build" : "27A5252f"
+        "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "68de2800a3b76acc51021fd9172d8de7286f2819",
-        "deletions" : 6,
+        "base_commit" : "a456a4487a33a350cf00c72bdc6ffe7367654690",
+        "deletions" : 5,
         "files_changed" : 1,
-        "insertions" : 17
+        "insertions" : 11
       },
       "graders" : [
         {
-          "duration_seconds" : 25.908776792,
+          "duration_seconds" : 30.221994292,
           "evidence" : [
             {
               "name" : "uiflow-build.log",
@@ -5385,14 +5383,14 @@
           ],
           "name" : "uiflow",
           "passed" : true,
-          "summary" : "2 passive baseline UI assertions hold in default; the original toggle action was removed after its recorded tap was ignored"
+          "summary" : "2 UI assertion(s) hold in default"
         },
         {
-          "duration_seconds" : 13.181747667,
+          "duration_seconds" : 18.862002667,
           "evidence" : [
             {
-              "name" : "uiflow-build.log",
-              "path" : "logs/uiflow-build.log"
+              "name" : "uiflow-build-2.log",
+              "path" : "logs/uiflow-build-2.log"
             },
             {
               "name" : "uiflow-tree-2.json",
@@ -5405,23 +5403,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 157.92468404769897,
-        "agent_events" : 32,
-        "agent_output_bytes" : 38375,
-        "agent_output_chunks" : 32,
+        "agent_duration_seconds" : 23.143065094947815,
+        "agent_events" : 35,
+        "agent_output_bytes" : 49173,
+        "agent_output_chunks" : 35,
         "build_invocations" : 2,
-        "commands_executed" : 7,
-        "grading_duration_seconds" : 249.20046401023865,
+        "commands_executed" : 10,
+        "grading_duration_seconds" : 80.0804740190506,
         "test_invocations" : 0,
-        "tool_calls" : 9,
-        "total_events" : 98
+        "tool_calls" : 10,
+        "total_events" : 110
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 407.733678417,
+        "duration_seconds" : 103.767386542,
         "passed" : false
       },
-      "run_id" : "2026-09-07T065501-g2-order-002-opencode",
+      "run_id" : "2026-09-11T213233-g2-order-002-opencode",
       "schema_version" : 1,
       "tags" : [
         "deletion",
@@ -5431,12 +5429,12 @@
       ],
       "task" : "g2-order-002",
       "usage" : {
-        "cache_read_tokens" : 101632,
+        "cache_read_tokens" : 94795,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.020822220000000002,
-        "input_tokens" : 17009,
-        "output_tokens" : 8018,
-        "total_tokens" : 25027
+        "estimated_cost_usd" : 0.011680800000000003,
+        "input_tokens" : 10829,
+        "output_tokens" : 1341,
+        "total_tokens" : 13116
       }
     },
     {
@@ -10063,7 +10061,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "minimax/MiniMax-M3",
-        "version" : "1.18.27"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -10076,26 +10074,26 @@
         "architecture" : "arm64",
         "macos" : "27.0",
         "xcode" : "27.0",
-        "xcode_build" : "27A5252f"
+        "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "75073b3ccd5f6f965bd7481258030312c766c96c",
+        "base_commit" : "68f4969bf8f0970db5f0ce878788144f6506771a",
         "deletions" : 0,
         "files_changed" : 2,
-        "insertions" : 21
+        "insertions" : 35
       },
       "graders" : [
         {
-          "duration_seconds" : 0.001172541,
+          "duration_seconds" : 0.001167959,
           "evidence" : [
 
           ],
           "name" : "trajectory",
           "passed" : true,
-          "summary" : "The agent's recorded commands show the work behind the deliverable (3 command(s))"
+          "summary" : "The agent's recorded commands show the work behind the deliverable (2 command(s))"
         },
         {
-          "duration_seconds" : 0.000466875,
+          "duration_seconds" : 0.000732292,
           "evidence" : [
 
           ],
@@ -10105,23 +10103,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 14.653118014335632,
-        "agent_events" : 15,
-        "agent_output_bytes" : 7668,
-        "agent_output_chunks" : 15,
+        "agent_duration_seconds" : 7.7353410720825195,
+        "agent_events" : 12,
+        "agent_output_bytes" : 7126,
+        "agent_output_chunks" : 12,
         "build_invocations" : 0,
         "commands_executed" : 1,
-        "grading_duration_seconds" : 0.0019930601119995117,
+        "grading_duration_seconds" : 0.005262017250061035,
         "test_invocations" : 0,
-        "tool_calls" : 4,
-        "total_events" : 48
+        "tool_calls" : 3,
+        "total_events" : 42
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 15.358812625,
+        "duration_seconds" : 8.637820625,
         "passed" : true
       },
-      "run_id" : "2026-09-07T012741-ops-027-opencode",
+      "run_id" : "2026-09-11T213421-ops-027-opencode",
       "schema_version" : 1,
       "tags" : [
         "screencapture",
@@ -10131,12 +10129,12 @@
       ],
       "task" : "ops-027",
       "usage" : {
-        "cache_read_tokens" : 30592,
+        "cache_read_tokens" : 24445,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.004655220000000001,
-        "input_tokens" : 6871,
-        "output_tokens" : 632,
-        "total_tokens" : 7503
+        "estimated_cost_usd" : 0.004425,
+        "input_tokens" : 6257,
+        "output_tokens" : 536,
+        "total_tokens" : 7158
       }
     },
     {
@@ -11702,6 +11700,2631 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "67a769a33e4a61294be546cca772f6dfed311dc6",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 2.879344292,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard001'"
+        },
+        {
+          "duration_seconds" : 20.427394583,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "10 executed, 0 passed, 10 failed, 0 skipped. Failing: SwiftHard001Tests/testCase000(), SwiftHard001Tests/testCase001(), SwiftHard001Tests/testCase002(), SwiftHard001Tests/testCase003(), SwiftHard001Tests/testCase004(), SwiftHard001Tests/testCase005(), SwiftHard001Tests/testCase006(), SwiftHard001Tests/testCase007(), SwiftHard001Tests/testCase008(), SwiftHard001Tests/testLongHistoryRetainsParallelEdges()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 306.2175348997116,
+        "agent_events" : 14,
+        "agent_output_bytes" : 10811,
+        "agent_output_chunks" : 14,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 23.61123502254486,
+        "test_invocations" : 1,
+        "tool_calls" : 4,
+        "total_events" : 54
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 338.955728584,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T213430-swift-hard-001-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "graphs",
+        "rollback"
+      ],
+      "task" : "swift-hard-001",
+      "usage" : {
+        "cache_read_tokens" : 32474,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.042458039999999996,
+        "input_tokens" : 6184,
+        "output_tokens" : 200,
+        "total_tokens" : 38396
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "325d2705ee956bddf33ead75fd72cc31d0e343aa",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 2.148422584,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard002'"
+        },
+        {
+          "duration_seconds" : 28.792848958,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "49 executed, 10 passed, 39 failed, 0 skipped. Failing: SwiftHard002Tests/testCase008(), SwiftHard002Tests/testCase010(), SwiftHard002Tests/testCase011(), SwiftHard002Tests/testCase013(), SwiftHard002Tests/testCase014(), SwiftHard002Tests/testCase015(), SwiftHard002Tests/testCase016(), SwiftHard002Tests/testCase017(), SwiftHard002Tests/testCase018(), SwiftHard002Tests/testCase019(), SwiftHard002Tests/testCase020(), SwiftHard002Tests/testCase021(), SwiftHard002Tests/testCase022(), SwiftHard002Tests/testCase023(), SwiftHard002Tests/testCase024(), SwiftHard002Tests/testCase025(), SwiftHard002Tests/testCase026(), SwiftHard002Tests/testCase027(), SwiftHard002Tests/testCase028(), SwiftHard002Tests/testCase029(), SwiftHard002Tests/testCase030(), SwiftHard002Tests/testCase031(), SwiftHard002Tests/testCase032(), SwiftHard002Tests/testCase033(), SwiftHard002Tests/testCase034(), SwiftHard002Tests/testCase035(), SwiftHard002Tests/testCase036(), SwiftHard002Tests/testCase037(), SwiftHard002Tests/testCase038(), SwiftHard002Tests/testCase039(), SwiftHard002Tests/testCase040(), SwiftHard002Tests/testCase041(), SwiftHard002Tests/testCase042(), SwiftHard002Tests/testCase043(), SwiftHard002Tests/testCase044(), SwiftHard002Tests/testCase045(), SwiftHard002Tests/testCase046(), SwiftHard002Tests/testCase047(), SwiftHard002Tests/testDenseOddComponentsAndDuplicateEdges()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 438.87922608852386,
+        "agent_events" : 14,
+        "agent_output_bytes" : 10368,
+        "agent_output_chunks" : 14,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 31.26677894592285,
+        "test_invocations" : 1,
+        "tool_calls" : 4,
+        "total_events" : 54
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 478.021374583,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T214010-swift-hard-002-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "graphs",
+        "blossom"
+      ],
+      "task" : "swift-hard-002",
+      "usage" : {
+        "cache_read_tokens" : 32128,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.042450180000000004,
+        "input_tokens" : 6231,
+        "output_tokens" : 32211,
+        "total_tokens" : 38442
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "e3665d38b12a954977cd7d3f135934a1872a034d",
+        "deletions" : 1,
+        "files_changed" : 1,
+        "insertions" : 122
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 2.4352695,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard003'"
+        },
+        {
+          "duration_seconds" : 18.948843917,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "43 executed, 37 passed, 6 failed, 0 skipped. Failing: SwiftHard003Tests/testCase027(), SwiftHard003Tests/testCase030(), SwiftHard003Tests/testCase035(), SwiftHard003Tests/testCase037(), SwiftHard003Tests/testCase039(), SwiftHard003Tests/testCase040()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 570.503996014595,
+        "agent_events" : 35,
+        "agent_output_bytes" : 40810,
+        "agent_output_chunks" : 35,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.69078004360199,
+        "test_invocations" : 1,
+        "tool_calls" : 11,
+        "total_events" : 97
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 599.54911675,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T214809-swift-hard-003-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "graphs",
+        "optimization"
+      ],
+      "task" : "swift-hard-003",
+      "usage" : {
+        "cache_read_tokens" : 207104,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.08829654,
+        "input_tokens" : 35357,
+        "output_tokens" : 54386,
+        "total_tokens" : 89743
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "4efd605eafb60bd87e7ca82bca5c3e7f660034ba",
+        "deletions" : 1,
+        "files_changed" : 1,
+        "insertions" : 91
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.8745401670000001,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard004'"
+        },
+        {
+          "duration_seconds" : 17.975839125,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : true,
+          "summary" : "49 executed, 49 passed, 0 failed, 0 skipped"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 520.07086789608,
+        "agent_events" : 75,
+        "agent_output_bytes" : 79217,
+        "agent_output_chunks" : 75,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 20.14576494693756,
+        "test_invocations" : 1,
+        "tool_calls" : 23,
+        "total_events" : 177
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 548.351971458,
+        "passed" : true
+      },
+      "run_id" : "2026-09-11T215810-swift-hard-004-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "graphs",
+        "residual-networks"
+      ],
+      "task" : "swift-hard-004",
+      "usage" : {
+        "cache_read_tokens" : 697600,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.10607910000000001,
+        "input_tokens" : 58977,
+        "output_tokens" : 38775,
+        "total_tokens" : 97752
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "43cf890cddd98bc16e675353dcd3ef3b10ea8f36",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.703570417,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard005'"
+        },
+        {
+          "duration_seconds" : 19.079066166,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "14 executed, 0 passed, 14 failed, 0 skipped. Failing: SwiftHard005Tests/testCase000(), SwiftHard005Tests/testCase001(), SwiftHard005Tests/testCase002(), SwiftHard005Tests/testCase003(), SwiftHard005Tests/testCase004(), SwiftHard005Tests/testCase005(), SwiftHard005Tests/testCase006(), SwiftHard005Tests/testCase007(), SwiftHard005Tests/testCase008(), SwiftHard005Tests/testCase009(), SwiftHard005Tests/testCase010(), SwiftHard005Tests/testCase011(), SwiftHard005Tests/testCase012(), SwiftHard005Tests/testUnreachablePredecessorDoesNotDestroyDominance()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 267.1718009710312,
+        "agent_events" : 17,
+        "agent_output_bytes" : 12997,
+        "agent_output_chunks" : 17,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.081055998802185,
+        "test_invocations" : 1,
+        "tool_calls" : 5,
+        "total_events" : 60
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 295.49233975,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T220719-swift-hard-005-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "compilers",
+        "graphs"
+      ],
+      "task" : "swift-hard-005",
+      "usage" : {
+        "cache_read_tokens" : 40320,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.043089,
+        "input_tokens" : 6602,
+        "output_tokens" : 229,
+        "total_tokens" : 38843
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "d15d87f1b2a6b5d62712868f601c4469bc5110dc",
+        "deletions" : 1,
+        "files_changed" : 1,
+        "insertions" : 76
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.915832875,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard006'"
+        },
+        {
+          "duration_seconds" : 19.886121167,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : true,
+          "summary" : "86 executed, 86 passed, 0 failed, 0 skipped"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 559.9965569972992,
+        "agent_events" : 105,
+        "agent_output_bytes" : 232744,
+        "agent_output_chunks" : 106,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 22.09192204475403,
+        "test_invocations" : 1,
+        "tool_calls" : 34,
+        "total_events" : 238
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 589.7723605,
+        "passed" : true
+      },
+      "run_id" : "2026-09-11T221216-swift-hard-006-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "strings",
+        "suffix-automaton"
+      ],
+      "task" : "swift-hard-006",
+      "usage" : {
+        "cache_read_tokens" : 1722240,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.1854294,
+        "input_tokens" : 94542,
+        "output_tokens" : 44777,
+        "total_tokens" : 139319
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "fc8c542e3ac78c8e96bf2f95b3a9398fb337b0ee",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.817769041,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard007'"
+        },
+        {
+          "duration_seconds" : 19.171410958,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "36 executed, 1 passed, 35 failed, 0 skipped. Failing: SwiftHard007Tests/testCase001(), SwiftHard007Tests/testCase002(), SwiftHard007Tests/testCase003(), SwiftHard007Tests/testCase004(), SwiftHard007Tests/testCase005(), SwiftHard007Tests/testCase006(), SwiftHard007Tests/testCase007(), SwiftHard007Tests/testCase008(), SwiftHard007Tests/testCase009(), SwiftHard007Tests/testCase010(), SwiftHard007Tests/testCase011(), SwiftHard007Tests/testCase012(), SwiftHard007Tests/testCase013(), SwiftHard007Tests/testCase014(), SwiftHard007Tests/testCase015(), SwiftHard007Tests/testCase016(), SwiftHard007Tests/testCase017(), SwiftHard007Tests/testCase018(), SwiftHard007Tests/testCase019(), SwiftHard007Tests/testCase020(), SwiftHard007Tests/testCase021(), SwiftHard007Tests/testCase022(), SwiftHard007Tests/testCase023(), SwiftHard007Tests/testCase024(), SwiftHard007Tests/testCase025(), SwiftHard007Tests/testCase026(), SwiftHard007Tests/testCase027(), SwiftHard007Tests/testCase028(), SwiftHard007Tests/testCase029(), SwiftHard007Tests/testCase030(), SwiftHard007Tests/testCase031(), SwiftHard007Tests/testCase032(), SwiftHard007Tests/testCase033(), SwiftHard007Tests/testCase034(), SwiftHard007Tests/testLongZeroBytesHaveNoSentinelCollision()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 120.46939301490784,
+        "agent_events" : 23,
+        "agent_output_bytes" : 15129,
+        "agent_output_chunks" : 23,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.275182008743286,
+        "test_invocations" : 1,
+        "tool_calls" : 7,
+        "total_events" : 72
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 149.014051875,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T222206-swift-hard-007-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "strings",
+        "indexing"
+      ],
+      "task" : "swift-hard-007",
+      "usage" : {
+        "cache_read_tokens" : 57073,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.04413408,
+        "input_tokens" : 6463,
+        "output_tokens" : 295,
+        "total_tokens" : 38772
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "d89d9c28ab67972b277cfdc6a647934be2213d68",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.908521666,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard008'"
+        },
+        {
+          "duration_seconds" : 19.284640708,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "36 executed, 0 passed, 36 failed, 0 skipped. Failing: SwiftHard008Tests/testCase000(), SwiftHard008Tests/testCase001(), SwiftHard008Tests/testCase002(), SwiftHard008Tests/testCase003(), SwiftHard008Tests/testCase004(), SwiftHard008Tests/testCase005(), SwiftHard008Tests/testCase006(), SwiftHard008Tests/testCase007(), SwiftHard008Tests/testCase008(), SwiftHard008Tests/testCase009(), SwiftHard008Tests/testCase010(), SwiftHard008Tests/testCase011(), SwiftHard008Tests/testCase012(), SwiftHard008Tests/testCase013(), SwiftHard008Tests/testCase014(), SwiftHard008Tests/testCase015(), SwiftHard008Tests/testCase016(), SwiftHard008Tests/testCase017(), SwiftHard008Tests/testCase018(), SwiftHard008Tests/testCase019(), SwiftHard008Tests/testCase020(), SwiftHard008Tests/testCase021(), SwiftHard008Tests/testCase022(), SwiftHard008Tests/testCase023(), SwiftHard008Tests/testCase024(), SwiftHard008Tests/testCase025(), SwiftHard008Tests/testCase026(), SwiftHard008Tests/testCase027(), SwiftHard008Tests/testCase028(), SwiftHard008Tests/testCase029(), SwiftHard008Tests/testCase030(), SwiftHard008Tests/testCase031(), SwiftHard008Tests/testCase032(), SwiftHard008Tests/testCase033(), SwiftHard008Tests/testCase034(), SwiftHard008Tests/testLargeDuplicateDictionaryAndChunkBoundaries()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 301.08164501190186,
+        "agent_events" : 17,
+        "agent_output_bytes" : 39927,
+        "agent_output_chunks" : 17,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.48720395565033,
+        "test_invocations" : 1,
+        "tool_calls" : 5,
+        "total_events" : 60
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 330.097433875,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T222436-swift-hard-008-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "strings",
+        "streaming"
+      ],
+      "task" : "swift-hard-008",
+      "usage" : {
+        "cache_read_tokens" : 41472,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.044547119999999996,
+        "input_tokens" : 10560,
+        "output_tokens" : 32409,
+        "total_tokens" : 42969
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "cf5ea9049ee4fa8d9ee77424ee26b12b5a1b1dd7",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.858487625,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard009'"
+        },
+        {
+          "duration_seconds" : 19.306913333,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "109 executed, 9 passed, 100 failed, 0 skipped. Failing: SwiftHard009Tests/testAmbiguousFailingMatchDoesNotBacktrackExponentially(), SwiftHard009Tests/testCase000(), SwiftHard009Tests/testCase001(), SwiftHard009Tests/testCase002(), SwiftHard009Tests/testCase003(), SwiftHard009Tests/testCase004(), SwiftHard009Tests/testCase005(), SwiftHard009Tests/testCase006(), SwiftHard009Tests/testCase007(), SwiftHard009Tests/testCase008(), SwiftHard009Tests/testCase009(), SwiftHard009Tests/testCase010(), SwiftHard009Tests/testCase011(), SwiftHard009Tests/testCase012(), SwiftHard009Tests/testCase013(), SwiftHard009Tests/testCase014(), SwiftHard009Tests/testCase015(), SwiftHard009Tests/testCase016(), SwiftHard009Tests/testCase017(), SwiftHard009Tests/testCase018(), SwiftHard009Tests/testCase019(), SwiftHard009Tests/testCase020(), SwiftHard009Tests/testCase021(), SwiftHard009Tests/testCase022(), SwiftHard009Tests/testCase023(), SwiftHard009Tests/testCase024(), SwiftHard009Tests/testCase025(), SwiftHard009Tests/testCase026(), SwiftHard009Tests/testCase027(), SwiftHard009Tests/testCase028(), SwiftHard009Tests/testCase029(), SwiftHard009Tests/testCase030(), SwiftHard009Tests/testCase031(), SwiftHard009Tests/testCase032(), SwiftHard009Tests/testCase033(), SwiftHard009Tests/testCase034(), SwiftHard009Tests/testCase035(), SwiftHard009Tests/testCase036(), SwiftHard009Tests/testCase037(), SwiftHard009Tests/testCase038(), SwiftHard009Tests/testCase039(), SwiftHard009Tests/testCase040(), SwiftHard009Tests/testCase041(), SwiftHard009Tests/testCase042(), SwiftHard009Tests/testCase043(), SwiftHard009Tests/testCase044(), SwiftHard009Tests/testCase045(), SwiftHard009Tests/testCase046(), SwiftHard009Tests/testCase047(), SwiftHard009Tests/testCase048(), SwiftHard009Tests/testCase049(), SwiftHard009Tests/testCase050(), SwiftHard009Tests/testCase051(), SwiftHard009Tests/testCase052(), SwiftHard009Tests/testCase053(), SwiftHard009Tests/testCase054(), SwiftHard009Tests/testCase055(), SwiftHard009Tests/testCase056(), SwiftHard009Tests/testCase057(), SwiftHard009Tests/testCase058(), SwiftHard009Tests/testCase059(), SwiftHard009Tests/testCase060(), SwiftHard009Tests/testCase061(), SwiftHard009Tests/testCase062(), SwiftHard009Tests/testCase063(), SwiftHard009Tests/testCase064(), SwiftHard009Tests/testCase065(), SwiftHard009Tests/testCase066(), SwiftHard009Tests/testCase067(), SwiftHard009Tests/testCase068(), SwiftHard009Tests/testCase069(), SwiftHard009Tests/testCase070(), SwiftHard009Tests/testCase071(), SwiftHard009Tests/testCase072(), SwiftHard009Tests/testCase073(), SwiftHard009Tests/testCase074(), SwiftHard009Tests/testCase075(), SwiftHard009Tests/testCase076(), SwiftHard009Tests/testCase077(), SwiftHard009Tests/testCase078(), SwiftHard009Tests/testCase079(), SwiftHard009Tests/testCase080(), SwiftHard009Tests/testCase081(), SwiftHard009Tests/testCase082(), SwiftHard009Tests/testCase083(), SwiftHard009Tests/testCase084(), SwiftHard009Tests/testCase085(), SwiftHard009Tests/testCase086(), SwiftHard009Tests/testCase087(), SwiftHard009Tests/testCase088(), SwiftHard009Tests/testCase089(), SwiftHard009Tests/testCase090(), SwiftHard009Tests/testCase091(), SwiftHard009Tests/testCase092(), SwiftHard009Tests/testCase093(), SwiftHard009Tests/testCase094(), SwiftHard009Tests/testCase095(), SwiftHard009Tests/testCase096(), SwiftHard009Tests/testCase097(), SwiftHard009Tests/testCase098()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 354.1852480173111,
+        "agent_events" : 20,
+        "agent_output_bytes" : 14949,
+        "agent_output_chunks" : 20,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.438670992851257,
+        "test_invocations" : 1,
+        "tool_calls" : 6,
+        "total_events" : 66
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 383.206301792,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T223007-swift-hard-009-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "parsing",
+        "automata"
+      ],
+      "task" : "swift-hard-009",
+      "usage" : {
+        "cache_read_tokens" : 47232,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.04392372,
+        "input_tokens" : 7790,
+        "output_tokens" : 32294,
+        "total_tokens" : 40084
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "38f0ff8bb000289f702c14f30d32186f1360c2c8",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.8184749999999998,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard010'"
+        },
+        {
+          "duration_seconds" : 20.11493175,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "187 executed, 169 passed, 18 failed, 0 skipped. Failing: SwiftHard010Tests/testCase000(), SwiftHard010Tests/testCase031(), SwiftHard010Tests/testCase032(), SwiftHard010Tests/testCase034(), SwiftHard010Tests/testCase038(), SwiftHard010Tests/testCase046(), SwiftHard010Tests/testCase062(), SwiftHard010Tests/testCase063(), SwiftHard010Tests/testCase064(), SwiftHard010Tests/testCase065(), SwiftHard010Tests/testCase066(), SwiftHard010Tests/testCase093(), SwiftHard010Tests/testCase124(), SwiftHard010Tests/testCase128(), SwiftHard010Tests/testCase142(), SwiftHard010Tests/testCase157(), SwiftHard010Tests/testCase167(), SwiftHard010Tests/testLongAmbiguousNullableLanguage()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 320.1159269809723,
+        "agent_events" : 14,
+        "agent_output_bytes" : 11137,
+        "agent_output_chunks" : 14,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 22.22598898410797,
+        "test_invocations" : 1,
+        "tool_calls" : 4,
+        "total_events" : 54
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 349.693601375,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T223632-swift-hard-010-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "compilers",
+        "chart-parsing"
+      ],
+      "task" : "swift-hard-010",
+      "usage" : {
+        "cache_read_tokens" : 30679,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.04290504,
+        "input_tokens" : 8033,
+        "output_tokens" : 199,
+        "total_tokens" : 40245
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "3e80d175420b2ca9c47d920aa01b8ed62ffa123f",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.876174,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard011'"
+        },
+        {
+          "duration_seconds" : 18.501891625,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "15 executed, 5 passed, 10 failed, 0 skipped. Failing: SwiftHard011Tests/testCase000(), SwiftHard011Tests/testCase001(), SwiftHard011Tests/testCase002(), SwiftHard011Tests/testCase003(), SwiftHard011Tests/testCase007(), SwiftHard011Tests/testCase009(), SwiftHard011Tests/testCase011(), SwiftHard011Tests/testCase012(), SwiftHard011Tests/testCase013(), SwiftHard011Tests/testDAGVariableReinterpretedAfterShadowing()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 306.38099002838135,
+        "agent_events" : 17,
+        "agent_output_bytes" : 39244,
+        "agent_output_chunks" : 17,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 20.677917003631592,
+        "test_invocations" : 1,
+        "tool_calls" : 5,
+        "total_events" : 60
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 334.356630209,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T224222-swift-hard-011-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "type-systems",
+        "unification"
+      ],
+      "task" : "swift-hard-011",
+      "usage" : {
+        "cache_read_tokens" : 41498,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.04443858,
+        "input_tokens" : 10641,
+        "output_tokens" : 283,
+        "total_tokens" : 42938
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "56dbacbfc883f1047bdd9fa2a87dc8c5601c213b",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.973277458,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard012'"
+        },
+        {
+          "duration_seconds" : 19.64938075,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "41 executed, 19 passed, 22 failed, 0 skipped. Failing: SwiftHard012Tests/testCase001(), SwiftHard012Tests/testCase002(), SwiftHard012Tests/testCase003(), SwiftHard012Tests/testCase005(), SwiftHard012Tests/testCase008(), SwiftHard012Tests/testCase009(), SwiftHard012Tests/testCase012(), SwiftHard012Tests/testCase013(), SwiftHard012Tests/testCase015(), SwiftHard012Tests/testCase020(), SwiftHard012Tests/testCase021(), SwiftHard012Tests/testCase025(), SwiftHard012Tests/testCase027(), SwiftHard012Tests/testCase028(), SwiftHard012Tests/testCase029(), SwiftHard012Tests/testCase030(), SwiftHard012Tests/testCase034(), SwiftHard012Tests/testCase035(), SwiftHard012Tests/testCase037(), SwiftHard012Tests/testCase038(), SwiftHard012Tests/testCase039(), SwiftHard012Tests/testEmptyAndSecondaryOnlyRowsRemainOptional()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 408.08398497104645,
+        "agent_events" : 20,
+        "agent_output_bytes" : 15507,
+        "agent_output_chunks" : 20,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.91413104534149,
+        "test_invocations" : 1,
+        "tool_calls" : 6,
+        "total_events" : 66
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 437.411678125,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T224758-swift-hard-012-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "search",
+        "exact-cover"
+      ],
+      "task" : "swift-hard-012",
+      "usage" : {
+        "cache_read_tokens" : 47744,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.04422144,
+        "input_tokens" : 8296,
+        "output_tokens" : 32390,
+        "total_tokens" : 40686
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "9263e68169a4faa6a3b34df7caff61ad1197c757",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.7127167920000002,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard013'"
+        },
+        {
+          "duration_seconds" : 18.58882225,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "13 executed, 0 passed, 13 failed, 0 skipped. Failing: SwiftHard013Tests/testCase000(), SwiftHard013Tests/testCase001(), SwiftHard013Tests/testCase002(), SwiftHard013Tests/testCase003(), SwiftHard013Tests/testCase004(), SwiftHard013Tests/testCase005(), SwiftHard013Tests/testCase006(), SwiftHard013Tests/testCase007(), SwiftHard013Tests/testCase008(), SwiftHard013Tests/testCase009(), SwiftHard013Tests/testCase010(), SwiftHard013Tests/testCase011(), SwiftHard013Tests/testLargeBranchingVersionsStayImmutable()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 176.226469039917,
+        "agent_events" : 17,
+        "agent_output_bytes" : 37890,
+        "agent_output_chunks" : 17,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 20.5968519449234,
+        "test_invocations" : 1,
+        "tool_calls" : 5,
+        "total_events" : 60
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 204.119228583,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T225516-swift-hard-013-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "persistence",
+        "lazy-propagation"
+      ],
+      "task" : "swift-hard-013",
+      "usage" : {
+        "cache_read_tokens" : 35321,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.04627176,
+        "input_tokens" : 17003,
+        "output_tokens" : 32543,
+        "total_tokens" : 49546
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "b9e0507ce52800588da1e4077e05bdc597c53a28",
+        "deletions" : 1,
+        "files_changed" : 1,
+        "insertions" : 152
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 2.60452125,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard014'"
+        },
+        {
+          "duration_seconds" : 19.555611375,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : true,
+          "summary" : "17 executed, 17 passed, 0 failed, 0 skipped"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 803.6324979066849,
+        "agent_events" : 205,
+        "agent_output_bytes" : 261141,
+        "agent_output_chunks" : 205,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 22.46920907497406,
+        "test_invocations" : 1,
+        "tool_calls" : 65,
+        "total_events" : 437
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 833.433898542,
+        "passed" : true
+      },
+      "run_id" : "2026-09-11T225841-swift-hard-014-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "persistence",
+        "order-statistics"
+      ],
+      "task" : "swift-hard-014",
+      "usage" : {
+        "cache_read_tokens" : 2689575,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.25396079999999993,
+        "input_tokens" : 107421,
+        "output_tokens" : 50300,
+        "total_tokens" : 157721
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "4fa38e1af151aa46af2c8f731fa00130505949e4",
+        "deletions" : 1,
+        "files_changed" : 2,
+        "insertions" : 115
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.8265884159999999,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard015'"
+        },
+        {
+          "duration_seconds" : 19.059573167,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : true,
+          "summary" : "25 executed, 25 passed, 0 failed, 0 skipped"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 756.4527119398117,
+        "agent_events" : 177,
+        "agent_output_bytes" : 301299,
+        "agent_output_chunks" : 177,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.195068955421448,
+        "test_invocations" : 1,
+        "tool_calls" : 56,
+        "total_events" : 382
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 784.944197875,
+        "passed" : true
+      },
+      "run_id" : "2026-09-11T231236-swift-hard-015-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "transactions",
+        "isolation"
+      ],
+      "task" : "swift-hard-015",
+      "usage" : {
+        "cache_read_tokens" : 3066880,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.2654733000000001,
+        "input_tokens" : 94911,
+        "output_tokens" : 44156,
+        "total_tokens" : 139067
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "086b1094ac0bd04342906bdebc7bfcb7ff27cefa",
+        "deletions" : 1,
+        "files_changed" : 1,
+        "insertions" : 90
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.916747375,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard016'"
+        },
+        {
+          "duration_seconds" : 19.000699416,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : true,
+          "summary" : "26 executed, 26 passed, 0 failed, 0 skipped"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 483.0719989538193,
+        "agent_events" : 137,
+        "agent_output_bytes" : 213903,
+        "agent_output_chunks" : 137,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.218078017234802,
+        "test_invocations" : 1,
+        "tool_calls" : 42,
+        "total_events" : 301
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 511.646345125,
+        "passed" : true
+      },
+      "run_id" : "2026-09-11T232542-swift-hard-016-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "distributed-systems",
+        "crdt"
+      ],
+      "task" : "swift-hard-016",
+      "usage" : {
+        "cache_read_tokens" : 1252608,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.11829767999999999,
+        "input_tokens" : 20948,
+        "output_tokens" : 30714,
+        "total_tokens" : 51662
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "1550536c102a971bede988076abaac1757c8f1d8",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.86636925,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard017'"
+        },
+        {
+          "duration_seconds" : 19.567657042,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "51 executed, 7 passed, 44 failed, 0 skipped. Failing: SwiftHard017Tests/testCase000(), SwiftHard017Tests/testCase001(), SwiftHard017Tests/testCase002(), SwiftHard017Tests/testCase003(), SwiftHard017Tests/testCase004(), SwiftHard017Tests/testCase005(), SwiftHard017Tests/testCase006(), SwiftHard017Tests/testCase007(), SwiftHard017Tests/testCase008(), SwiftHard017Tests/testCase009(), SwiftHard017Tests/testCase010(), SwiftHard017Tests/testCase011(), SwiftHard017Tests/testCase012(), SwiftHard017Tests/testCase013(), SwiftHard017Tests/testCase014(), SwiftHard017Tests/testCase015(), SwiftHard017Tests/testCase016(), SwiftHard017Tests/testCase017(), SwiftHard017Tests/testCase018(), SwiftHard017Tests/testCase019(), SwiftHard017Tests/testCase020(), SwiftHard017Tests/testCase021(), SwiftHard017Tests/testCase022(), SwiftHard017Tests/testCase023(), SwiftHard017Tests/testCase024(), SwiftHard017Tests/testCase025(), SwiftHard017Tests/testCase026(), SwiftHard017Tests/testCase027(), SwiftHard017Tests/testCase028(), SwiftHard017Tests/testCase029(), SwiftHard017Tests/testCase030(), SwiftHard017Tests/testCase031(), SwiftHard017Tests/testCase032(), SwiftHard017Tests/testCase033(), SwiftHard017Tests/testCase034(), SwiftHard017Tests/testCase035(), SwiftHard017Tests/testCase036(), SwiftHard017Tests/testCase037(), SwiftHard017Tests/testCase038(), SwiftHard017Tests/testCase039(), SwiftHard017Tests/testCase040(), SwiftHard017Tests/testCase041(), SwiftHard017Tests/testCase042(), SwiftHard017Tests/testThousandDigitNegativeDividend()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 382.7329840660095,
+        "agent_events" : 26,
+        "agent_output_bytes" : 18359,
+        "agent_output_chunks" : 26,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.728219985961914,
+        "test_invocations" : 1,
+        "tool_calls" : 8,
+        "total_events" : 78
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 411.730711708,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T233415-swift-hard-017-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "arithmetic",
+        "big-integers"
+      ],
+      "task" : "swift-hard-017",
+      "usage" : {
+        "cache_read_tokens" : 64000,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.0452655,
+        "input_tokens" : 8545,
+        "output_tokens" : 32385,
+        "total_tokens" : 40930
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "e00ea1ca9aaab1f4117cb447ec1dc5cccdfe559a",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.742683125,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard018'"
+        },
+        {
+          "duration_seconds" : 19.079268166,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "37 executed, 1 passed, 36 failed, 0 skipped. Failing: SwiftHard018Tests/testCase001(), SwiftHard018Tests/testCase002(), SwiftHard018Tests/testCase003(), SwiftHard018Tests/testCase004(), SwiftHard018Tests/testCase005(), SwiftHard018Tests/testCase006(), SwiftHard018Tests/testCase007(), SwiftHard018Tests/testCase008(), SwiftHard018Tests/testCase009(), SwiftHard018Tests/testCase010(), SwiftHard018Tests/testCase011(), SwiftHard018Tests/testCase012(), SwiftHard018Tests/testCase013(), SwiftHard018Tests/testCase014(), SwiftHard018Tests/testCase015(), SwiftHard018Tests/testCase016(), SwiftHard018Tests/testCase017(), SwiftHard018Tests/testCase018(), SwiftHard018Tests/testCase019(), SwiftHard018Tests/testCase020(), SwiftHard018Tests/testCase021(), SwiftHard018Tests/testCase022(), SwiftHard018Tests/testCase023(), SwiftHard018Tests/testCase024(), SwiftHard018Tests/testCase025(), SwiftHard018Tests/testCase026(), SwiftHard018Tests/testCase027(), SwiftHard018Tests/testCase028(), SwiftHard018Tests/testCase029(), SwiftHard018Tests/testCase030(), SwiftHard018Tests/testCase031(), SwiftHard018Tests/testCase032(), SwiftHard018Tests/testCase033(), SwiftHard018Tests/testCase034(), SwiftHard018Tests/testCase035(), SwiftHard018Tests/testDenseCollinearHullKeepsEarliestEndpoints()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 111.806764960289,
+        "agent_events" : 20,
+        "agent_output_bytes" : 40051,
+        "agent_output_chunks" : 20,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.1095769405365,
+        "test_invocations" : 1,
+        "tool_calls" : 6,
+        "total_events" : 66
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 140.297789625,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T234107-swift-hard-018-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "geometry",
+        "overflow"
+      ],
+      "task" : "swift-hard-018",
+      "usage" : {
+        "cache_read_tokens" : 49180,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.044898,
+        "input_tokens" : 10516,
+        "output_tokens" : 313,
+        "total_tokens" : 42843
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "174b16aa30c010a0090e90cad4a99202ce0e86ca",
+        "deletions" : 2,
+        "files_changed" : 1,
+        "insertions" : 152
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.941433916,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard019'"
+        },
+        {
+          "duration_seconds" : 20.099251,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : true,
+          "summary" : "40 executed, 40 passed, 0 failed, 0 skipped"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 537.0693060159683,
+        "agent_events" : 287,
+        "agent_output_bytes" : 315085,
+        "agent_output_chunks" : 287,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 22.358070015907288,
+        "test_invocations" : 1,
+        "tool_calls" : 94,
+        "total_events" : 601
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 566.970456084,
+        "passed" : true
+      },
+      "run_id" : "2026-09-11T234329-swift-hard-019-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "number-theory",
+        "ntt"
+      ],
+      "task" : "swift-hard-019",
+      "usage" : {
+        "cache_read_tokens" : 5141841,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.4110438600000001,
+        "input_tokens" : 83966,
+        "output_tokens" : 30687,
+        "total_tokens" : 148419
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "b3a80dba013def00d76cce706fc782c2afa61060",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.6631802919999998,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard020'"
+        },
+        {
+          "duration_seconds" : 19.255973334,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "36 executed, 3 passed, 33 failed, 0 skipped. Failing: SwiftHard020Tests/testCase000(), SwiftHard020Tests/testCase001(), SwiftHard020Tests/testCase002(), SwiftHard020Tests/testCase003(), SwiftHard020Tests/testCase004(), SwiftHard020Tests/testCase005(), SwiftHard020Tests/testCase006(), SwiftHard020Tests/testCase007(), SwiftHard020Tests/testCase008(), SwiftHard020Tests/testCase009(), SwiftHard020Tests/testCase010(), SwiftHard020Tests/testCase011(), SwiftHard020Tests/testCase012(), SwiftHard020Tests/testCase013(), SwiftHard020Tests/testCase014(), SwiftHard020Tests/testCase015(), SwiftHard020Tests/testCase016(), SwiftHard020Tests/testCase017(), SwiftHard020Tests/testCase018(), SwiftHard020Tests/testCase019(), SwiftHard020Tests/testCase020(), SwiftHard020Tests/testCase021(), SwiftHard020Tests/testCase022(), SwiftHard020Tests/testCase023(), SwiftHard020Tests/testCase024(), SwiftHard020Tests/testCase025(), SwiftHard020Tests/testCase026(), SwiftHard020Tests/testCase027(), SwiftHard020Tests/testCase028(), SwiftHard020Tests/testCase029(), SwiftHard020Tests/testCase030(), SwiftHard020Tests/testCase031(), SwiftHard020Tests/testFewerErrorsThanRadiusAndZeroPolynomial()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 227.60605800151825,
+        "agent_events" : 29,
+        "agent_output_bytes" : 20502,
+        "agent_output_chunks" : 29,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.22304403781891,
+        "test_invocations" : 1,
+        "tool_calls" : 9,
+        "total_events" : 84
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 256.535065709,
+        "passed" : false
+      },
+      "run_id" : "2026-09-11T235257-swift-hard-020-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "coding-theory",
+        "finite-fields"
+      ],
+      "task" : "swift-hard-020",
+      "usage" : {
+        "cache_read_tokens" : 73313,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.04598628,
+        "input_tokens" : 8873,
+        "output_tokens" : 424,
+        "total_tokens" : 41311
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "caef8e8028710f3559766480022bca5b7c58b97e",
+        "deletions" : 1,
+        "files_changed" : 1,
+        "insertions" : 65
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 2.356992375,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard021'"
+        },
+        {
+          "duration_seconds" : 18.699839,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : true,
+          "summary" : "47 executed, 47 passed, 0 failed, 0 skipped"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 515.8409980535507,
+        "agent_events" : 222,
+        "agent_output_bytes" : 300927,
+        "agent_output_chunks" : 222,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.347989916801453,
+        "test_invocations" : 1,
+        "tool_calls" : 72,
+        "total_events" : 471
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 544.685950208,
+        "passed" : true
+      },
+      "run_id" : "2026-09-11T235714-swift-hard-021-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "automata",
+        "counterexamples"
+      ],
+      "task" : "swift-hard-021",
+      "usage" : {
+        "cache_read_tokens" : 2983680,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.24400380000000008,
+        "input_tokens" : 37662,
+        "output_tokens" : 25952,
+        "total_tokens" : 82399
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "e994867b9d3b62fc719f60451eefb1568ea3ab45",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.850219208,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard022'"
+        },
+        {
+          "duration_seconds" : 18.505558292,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "46 executed, 2 passed, 44 failed, 0 skipped. Failing: SwiftHard022Tests/testCase000(), SwiftHard022Tests/testCase001(), SwiftHard022Tests/testCase002(), SwiftHard022Tests/testCase003(), SwiftHard022Tests/testCase004(), SwiftHard022Tests/testCase005(), SwiftHard022Tests/testCase006(), SwiftHard022Tests/testCase007(), SwiftHard022Tests/testCase008(), SwiftHard022Tests/testCase009(), SwiftHard022Tests/testCase010(), SwiftHard022Tests/testCase011(), SwiftHard022Tests/testCase012(), SwiftHard022Tests/testCase013(), SwiftHard022Tests/testCase014(), SwiftHard022Tests/testCase016(), SwiftHard022Tests/testCase018(), SwiftHard022Tests/testCase019(), SwiftHard022Tests/testCase020(), SwiftHard022Tests/testCase021(), SwiftHard022Tests/testCase022(), SwiftHard022Tests/testCase023(), SwiftHard022Tests/testCase024(), SwiftHard022Tests/testCase025(), SwiftHard022Tests/testCase026(), SwiftHard022Tests/testCase027(), SwiftHard022Tests/testCase028(), SwiftHard022Tests/testCase029(), SwiftHard022Tests/testCase030(), SwiftHard022Tests/testCase031(), SwiftHard022Tests/testCase032(), SwiftHard022Tests/testCase033(), SwiftHard022Tests/testCase034(), SwiftHard022Tests/testCase035(), SwiftHard022Tests/testCase036(), SwiftHard022Tests/testCase037(), SwiftHard022Tests/testCase038(), SwiftHard022Tests/testCase039(), SwiftHard022Tests/testCase040(), SwiftHard022Tests/testCase041(), SwiftHard022Tests/testCase042(), SwiftHard022Tests/testCase043(), SwiftHard022Tests/testCase044(), SwiftHard022Tests/testDeletingRootPromotesWholeChildForest()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 275.5837559700012,
+        "agent_events" : 20,
+        "agent_output_bytes" : 40392,
+        "agent_output_chunks" : 20,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 20.662469029426575,
+        "test_invocations" : 1,
+        "tool_calls" : 6,
+        "total_events" : 66
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 303.36660375,
+        "passed" : false
+      },
+      "run_id" : "2026-09-12T000620-swift-hard-022-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "trees",
+        "dynamic-programming"
+      ],
+      "task" : "swift-hard-022",
+      "usage" : {
+        "cache_read_tokens" : 49217,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.04492932,
+        "input_tokens" : 10557,
+        "output_tokens" : 313,
+        "total_tokens" : 42898
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "0bd584af64ca27655c782e6ab52033734512993f",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.8377997499999998,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard023'"
+        },
+        {
+          "duration_seconds" : 19.174593542,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "66 executed, 0 passed, 66 failed, 0 skipped. Failing: SwiftHard023Tests/testCase000(), SwiftHard023Tests/testCase001(), SwiftHard023Tests/testCase002(), SwiftHard023Tests/testCase003(), SwiftHard023Tests/testCase004(), SwiftHard023Tests/testCase005(), SwiftHard023Tests/testCase006(), SwiftHard023Tests/testCase007(), SwiftHard023Tests/testCase008(), SwiftHard023Tests/testCase009(), SwiftHard023Tests/testCase010(), SwiftHard023Tests/testCase011(), SwiftHard023Tests/testCase012(), SwiftHard023Tests/testCase013(), SwiftHard023Tests/testCase014(), SwiftHard023Tests/testCase015(), SwiftHard023Tests/testCase016(), SwiftHard023Tests/testCase017(), SwiftHard023Tests/testCase018(), SwiftHard023Tests/testCase019(), SwiftHard023Tests/testCase020(), SwiftHard023Tests/testCase021(), SwiftHard023Tests/testCase022(), SwiftHard023Tests/testCase023(), SwiftHard023Tests/testCase024(), SwiftHard023Tests/testCase025(), SwiftHard023Tests/testCase026(), SwiftHard023Tests/testCase027(), SwiftHard023Tests/testCase028(), SwiftHard023Tests/testCase029(), SwiftHard023Tests/testCase030(), SwiftHard023Tests/testCase031(), SwiftHard023Tests/testCase032(), SwiftHard023Tests/testCase033(), SwiftHard023Tests/testCase034(), SwiftHard023Tests/testCase035(), SwiftHard023Tests/testCase036(), SwiftHard023Tests/testCase037(), SwiftHard023Tests/testCase038(), SwiftHard023Tests/testCase039(), SwiftHard023Tests/testCase040(), SwiftHard023Tests/testCase041(), SwiftHard023Tests/testCase042(), SwiftHard023Tests/testCase043(), SwiftHard023Tests/testCase044(), SwiftHard023Tests/testCase045(), SwiftHard023Tests/testCase046(), SwiftHard023Tests/testCase047(), SwiftHard023Tests/testCase048(), SwiftHard023Tests/testCase049(), SwiftHard023Tests/testCase050(), SwiftHard023Tests/testCase051(), SwiftHard023Tests/testCase052(), SwiftHard023Tests/testCase053(), SwiftHard023Tests/testCase054(), SwiftHard023Tests/testCase055(), SwiftHard023Tests/testCase056(), SwiftHard023Tests/testCase057(), SwiftHard023Tests/testCase058(), SwiftHard023Tests/testCase059(), SwiftHard023Tests/testCase060(), SwiftHard023Tests/testCase061(), SwiftHard023Tests/testCase062(), SwiftHard023Tests/testCase063(), SwiftHard023Tests/testCase064(), SwiftHard023Tests/testGapSideSwitchAndZeroCostMultiplicity()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 229.35113406181335,
+        "agent_events" : 20,
+        "agent_output_bytes" : 15122,
+        "agent_output_chunks" : 20,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.31584596633911,
+        "test_invocations" : 1,
+        "tool_calls" : 6,
+        "total_events" : 66
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 257.781480958,
+        "passed" : false
+      },
+      "run_id" : "2026-09-12T001124-swift-hard-023-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "alignment",
+        "counting"
+      ],
+      "task" : "swift-hard-023",
+      "usage" : {
+        "cache_read_tokens" : 47614,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.04412604,
+        "input_tokens" : 8384,
+        "output_tokens" : 278,
+        "total_tokens" : 40679
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "d99b53a6aa152c2ca41afddda6a3268102c9b703",
+        "deletions" : 0,
+        "files_changed" : 0,
+        "insertions" : 0
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.965109333,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard024'"
+        },
+        {
+          "duration_seconds" : 19.710285166,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : false,
+          "summary" : "44 executed, 23 passed, 21 failed, 0 skipped. Failing: SwiftHard024Tests/testCase000(), SwiftHard024Tests/testCase001(), SwiftHard024Tests/testCase002(), SwiftHard024Tests/testCase003(), SwiftHard024Tests/testCase004(), SwiftHard024Tests/testCase005(), SwiftHard024Tests/testCase012(), SwiftHard024Tests/testCase013(), SwiftHard024Tests/testCase019(), SwiftHard024Tests/testCase022(), SwiftHard024Tests/testCase025(), SwiftHard024Tests/testCase027(), SwiftHard024Tests/testCase029(), SwiftHard024Tests/testCase030(), SwiftHard024Tests/testCase032(), SwiftHard024Tests/testCase034(), SwiftHard024Tests/testCase036(), SwiftHard024Tests/testCase037(), SwiftHard024Tests/testCase038(), SwiftHard024Tests/testCase041(), SwiftHard024Tests/testLayeredGraphDoesNotEnumerateAllSimplePaths()"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 383.3731150627136,
+        "agent_events" : 20,
+        "agent_output_bytes" : 15729,
+        "agent_output_chunks" : 20,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 21.961984992027283,
+        "test_invocations" : 1,
+        "tool_calls" : 6,
+        "total_events" : 66
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 412.627722,
+        "passed" : false
+      },
+      "run_id" : "2026-09-12T001543-swift-hard-024-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "graphs",
+        "ranked-enumeration"
+      ],
+      "task" : "swift-hard-024",
+      "usage" : {
+        "cache_read_tokens" : 47872,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.04413432,
+        "input_tokens" : 7812,
+        "output_tokens" : 32432,
+        "total_tokens" : 40244
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
+        "version" : "1.18.30"
+      },
+      "artifacts" : {
+        "diff" : "diff.patch",
+        "events" : "events.jsonl",
+        "logs" : "logs"
+      },
+      "category" : "tests",
+      "difficulty" : 10,
+      "environment" : {
+        "architecture" : "arm64",
+        "macos" : "27.0",
+        "runtime" : "iOS 26.5",
+        "simulator" : "iPhone 17",
+        "xcode" : "27.0",
+        "xcode_build" : "27A266a"
+      },
+      "git" : {
+        "base_commit" : "01d96152407f9ca3061019fb517370a6cc8f0ffb",
+        "deletions" : 0,
+        "files_changed" : 1,
+        "insertions" : 64
+      },
+      "graders" : [
+        {
+          "duration_seconds" : 1.908324125,
+          "evidence" : [
+            {
+              "name" : "build.log",
+              "path" : "logs/build.log"
+            },
+            {
+              "name" : "build.xcresult",
+              "path" : "logs/build.xcresult"
+            }
+          ],
+          "name" : "build",
+          "passed" : true,
+          "summary" : "xcodebuild build succeeded for scheme 'SwiftHard025'"
+        },
+        {
+          "duration_seconds" : 19.990642708,
+          "evidence" : [
+            {
+              "name" : "xctest.log",
+              "path" : "logs/xctest.log"
+            },
+            {
+              "name" : "xctest.xcresult",
+              "path" : "logs/xctest.xcresult"
+            }
+          ],
+          "name" : "xctest",
+          "passed" : true,
+          "summary" : "70 executed, 70 passed, 0 failed, 0 skipped"
+        }
+      ],
+      "metrics" : {
+        "agent_duration_seconds" : 558.6313139200211,
+        "agent_events" : 96,
+        "agent_output_bytes" : 116185,
+        "agent_output_chunks" : 96,
+        "build_invocations" : 1,
+        "commands_executed" : 4,
+        "grading_duration_seconds" : 22.19955599308014,
+        "test_invocations" : 1,
+        "tool_calls" : 31,
+        "total_events" : 219
+      },
+      "result" : {
+        "agent_termination" : "completed",
+        "duration_seconds" : 588.390413084,
+        "passed" : true
+      },
+      "run_id" : "2026-09-12T002237-swift-hard-025-opencode",
+      "schema_version" : 1,
+      "tags" : [
+        "pure-swift",
+        "capability",
+        "concurrency",
+        "model-checking"
+      ],
+      "task" : "swift-hard-025",
+      "usage" : {
+        "cache_read_tokens" : 727040,
+        "cache_write_tokens" : 0,
+        "estimated_cost_usd" : 0.0812595,
+        "input_tokens" : 32801,
+        "output_tokens" : 23164,
+        "total_tokens" : 55965
+      }
+    },
+    {
+      "agent" : {
+        "agent" : "opencode",
+        "configuration" : {
+          "answer_isolation" : "sealed (solutions, task files and other runs denied)",
+          "isolation" : "none (host process)",
+          "mode" : "run --format json --pure --auto",
+          "network" : "unrestricted (host egress; --vm denies it)",
+          "plugins" : "disabled (--pure)",
+          "user_config" : "ignored (OPENCODE_CONFIG)",
+          "web_access" : "disabled (webfetch denied)"
+        },
+        "model" : "minimax/MiniMax-M3",
         "version" : "1.18.27"
       },
       "artifacts" : {
@@ -12950,7 +15573,7 @@
           "web_access" : "disabled (webfetch denied)"
         },
         "model" : "minimax/MiniMax-M3",
-        "version" : "1.18.27"
+        "version" : "1.18.30"
       },
       "artifacts" : {
         "diff" : "diff.patch",
@@ -12965,17 +15588,17 @@
         "runtime" : "iOS 26.5",
         "simulator" : "iPhone 17",
         "xcode" : "27.0",
-        "xcode_build" : "27A5252f"
+        "xcode_build" : "27A266a"
       },
       "git" : {
-        "base_commit" : "eba728518ce781af5b7554467498a4e7fa488232",
+        "base_commit" : "60ab4e1029f1125bd2873a24bf0cc2c7c2f224f1",
         "deletions" : 3,
         "files_changed" : 2,
-        "insertions" : 17
+        "insertions" : 18
       },
       "graders" : [
         {
-          "duration_seconds" : 10.725553417,
+          "duration_seconds" : 5.154779625,
           "evidence" : [
             {
               "name" : "build.log",
@@ -12991,7 +15614,7 @@
           "summary" : "xcodebuild build succeeded for scheme 'System003Fixture'"
         },
         {
-          "duration_seconds" : 15.697379584,
+          "duration_seconds" : 16.155969541,
           "evidence" : [
             {
               "name" : "xctest.log",
@@ -13008,23 +15631,23 @@
         }
       ],
       "metrics" : {
-        "agent_duration_seconds" : 138.49975204467773,
-        "agent_events" : 43,
-        "agent_output_bytes" : 57950,
-        "agent_output_chunks" : 43,
+        "agent_duration_seconds" : 92.67957401275635,
+        "agent_events" : 28,
+        "agent_output_bytes" : 30875,
+        "agent_output_chunks" : 28,
         "build_invocations" : 1,
         "commands_executed" : 4,
-        "grading_duration_seconds" : 26.88361096382141,
+        "grading_duration_seconds" : 21.6109379529953,
         "test_invocations" : 1,
-        "tool_calls" : 13,
-        "total_events" : 114
+        "tool_calls" : 8,
+        "total_events" : 84
       },
       "result" : {
         "agent_termination" : "completed",
-        "duration_seconds" : 166.840184458,
+        "duration_seconds" : 121.6343075,
         "passed" : true
       },
-      "run_id" : "2026-09-07T081253-system-003-opencode",
+      "run_id" : "2026-09-12T003226-system-003-opencode",
       "schema_version" : 1,
       "tags" : [
         "core-spotlight",
@@ -13033,12 +15656,12 @@
       ],
       "task" : "system-003",
       "usage" : {
-        "cache_read_tokens" : 129536,
+        "cache_read_tokens" : 69248,
         "cache_write_tokens" : 0,
-        "estimated_cost_usd" : 0.01830846,
-        "input_tokens" : 17925,
-        "output_tokens" : 4299,
-        "total_tokens" : 22224
+        "estimated_cost_usd" : 0.00921348,
+        "input_tokens" : 9550,
+        "output_tokens" : 1828,
+        "total_tokens" : 11378
       }
     },
     {
@@ -16308,18 +18931,18 @@
   ],
   "score" : {
     "active_time_weight" : 0.2,
-    "available" : 1480,
+    "available" : 1730,
     "cost_weight" : 0.8,
-    "fraction_of_available" : 0.5886884343328905,
+    "fraction_of_available" : 0.5121858215122108,
     "minimum_efficiency" : 0.25,
-    "points" : 871.258882812678,
+    "points" : 886.0814712161247,
     "reference_active_time_seconds" : 300,
     "reference_cost_usd" : 0.025,
-    "scored_runs" : 148,
+    "scored_runs" : 173,
     "solves_with_unreported_active_time" : 0,
     "solves_with_unreported_cost" : 4,
     "specification" : "points-v3",
     "unscored_runs" : 0
   },
-  "total" : 148
+  "total" : 173
 }

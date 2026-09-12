@@ -1,17 +1,17 @@
 ---
-title: "minimax/MiniMax-M3, Gold Suite 1.2, 110/148 passed"
+title: "minimax/MiniMax-M3, Gold Suite 1.3, 117/173 passed"
 date: 2026-09-07
 suite: gold
-suite_revision: "2026-09-10"
+suite_revision: "2026-09-11"
 attempt: "latest"
 data: minimax-m3
 model: "minimax/MiniMax-M3"
 harness: "opencode, opencode 1.18.27, opencode 1.18.30"
-tasks: 148
-passed: 110
+tasks: 173
+passed: 117
 description: >-
-  AppleBench results for minimax/MiniMax-M3 on Gold Suite 1.2:
-  110 of 148 tasks completed to a verified result (74.3% pass rate),
+  AppleBench results for minimax/MiniMax-M3 on Gold Suite 1.3:
+  117 of 173 tasks completed to a verified result (67.6% pass rate),
   with cost, active time, per-category results,
   and every task.
 ---
