@@ -54,10 +54,10 @@ Params: runs (site.benchmarks).
     {%- if task_cost > max_task_cost %}{% assign max_task_cost = task_cost %}{% endif -%}
     {%- if active_per_solve > max_active_per_solve %}{% assign max_active_per_solve = active_per_solve %}{% endif -%}
     {%- assign name = run.model | split: "/" | last -%}
-    {%- assign effort_label = "provider default" -%}
+    {%- assign effort_label = "(default)" -%}
     {%- for reasoning in report.reasoning -%}
       {%- if reasoning.effort -%}
-        {%- assign effort_label = reasoning.effort | append: " effort" -%}
+        {%- assign effort_label = reasoning.effort | prepend: "(" | append: ")" -%}
         {%- break -%}
       {%- endif -%}
     {%- endfor -%}
@@ -138,10 +138,10 @@ Params: runs (site.benchmarks).
         {%- assign pending_hits = pending_rows | where: "passed", "true" -%}
         {%- assign pending_name = run.model | split: "/" | last -%}
         {%- assign pending_report = site.data.reports[run.data] -%}
-        {%- assign pending_effort = "provider default" -%}
+        {%- assign pending_effort = "(default)" -%}
         {%- for reasoning in pending_report.reasoning -%}
           {%- if reasoning.effort -%}
-            {%- assign pending_effort = reasoning.effort | append: " effort" -%}
+            {%- assign pending_effort = reasoning.effort | prepend: "(" | append: ")" -%}
             {%- break -%}
           {%- endif -%}
         {%- endfor -%}

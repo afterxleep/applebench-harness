@@ -1148,6 +1148,27 @@ th {
   font-size: 0.74rem;
 }
 
+.comparison-pending {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.comparison-pending h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.comparison-pending .figure__note {
+  max-width: 60ch;
+  margin-top: 0.5rem;
+  line-height: 1.55;
+}
+
+.comparison-pending .bars {
+  margin-top: 1rem;
+}
+
 .bars--money .bar-row__fill {
   background: #477eac;
 }
@@ -1406,6 +1427,25 @@ th {
   .figure figcaption {
     grid-template-columns: 1fr;
     gap: 0.8rem;
+  }
+
+  .bars--leaderboard .bar-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 0.9rem;
+  }
+
+  .bars--leaderboard .bar-row__label {
+    white-space: normal;
+  }
+
+  .bars--leaderboard .bar-row__track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .bars--leaderboard .bar-row__value {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .site-footer__inner {
