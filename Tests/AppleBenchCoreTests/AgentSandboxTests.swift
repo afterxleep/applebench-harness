@@ -269,6 +269,59 @@ struct AgentSandboxTests {
         #expect(try !canRead(answers), "the run's grader specification is readable")
     }
 
+    @Test("A sealed run cannot read any harness-owned evidence")
+    func sealedRunCannotReadHarnessEvidence() throws {
+        let harness = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("applebench-harness-seal-\(UUID().uuidString)")
+        let run = harness.appendingPathComponent(".applebench/runs/r1")
+        let workspace = run.appendingPathComponent("workspace")
+        let evidence = [
+            harness.appendingPathComponent(".applebench/imported-old/result.json"),
+            harness.appendingPathComponent("site/_data/reports/another-model.json"),
+            harness.appendingPathComponent("Sources/AppleBenchCore/Runner/AgentSandbox.swift"),
+        ]
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+        for file in evidence {
+            try FileManager.default.createDirectory(
+                at: file.deletingLastPathComponent(), withIntermediateDirectories: true
+            )
+            try "answer material".write(to: file, atomically: true, encoding: .utf8)
+        }
+        let workspaceFile = workspace.appendingPathComponent("Sources/Problem.swift")
+        try FileManager.default.createDirectory(
+            at: workspaceFile.deletingLastPathComponent(), withIntermediateDirectories: true
+        )
+        try "fixture".write(to: workspaceFile, atomically: true, encoding: .utf8)
+        defer { try? FileManager.default.removeItem(at: harness) }
+
+        let box = AgentSandbox.standard(
+            harnessRoot: harness,
+            taskSetRoot: nil,
+            workspaceURL: workspace,
+            runDirectory: run
+        )
+        let profileURL = run.appendingPathComponent("agent.sb")
+
+        func canRead(_ file: URL) throws -> Bool {
+            let command = try #require(try box.wrap(
+                executable: "/bin/cat", arguments: [file.path], profileURL: profileURL
+            ))
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: command.executable)
+            process.arguments = command.arguments
+            process.standardOutput = FileHandle.nullDevice
+            process.standardError = FileHandle.nullDevice
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus == 0
+        }
+
+        #expect(try canRead(workspaceFile), "the agent cannot read its own workspace")
+        for file in evidence {
+            #expect(try !canRead(file), "harness evidence is readable: \(file.path)")
+        }
+    }
+
     @Test("A binary the agent fetches into its workspace may run")
     func downloadedBinariesMayRun() throws {
         // A tool the agent downloads is its own work: it pays the tokens to

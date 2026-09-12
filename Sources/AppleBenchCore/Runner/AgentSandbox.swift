@@ -244,6 +244,10 @@ public struct AgentSandbox: Sendable {
         runDirectory: URL? = nil
     ) -> AgentSandbox {
         var denied: [URL] = [
+            // Published reports, imports, scripts and harness implementation
+            // can all disclose prior answers or the grading boundary. Open
+            // only the path from this checkout to the current run.
+            harnessRoot,
             // Everything the harness cached or measured. Only the current
             // run is opened back up below, one ancestor at a time.
             harnessRoot.appendingPathComponent(".applebench"),
