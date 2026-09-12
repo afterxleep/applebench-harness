@@ -87,6 +87,16 @@ public final class ParallelCursor: @unchecked Sendable {
         abandoned = true
     }
 
+    /// Stop handing out work and report whether this call performed the stop.
+    /// The combined operation lets concurrent workers emit one stop notice.
+    public func abandonIfNeeded() -> Bool {
+        os_unfair_lock_lock(&lock)
+        defer { os_unfair_lock_unlock(&lock) }
+        guard !abandoned else { return false }
+        abandoned = true
+        return true
+    }
+
     public var wasAbandoned: Bool {
         os_unfair_lock_lock(&lock)
         defer { os_unfair_lock_unlock(&lock) }

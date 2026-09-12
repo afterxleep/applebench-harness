@@ -433,9 +433,8 @@ suite_status=${PIPESTATUS[0]}
 
 set -e
 
-# Export regardless of the suite's exit status: a run with infrastructure
-# errors still produced results worth reading, and hiding them would make
-# the report look better than the run actually was.
+# Export regardless of the suite's exit status: a stopped run can contain
+# completed valid results needed for --changed to resume at the errored task.
 "$binary" results "$runs_dir" --format csv  --output "$out/summary.csv"
 "$binary" results "$runs_dir" --format json --output "$out/summary.json"
 

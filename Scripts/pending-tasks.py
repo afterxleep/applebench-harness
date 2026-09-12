@@ -122,18 +122,24 @@ def main() -> int:
         # raw run (Reports/<suite>-<date>/summary.json). A run that has not
         # been published is still a run, and treating it as absent would
         # re-run everything it already covered.
-        candidates = sorted(
-            list(directory.glob("*.json")) + list(directory.glob("*/summary.json")),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True,
-        )
-        for candidate in candidates:
-            try:
-                document = json.loads(candidate.read_text())
-            except (ValueError, OSError):
-                continue
-            if any(r.get("agent", {}).get("model") == args.model for r in document.get("runs", [])):
-                report_path = candidate
+        # A published report is the complete cumulative record for a model.
+        # A nested summary is one invocation and may contain only a handful of
+        # tasks. Prefer the published record even when a partial summary was
+        # written more recently, otherwise --changed reruns already-scored work.
+        candidate_groups = [
+            list(directory.glob("*.json")),
+            list(directory.glob("*/summary.json")),
+        ]
+        for candidates in candidate_groups:
+            for candidate in sorted(candidates, key=lambda p: p.stat().st_mtime, reverse=True):
+                try:
+                    document = json.loads(candidate.read_text())
+                except (ValueError, OSError):
+                    continue
+                if any(r.get("agent", {}).get("model") == args.model for r in document.get("runs", [])):
+                    report_path = candidate
+                    break
+            if report_path is not None:
                 break
 
     # When each task was last run for this model, from the run id's UTC stamp.

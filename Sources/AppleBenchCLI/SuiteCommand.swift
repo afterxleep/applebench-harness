@@ -181,9 +181,8 @@ struct SuiteCommand: AsyncParsableCommand {
         print("AppleBench · suite \(benchmarkSuite.id) · \(tasks.count) task(s) × \(entries.count) configuration(s) × \(runs) run(s)\n")
 
         // Set when the agent never reached its model. A caller has to tell
-        // this from an ordinary run that hit a few infrastructure errors,
-        // because that one still produced results worth publishing and this
-        // one produced nothing at all.
+        // this from a run stopped by an infrastructure error, which retains
+        // completed valid results; abandonment produced nothing at all.
         let abandoned = AbandonedFlag()
         let report = await coordinator.runSuite(
             suite: benchmarkSuite,
@@ -217,6 +216,10 @@ struct SuiteCommand: AsyncParsableCommand {
                 print("")
                 print("Suite stopped: \(reason)")
                 print("Nothing here measures the model. Fix the agent and run it again.")
+            case .suiteStopped(let reason):
+                print("")
+                print("Suite stopped: \(reason)")
+                print("Completed valid results were retained. Fix the infrastructure issue and resume with --changed.")
             }
         }
 
@@ -264,10 +267,10 @@ struct SuiteCommand: AsyncParsableCommand {
             }
         }
 
-        // Its own exit code, not just failure. A run that hit a few errors and
-        // finished still produced a result a caller may want to publish; an
-        // abandoned one produced nothing, and publishing it would put a score
-        // on the board that no model earned.
+        // Its own exit code, not just failure. A run stopped by an
+        // infrastructure error still exports completed results and exits 1;
+        // an abandoned one produced nothing, and publishing it would put a
+        // score on the board that no model earned.
         if abandoned.isSet {
             throw ExitCode(Self.abandonedExitCode)
         }

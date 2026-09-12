@@ -50,6 +50,9 @@ public struct RunCoordinator: Sendable {
         /// The suite stopped early because the agent never reached its model.
         /// Jobs already running finish; nothing new is claimed.
         case suiteAbandoned(reason: String)
+        /// The suite stopped after an infrastructure error. Completed valid
+        /// results remain publishable so --changed can resume from this task.
+        case suiteStopped(reason: String)
     }
 
     /// One row of a suite comparison: an agent harness, optionally pinned to
@@ -90,8 +93,8 @@ public struct RunCoordinator: Sendable {
     }
 
     /// Runs every task in the suite for every entry, `runs` times each.
-    /// Infrastructure failures on one run are recorded and do not abort the
-    /// rest of the suite.
+    /// Infrastructure failures stop new work from being claimed. Valid results
+    /// that completed before the failure remain in the report for resumption.
     ///
     /// Concurrency: when `parallelism` is greater than 1, work for a single
     /// entry is dispatched across that many concurrent task slots. Each slot
@@ -148,6 +151,7 @@ public struct RunCoordinator: Sendable {
                 totalCostUSD: perEntry.totalCost
             ))
             allResults.append(contentsOf: perEntry.results)
+            if perEntry.stopped { break }
         }
 
         return SuiteReport(suiteID: suite.id, agents: agentReports, results: allResults)
@@ -166,6 +170,7 @@ public struct RunCoordinator: Sendable {
         var totalTokens: Int? = nil
         var totalCost: Double? = nil
         var results: [BenchmarkRunResult] = []
+        var stopped = false
     }
 
     private func runJobs(
@@ -243,8 +248,7 @@ public struct RunCoordinator: Sendable {
                                 // Repeated pre-model exits say nothing about
                                 // the task. Stop before untouched fixtures can
                                 // be published as model failures.
-                                if !cursor.wasAbandoned {
-                                    cursor.abandon()
+                                if cursor.abandonIfNeeded() {
                                     let attemptWord = startupAttempt == 1 ? "attempt" : "attempts"
                                     progress(.suiteAbandoned(
                                         reason: "the agent never reached its model on "
@@ -254,6 +258,11 @@ public struct RunCoordinator: Sendable {
                                 break
                             } catch {
                                 errorMessage = "\(error)"
+                                if cursor.abandonIfNeeded() {
+                                    progress(.suiteStopped(
+                                        reason: "infrastructure error on \(job.task.id): \(error)"
+                                    ))
+                                }
                                 break
                             }
                         }
@@ -282,7 +291,8 @@ public struct RunCoordinator: Sendable {
             durations: s.durations,
             totalTokens: s.totalTokens,
             totalCost: s.totalCost,
-            results: s.results
+            results: s.results,
+            stopped: cursor.wasAbandoned
         )
     }
 

@@ -123,9 +123,10 @@ never supersede another's.
   included in completion-rate denominators.
 - A grader that **cannot execute** (e.g. `xcodebuild` reports a malformed
   `.xcresult`) is **not** the same thing, the runner records it as
-  `graderFailure` and the run terminates with exit code 2 (`BenchmarkFailure`).
-  Suite aggregation counts these as `errored` and excludes them from the
-  completion rate.
+  `graderFailure`, counts it as `errored`, and stops the suite before another
+  task is claimed. Completed valid results are retained and excluded errors do
+  not affect the completion rate. After fixing the infrastructure, rerun with
+  `--changed` to resume from the errored task.
 
 ### Suite-level aggregation
 
@@ -192,9 +193,11 @@ configuration, plus the AppleBench points score described above. No statistical
 significance claims are made.
 
 Runs that fail for infrastructure reasons (agent CLI missing, `xcodebuild`
-unlaunchable) are counted separately as *errored* and excluded from completion
-rates, a grader reporting FAIL is a valid benchmark result; a grader that
-cannot execute is not.
+unlaunchable) stop before another task is claimed. They are counted separately
+as *errored* and excluded from completion rates. Completed valid results remain
+publishable so `--changed` can resume after the issue is fixed. A grader
+reporting FAIL is a valid benchmark result and does not stop the suite; a grader
+that cannot execute is not.
 
 ## Run limits and safety
 

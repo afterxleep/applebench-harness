@@ -169,6 +169,7 @@ private final class StartupRetryTrace: @unchecked Sendable {
     private var recordedNotices: [StartupRetryNotice] = []
     private var recordedDelays: [Duration] = []
     private var recordedAbandonmentReasons: [String] = []
+    private var recordedStopReasons: [String] = []
     private var recordedErrors: [String] = []
 
     func record(_ progress: RunCoordinator.SuiteProgress) {
@@ -188,6 +189,8 @@ private final class StartupRetryTrace: @unchecked Sendable {
             ))
         case .suiteAbandoned(let reason):
             recordedAbandonmentReasons.append(reason)
+        case .suiteStopped(let reason):
+            recordedStopReasons.append(reason)
         case .taskErrored(_, _, let error):
             recordedErrors.append(error)
         case .taskStarted, .taskFinished:
@@ -217,6 +220,12 @@ private final class StartupRetryTrace: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         return recordedAbandonmentReasons
+    }
+
+    var stopReasons: [String] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recordedStopReasons
     }
 
     var errors: [String] {
@@ -647,34 +656,38 @@ struct RunCoordinatorTests {
         #expect(report.results.count == 2)
     }
 
-    @Test("Infrastructure errors on one agent do not abort the suite")
+    @Test("Infrastructure errors abort the suite before another task or agent starts")
     func erroringAgent() async throws {
         let harness = try await RunnerHarness.make()
         defer { harness.cleanUp() }
 
         let coordinator = RunCoordinator(runner: harness.makeRunner())
-        let suite = BenchmarkSuite(id: "unit", name: "Unit", tasks: ["unit-001"])
+        var secondTask = harness.task
+        secondTask.id = "unit-002"
+        let suite = BenchmarkSuite(id: "unit", name: "Unit", tasks: ["unit-001", "unit-002"])
         let broken = ScriptedAdapter(
             identifier: "broken",
             prepareError: .agentLaunchFailure("missing binary")
         )
+        let trace = StartupRetryTrace()
         let report = await coordinator.runSuite(
             suite: suite,
-            tasks: [harness.task],
+            tasks: [harness.task, secondTask],
             entries: [
                 .init(adapter: broken, model: "model-a"),
                 .init(adapter: ScriptedAdapter(), model: "model-b"),
             ],
             runs: 1,
-            options: harness.options
+            options: harness.options,
+            progress: trace.record
         )
 
-        #expect(report.agents.count == 2)
+        #expect(report.agents.count == 1)
         #expect(report.agents[0].agent == "broken · model-a")
         #expect(report.agents[0].errored == 1)
         #expect(report.agents[0].attempted == 0)
-        #expect(report.agents[1].agent == "scripted · model-b")
-        #expect(report.agents[1].passed == 1)
+        #expect(trace.stopReasons.count == 1)
+        #expect(trace.stopReasons.first?.contains("unit-001") == true)
     }
 
     @Test("Median duration")
