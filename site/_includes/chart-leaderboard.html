@@ -22,6 +22,7 @@ Params: runs (site.benchmarks).
   {%- assign report = site.data.reports[run.data] -%}
   {%- assign comparable = true -%}
   {%- if current and run.suite_revision != current.id %}{% assign comparable = false %}{% endif -%}
+  {%- if current and rows.size != current.gold_tasks %}{% assign comparable = false %}{% endif -%}
   {%- unless comparable -%}
     {%- assign left_out = left_out | push: run -%}
   {%- endunless -%}
@@ -118,10 +119,30 @@ Params: runs (site.benchmarks).
   </div>
 
   {%- if left_out.size > 0 -%}
-  <p class="figure__note">
-    Not ranked: {%- for run in left_out %} <a href="{{ run.url | relative_url }}">{{ run.model | split: "/" | last }}</a>{%- unless forloop.last %},{% endunless -%}{% endfor -%}.
-    Older task set, so it does not belong on this chart.
-  </p>
+  <div class="comparison-pending">
+    <h4>Awaiting {{ current.name }} tasks</h4>
+    <p class="figure__note">
+      These published results remain visible, but are not ranked against models
+      that completed the current {{ current.gold_tasks }}-task suite.
+    </p>
+    <div class="bars bars--leaderboard">
+      {%- for run in left_out -%}
+        {%- assign pending_rows = site.data.benchmarks[run.data] -%}
+        {%- assign pending_hits = pending_rows | where: "passed", "true" -%}
+        {%- assign pending_name = run.model | split: "/" | last -%}
+        {%- capture pending_label %}{{ pending_name }} · {{ pending_rows.size }} tasks{% endcapture -%}
+        {%- capture pending_printed %}{{ pending_hits.size }}/{{ pending_rows.size }}{% endcapture -%}
+        {%- assign pending_link = run.url | relative_url -%}
+        {%- include bar-row.html
+            label=pending_label
+            value=pending_hits.size
+            total=pending_rows.size
+            value_label=pending_printed
+            link=pending_link
+            color="series-2" -%}
+      {%- endfor -%}
+    </div>
+  </div>
   {%- endif -%}
   <p class="figure__note">
     A pass means the app built, ran, and the checks succeeded. This chart
