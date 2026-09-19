@@ -1,0 +1,99 @@
+{%- comment -%}
+AppleBench score by task category. One measure, one series · magnitude by length,
+so a single sequential hue and no legend. Params: rows (the run rows).
+{%- endcomment -%}
+<figure class="figure">
+  <figcaption>
+    <h3 class="figure__title">AppleBench score by category</h3>
+    <p class="figure__subtitle">
+      Points earned out of available empirical weight in each kind of work, worst first.
+    </p>
+  </figcaption>
+
+  {%- assign groups = include.rows | group_by: "category" -%}
+  {%- assign ranked = "" | split: "" -%}
+  {%- for group in groups -%}
+    {%- if group.name == "composition" -%}{%- continue -%}{%- endif -%}
+    {%- assign earned = 0 -%}
+    {%- assign available = 0 -%}
+    {%- for item in group.items -%}
+      {%- assign earned = earned | plus: item.points -%}
+      {%- assign available = available | plus: item.face_value -%}
+    {%- endfor -%}
+    {%- assign rate = earned | times: 10000 | divided_by: available -%}
+    {%- capture packed -%}{{ rate | prepend: "00000" | slice: -5, 5 }}|{{ group.name }}|{{ earned }}|{{ available }}{%- endcapture -%}
+    {%- assign ranked = ranked | push: packed -%}
+  {%- endfor -%}
+  {%- assign ranked = ranked | sort -%}
+
+  <div class="bars">
+    {%- for packed in ranked -%}
+      {%- assign parts = packed | split: "|" -%}
+      {%- assign bar_label = parts[1] -%}
+      {%- assign bar_value = parts[2] -%}
+      {%- assign bar_total = parts[3] -%}
+      {%- assign category = site.data.categories | where: "id", bar_label | first -%}
+      {%- include bar-row.html label=bar_label description=category.description value=bar_value total=bar_total color="series-1" -%}
+    {%- endfor -%}
+  </div>
+
+  {%- assign composition_rows = include.rows | where: "category", "composition" -%}
+  {%- if composition_rows.size > 0 -%}
+    {%- assign composition_earned = 0 -%}
+    {%- assign composition_available = 0 -%}
+    {%- for item in composition_rows -%}
+      {%- assign composition_earned = composition_earned | plus: item.points -%}
+      {%- assign composition_available = composition_available | plus: item.face_value -%}
+    {%- endfor -%}
+    {%- assign composition_category = site.data.categories | where: "id", "composition" | first -%}
+    <div class="composition-breakout">
+      <div class="composition-breakout__head">
+        <h4>Composition</h4>
+        <p>{{ composition_category.description }}</p>
+      </div>
+      <div class="bars">
+        {%- include bar-row.html
+            label="Composition"
+            description=composition_category.description
+            value=composition_earned
+            total=composition_available
+            color="series-2" -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  <p class="figure__note">
+    A verified pass earns the task's empirical weight; a failure earns zero.
+  </p>
+
+  <details class="data-table">
+    <summary>View as a table</summary>
+    <table>
+      <thead>
+        <tr><th scope="col">Category</th><th scope="col">Points</th><th scope="col">Available</th><th scope="col">Score</th></tr>
+      </thead>
+      <tbody>
+        {%- for packed in ranked -%}
+          {%- assign parts = packed | split: "|" -%}
+          {%- assign row_label = parts[1] -%}
+          {%- assign row_hits = parts[2] -%}
+          {%- assign row_total = parts[3] -%}
+          <tr>
+            <td>{{ row_label }}</td>
+            <td>{{ row_hits }}</td>
+            <td>{{ row_total }}</td>
+            <td>{{ row_hits | times: 1000 | divided_by: row_total | times: 0.1 | round: 1 }}%</td>
+          </tr>
+        {%- endfor -%}
+        {%- if composition_rows.size > 0 -%}
+          <tr class="composition-table-row">
+            <td>composition</td>
+            <td>{{ composition_earned }}</td>
+            <td>{{ composition_available }}</td>
+            <td>{{ composition_earned | times: 1000 | divided_by: composition_available | times: 0.1 | round: 1 }}%</td>
+          </tr>
+        {%- endif -%}
+      </tbody>
+    </table>
+  </details>
+</figure>

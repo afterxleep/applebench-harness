@@ -1,0 +1,72 @@
+---
+layout: default
+title: Results
+permalink: /benchmarks/
+description: Published AppleBench runs, with full per-task data and charts.
+---
+
+<div class="wrap">
+  <header class="article-header article-header--editorial">
+    {%- assign current_suite = site.data.suite_revisions | where: "current", true | first -%}
+    <p class="section__index">Measured results / {{ current_suite.name }}</p>
+    <div class="article-header__grid">
+      <h1>Results</h1>
+      <p class="article-header__lede">
+        AppleBench score, raw pass rate, list-price cost, and active time for {{ current_suite.name }}.
+        Every headline number opens into the full task-level record.
+      </p>
+    </div>
+    <div class="callout">
+      <p><strong>The score is a living number.</strong> Under the
+        <code>empirical-v1</code> specification each task is weighted by how
+        rarely the complete published models pass it — a task everyone solves
+        is worth 100 points, a task almost nobody solves is worth up to 2000.
+        Adding another complete model changes those weights, so every model —
+        including ones published earlier — is rescored without being rerun.
+        The raw pass rate is always shown beside the score, and the full
+        weight table is
+        <a href="{{ '/empirical_weights.json' | relative_url }}">published</a>.</p>
+    </div>
+    <div class="callout">
+      <p><strong>Reruns pending.</strong> Kimi K3 and GPT-5.6 Terra ran some
+        tasks that were later found to be compromised. Both will be rerun on
+        those tasks, and their results will change when they are.</p>
+    </div>
+  </header>
+</div>
+
+<div class="wrap results-dashboard">
+  {%- assign ranked_runs = site.benchmarks | sort: "date" | reverse -%}
+  {%- include chart-leaderboard.html runs=ranked_runs -%}
+  {%- include chart-composition.html runs=ranked_runs -%}
+</div>
+
+<div class="wrap results-archive">
+  <p class="section__index">Run archive</p>
+  <ul class="entry-list entry-list--archive">
+    {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
+    {%- for run in runs -%}
+      {%- assign rows = site.data.benchmarks[run.data] -%}
+      {%- assign run_revision = site.data.suite_revisions | where: "id", run.suite_revision | first -%}
+      {%- assign hits = rows | where: "passed", "true" -%}
+      {%- assign rate = hits.size | times: 100.0 | divided_by: rows.size -%}
+      {%- assign report = site.data.reports[run.data] -%}
+      <li>
+        <a class="entry" href="{{ run.url | relative_url }}">
+          <p class="entry__meta">
+            <time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time>
+            <span>{% if run_revision %}{{ run_revision.name }}{% else %}{{ run.suite }} suite{% endif %}</span>
+            {%- if rows -%}
+              <span class="entry__score">{{ report.score.percentage | round: 1 }} AppleBench score</span>
+              <span>{{ hits.size }}/{{ rows.size }} passed</span>
+            {%- endif -%}
+          </p>
+          <h2 class="entry__title">{{ run.title }}</h2>
+          <p class="entry__excerpt">{{ run.lede | default: run.excerpt | strip_html | truncate: 220 }}</p>
+        </a>
+      </li>
+    {%- else -%}
+      <li><p style="color:var(--ink-2)">No runs published yet.</p></li>
+    {%- endfor -%}
+  </ul>
+</div>

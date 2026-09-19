@@ -1,0 +1,17 @@
+{%- comment -%}
+Render a dollar amount with exactly `places` decimals. Liquid's `round: 2`
+drops a trailing zero, so $3.00 prints as $3.0 n/a which reads like a rounding
+artifact on a page whose whole argument is that the numbers are exact.
+Params: value, places (2 or 3; default 2).
+{%- endcomment -%}
+{%- assign places = include.places | default: 2 -%}
+{%- if places == 3 -%}{%- assign scale = 1000 -%}{%- else -%}{%- assign scale = 100 -%}{%- endif -%}
+{%- assign units = include.value | times: 1.0 | times: scale | round -%}
+{%- assign whole = units | divided_by: scale -%}
+{%- comment -%}
+Adding `scale` guarantees a leading 1, so slicing past it yields a
+zero-padded fraction without a padding branch.
+{%- endcomment -%}
+{%- assign frac = units | modulo: scale | plus: scale | append: "" | slice: 1, places -%}
+${{ whole }}.{{ frac }}
+{%- comment -%}no trailing newline{%- endcomment -%}

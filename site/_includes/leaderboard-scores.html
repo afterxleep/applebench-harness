@@ -1,0 +1,63 @@
+{%- comment -%}
+The ranked AppleBench score bars for the current suite revision — the
+leaderboard and nothing else. Models still working through the current suite
+are left out entirely rather than shown as pending; the full comparison,
+including them, lives on the results page.
+
+Params: runs (site.benchmarks).
+{%- endcomment -%}
+
+{%- assign current = site.data.suite_revisions | where: "current", true | first -%}
+{%- assign by_score = "" | split: "" -%}
+{%- for run in include.runs -%}
+  {%- assign rows = site.data.benchmarks[run.data] -%}
+  {%- assign report = site.data.reports[run.data] -%}
+  {%- if rows and report and current and run.suite_revision == current.id and rows.size == current.gold_tasks -%}
+    {%- assign score_key = 0 -%}
+    {%- if report.score.available > 0 %}
+      {%- assign score_key = report.score.points | times: 10000 | divided_by: report.score.available | round %}
+    {%- endif -%}
+    {%- assign name = run.model | split: "/" | last -%}
+    {%- assign effort_label = "(default)" -%}
+    {%- for reasoning in report.reasoning -%}
+      {%- if reasoning.effort -%}
+        {%- assign effort_label = reasoning.effort | prepend: "(" | append: ")" -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- capture score_row -%}{{ score_key | prepend: "00000" | slice: -5, 5 }}|{{ name }}|{{ effort_label }}|{{ report.score.points }}|{{ report.score.available }}|{{ run.url }}{%- endcapture -%}
+    {%- assign by_score = by_score | push: score_row -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign by_score = by_score | sort | reverse -%}
+
+<figure class="figure leaderboard-hero">
+  <figcaption>
+    <h2 class="figure__title">Leaderboard</h2>
+    <p class="figure__subtitle">Weighted capability score on {{ current.name }}. Higher is better.</p>
+  </figcaption>
+
+  <div class="bars bars--leaderboard">
+    {%- for packed in by_score -%}
+      {%- assign parts = packed | split: "|" -%}
+      {%- assign bar_value = parts[3] -%}
+      {%- assign bar_total = parts[4] -%}
+      {%- capture bar_label %}{{ parts[1] }} {{ parts[2] }}{% endcapture -%}
+      {%- capture bar_printed %}{{ bar_value | times: 1.0 | divided_by: bar_total | times: 100 | round: 1 }}%{% endcapture -%}
+      {%- assign bar_link = parts[5] | relative_url -%}
+      {%- include bar-row.html
+          label=bar_label
+          value=bar_value
+          total=bar_total
+          value_label=bar_printed
+          link=bar_link
+          hide_percent=true
+          color="series-1" -%}
+    {%- endfor -%}
+  </div>
+
+  <p class="figure__note">Adding another complete model can reweight the tasks
+    and rescore every model without a rerun. Full comparisons, raw pass rates,
+    and per-task data are on the
+    <a href="{{ '/benchmarks/' | relative_url }}">results page</a>.</p>
+</figure>

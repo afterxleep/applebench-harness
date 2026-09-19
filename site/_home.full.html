@@ -1,0 +1,189 @@
+---
+layout: default
+title: AppleBench
+description: >-
+  AppleBench tests AI agents on real-life Apple coding: fixing bugs, tracking
+  down concurrency issues, getting Apple frameworks right, then proving the app
+  builds, passes its tests, and runs.
+---
+
+{%- assign current_suite = site.data.suite_revisions | where: "current", true | first -%}
+{%- assign scoring_tasks = current_suite.gold_tasks -%}
+{%- assign app_run_tasks = current_suite.app_run_tasks -%}
+{%- assign sample_tasks = current_suite.public_sample_tasks -%}
+{%- assign category_count = current_suite.category_tasks | size -%}
+
+<section class="hero">
+  <div class="wrap hero__grid">
+    <div class="hero__main">
+      <p class="eyebrow">AppleBench <span>{{ current_suite.name }}</span></p>
+      <h1>Can an AI agent do <em>real Apple work?</em></h1>
+      <p class="hero__lede">
+        Real-life coding, not puzzles. Fix the bug, track down the concurrency
+        issue, get the framework right, then check it: the app has to build,
+        pass its tests, and actually work when you run it.
+      </p>
+      <div class="button-row">
+        <a class="button button--primary" href="{{ '/benchmarks/' | relative_url }}">Read the results <span aria-hidden="true">↗</span></a>
+        <a class="button button--ghost" href="{{ '/benchmark/' | relative_url }}">See the benchmark</a>
+      </div>
+    </div>
+
+    <aside class="hero__proof" aria-label="Independent verification and current benchmark facts">
+      <div class="verification-chain">
+        <p class="hero__proof-label">Independent verification</p>
+        <p class="verification-chain__title">Nothing passes on trust.</p>
+        <ol aria-label="Verification stages">
+          <li><span>01</span>Agent exits</li>
+          <li><span>02</span>Clean build</li>
+          <li><span>03</span>Tests run</li>
+          <li><span>04</span>App launches</li>
+          <li><span>05</span>Verdict recorded</li>
+        </ol>
+      </div>
+      <dl>
+        <div><dt>{{ scoring_tasks }}</dt><dd>{{ current_suite.name }} tasks</dd></div>
+        <div><dt>{{ category_count }}</dt><dd>areas of Apple development</dd></div>
+        <div><dt>{{ app_run_tasks }}</dt><dd>tasks require a running app</dd></div>
+      </dl>
+      <p>Fresh builds. Independent graders. Simulator evidence. No self-reported passes.</p>
+    </aside>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap section-split">
+    <div class="section__head">
+      <p class="section__index">01 / The premise</p>
+      <h2>Coding, from real life.</h2>
+    </div>
+    <div class="section__body">
+      <ol class="sequence" aria-label="The AppleBench verification sequence">
+        <li>Understand</li><li>Fix</li><li>Build</li><li>Run</li><li>Test</li><li>Verify</li>
+      </ol>
+      <p class="section__lede">
+        There are thousands of coding benchmarks, and most hand out puzzles and
+        stop at the diff. AppleBench's coding tasks come from real apps: a data
+        race, a broken migration, a widget that never updates, a project that
+        won't build. The agent has to find the bug, fix it, and check its own
+        work. After it exits, we rebuild the project from scratch, run its
+        tests, launch the app, and check it on a simulator.
+      </p>
+      <p class="pull-quote">The agent never grades its own work.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tinted">
+  <div class="wrap">
+    <div class="section__head section__head--wide">
+      <p class="section__index">02 / The work</p>
+      <h2>One benchmark. Nine kinds of Apple work.</h2>
+      <p>The suite follows what an Apple engineer actually has to get done, in the code and around it.</p>
+    </div>
+    <div class="measure-grid">
+      <article class="measure"><span>01</span><strong>{{ current_suite.category_tasks.build }}</strong><h3>Build</h3><p>Compiler, availability, and linker failures.</p></article>
+      <article class="measure"><span>02</span><strong>{{ current_suite.category_tasks.tests }}</strong><h3>Tests</h3><p>Find the defect behind a failing test.</p></article>
+      <article class="measure"><span>03</span><strong>{{ current_suite.category_tasks.runtime }}</strong><h3>Runtime</h3><p>Crashes and behavior invisible at compile time.</p></article>
+      <article class="measure"><span>04</span><strong>{{ current_suite.category_tasks.visual }}</strong><h3>Interface</h3><p>Layout, accessibility, language, and device state.</p></article>
+      <article class="measure"><span>05</span><strong>{{ current_suite.category_tasks.interaction }}</strong><h3>Interaction</h3><p>Real flows driven through the running app.</p></article>
+      <article class="measure"><span>06</span><strong>{{ current_suite.category_tasks.project }}</strong><h3>Project</h3><p>Targets, assets, schemes, plists, and packages.</p></article>
+      <article class="measure"><span>07</span><strong>{{ current_suite.category_tasks.frameworks }}</strong><h3>Swift + SDKs</h3><p>Concurrency, persistence, widgets, intents, and more.</p></article>
+      <article class="measure"><span>08</span><strong>{{ current_suite.category_tasks.ops }}</strong><h3>Operations</h3><p>Build, test, simulator, and device toolchains.</p></article>
+      <article class="measure measure--wide"><span>09</span><strong>{{ current_suite.category_tasks.composition }}</strong><h3>Composition</h3><p>The hardest work in the set: a whole feature at once, where screens, storage, and an outside boundary all have to work together.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap section-split">
+    <div class="section__head">
+      <p class="section__index">03 / The standard</p>
+      <h2>A pass has to survive inspection.</h2>
+    </div>
+    <ol class="principles">
+      <li><div><h3>Grade the workspace, not the transcript</h3><p>A clean build and independent tests run only after the agent stops.</p></div></li>
+      <li><div><h3>Prove every task is solvable</h3><p>The broken fixture must fail and its reference repair must pass before admission.</p></div></li>
+      <li><div><h3>Ask the device when the device matters</h3><p>{{ app_run_tasks }} tasks require the app to launch and behave correctly on a simulator.</p></div></li>
+      <li><div><h3>Publish the inconvenient numbers</h3><p>Failures, timeouts, tokens, cost, and grader evidence stay visible.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section section--results">
+  <div class="wrap">
+    <div class="section__head section__head--wide">
+      <p class="section__index">04 / Latest measurements</p>
+      <h2>Results, with receipts.</h2>
+      <p>Open a run to inspect every task, grader, token, and dollar.</p>
+    </div>
+    {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
+    <ul class="entry-list entry-list--featured">
+      {%- for run in runs limit: 3 -%}
+        {%- assign rows = site.data.benchmarks[run.data] -%}
+        {%- assign run_revision = site.data.suite_revisions | where: "id", run.suite_revision | first -%}
+        {%- assign hits = rows | where: "passed", "true" -%}
+        {%- assign rate = hits.size | times: 100.0 | divided_by: rows.size -%}
+        <li>
+          <a class="entry" href="{{ run.url | relative_url }}">
+            <p class="entry__number">0{{ forloop.index }}</p>
+            <div class="entry__body">
+              <p class="entry__meta"><time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time><span>{% if run_revision %}{{ run_revision.name }}{% else %}{{ run.suite }} suite{% endif %}</span></p>
+              <h3 class="entry__title">{{ run.model }}</h3>
+              <p class="entry__excerpt">{{ hits.size }} of {{ rows.size }} tasks passed</p>
+            </div>
+            <p class="entry__result"><strong>{{ rate | round: 1 }}%</strong><span>{{ hits.size }} / {{ rows.size }} passed</span></p>
+            <span class="entry__arrow" aria-hidden="true">↗</span>
+          </a>
+        </li>
+      {%- else -%}
+        <li><p>No runs published yet.</p></li>
+      {%- endfor -%}
+    </ul>
+    <p class="text-link"><a href="{{ '/benchmarks/' | relative_url }}">Compare every published run <span aria-hidden="true">→</span></a></p>
+  </div>
+</section>
+
+<section class="section section--evolving">
+  <div class="wrap evolving-grid">
+    <div class="section__head">
+      <p class="section__index">05 / A living benchmark</p>
+      <h2>The suite keeps moving.</h2>
+    </div>
+    <div class="evolving-copy">
+      <p class="section__lede">
+        Apple development does not stand still, and neither can the benchmark.
+        New tasks are added as Swift, Xcode, Apple frameworks, and agent
+        workflows change.
+      </p>
+      <div class="evolving-items">
+        <article><span>01</span><h3>New failure modes</h3><p>Fresh tasks cover real problems that current agents and toolchains expose.</p></article>
+        <article><span>02</span><h3>Versioned suites</h3><p>Every result names the exact task set used, so comparisons stay honest.</p></article>
+        <article><span>03</span><h3>Recalibrated evidence</h3><p>Fixtures and graders are checked again as platforms and models evolve.</p></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--closing">
+  <div class="wrap closing-grid">
+    <div>
+      <p class="section__index">06 / Trust</p>
+      <h2>The harness is public.<br><em>The answers are not.</em></h2>
+    </div>
+    <div>
+      <p>
+        Anyone can inspect the runner, graders, and {{ sample_tasks }} sample
+        tasks. The {{ scoring_tasks }} {{ current_suite.name }} tasks and their
+        reference repairs remain private. Published runs use a macOS answer
+        sandbox; third-party web tools are disabled while provider traffic
+        remains available.
+      </p>
+      <p>That keeps the benchmark inspectable without turning its answer key into training data.</p>
+      <div class="button-row">
+        {%- if site.github_url -%}<a class="button button--primary" href="{{ site.github_url }}">Browse the source <span aria-hidden="true">↗</span></a>{%- endif -%}
+        <a class="button button--ghost" href="{{ '/methodology/' | relative_url }}">Read the methodology</a>
+      </div>
+    </div>
+  </div>
+</section>

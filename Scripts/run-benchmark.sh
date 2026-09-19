@@ -1,0 +1,477 @@
+#!/bin/bash
+# Run a full AppleBench suite and export machine-readable results.
+#
+# Usage:
+#   ./Scripts/run-benchmark.sh [options]
+#
+# Options:
+#   -s, --suite <id>        Suite to run (default: gold)
+#       --changed           Run only what this model still owes: tasks it has
+#                           never been scored on, and tasks whose `modified:`
+#                           instant is later than its last run of them. Needs
+#                           --model. Nothing is marked by hand. Exits without
+#                           running when nothing is due, so it is safe to use
+#                           every time.
+#       --publish           Rewrite this model's published report from every run
+#                           in the runs directory, and the site data with it.
+#                           On by default with --changed: the point of running
+#                           what is outstanding is to end up current.
+#       --no-publish        Skip that.
+#   -a, --agent <id>        Agent harness (default: opencode)
+#   -m, --model <id>        Model passed to the agent
+#   -e, --effort <level>    Reasoning effort, forwarded to OpenCode as the
+#                           model variant. Valid levels are per-provider
+#                           (minimal, low, medium, high, max), so the value
+#                           is passed through rather than validated. Effort
+#                           defaults to max and is recorded on the run.
+#       --max-tokens <n>    Stop a task once it has spent this many tokens
+#                           (default: 1000000).
+#                           The wall clock is a poor proxy for spend: a model
+#                           can burn a budget in two minutes or idle for
+#                           twenty. Tightens each task's own limit, never
+#                           loosens it.
+#       --timeout-cap <s>   Ceiling on every task's wall-clock timeout, in
+#                           seconds. Defaults to 3600, one hour, to preserve
+#                           the measured composition workload while bounding
+#                           a task that has stopped making progress.
+#                           Tightening only: a task that asks for less keeps
+#                           what its author gave it.
+#       --agent-arg <arg>   Extra argument forwarded verbatim to the agent CLI
+#                           (repeatable). The escape hatch for anything the
+#                           flags above do not cover.
+#   -p, --parallel <n>      Concurrent tasks (default: 1)
+#       --agent-startup-retries <n>
+#                           Retries when the agent exits before reaching its
+#                           model (default: 3, for 4 total attempts).
+#                           Each retry is logged and waits 1, 2, then 4s.
+#   -o, --out <dir>         Report directory (default: Reports/<suite>-<date>)
+#       --runs-dir <dir>    Run artifact root (default: .applebench/runs)
+#       --stream            Show what each task is doing as it happens:
+#                           commands, file edits, graders. A task can sit
+#                           silent for ten minutes otherwise, which looks
+#                           identical to a wedged simulator.
+#       --stream-output     That, plus the model's own messages. Noisy.
+#       --no-seal           Let the agent read the reference solutions, the
+#                           task files and other runs. They sit on the same
+#                           disk under the same user, so a scoring run must
+#                           not use this. Sealing is on by default.
+#       --task-set-repo <u> Git URL of the task set to score. Cloned on first
+#                           use and fast-forwarded after, then prepared. Also
+#                           read from APPLEBENCH_TASKSET_REPO, so a scoring
+#                           run is one command on a fresh machine.
+#       --task-set-dir <d>  Where that clone lives (default:
+#                           .applebench/taskset)
+#       --api-key <key>     Provider key to run with. The environment variable
+#                           is inferred from the model provider; no need to
+#                           export it or pass --allow-env yourself.
+#       --api-key-file <p>  Read that key from a file instead. Prefer this:
+#                           an argument is visible in `ps` to every process
+#                           on the machine and lands in your shell history.
+#       --api-key-env <n>   Override the inferred provider key variable.
+#       --allow-env <NAME>  Expose an environment variable to the agent
+#                           (repeatable). Wrapper CLI stripping is always
+#                           enforced, which gives the agent a hermetic HOME;
+#                           credentials stored under the real one go with it.
+#
+# The agent runs on this host inside a sandbox that seals it away from the
+# harness and the answers. "No network" means its toolset: webfetch is denied
+# and plugins are off, but nothing stops it shelling out to curl.
+#
+# Everything machine-specific comes from the environment, never from this
+# file. To point runs at a self-hosted or proxied endpoint, export
+# APPLEBENCH_OPENCODE_PROVIDER with an OpenCode provider block (inline JSON
+# or a path to a JSON file) before invoking this script.
+set -euo pipefail
+
+provider_key_environment_variable() {
+    local model_id="$1"
+    local override="${2:-}"
+    if [ -n "$override" ]; then
+        printf '%s\n' "$override"
+        return
+    fi
+
+    case "$model_id" in
+        openai/*) printf '%s\n' "OPENAI_API_KEY" ;;
+        anthropic/*) printf '%s\n' "ANTHROPIC_API_KEY" ;;
+        minimax/*) printf '%s\n' "MINIMAX_API_KEY" ;;
+        *) printf '%s\n' "OPENROUTER_API_KEY" ;;
+    esac
+}
+
+publishable_suite_status() {
+    [ "$1" -eq 0 ] || [ "$1" -eq 1 ]
+}
+
+# Every published result is measured on one Xcode. Two toolchains in the same
+# report made a hidden test compile on one host and not the other, and correct
+# fixes were scored as failures.
+supported_xcode_version() {
+    [ "${1%%.*}" = "27" ]
+}
+
+# The whole script is one function, called on the last line. Bash reads a
+# script as it runs it, so editing this file while a suite is mid-flight
+# shifts what the running copy reads next: one such edit made a run skip
+# straight past its own exit-status assignment after four hours of work.
+# Wrapping the body means it is parsed in full before anything executes.
+main() {
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$root"
+
+suite="gold"
+pending_mode=""
+publish=""
+agent="opencode"
+model=""
+effort="max"
+max_tokens=""
+timeout_cap=""
+agent_arg=()
+parallel="1"
+agent_startup_retries="3"
+out=""
+runs_dir="$root/.applebench/runs"
+
+stream=""
+seal="--seal-answers"
+allow_env=()
+api_key=""
+api_key_file=""
+api_key_variable=""
+task_set_repo="${APPLEBENCH_TASKSET_REPO:-}"
+task_set_dir=""
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -s|--suite) suite="$2"; shift 2 ;;
+        --changed|--changed-only) pending_mode="both"; shift ;;
+        --publish)      publish="yes"; shift ;;
+        --no-publish)   publish="no"; shift ;;
+        -a|--agent) agent="$2"; shift 2 ;;
+        -m|--model) model="$2"; shift 2 ;;
+        -e|--effort) effort="$2"; shift 2 ;;
+        --max-tokens) max_tokens="$2"; shift 2 ;;
+        --timeout-cap) timeout_cap="$2"; shift 2 ;;
+        --agent-arg) agent_arg+=(--agent-arg "$2"); shift 2 ;;
+        -p|--parallel) parallel="$2"; shift 2 ;;
+        --agent-startup-retries) agent_startup_retries="$2"; shift 2 ;;
+        -o|--out) out="$2"; shift 2 ;;
+        --runs-dir) runs_dir="$2"; shift 2 ;;
+        --strip-wrapper-clis) shift ;;  # always on now; accepted so old commands keep working
+        --stream) stream="--stream"; shift ;;
+        --no-seal) seal=""; shift ;;
+        --stream-output) stream="--stream-output"; shift ;;
+        --allow-env) allow_env+=(--allow-env "$2"); shift 2 ;;
+        --task-set-repo) task_set_repo="$2"; shift 2 ;;
+        --task-set-dir) task_set_dir="$2"; shift 2 ;;
+        --api-key) api_key="$2"; shift 2 ;;
+        --api-key-file) api_key_file="$2"; shift 2 ;;
+        --api-key-env) api_key_variable="$2"; shift 2 ;;
+        -h|--help)
+            sed -n '2,/^set -euo pipefail$/p' "$0" | sed '$d; s/^# \{0,1\}//'
+            exit 0
+            ;;
+        *) echo "unknown option: $1" >&2; exit 2 ;;
+    esac
+done
+
+api_key_variable="$(provider_key_environment_variable "$model" "$api_key_variable")"
+
+# No model named: offer the catalogue rather than guess one. Everything in it
+# is reachable and priced, so a pick cannot land on a name the gateway does not
+# have, and the effort comes from the model's own ladder rather than the
+# person choosing. Only when there is a terminal to draw on — a scripted run
+# with no --model is an error, not a prompt nobody will see.
+if [ -z "$model" ] && [ -t 0 ]; then
+    if picked="$("$root/Scripts/pick-model.py" --prefix openrouter/ </dev/tty)"; then
+        model="${picked%%$'\t'*}"
+        effort="${picked#*$'\t'}"
+        echo "Selected $model${effort:+ at effort $effort}"
+    else
+        echo "error: no model selected." >&2
+        exit 1
+    fi
+elif [ -z "$model" ]; then
+    # No model and no terminal to choose from. Running the agent's own default
+    # would score a model the report cannot name and cannot price, so it fails
+    # here rather than producing a number nobody can attribute.
+    echo "error: no --model given and no terminal to pick one on." >&2
+    echo "       Pass --model <id>, or run interactively to choose from the catalog." >&2
+    exit 2
+fi
+
+# A key given on the command line or in a file must be available before model
+# validation asks OpenCode which models it can reach. Exporting it afterwards
+# makes a clean installation reject the provider before the run starts.
+if [ -n "$api_key" ] && [ -n "$api_key_file" ]; then
+    echo "error: pass --api-key or --api-key-file, not both." >&2
+    exit 2
+fi
+if [ -n "$api_key_file" ]; then
+    if [ ! -r "$api_key_file" ]; then
+        echo "error: --api-key-file cannot be read: $api_key_file" >&2
+        exit 2
+    fi
+    api_key="$(tr -d '[:space:]' < "$api_key_file")"
+    if [ -z "$api_key" ]; then
+        echo "error: --api-key-file is empty: $api_key_file" >&2
+        exit 2
+    fi
+fi
+if [ -n "$api_key" ]; then
+    export "$api_key_variable=$api_key"
+    case " ${allow_env[*]-} " in
+        *" $api_key_variable "*) ;;
+        *) allow_env+=(--allow-env "$api_key_variable") ;;
+    esac
+fi
+
+# Check the model before spending an hour on it. A name the agent cannot reach
+# produces a suite of failures that read as the model being bad at Swift; a
+# model missing from the catalog publishes a report with no cost in it, and
+# the gap is invisible next to models that have one. Both are cheap to catch
+# here and expensive to notice afterwards.
+#
+# The same check resolves the effort: every model runs at the strongest
+# reasoning it exposes, and since the ladders differ — and some models have
+# none — the level comes from the catalog rather than a hardcoded word.
+if [ -n "$model" ]; then
+    echo "Checking ${model}..."
+    if ! resolved_effort="$("$root/Scripts/validate-model.py" "$model" --agent "$agent" ${effort:+--effort "$effort"})"; then
+        echo "error: refusing to start. Fix the problems above, or add the model with" >&2
+        echo "       ./Scripts/update-model-catalog.py <model-id>" >&2
+        exit 1
+    fi
+    effort="$resolved_effort"
+fi
+
+xcode_version="$(xcodebuild -version 2>/dev/null | awk 'NR==1 {print $2}')"
+if ! supported_xcode_version "$xcode_version"; then
+    echo "error: scoring runs use Xcode 27; the selected Xcode is ${xcode_version:-unknown}." >&2
+    exit 2
+fi
+
+# Materialise the task set before anything reads it. The tasks live in their
+# own repository, so a scoring run on a fresh machine would otherwise be clone,
+# export, prepare, run, with three chances to point at the wrong directory.
+#
+# The clone lives inside the harness, never the other way round: nothing the
+# harness generates is written back to the task set.
+if [ -n "$task_set_repo" ]; then
+    APPLEBENCH_TASKSET="$("$root/Scripts/fetch-taskset.sh" "$task_set_repo" "${task_set_dir:-}")"
+    export APPLEBENCH_TASKSET
+elif [ -n "$task_set_dir" ]; then
+    echo "error: --task-set-dir needs --task-set-repo (or APPLEBENCH_TASKSET_REPO); to use a task set already on disk, set APPLEBENCH_TASKSET." >&2
+    exit 2
+fi
+
+# shellcheck source=Scripts/taskset.sh
+. "$(dirname "$0")/taskset.sh"
+
+
+# Runtime tasks crash the app on purpose, and macOS puts a "quit unexpectedly"
+# dialog on screen for each one unless CrashReporter is told not to. Over a
+# suite that is one modal dialog per crashing task, on top of whatever else the
+# operator is doing. Warn rather than write the preference: it is a global user
+# setting and a benchmark script has no business changing one silently.
+crash_dialog_type="$(defaults read com.apple.CrashReporter DialogType 2>/dev/null || echo unset)"
+case "$crash_dialog_type" in
+    none|server) ;;
+    *)
+        echo "note: macOS will show a crash dialog for every task whose app crashes, and"
+        echo "      several tasks crash by design. Silence them with:"
+        echo "        defaults write com.apple.CrashReporter DialogType none"
+        echo "      Undo later with: defaults delete com.apple.CrashReporter DialogType"
+        echo
+        ;;
+esac
+
+stamp="$(date -u +%Y-%m-%d)"
+# The report directory carries the model, because comparing two models means
+# running two of these at once and the date alone gives them the same folder:
+# run.log, prepare.log, pending-suite.yaml and summary.json would each be
+# whichever process wrote last.
+model_slug="$(printf '%s' "${model##*/}" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]\{1,\}/-/g' -e 's/^-//' -e 's/-$//')"
+out="${out:-$root/Reports/$suite-$stamp${model_slug:+-$model_slug}}"
+mkdir -p "$out"
+
+# Fetching the task set, preparing fixtures and building the binary all write
+# to shared paths, so two runs starting together corrupt each other's setup.
+# They are also idempotent, so the second run can simply wait and then find the
+# work already done. mkdir is the atomic test-and-set every shell has.
+setup_lock="$root/.applebench/setup.lock"
+mkdir -p "$root/.applebench"
+setup_waited=0
+while ! mkdir "$setup_lock" 2>/dev/null; do
+    if [ "$setup_waited" -eq 0 ]; then
+        echo "Another benchmark is preparing the workspace; waiting for it..."
+        setup_waited=1
+    fi
+    # A lock left behind by a killed run would otherwise block every future
+    # one, so an old one is reclaimed rather than waited on forever.
+    if [ -n "$(find "$setup_lock" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then
+        echo "note: clearing a stale setup lock." >&2
+        rmdir "$setup_lock" 2>/dev/null || true
+    fi
+    sleep 2
+done
+trap 'rmdir "$setup_lock" 2>/dev/null || true' EXIT
+
+# Fixtures are prepared before every run, not only when the task set was just
+# cloned. A suite run against unprepared fixtures does not fail once: it fails
+# per task, as a wall of "repository does not exist" errors that read like a
+# broken task set rather than a missing setup step.
+#
+# prepare-fixtures.sh is idempotent, so the cost of doing this every time is a
+# few seconds against never being able to run the wrong thing.
+echo "Preparing fixtures…"
+if ! "$(dirname "$0")/prepare-fixtures.sh" >"$out/prepare.log" 2>&1; then
+    echo "error: preparing fixtures failed. See $out/prepare.log" >&2
+    exit 1
+fi
+
+# The agent never receives a local verification bundle. The runner uses this
+# sealed source only after each agent process exits, fetching the exact task-set
+# revision into a temporary grading checkout that is deleted immediately.
+export APPLEBENCH_VERIFICATION_REPOSITORY="$(git -C "$taskset_root" remote get-url origin)"
+export APPLEBENCH_VERIFICATION_REVISION="$(git -C "$taskset_root" rev-parse HEAD)"
+export APPLEBENCH_VERIFICATION_MANIFEST="$root/.applebench/verification-fixtures.txt"
+
+# Always build, never only when the binary is missing. A machine that pulls a
+# harness change and still has last week's binary runs the old grader against
+# the new tasks, and the failure it produces — "invalid String value uiflow" —
+# looks like a broken task set rather than a stale build.
+binary="$root/.build/release/applebench"
+echo "Building applebench (release)…"
+swift build -c release
+
+# Shared setup is finished; the run itself writes only to its own run
+# directories, so the next benchmark can start preparing while this one runs.
+rmdir "$setup_lock" 2>/dev/null || true
+trap - EXIT
+
+log="$out/run.log"
+if [ -f "$taskset_suites/$suite.yaml" ]; then suite="$taskset_suites/$suite.yaml"; fi
+
+# Pending mode narrows the suite to the tasks this model actually owes. The
+# selection is written out as a suite of its own rather than filtered inside
+# the runner, so the run records exactly which tasks it was given.
+if [ -n "$pending_mode" ]; then
+    if [ -z "$model" ]; then
+        echo "error: --changed needs --model: what is outstanding is per model." >&2
+        exit 2
+    fi
+    pending="$(APPLEBENCH_TASKSET="$taskset_root" python3 "$root/Scripts/pending-tasks.py" \
+        --model "$model" --reports-dir "$root/Reports" \
+        --suite "$suite" --mode "$pending_mode")"
+    if [ -z "$pending" ]; then
+        echo "Nothing pending: $model is up to date with every task in $(basename "$suite" .yaml)."
+        exit 0
+    fi
+    count="$(echo "$pending" | wc -w | tr -d " ")"
+    echo "Pending for $model ($count task(s)):"
+    echo "  $pending"
+    echo
+    pending_suite="$out/pending-suite.yaml"
+    {
+        echo "id: pending"
+        echo "name: \"Pending for $model\""
+        echo "tasks:"
+        for task in $pending; do echo "  - $task"; done
+    } > "$pending_suite"
+    suite="$pending_suite"
+fi
+
+
+echo "AppleBench · suite=$suite agent=$agent model=${model:-<default>} effort=${effort:-<default>} parallel=$parallel"
+echo "  caps:   tokens=${max_tokens:-1000000} timeout=${timeout_cap:-3600}s"
+echo "  runs:   $runs_dir"
+echo "  report: $out"
+echo
+
+set +e
+"$binary" suite "$suite" \
+    --agent "$agent" \
+    --tasks-dir "$taskset_tasks" \
+    ${model:+--model "$model"} \
+    ${effort:+--effort "$effort"} \
+    ${stream:+"$stream"} \
+    ${seal:+"$seal"} \
+    ${max_tokens:+--max-tokens "$max_tokens"} \
+    ${timeout_cap:+--timeout-cap "$timeout_cap"} \
+    ${agent_arg[@]+"${agent_arg[@]}"} \
+    --parallel "$parallel" \
+    --agent-startup-retries "$agent_startup_retries" \
+    --runs-dir "$runs_dir" \
+    ${allow_env[@]+"${allow_env[@]}"} \
+    2>&1 | tee "$log"
+suite_status=${PIPESTATUS[0]}
+
+set -e
+
+# Export regardless of the suite's exit status: a stopped run can contain
+# completed valid results needed for --changed to resume at the errored task.
+"$binary" results "$runs_dir" --format csv  --output "$out/summary.csv"
+"$binary" results "$runs_dir" --format json --output "$out/summary.json"
+
+
+echo
+echo "Wrote:"
+echo "  $out/summary.csv"
+echo "  $out/summary.json"
+echo "  $log"
+# A run leaves its artifacts in the runs directory, which is cumulative: every
+# run this machine has ever done is in there. Publishing from it is therefore
+# how a model's score becomes *current* rather than a snapshot of one sitting —
+# the new tasks are added to what was already scored, because points are a
+# plain sum and the export walks the whole tree.
+#
+# Suites are all of them: a score that spans gold and gold-02 has to name both,
+# or half of what was just run is filtered straight back out.
+#
+# Exit code 3 means the suite stopped because the agent never reached its
+# model. Publishing then would rewrite the model's page from whatever runs
+# happened to be in the tree already, and report a score nothing just earned.
+if ! publishable_suite_status "$suite_status"; then
+    echo
+    echo "Not publishing: the benchmark invocation did not produce a resumable suite result." >&2
+elif [ "${publish:-}" = "yes" ] || { [ -n "$pending_mode" ] && [ "${publish:-}" != "no" ]; }; then
+    if [ -z "$model" ]; then
+        echo "note: --publish needs --model to know which report to rewrite; skipping." >&2
+    else
+        slug="$(printf '%s' "${model##*/}" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]\{1,\}/-/g' -e 's/^-//' -e 's/-$//')"
+        suite_args=()
+        for file in "$taskset_suites"/gold*.yaml; do
+            [ -e "$file" ] && suite_args+=(--suite-file "$file")
+        done
+        base_args=()
+        published_report="$root/Reports/$slug.json"
+        if [ -f "$published_report" ]; then
+            base_report="$out/base-report.json"
+            cp "$published_report" "$base_report"
+            base_args+=(--base-report "$base_report")
+        fi
+        echo
+        echo "Publishing $slug from ${runs_dir}..."
+        # Latest, not first. `first` is the honest rule when the same task is
+        # attempted twice, because it stops a weak score being retried away.
+        # But a re-run here means the *task* changed, and the earlier attempt
+        # scored a version that no longer exists — keeping it would report a
+        # model against tasks it was never asked to solve, and would silently
+        # discard everything `--changed` just spent an hour running.
+        "$root/Scripts/publish-report.sh" "$slug" "$runs_dir" gold \
+            --attempt latest --model "$model" \
+            "${base_args[@]+"${base_args[@]}"}" \
+            "${suite_args[@]+"${suite_args[@]}"}" \
+            || echo "note: publish failed; the run itself is intact in $out" >&2
+    fi
+fi
+
+exit "$suite_status"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi

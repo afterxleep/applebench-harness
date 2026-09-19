@@ -1,0 +1,269 @@
+---
+layout: default
+---
+{%- assign rows = site.data.benchmarks[page.data] -%}
+{%- assign report = site.data.reports[page.data] -%}
+{%- assign revision = site.data.suite_revisions | where: "id", page.suite_revision | first -%}
+{%- assign passed = rows | where: "passed", "true" -%}
+{%- assign total = rows.size -%}
+{%- assign rate = 0 -%}
+{%- comment -%}
+  Scaled by 10,000 rather than 1,000: Liquid divides two integers as integers,
+  and the coarser scale rounded the rate a tenth of a point away from the
+  completion rate in the export this page links to.
+{%- endcomment -%}
+{%- if total > 0 %}{% assign rate = passed.size | times: 10000 | divided_by: total | times: 0.01 %}{% endif -%}
+
+{%- assign cost = 0 -%}
+{%- assign list_cost = 0 -%}
+{%- assign missing_list_cost = 0 -%}
+{%- assign missing_timeout_telemetry = 0 -%}
+{%- assign tokens = 0 -%}
+{%- assign seconds = 0 -%}
+{%- for row in rows -%}
+  {%- assign cost = cost | plus: row.cost_usd -%}
+  {%- assign list_cost = list_cost | plus: row.list_cost_usd -%}
+  {%- if row.list_cost_usd == nil or row.list_cost_usd == empty -%}
+    {%- assign missing_list_cost = missing_list_cost | plus: 1 -%}
+    {%- if row.agent_termination == "timeout" -%}
+      {%- assign missing_timeout_telemetry = missing_timeout_telemetry | plus: 1 -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- assign tokens = tokens | plus: row.total_tokens -%}
+  {%- assign seconds = seconds | plus: row.duration_seconds -%}
+{%- endfor -%}
+{%- assign telemetry_covered = total | minus: missing_list_cost -%}
+{%- assign active_seconds = 0 -%}
+{%- for run in report.runs -%}
+  {%- assign run_active = run.metrics.agent_duration_seconds | default: run.result.duration_seconds -%}
+  {%- assign active_seconds = active_seconds | plus: run_active -%}
+{%- endfor -%}
+{%- assign earned_points = report.score.points | default: 0 -%}
+{%- assign available_points = report.score.available | default: 0 -%}
+{%- assign complexity_score = report.score.percentage | default: 0 -%}
+{%- assign score_percentage = report.score.percentage | default: 0 -%}
+{%- assign cost_per_point = 0 -%}
+{%- assign active_minutes_per_point = 0 -%}
+{%- if score_percentage > 0 -%}
+  {%- assign cost_per_point = list_cost | times: 1.0 | divided_by: score_percentage -%}
+  {%- assign active_minutes_per_point = active_seconds | times: 1.0 | divided_by: score_percentage | divided_by: 60 -%}
+{%- endif -%}
+
+<div class="wrap">
+  <div class="article-header">
+    <p class="entry__meta">
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
+      <span>{% if revision %}{{ revision.name }}{% else %}{{ page.suite }} suite{% endif %}</span>
+      <span>{{ total }} tasks</span>
+      {%- if revision and revision.released %}<span>released {{ revision.released }}</span>{% endif -%}
+    </p>
+    <h1>{{ page.title }}</h1>
+    {%- if page.lede %}<p class="article-header__lede">{{ page.lede }}</p>{% endif -%}
+
+    {%- if revision and revision.current != true %}
+    <div class="callout callout--warning">
+      <p><strong>Measured on suite {{ revision.name }}.</strong> {{ revision.summary }}</p>
+      <p>Numbers here are not comparable with runs on the current suite. See
+        <a href="{{ '/methodology/#suite-revisions' | relative_url }}">suite revisions</a>.</p>
+    </div>
+    {%- endif -%}
+  </div>
+
+  <div class="stats" style="margin-bottom:1.25rem">
+    <div class="stat">
+      <div class="stat__value">{{ complexity_score | round: 1 }}</div>
+      <div class="stat__label">AppleBench score</div>
+      <p class="stat__note">empirical-v1 weighting; raw pass rate shown beside it</p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{{ rate | round: 1 }}%</div>
+      <div class="stat__label">Raw pass rate</div>
+      <p class="stat__note">{{ passed.size }} of {{ total }} tasks</p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{% include money.html value=cost_per_point places=3 %}</div>
+      <div class="stat__label">Cost per percentage point</div>
+      <p class="stat__note">all list-price spend / score percentage points</p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{{ active_minutes_per_point | round: 1 }}m</div>
+      <div class="stat__label">Active time per percentage point</div>
+      <p class="stat__note">all agent time / score percentage points; provider-influenced</p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{% include money.html value=list_cost %}</div>
+      <div class="stat__label">Recorded suite cost</div>
+      <p class="stat__note">model-owner list price, including cached input</p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{{ tokens | times: 1.0 | divided_by: 1000000 | round: 2 }}M</div>
+      <div class="stat__label">Tokens</div>
+      <p class="stat__note">input and output, excluding cached prompt reads</p>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{{ seconds | divided_by: 3600 | round: 1 }}h</div>
+      <div class="stat__label">Wall clock</div>
+      <p class="stat__note">agent phase plus grading</p>
+    </div>
+  </div>
+
+  {%- if missing_list_cost > 0 -%}
+  <p class="telemetry-coverage">
+    <strong>Telemetry coverage:</strong> all {{ total }} task outcomes count in the pass rate.
+    Cost and token totals cover {{ telemetry_covered }} of {{ total }} tasks;
+    {{ missing_list_cost }}{% if missing_timeout_telemetry == missing_list_cost %} timed-out{% endif %}
+    attempt{% if missing_list_cost != 1 %}s{% endif %} did not report complete telemetry and
+    {% if missing_list_cost == 1 %}is{% else %}are{% endif %} omitted from those totals, never treated as zero.
+  </p>
+  {%- endif -%}
+
+  <p style="color:var(--ink-3); font-size:.88rem; margin:0 0 2.5rem">
+    AppleBench score (empirical-v1) is the primary result; raw pass rate remains beside it. The score is a living number for this suite: adding another complete model can change task weights, so earlier models are rescored without being rerun.
+    Cost and active time include failed attempts and are divided by score percentage points, not raw points.
+    Attempt rule: <code>{{ report.attempt | default: "all" }}</code>.
+    <a href="{{ '/methodology/#reading-the-results' | relative_url }}">How to read these results</a>.
+  </p>
+
+  {%- comment -%}
+    Conditions come from the run's own export, not from anything typed into
+    the page, so they cannot drift from the data the charts below read.
+  {%- endcomment -%}
+  {%- assign first = report.runs | first -%}
+  {%- if first -%}
+  <div class="figure" style="margin-bottom:2.5rem">
+    <table style="margin:0">
+      <tbody>
+        <tr><th scope="row">Suite</th><td>{% if revision %}{{ revision.name }}{% else %}<code>{{ page.suite }}</code>{% endif %}, {{ total }} tasks{% if page.suite_revision %} (<code>{{ page.suite_revision }}</code>){% endif %}</td></tr>
+        <tr><th scope="row">Model</th><td><code>{{ page.model }}</code></td></tr>
+        {%- comment -%}
+          Effort changes both what a model completes and what it costs, so a run
+          that does not state it cannot be reproduced or compared. Every model
+          is benchmarked at the strongest reasoning it offers; where a model
+          offers no effort ladder at all, that is said rather than dressed up
+          as a setting that was chosen.
+        {%- endcomment -%}
+        {%- if report.reasoning and report.reasoning.size > 0 -%}
+        {%- assign reasoning_groups = report.reasoning | sort: "runs" | reverse -%}
+        <tr>
+          <th scope="row">Reasoning</th>
+          <td>
+            {%- for reasoning in reasoning_groups -%}
+            {%- if forloop.first == false %}; {% endif -%}
+            {%- if reasoning.effort -%}
+              effort <code>{{ reasoning.effort }}</code>
+              {%- if reasoning.at_maximum_effort %}, the strongest this model exposes
+              {%- elsif reasoning.maximum_effort %}, of a maximum of <code>{{ reasoning.maximum_effort }}</code>{% endif -%}
+            {%- elsif reasoning.maximum_effort -%}
+              provider default (maximum available: <code>{{ reasoning.maximum_effort }}</code>; no effort requested)
+            {%- else -%}
+              provider default; this model exposes no selectable effort level, so there is no stronger setting to ask for
+            {%- endif -%}
+            {%- if report.reasoning.size > 1 %} (<code>{{ reasoning.runs }}</code> {% if reasoning.runs == 1 %}run{% else %}runs{% endif %}){% endif -%}
+            {%- endfor -%}
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Pricing</th>
+          <td>
+            the model owner's list price, per
+            <a href="{{ reasoning.price_source }}">models.dev</a>, retrieved
+            {{ reasoning.price_retrieved }}. Cached prompt tokens are billed at
+            their own lower rate and are counted separately from the token
+            figure above, which is input and output only.
+          </td>
+        </tr>
+        {%- endif -%}
+        <tr><th scope="row">Harness</th><td>{{ page.harness }}{% for pair in first.agent.configuration %}, {{ pair[0] | replace: "_", " " }}: {{ pair[1] }}{% endfor %}</td></tr>
+        <tr><th scope="row">Host</th><td>Xcode {{ first.environment.xcode }}{% if first.environment.xcode_build %} ({{ first.environment.xcode_build }}){% endif %}, macOS {{ first.environment.macos }}, {{ first.environment.architecture }}</td></tr>
+        <tr><th scope="row">Selection</th><td>attempt rule <code>{{ report.attempt }}</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  {%- endif -%}
+
+  {%- if report.configurations.size > 1 -%}
+  <div class="figure" style="margin-bottom:2.5rem">
+    <p style="margin-top:0"><strong>More than one configuration ran here.</strong>
+      A total over the whole directory mixes them, so each is broken out.</p>
+    <table style="margin:0">
+      <thead><tr><th scope="col">Configuration</th><th scope="col">Passed</th><th scope="col">Rate</th></tr></thead>
+      <tbody>
+        {%- for configuration in report.configurations -%}
+        <tr>
+          <td><code>{{ configuration.label }}</code></td>
+          <td>{{ configuration.passed }} / {{ configuration.total }}</td>
+          <td>{{ configuration.completion_rate | times: 100 | round: 1 }}%</td>
+        </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </div>
+  {%- endif -%}
+
+  <div class="benchmark-chart-stack">
+    {%- include chart-pass-by-category.html rows=rows -%}
+  </div>
+
+  {%- include chart-cost-vs-time.html rows=rows -%}
+  {%- include chart-task-matrix.html rows=rows -%}
+</div>
+
+<div class="wrap wrap--narrow">
+  <article class="prose" style="margin-top:3rem">
+    {{ content }}
+  </article>
+
+  <h2>Every run</h2>
+  <p>
+    Each row is one task. Cost uses the model owner's pinned list price and
+    includes cached prompt input when the provider reported it.
+  </p>
+</div>
+
+<div class="wrap">
+  <div class="figure" style="padding:0; overflow-x:auto">
+    <table style="margin:0; min-width:760px">
+      <thead>
+        <tr>
+          <th scope="col">Task</th>
+          <th scope="col">Category</th>
+          <th scope="col">Result</th>
+          <th scope="col">Weight</th>
+          <th scope="col">Points</th>
+          <th scope="col">Time</th>
+          <th scope="col">Tokens</th>
+          <th scope="col">Cost</th>
+          <th scope="col">Graders</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%- assign sorted = rows | sort: "task" -%}
+        {%- for row in sorted -%}
+          <tr>
+            <td><code>{{ row.task }}</code></td>
+            <td>{{ row.category }}</td>
+            <td>
+              {%- if row.passed == "true" -%}
+                <span class="pill pill--pass">Pass</span>
+              {%- else -%}
+                <span class="pill pill--fail">Fail</span>
+              {%- endif -%}
+            </td>
+            <td title="Authored difficulty (metadata only, not scored)">{{ row.difficulty }}/10</td>
+            <td>{{ row.points }}/{{ row.face_value }}</td>
+            <td>{{ row.duration_seconds | divided_by: 60 | round }}m</td>
+            <td>{% if row.total_tokens and row.total_tokens != empty %}{{ row.total_tokens }}{% else %}n/a{% endif %}</td>
+            <td>{% if row.list_cost_usd and row.list_cost_usd != empty %}${{ row.list_cost_usd }}{% else %}n/a{% endif %}</td>
+            <td><code style="font-size:.76rem">{{ row.graders }}</code></td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </div>
+
+  <p style="color:var(--ink-3); font-size:.88rem">
+    Source data: <code>{{ page.data }}.csv</code>, the same file the charts
+    above read.{% if site.github_url %}
+    <a href="{{ site.github_url }}/blob/main/site/_data/benchmarks/{{ page.data }}.csv">View it</a>.{% endif %}
+  </p>
+</div>

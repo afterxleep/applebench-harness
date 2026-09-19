@@ -1,0 +1,17 @@
+id: dev
+name: "AppleBench · sample tasks"
+
+# The sample tasks that ship with the harness. They are meant to be read,
+# run, and copied from. They are never used for published scores; those come
+# from a private task set.
+
+
+tasks:
+  - ops-004
+  - project-001
+  - build-002
+  - tests-003
+  - runtime-002
+  - visual-002
+  - ui-auto-013
+  - project-003

@@ -1,0 +1,62 @@
+{%- comment -%}
+Composition is deliberately separate from the ordinary category leaderboard.
+These five tasks ask for a complete feature across screens, storage, and an
+outside boundary, so folding them into framework work hides their signal.
+
+Params: runs (site.benchmarks).
+{%- endcomment -%}
+
+{%- assign ranked = "" | split: "" -%}
+{%- for run in include.runs -%}
+  {%- assign rows = site.data.benchmarks[run.data] -%}
+  {%- assign composition_rows = rows | where: "category", "composition" -%}
+  {%- if composition_rows.size > 0 -%}
+    {%- assign hits = composition_rows | where: "passed", "true" -%}
+    {%- assign name = run.model | split: "/" | last -%}
+    {%- assign report = site.data.reports[run.data] -%}
+    {%- assign effort = "(default)" -%}
+    {%- for reasoning in report.reasoning -%}
+      {%- if reasoning.effort -%}
+        {%- assign effort = reasoning.effort | prepend: "(" | append: ")" -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- assign rate_key = hits.size | times: 10000 | divided_by: composition_rows.size -%}
+    {%- capture packed -%}{{ rate_key | prepend: "00000" | slice: -5, 5 }}|{{ name }}|{{ hits.size }}|{{ composition_rows.size }}|{{ run.url }}|{{ effort }}{%- endcapture -%}
+    {%- assign ranked = ranked | push: packed -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign ranked = ranked | sort | reverse -%}
+
+<figure class="figure figure--composition">
+  <figcaption>
+    <h3 class="figure__title">Composition</h3>
+    <p class="figure__subtitle">
+      The hardest work in the suite: complete features where screens, storage,
+      and an outside boundary all have to work together.
+    </p>
+  </figcaption>
+
+  <div class="bars bars--leaderboard">
+    {%- for packed in ranked -%}
+      {%- assign parts = packed | split: "|" -%}
+      {%- capture label -%}{{ parts[1] }} {{ parts[5] }}{%- endcapture -%}
+      {%- capture printed -%}{{ parts[2] }}/{{ parts[3] }}{%- endcapture -%}
+      {%- assign link = parts[4] | relative_url -%}
+      {%- assign value = parts[2] -%}
+      {%- assign total = parts[3] -%}
+      {%- include bar-row.html
+          label=label
+          value=value
+          total=total
+          value_label=printed
+          link=link
+          color="series-2" -%}
+    {%- endfor -%}
+  </div>
+
+  <p class="figure__note">
+    Composition stays out of the ordinary category ranking so its whole-feature
+    signal is visible instead of disappearing inside Swift and framework totals.
+  </p>
+</figure>

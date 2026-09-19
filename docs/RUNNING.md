@@ -1,0 +1,326 @@
+# Running the suite
+
+A scoring run on a Mac, from nothing to a published page.
+
+## What the Mac needs
+
+| | |
+|---|---|
+| macOS | Apple Silicon, recent enough for the Xcode below |
+| Xcode | **27**, selected with `xcode-select`. `run-benchmark.sh` refuses any other version, so every published result comes from one toolchain |
+| Simulator runtime | **iOS 26.5**, with an `iPhone 17` device type |
+| Swift | 6 language mode, ships with Xcode 16 and later |
+| XcodeGen | `brew install xcodegen`, required to prepare fixtures and to grade an isolated one |
+| OpenCode | `brew install sst/tap/opencode` |
+| Disk | 30 GB free is comfortable |
+
+**No task pins an Xcode version.** `environment.xcode` exists in the task
+schema and is enforced when set; no task sets it. What every task does name is
+a simulator (`iPhone 17` on `iOS 26.5`), and that is the only thing tying the
+suite to a recent Xcode.
+
+### Running on an older Xcode
+
+The floor for the harness itself is **Xcode 16**: it is a Swift 6 package and
+uses `xcresulttool get test-results`, both of which arrived there. The
+fixtures deploy to iOS 18.0, carry no availability annotations, and use no API
+newer than that.
+
+So point the suite at a runtime your Xcode has, rather than editing every task
+file:
+
+```bash
+export APPLEBENCH_SIMULATOR_DEVICE="iPhone 16"
+export APPLEBENCH_SIMULATOR_RUNTIME="iOS 18.5"
+```
+
+The task files keep naming the reference environment, the override says what
+this host actually ran, and each run records the environment it really used, so a published result is never ambiguous about which it was.
+
+Verify before scoring on a toolchain the suite has not been proven on:
+
+```bash
+./Scripts/verify-fixtures.sh
+```
+
+### What has been verified where
+
+| Toolchain | Coverage |
+|---|---|
+| Xcode 27.0 beta 6 (27A5252f), iOS 26.5 / iPhone 17 | all 123 gold tasks |
+| iOS 18.5 / iPhone 16 runtime, same Xcode | 15 tasks across every category, build, tests, runtime, visual, interaction, ui-auto, project, ops, and six framework families, all fail-then-pass |
+
+The iOS 18 sample is the runtime an Xcode 16 host would provide. It does not
+prove the compiler behaves identically, only that nothing in the fixtures
+needs a newer SDK.
+
+Treat a failure on an unverified toolchain as a difference to investigate
+rather than a model result. Framework behaviour does move between releases:
+SwiftData's predicate translation traps on expressions it cannot lower, and
+that is exactly the sort of thing that shifts.
+
+Several tasks crash the app on purpose, and macOS puts a "quit unexpectedly"
+dialog on screen for each one. Over a suite that is a modal dialog per crashing
+task:
+
+```bash
+defaults write com.apple.CrashReporter DialogType none
+# undo with: defaults delete com.apple.CrashReporter DialogType
+```
+
+`run-benchmark.sh` checks this and says so rather than writing the preference
+itself, since it is a global user setting.
+
+Accept the license and install the runtime before anything else:
+
+```bash
+sudo xcodebuild -license accept
+xcodebuild -downloadPlatform iOS          # then confirm 26.5 is present
+xcrun simctl list runtimes | grep "iOS 26.5"
+xcrun simctl list devicetypes | grep "iPhone 17"
+```
+
+## Get the harness and a task set
+
+The harness is public. The tasks it runs live in their own repository, so on a
+fresh machine a scoring run is:
+
+```bash
+git clone https://github.com/afterxleep/applebench-harness.git
+cd applebench-harness
+
+./Scripts/run-benchmark.sh \
+  --task-set-repo git@github.com:you/your-scoring-set.git \
+  --model <model> \
+  --api-key-file ~/.config/applebench/openrouter.key \
+  --strip-wrapper-clis
+```
+
+That clones the task set into `.applebench/taskset`, prepares its fixtures, and
+runs the `gold` suite. Later runs fast-forward the clone instead of re-cloning,
+and a task set that has diverged locally is an error rather than a merge, since
+a merged set is a different set and would score different tasks. Put the URL in
+`APPLEBENCH_TASKSET_REPO` and you can drop the flag.
+
+Run it with no `--task-set-repo` at all and the eight bundled sample tasks are
+what runs, so a fresh clone works with no arguments.
+
+For a task set already on disk, point at it directly and prepare it yourself:
+
+```bash
+export APPLEBENCH_TASKSET=/path/to/scoring-task-set
+./Scripts/prepare-fixtures.sh
+```
+
+Nothing is copied in either direction. The clone, prepared fixtures, run
+artifacts and reports all live under the harness's `.applebench/`, so the task
+set stays clean and a closed one never lands in a public checkout.
+
+## Prepare
+
+```bash
+swift build -c release
+./Scripts/prepare-fixtures.sh
+```
+
+`prepare-fixtures.sh` snapshots every fixture into `.applebench/fixtures/`,
+strips the authoring files, and withholds the graded tests for the fixtures
+that isolate. Run it again whenever a fixture changes.
+
+Optional, and worth it before a run you intend to publish. It takes a few
+hours and proves every task still fails unfixed and passes fixed:
+
+```bash
+./Scripts/verify-fixtures.sh
+```
+
+## Run
+
+The model identifier is passed through to OpenCode. Direct vendor models use
+IDs such as `openai/<model>` and `anthropic/<model>`; gateway models use
+`openrouter/<publisher>/<model>`. Keeping all of them on the default
+`--agent opencode` makes the model the variable while the agent loop stays
+fixed.
+
+```bash
+./Scripts/run-benchmark.sh \
+  --suite gold \
+  --model openrouter/anthropic/claude-sonnet-4.5 \
+  --task-set-repo git@github.com:you/your-scoring-set.git \
+  --api-key-file ~/.config/applebench/openrouter.key \
+  --strip-wrapper-clis
+```
+
+### Bounding what a run costs
+
+Most of a suite's spend is in the tasks a model cannot solve, because those are
+the ones that run to their full limit. Two caps bound that from the command
+line, so the task files stay as their author wrote them:
+
+```bash
+./Scripts/run-benchmark.sh --suite gold --model <model> \
+  --max-tokens 150000 --timeout-cap 600
+```
+
+`--max-tokens` counts spend live from the agent's own usage reports and tears
+down the process when it crosses the budget. The run records
+`budget_exceeded` rather than `timeout`, so a reader can tell which limit ended
+it. Grading still runs against whatever the agent left, exactly as it does
+after a timeout.
+
+It is a step boundary, not a hard ceiling. OpenCode reports usage per completed
+step, so the earliest the harness can act is after the step that crossed the
+line; a cap of 500 against a first step of 20,000 stops after that step, not at
+500. It bounds how many steps a losing task gets, which is where the money goes,
+not the exact token count.
+
+`--timeout-cap` is the same idea for the clock, and it applies by default at
+**3600 seconds**, one hour. That is at or above every task's own limit, so by
+default each task gets exactly the time its author gave it. Passing a lower cap
+cuts tasks short, and results measured under different caps are not comparable.
+
+There is no default token cap. The only measurements available come from one
+model on the easier sample suite, and a token default guessed too low would
+truncate real work while reporting an ordinary failure, which is the kind of
+error a benchmark cannot see in its own numbers. Set `--max-tokens` once a run
+has measured what your tasks actually spend.
+
+Both caps only ever tighten: a task asking for less keeps what its author gave
+it, because raising a limit would change what the task measures.
+
+### Reasoning effort
+
+`--effort` sets how hard the model thinks, forwarded to OpenCode as the model
+variant:
+
+```bash
+./Scripts/run-benchmark.sh --suite gold --model <model> --effort high ...
+```
+
+Which levels exist is up to the provider (`minimal`, `low`, `medium`, `high`,
+`max` are the usual set), so the value is passed through rather than validated.
+An unknown level fails at the agent, not silently.
+
+Effort changes the number, so it is part of a run's conditions rather than a
+detail: each run records it as `variant` in its metadata, and two runs at
+different efforts are not comparable. `--agent-arg` forwards anything else to
+the agent CLI verbatim, repeatably, for knobs `--effort` does not cover.
+
+`--api-key-file` reads the key, puts it in the standard variable inferred from
+the model prefix, and allowlists it for the agent. The built-in mappings are
+`openai/` → `OPENAI_API_KEY`, `anthropic/` → `ANTHROPIC_API_KEY`, `minimax/` →
+`MINIMAX_API_KEY`, and `openrouter/` → `OPENROUTER_API_KEY`. `--api-key <key>`
+takes the value inline instead, at the cost of putting a secret where `ps` and
+your shell history can see it. Use `--api-key-env NAME` for a custom provider
+or proxy.
+
+OpenCode can also reuse providers connected with `opencode auth login`; the
+benchmark copies OpenCode's authentication file into its hermetic home, reduced
+to the provider named by `--model`, and writes a refreshed token back when the
+run ends. Provider blocks carried into the run's config are reduced the same
+way. The agent can still read the credential its own provider needs, so on a
+host run treat that key as visible to the model.
+OpenAI offers ChatGPT subscription authentication or an API key through that
+flow. Anthropic model runs require API billing; Claude Pro/Max authentication
+plugins are not supported by OpenCode.
+
+`--strip-wrapper-clis` hides `flowdeck`, `tuist`, `fastlane`, `xcodegen` and
+friends from the agent's `PATH`. Use it: the benchmark is about driving the
+Apple toolchain, and a wrapper answers a different question. That mode also
+gives the agent a hermetic `HOME`, so credentials stored by `opencode auth
+login` are not visible to it, which is why the key is passed with
+`--allow-env` rather than relied on from disk.
+
+That command runs the agent as a process on this host. Read the next section
+before publishing anything from it.
+
+## Isolating the agent
+
+Every task that names a simulator gets one: the harness creates and boots a
+device matching the task before the agent starts, and tells the agent its UDID
+in `APPLEBENCH_SIMULATOR_UDID` (with `APPLEBENCH_SIMULATOR_NAME`, `_DEVICE` and
+`_RUNTIME` beside it). Grading erases that same device first, so nothing the
+agent left on it can stand in for work it did not do. Tasks say to address it
+by UDID, because `booted` is whichever simulator the host happens to have up —
+and a run that reached for one graded a screenshot of somebody else's iPad.
+
+The agent runs on this host. `run-benchmark.sh` seals it by default with a
+macOS sandbox profile: it can write only its workspace, and it cannot read the
+harness checkout, task files, reference solutions, graders, cached fixtures,
+other runs, or other copies of the benchmark kept beside the harness. It gets a
+benchmark-owned OpenCode config in place of the user's, `webfetch` denied,
+plugins off, and no user MCP servers or instructions.
+
+The network stays open, because OpenCode reaches the model from the same
+process tree as its `bash` tool. An agent could still `curl` a web page, so
+every run records `network: unrestricted (host egress)`.
+
+The sandbox is not the only check. The trajectory grader fails a run whose tool
+calls reach protected benchmark material, and published runs are audited:
+anything that crossed the boundary is invalidated and run again. An attempt the
+sandbox refused reached nothing and is not held against the run; a tool call
+counts as refused only when it failed outright, or when it printed nothing but
+refusals for every protected path it named.
+
+### What the run records
+
+Every run records `answer_isolation`, which says whether the sandbox was
+applied, and its network policy. Check `result.json` before publishing: a run
+that says `none (answers readable on the host filesystem)` was started with
+`--no-seal` and is not a number to publish.
+
+Leave `--parallel` at 1. Each slot runs a full task with its own simulator,
+and simulators running alongside each other is the single most reliable way
+to turn a good run into a directory of timeouts.
+
+Expect several hours for 123 tasks. The script writes a log and a summary to
+`Reports/gold-<date>/` and exits with the suite's own status.
+
+### Pointing at something else
+
+To route through a self-hosted or proxied endpoint, export an OpenCode
+provider block before running, inline JSON or a path to a JSON file:
+
+```bash
+export APPLEBENCH_OPENCODE_PROVIDER='{"local":{"npm":"@ai-sdk/anthropic", ...}}'
+```
+
+The block is merged into the harness's own configuration, which re-applies
+its sandbox keys afterwards: an override cannot re-enable web access.
+
+## Publish
+
+```bash
+./Scripts/publish-report.sh 2026-09-01-sonnet-45 .applebench/runs gold
+```
+
+The page writes itself from the run's export, model, harness, host, pass
+rate, charts, per-task table. Add commentary in the body only if there is
+something the numbers do not say; the one thing worth writing by hand is
+which attempt counts, when a task was re-run.
+
+Then commit and push; the Pages workflow deploys on any change under
+`site/`.
+
+## If a run goes wrong
+
+- **Everything after a certain point timed out.** Almost always another
+  simulator was up, or the disk filled. Check `xcrun simctl list devices
+  booted` and `df -h`.
+- **Simulators piling up.** They should not. Each run creates one device named
+  `AppleBench-<run id>` and deletes it afterwards, verifying it is gone rather
+  than assuming, and sweeps any left by an earlier run before it creates its
+  own. That sweep is what recovers from a killed run, since nothing else does.
+  Devices without that prefix are never touched.
+- **A run changed nothing and looks finished.** Check `agent_termination` in
+  `result.json`. `output_truncated` means the provider stopped the model at its
+  own output limit mid-answer, which a model can hit by spending its whole
+  budget on hidden reasoning. That is a cut-off run, not a model that declined
+  to work, and it is worth running again.
+- **A task failed before any test executed.** The grader retries a run whose
+  app would not install or whose test runner never attached, and records a
+  warning when it does. Two in a row is the host, not the model.
+- **A verdict looks wrong.** Every number traces to a run directory under
+  `.applebench/runs/`: `result.json` for the verdict, `events.jsonl` for the
+  trajectory, `logs/` for the build and test output, `diff.patch` for exactly
+  what the agent changed.

@@ -1,0 +1,33 @@
+name: CellReuseFixture
+options:
+  bundleIdPrefix: com.applebench
+  deploymentTarget:
+    iOS: "18.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    CODE_SIGNING_ALLOWED: "NO"
+    GENERATE_INFOPLIST_FILE: "YES"
+    INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+targets:
+  CellReuseFixture:
+    type: application
+    platform: iOS
+    sources: [Sources]
+  CellReuseFixtureTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - Tests
+      - Sources/Contact.swift
+      - Sources/AvatarLoader.swift
+      - Sources/ContactCell.swift
+schemes:
+  CellReuseFixture:
+    build:
+      targets:
+        CellReuseFixture: all
+        CellReuseFixtureTests: [test]
+    test:
+      targets:
+        - CellReuseFixtureTests

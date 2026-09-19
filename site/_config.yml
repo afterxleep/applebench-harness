@@ -1,0 +1,79 @@
+title: AppleBench
+tagline: A benchmark for AI agents that build Apple apps
+description: >-
+  AppleBench Gold Suite 1.2 tests whether an AI coding agent can repair a real
+  broken Xcode project and leave an app that builds, passes independent tests,
+  and works on a simulator.
+
+url: https://afterxleep.github.io
+baseurl: /applebench-harness
+# github_url drives every repository link on the site. Emptying it removes
+# them all, which is what to do if the harness ever goes private again.
+github_url: https://github.com/afterxleep/applebench-harness
+
+# Publishes only the holding page and hides navigation to everything else.
+coming_soon: true
+
+author:
+  name: Daniel Bernal
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+collections:
+  benchmarks:
+    output: true
+    permalink: /benchmarks/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: benchmarks
+    values:
+      layout: benchmark
+  - scope:
+      path: ""
+    values:
+      layout: page
+
+permalink: /blog/:year/:month/:title/
+paginate: false
+
+sass:
+  style: compressed
+  sass_dir: _sass
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - README.md
+  # Coming-soon mode: nothing but the holding page is published. To launch,
+  # set coming_soon to false, delete everything below, and move _home.full.html
+  # back to index.html.
+  - benchmark.md
+  - benchmarks.html
+  - blog.html
+  - methodology.md
+  - empirical_weights.json
+  - _posts
+  - _benchmarks
+
+# Ordered navigation. `benchmarks` and `blog` are index pages, not collections
+# being enumerated here.
+nav:
+  - title: Benchmark
+    url: /benchmark/
+  - title: Results
+    url: /benchmarks/
+  - title: Blog
+    url: /blog/
+  - title: Methodology
+    url: /methodology/

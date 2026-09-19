@@ -1,0 +1,150 @@
+# What the suite was, when. A published number only means something against a
+# stated set of tasks, so every run records the revision it was measured on
+# and results are only comparable within one.
+# The current entry also drives the task totals shown on the homepage.
+
+- id: "2026-09-10"
+  name: "Gold Suite 1.2"
+  version: "1.2"
+  released: "2026-09-10"
+  gold_tasks: 148
+  app_run_tasks: 53
+  public_sample_tasks: 8
+  category_tasks:
+    build: 1
+    tests: 3
+    runtime: 5
+    visual: 9
+    interaction: 27
+    project: 4
+    frameworks: 66
+    ops: 28
+    composition: 5
+  current: true
+  summary: >-
+    Gold Suite 1.2 adds five end-to-end composition tasks and strengthens
+    answer isolation. Withheld tests are fetched from the sealed task repository
+    only after the agent exits. Published results keep capability, list-price
+    cost, and active agent time as separate measures.
+  changes:
+    - "Five composition tasks exercise complete product workflows across SwiftUI, persistence, networking, media, and UI automation."
+    - "Every composition fixture was calibrated fail-then-pass before model results were accepted."
+    - "Pass rate, recorded cost, and active agent time are reported separately; tokens and tool calls remain diagnostic data."
+    - "Composition runs default to a 3,600-second wall-clock ceiling and a 1,000,000-token safety ceiling."
+    - "The empirical-v1 score weights each task by how rarely the complete published models pass it, from 100 points for a universal pass to a 2000-point cap; raw pass rate remains separately visible, and cost and active time are divided by score percentage points, and failed attempts stay in their numerators."
+    - "Withheld tests do not exist in the agent-visible harness state; the runner fetches the exact task-set revision into a temporary grading checkout after the agent exits."
+    - "The agent sandbox denies the complete .applebench state tree, including cached fixtures, solutions, task files, and other runs."
+
+- id: "2026-09-09"
+  name: "2026-09-09"
+  gold_tasks: 143
+  app_run_tasks: 48
+  public_sample_tasks: 8
+  category_tasks:
+    build: 1
+    tests: 3
+    runtime: 5
+    visual: 9
+    interaction: 27
+    project: 4
+    frameworks: 66
+    ops: 28
+  current: false
+  summary: >-
+    The 143-task gold set adds an Arabic right-to-left layout task. Harness and
+    task corrections remove false UI, locale, startup, timeout, and sandbox
+    failures while preserving the model's original workspace and evidence for
+    review.
+  changes:
+    - "A previously unlisted Arabic right-to-left badge task now fails unchanged, passes its reference solution in English and Arabic, and is measured for every published model."
+    - "UI flow grading now reads a fresh settled accessibility tree, clears state where flows must be isolated, and accepts valid region-aware localized date renderings."
+    - "The ledger baseline no longer depends on a flaky toggle tap, and the enrolment automation task now requires an explicit assertion that the keyboard disappeared."
+    - "Reviewed adjudications can correct a grader verdict without rewriting result.json, and targeted reports can build on an immutable prior baseline instead of rerunning unaffected work."
+    - "Agent startup failures retry only before a model is reached; package verification and timeout accounting now preserve the model's actual work and failure stage."
+
+- id: "2026-09-08"
+  name: "2026-09-08"
+  gold_tasks: 142
+  app_run_tasks: 47
+  public_sample_tasks: 8
+  category_tasks:
+    build: 1
+    tests: 3
+    runtime: 5
+    visual: 8
+    interaction: 27
+    project: 4
+    frameworks: 66
+    ops: 28
+  current: false
+  summary: >-
+    Six expert Swift concurrency tasks join the gold suite. Their contracts
+    cover actor reentrancy, cancellation-safe continuations, bounded task
+    groups, shared task ownership, AsyncStream multicast, and Swift 6.2
+    isolated conformances. All six fail unchanged and pass with their
+    reference solutions.
+  changes:
+    - "Six deterministic Swift concurrency tasks added at difficulties 8 through 10, with 33 hidden tests across their final contracts."
+    - "Every asynchronous observation is explicitly ordered and bounded, so a broken solution fails locally instead of hanging or relying on elapsed-time scheduling."
+    - "MiniMax M2.7 and MiniMax M3 were rerun under sealed answer isolation, and their latest authoritative attempts are included in the published results."
+
+- id: "2026-09-06"
+  name: "2026-09-06"
+  gold_tasks: 136
+  current: false
+  summary: >-
+    The graders judge outcomes, not routes. Prompts say what has to be true
+    when the work is done and no longer name the tools or the commands;
+    nothing in a grader asks which command was run or how many. Two visual
+    tasks join the suite. The reporting method was simplified so every task
+    contributed equally to pass rate.
+  changes:
+    - "Thirty-five operational prompts stop dictating commands and stop fencing off third-party tools, which the harness now denies unconditionally. Naming them was a hint."
+    - "Seventeen mutation graders match by pattern rather than by an identifier the agent is free to rename, so a renamed identifier fails the test instead of breaking the grader."
+    - "Every assertion that graded the route is gone: no grader asks for a tool to have been run, for a command count, or for a command string in a report. Deliverables are checked for what they contain."
+    - "Seed-data guards check the value, not the line: renaming a property or moving the data no longer fails a task whose behaviour is right."
+    - "Deliverables are asked for in the working directory rather than at the repo root, which a model could resolve to the operator's checkout."
+    - "Two tasks added that need the device: a landscape layout that starves its hero image, and a card that keeps light-mode colours in dark mode."
+    - "Each task carries the instant it last changed, so a task edited after a run is told apart from one edited before it."
+
+- id: "2026-09-03"
+  name: "2026-09-03 (superseded)"
+  gold_tasks: 134
+  current: false
+  summary: >-
+    Eleven tasks added that cannot be solved without driving the device, and
+    twenty-five hardened so that a test asserting nothing no longer passes.
+    Every task in the suite still fails for an agent that changes nothing and
+    passes once the reference fix is applied, 134 of 134.
+  changes:
+    - "Eleven tasks require the device itself: rotation, a language change and reboot, hardware buttons over the Indigo HID path, coordinate taps under rotation, list ordering, and accessibility content sizes."
+    - "Twenty-five tasks whose deliverable is a test gained a mutation grader: the app is deliberately broken and the agent's own test has to fail. A test that launches the app and asserts nothing no longer passes."
+    - "Thirty tasks gained a trajectory grader, so a task cannot be answered by editing the expected output instead of doing the work."
+    - "Planted defects are camouflaged rather than obvious: the fixture behaves correctly everywhere except the case under test."
+
+- id: "2026-08-31"
+  name: "2026-08-31 (superseded)"
+  gold_tasks: 123
+  current: false
+  summary: >-
+    Every task in the suite now fails for an agent that changes nothing and
+    passes once the reference fix is applied, 123 of 123. Before this
+    revision that had never been established for the ops family or for
+    ui-auto, and 47 tasks could not pass their own solvability check.
+  changes:
+    - "The 50 frameworks tasks were re-authored against the real APIs. They had tested String and Bool constants standing in for the frameworks they were named after."
+    - "Prompts state the symptom only. Titles and prompts used to state the diagnosis, and often the fix."
+    - "59 fixtures now ship with no test target at all. The graded tests were being handed to the agent alongside the defect."
+    - "Comments naming the planted defect were removed from every shipped source, and a check now blocks them in CI."
+    - "Seven harness defects were fixed, four of which made tasks impossible to pass for any agent."
+    - "visual-006 left the scoring suite: an agent that changes nothing passes it."
+
+- id: "2026-08-27"
+  name: "2026-08-27 (superseded)"
+  gold_tasks: 72
+  current: false
+  summary: >-
+    The suite as it stood for the MiniMax M2.7 and M3 runs. Its ops and
+    ui-auto tasks had never been shown to be solvable, several were
+    unpassable by construction, and fixtures shipped their own graded tests
+    and comments naming the defect.

@@ -1,0 +1,45 @@
+id: project-003
+title: Badge artwork never resolves at runtime
+category: project
+difficulty: 3
+
+repository:
+  url: ./.applebench/fixtures/AssetCatalogFixture
+  commit: HEAD
+
+prompt: |
+  The certification screen shows "Badge missing" instead of the badge. The
+  artwork is in the repository and the build is clean.
+  Make the badge appear.
+
+environment:
+  platform: ios
+  simulator:
+    device: "iPhone 17"
+    runtime: "iOS 26.5"
+
+limits:
+  timeout_seconds: 1200
+
+tags:
+  - asset-catalog
+  - resources
+  - packaging
+
+graders:
+  - type: build
+    project: AssetCatalogFixture.xcodeproj
+    scheme: AssetCatalogFixture
+
+  # The compiled catalog has to actually be in the product.
+  - type: xcodeproj
+    project: AssetCatalogFixture.xcodeproj
+    scheme: AssetCatalogFixture
+    bundle_contains:
+      - Assets.car
+
+  - type: xcuitest
+    project: AssetCatalogFixture.xcodeproj
+    scheme: AssetCatalogFixture
+    tests:
+      - AssetCatalogFixtureUITests/BadgeAssetTests/testBadgeArtworkResolves

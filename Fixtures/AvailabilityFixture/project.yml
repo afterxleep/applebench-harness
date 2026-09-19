@@ -1,0 +1,16 @@
+name: AvailabilityFixture
+options:
+  bundleIdPrefix: com.applebench
+  deploymentTarget:
+    iOS: "18.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    CODE_SIGNING_ALLOWED: "NO"
+    GENERATE_INFOPLIST_FILE: "YES"
+    INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+targets:
+  AvailabilityFixture:
+    type: application
+    platform: iOS
+    sources: [Sources]

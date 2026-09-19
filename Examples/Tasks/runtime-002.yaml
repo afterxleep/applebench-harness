@@ -1,0 +1,45 @@
+id: runtime-002
+title: Profile screen crashes before its data arrives
+category: runtime
+difficulty: 2
+
+repository:
+  url: ./.applebench/fixtures/AsyncLoadFixture
+  commit: HEAD
+
+prompt: |
+  The app dies as soon as the profile screen appears.
+  Fix it so the screen comes up and shows the profile once it has loaded.
+
+environment:
+  platform: ios
+  simulator:
+    device: "iPhone 17"
+    runtime: "iOS 26.5"
+
+limits:
+  timeout_seconds: 900
+
+tags:
+  - crash
+  - async
+  - swiftui
+
+graders:
+  - type: build
+    project: AsyncLoadFixture.xcodeproj
+    scheme: AsyncLoadFixture
+
+  - type: xcuitest
+    project: AsyncLoadFixture.xcodeproj
+    scheme: AsyncLoadFixture
+    tests:
+      - AsyncLoadFixtureUITests/ProfileLoadTests/testProfileAppearsAfterLoading
+
+  - type: runtime
+    project: AsyncLoadFixture.xcodeproj
+    scheme: AsyncLoadFixture
+    launch:
+      bundle_identifier: com.applebench.AsyncLoadFixture
+    must_not_crash: true
+    observation_seconds: 8

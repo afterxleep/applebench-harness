@@ -1,0 +1,74 @@
+diff --git a/Sources/CountersModel.swift b/Sources/CountersModel.swift
+index 5f0d54a..cf5445b 100644
+--- a/Sources/CountersModel.swift
++++ b/Sources/CountersModel.swift
+@@ -6,7 +6,6 @@ final class CountersModel: ObservableObject {
+     @Published var value: Int = 0
+ 
+     func increment() {
+-        let next = value + 1
+-        value = next
++        value += 1
+     }
+ }
+diff --git a/StateFixture.xcodeproj/project.pbxproj b/StateFixture.xcodeproj/project.pbxproj
+index bab8833..9628e89 100644
+--- a/StateFixture.xcodeproj/project.pbxproj
++++ b/StateFixture.xcodeproj/project.pbxproj
+@@ -10,6 +10,7 @@
+ 		1A088EB20DAB1190666A69D2 /* StateFixtureApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C2AF2ADC8C988E18F9AE195 /* StateFixtureApp.swift */; };
+ 		520157865D2A2143501F0790 /* StateUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EF0DA01DBB697CA4E8113E /* StateUITests.swift */; };
+ 		83664E9FC79FFBB3D9744B28 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEB2CA5E94255CEF2259AA41 /* RootView.swift */; };
++		E40AB06EE5091B4F0BA6A66A /* CounterAutomationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C349822293A9528B162F6EF /* CounterAutomationTests.swift */; };
+ 		F8E4EDC323E49FEE280830FF /* CountersModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67F7763575732960F965C057 /* CountersModel.swift */; };
+ /* End PBXBuildFile section */
+ 
+@@ -27,6 +28,7 @@
+ 		1C2AF2ADC8C988E18F9AE195 /* StateFixtureApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateFixtureApp.swift; sourceTree = "<group>"; };
+ 		38EF0DA01DBB697CA4E8113E /* StateUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateUITests.swift; sourceTree = "<group>"; };
+ 		67F7763575732960F965C057 /* CountersModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountersModel.swift; sourceTree = "<group>"; };
++		7C349822293A9528B162F6EF /* CounterAutomationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterAutomationTests.swift; sourceTree = "<group>"; };
+ 		B4631CF3302AE0976D6CBA4C /* StateFixture.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = StateFixture.app; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		DEB2CA5E94255CEF2259AA41 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+ 		F1F02B2D64CB7A4527275201 /* StateFixtureUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StateFixtureUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+@@ -55,6 +57,7 @@
+ 		92142DFED438BC03345CB296 /* UITests */ = {
+ 			isa = PBXGroup;
+ 			children = (
++				7C349822293A9528B162F6EF /* CounterAutomationTests.swift */,
+ 				38EF0DA01DBB697CA4E8113E /* StateUITests.swift */,
+ 			);
+ 			path = UITests;
+@@ -146,6 +149,7 @@
+ 			isa = PBXSourcesBuildPhase;
+ 			buildActionMask = 2147483647;
+ 			files = (
++				E40AB06EE5091B4F0BA6A66A /* CounterAutomationTests.swift in Sources */,
+ 				520157865D2A2143501F0790 /* StateUITests.swift in Sources */,
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+diff --git a/UITests/CounterAutomationTests.swift b/UITests/CounterAutomationTests.swift
+new file mode 100644
+index 0000000..8782da0
+--- /dev/null
++++ b/UITests/CounterAutomationTests.swift
+@@ -0,0 +1,19 @@
++import XCTest
++
++/// Reference automation for the fixture, authored the way the task asks:
++/// accessibility identifiers rather than coordinates, and assertions on what
++/// the user can see.
++
++final class CounterAutomationTests: XCTestCase {
++    func testTheCounterAdvancesByEveryTap() {
++        let app = XCUIApplication()
++        app.launch()
++
++        let increment = app.buttons["increment"]
++        XCTAssertTrue(increment.waitForExistence(timeout: 10))
++        for _ in 0..<3 { increment.tap() }
++
++        XCTAssertTrue(app.buttons["goDetail"].exists)
++        XCTAssertEqual(app.state, .runningForeground)
++    }
++}

@@ -1,0 +1,31 @@
+diff --git a/Sources/Analytics.swift b/Sources/Analytics.swift
+index 3b4a614..78bf2eb 100644
+--- a/Sources/Analytics.swift
++++ b/Sources/Analytics.swift
+@@ -4,6 +4,7 @@ import Foundation
+ ///
+ /// Isolated to the main actor so its mutable state has a single, statically
+ /// known execution context under Swift 6 strict concurrency.
++/// Vehicle fixture for operational tasks — compiles cleanly.
+ @MainActor
+ final class Analytics {
+     static let shared = Analytics()
+diff --git a/clean-report.md b/clean-report.md
+new file mode 100644
+index 0000000..3d36100
+--- /dev/null
++++ b/clean-report.md
+@@ -0,0 +1,13 @@
++# Clean rebuild report — BuildFixture
++
++Derived data before clean: 214M
++Derived data after clean: 0B
++Rebuild wall clock: 38.6s
++
++Commands:
++
++```
++xcodebuild clean -project BuildFixture.xcodeproj -scheme BuildFixture
++rm -rf ~/Library/Developer/Xcode/DerivedData/BuildFixture-*
++xcodebuild -project BuildFixture.xcodeproj -scheme BuildFixture build
++```
