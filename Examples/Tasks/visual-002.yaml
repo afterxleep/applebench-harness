@@ -1,0 +1,38 @@
+id: visual-002
+title: Profile card has drifted from its design reference
+category: visual
+difficulty: 2
+
+repository:
+  url: ./.applebench/fixtures/UIMockFixture
+  commit: HEAD
+
+prompt: |
+  The profile screen no longer matches the design reference in
+  Design/expected-ui.png.
+  Bring the screen back in line with it.
+
+environment:
+  platform: ios
+  simulator:
+    device: "iPhone 17"
+    runtime: "iOS 26.5"
+
+limits:
+  timeout_seconds: 900
+
+tags:
+  - layout
+  - design-spec
+  - swiftui
+
+graders:
+  - type: build
+    project: UIMockFixture.xcodeproj
+    scheme: UIMockFixture
+
+  - type: xcuitest
+    project: UIMockFixture.xcodeproj
+    scheme: UIMockFixture
+    tests:
+      - UIMockFixtureUITests/ProfileCardTests/testProfileMatchesDesign

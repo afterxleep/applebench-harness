@@ -1,0 +1,36 @@
+diff --git a/TargetMembershipFixture.xcodeproj/project.pbxproj b/TargetMembershipFixture.xcodeproj/project.pbxproj
+index 9d8fca3..d5b6988 100644
+--- a/TargetMembershipFixture.xcodeproj/project.pbxproj
++++ b/TargetMembershipFixture.xcodeproj/project.pbxproj
+@@ -7,6 +7,7 @@
+ 	objects = {
+ 
+ /* Begin PBXBuildFile section */
++		6284B9DFCB4402867FC5F5F2 /* ReadingFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7FAFEB69B6FCE300AF5FF63 /* ReadingFormatter.swift */; };
+ 		7444D86499C8ECABFCC8688D /* ReadingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A24C0978973B0ADEA08F09 /* ReadingsView.swift */; };
+ 		882E1C5D7C7E4EE137D61A97 /* TargetMembershipFixtureApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F4A039D9DD8EF90ED86B00 /* TargetMembershipFixtureApp.swift */; };
+ /* End PBXBuildFile section */
+@@ -15,6 +16,7 @@
+ 		119557CC54666E4A2895B40D /* TargetMembershipFixture.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TargetMembershipFixture.app; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		52F4A039D9DD8EF90ED86B00 /* TargetMembershipFixtureApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetMembershipFixtureApp.swift; sourceTree = "<group>"; };
+ 		A1A24C0978973B0ADEA08F09 /* ReadingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingsView.swift; sourceTree = "<group>"; };
++		C7FAFEB69B6FCE300AF5FF63 /* ReadingFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingFormatter.swift; sourceTree = "<group>"; };
+ /* End PBXFileReference section */
+ 
+ /* Begin PBXGroup section */
+@@ -37,6 +39,7 @@
+ 		CBC4B061D7521EEDD4F199A6 /* Sources */ = {
+ 			isa = PBXGroup;
+ 			children = (
++				C7FAFEB69B6FCE300AF5FF63 /* ReadingFormatter.swift */,
+ 				A1A24C0978973B0ADEA08F09 /* ReadingsView.swift */,
+ 				52F4A039D9DD8EF90ED86B00 /* TargetMembershipFixtureApp.swift */,
+ 			);
+@@ -98,6 +101,7 @@
+ 			isa = PBXSourcesBuildPhase;
+ 			buildActionMask = 2147483647;
+ 			files = (
++				6284B9DFCB4402867FC5F5F2 /* ReadingFormatter.swift in Sources */,
+ 				7444D86499C8ECABFCC8688D /* ReadingsView.swift in Sources */,
+ 				882E1C5D7C7E4EE137D61A97 /* TargetMembershipFixtureApp.swift in Sources */,
+ 			);

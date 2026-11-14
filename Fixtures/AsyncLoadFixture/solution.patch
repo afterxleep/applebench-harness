@@ -1,0 +1,38 @@
+diff --git a/Sources/ProfileScreen.swift b/Sources/ProfileScreen.swift
+index 329eda2..0396282 100644
+--- a/Sources/ProfileScreen.swift
++++ b/Sources/ProfileScreen.swift
+@@ -5,18 +5,23 @@ struct ProfileScreen: View {
+ 
+     var body: some View {
+         VStack(spacing: 12) {
+-            Text(loader.profile!.name)
+-                .font(.title2)
+-                .accessibilityIdentifier("name")
++            if let profile = loader.profile {
++                Text(profile.name)
++                    .font(.title2)
++                    .accessibilityIdentifier("name")
+ 
+-            Text(loader.profile!.role)
+-                .font(.subheadline)
+-                .foregroundStyle(.secondary)
+-                .accessibilityIdentifier("role")
++                Text(profile.role)
++                    .font(.subheadline)
++                    .foregroundStyle(.secondary)
++                    .accessibilityIdentifier("role")
+ 
+-            Text("\(loader.profile!.followers) followers")
+-                .font(.footnote)
+-                .accessibilityIdentifier("followers")
++                Text("\(profile.followers) followers")
++                    .font(.footnote)
++                    .accessibilityIdentifier("followers")
++            } else {
++                ProgressView()
++                    .accessibilityIdentifier("loading")
++            }
+         }
+         .padding()
+         .navigationTitle("Profile")

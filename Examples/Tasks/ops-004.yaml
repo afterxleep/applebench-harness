@@ -1,0 +1,45 @@
+id: ops-004
+title: Clean derived data, rebuild from scratch, prove it is clean
+category: ops
+difficulty: 3
+
+repository:
+  url: ./.applebench/fixtures/BuildFixture
+  commit: HEAD
+
+prompt: |
+  Wipe the build artifacts for this project. Use the raw toolchain —
+  `xcodebuild clean` plus `rm -rf` on the project's derived-data
+  path. No third-party CLI.
+
+  After cleaning, run a fresh `xcodebuild build` and write a short
+  report to `clean-report.md` at the repo root showing the
+  pre-clean size of the derived-data directory, the post-clean
+  size, and the elapsed wall-clock time of the rebuild.
+
+environment:
+  platform: ios
+  simulator:
+    device: "iPhone 17"
+    runtime: "iOS 26.5"
+
+limits:
+  timeout_seconds: 1200
+
+tags:
+  - xcodebuild
+  - clean
+  - operational
+
+graders:
+  - type: build
+    project: BuildFixture.xcodeproj
+    scheme: BuildFixture
+
+  - type: file
+    assertions:
+      - path: clean-report.md
+        exists: true
+        changed: true
+      - path: clean-report.md
+        contains: "xcodebuild"

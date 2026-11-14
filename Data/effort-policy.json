@@ -1,0 +1,10 @@
+{
+  "_comment": "Models are measured at the provider's default configuration, as users run them. A model listed here is run at the named effort because that is its documented default; every other model is run with no effort flag, and its runs record effort as blank.",
+  "efforts": {
+    "openrouter/z-ai/glm-5.3-flash": "max",
+    "openrouter/moonshotai/kimi-k3": "max",
+    "anthropic/claude-haiku-5-5": "medium",
+    "anthropic/claude-sonnet-5-5": "high",
+    "anthropic/claude-opus-5-5": "medium"
+  }
+}

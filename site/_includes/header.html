@@ -1,0 +1,17 @@
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="{{ '/' | relative_url }}">
+      {%- include logo.html -%}
+      <span class="brand__name">AppleBench</span>
+    </a>
+    {%- unless site.coming_soon -%}
+    <nav class="site-nav" aria-label="Primary">
+      {%- for item in site.nav -%}
+        {%- assign target = item.url | relative_url -%}
+        <a href="{{ target }}"{% if page.url contains item.url %} aria-current="page"{% endif %}>{{ item.title }}</a>
+      {%- endfor -%}
+      {%- if site.github_url -%}<a href="{{ site.github_url }}">GitHub</a>{%- endif -%}
+    </nav>
+    {%- endunless -%}
+  </div>
+</header>

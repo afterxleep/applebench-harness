@@ -1,0 +1,39 @@
+id: build-002
+title: Build fails on an API newer than the deployment target
+category: build
+difficulty: 2
+
+repository:
+  url: ./.applebench/fixtures/AvailabilityFixture
+  commit: HEAD
+
+prompt: |
+  The app stopped building after the toolbar work landed on the library screen.
+  Get it building again. It still has to run on our iOS 18 devices.
+
+environment:
+  platform: ios
+  simulator:
+    device: "iPhone 17"
+    runtime: "iOS 26.5"
+
+limits:
+  timeout_seconds: 900
+
+tags:
+  - availability
+  - swiftui
+
+graders:
+  - type: build
+    project: AvailabilityFixture.xcodeproj
+    scheme: AvailabilityFixture
+
+  # Raising the deployment target would silence the compiler and drop every
+  # iOS 18 device, so the resolved setting is pinned.
+  - type: xcodeproj
+    project: AvailabilityFixture.xcodeproj
+    scheme: AvailabilityFixture
+    build_settings:
+      - key: IPHONEOS_DEPLOYMENT_TARGET
+        equals: "18.0"

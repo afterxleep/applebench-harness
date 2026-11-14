@@ -1,0 +1,74 @@
+{%- comment -%}
+One horizontal bar. Params: label, value, total, color (a CSS custom-property
+name without the leading dashes), suffix (optional right-hand annotation),
+value_label (optional replacement for the printed "value/total", for callers
+whose numbers are fractional and want them rounded), link (optional href: the
+label becomes a link to it, for a row that stands for something with a page),
+description (optional: the label becomes a click-to-open explanation),
+hide_percent (optional: print only value_label, for a cost whose share of
+the most expensive run is the bar length and not the reading).
+The number is always printed beside the bar, so the reading never depends on
+color or on estimating a length.
+{%- endcomment -%}
+{%- comment -%}
+`value` and `total` arrive as strings when the caller built them from a split,
+so coerce before comparing · Liquid will not order a String against 0.
+{%- endcomment -%}
+{%- assign bar_value = include.value | plus: 0 -%}
+{%- assign bar_total = include.total | plus: 0 -%}
+{%- assign pct = 0 -%}
+{%- if bar_total > 0 -%}
+  {%- assign pct = bar_value | times: 1.0 | divided_by: bar_total | times: 100 -%}
+{%- endif -%}
+{%- capture printed -%}{{ bar_value }}/{{ bar_total }}{%- endcapture -%}
+{%- assign printed = include.value_label | default: printed -%}
+<div class="bar-row">
+  <div class="bar-row__label" title="{{ include.label }}">
+    {%- if include.link -%}
+      <a href="{{ include.link }}">{{ include.label }}</a>
+    {%- elsif include.description -%}
+      {%- assign help_id = include.label | slugify | prepend: "category-help-" -%}
+      <span class="category-help">
+        <button class="category-help__trigger"
+                type="button"
+                popovertarget="{{ help_id }}"
+                style="anchor-name: --{{ help_id }}"
+                aria-label="About the {{ include.label }} category">
+          <span>{{ include.label }}</span>
+          <span class="category-help__icon" aria-hidden="true">?</span>
+        </button>
+        <span class="category-help__popover"
+              id="{{ help_id }}"
+              popover
+              role="note"
+              style="position-anchor: --{{ help_id }}">
+          <strong>{{ include.label }}</strong>
+          {{ include.description }}
+        </span>
+      </span>
+    {%- else -%}
+      {{ include.label }}
+    {%- endif -%}
+  </div>
+  {%- capture bar_aria -%}
+    {%- if include.hide_percent -%}
+      {{ include.label }}: {{ printed }}
+    {%- else -%}
+      {{ include.label }}: {{ printed | replace: '/', ' of ' }}, {{ pct | round: 1 }} percent
+    {%- endif -%}
+  {%- endcapture -%}
+  <div class="bar-row__track"
+       role="img"
+       aria-label="{{ bar_aria | strip }}">
+    <div class="bar-row__fill"
+         style="width: {{ pct | round: 2 }}%; --bar-color: var(--{{ include.color | default: 'series-1' }});"></div>
+  </div>
+  <div class="bar-row__value">
+    {%- unless include.hide_percent -%}
+    {{ pct | round: 1 }}%
+    <span>{{ printed }}</span>
+    {%- else -%}
+    {{ printed }}
+    {%- endunless -%}
+  </div>
+</div>
