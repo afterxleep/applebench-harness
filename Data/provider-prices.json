@@ -1,0 +1,40 @@
+{
+  "note": "Prices read from the model owner's own pricing page. They win over models.dev, which can list a reseller's price instead (for GLM 5.3 Flash it listed the cheapest OpenRouter host). USD per million tokens, standard tier, shortest-context band.",
+  "models": {
+    "openrouter/z-ai/glm-5.3-flash": {
+      "cost_per_million": {"input": 0.15, "cache_read": 0.03, "output": 0.5},
+      "url": "https://docs.z.ai/guides/overview/pricing",
+      "retrieved": "2026-11-17"
+    },
+    "anthropic/claude-opus-5-5": {
+      "cost_per_million": {"input": 4, "cache_write": 5, "cache_read": 0.2, "output": 20},
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "retrieved": "2026-11-17"
+    },
+    "anthropic/claude-sonnet-5-5": {
+      "cost_per_million": {"input": 2, "cache_write": 2.5, "cache_read": 0.1, "output": 10},
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "retrieved": "2026-11-17"
+    },
+    "anthropic/claude-haiku-5-5": {
+      "cost_per_million": {"input": 0.1, "cache_write": 0.125, "cache_read": 0.01, "output": 0.5},
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "retrieved": "2026-11-17"
+    },
+    "openai/gpt-6-luna": {
+      "cost_per_million": {"input": 0.1, "cache_read": 0.01, "output": 0.5},
+      "url": "https://developers.openai.com/api/docs/pricing",
+      "retrieved": "2026-11-17"
+    },
+    "minimax/MiniMax-M3": {
+      "cost_per_million": {"input": 0.3, "cache_read": 0.06, "output": 1.2},
+      "url": "https://platform.minimax.io/docs/guides/pricing",
+      "retrieved": "2026-11-17"
+    },
+    "openrouter/minimax/minimax-m3": {
+      "cost_per_million": {"input": 0.3, "cache_read": 0.06, "output": 1.2},
+      "url": "https://platform.minimax.io/docs/guides/pricing",
+      "retrieved": "2026-11-17"
+    }
+  }
+}

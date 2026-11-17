@@ -1,0 +1,527 @@
+import AppleBenchCore
+import Foundation
+
+/// Builds and installs the app, puts the device into the graded state, drives
+/// the app through FlowDeck, and judges the accessibility tree it leaves.
+///
+/// Every other grader in the harness asks `xcodebuild` a question. This one
+/// asks the device, which is the only way to grade behaviour that depends on
+/// how the device itself is configured — rotation, system language, Dynamic
+/// Type, an app that has been backgrounded with the Home button. Two of those
+/// have no `simctl` equivalent, so this grader is also the reason a task can
+/// require them at all.
+public struct UIFlowGrader: Grader {
+    public let identifier = "uiflow"
+    private let configuration: UIFlowGraderConfiguration
+    private let simulatorManager: SimulatorManager
+
+    public init(
+        configuration: UIFlowGraderConfiguration,
+        simulatorManager: SimulatorManager = SimulatorManager()
+    ) {
+        self.configuration = configuration
+        self.simulatorManager = simulatorManager
+    }
+
+    public func grade(task: BenchmarkTask, context: GradingContext) async throws -> GradingResult {
+        let start = ContinuousClock.now
+        try configuration.validate()
+
+        guard let udid = context.simulatorUDID else {
+            throw BenchmarkFailure.graderFailure(
+                grader: identifier,
+                message: "A UI flow needs a simulator; the task declares none"
+            )
+        }
+
+        var buildArguments = XcodebuildSupport.baseArguments(
+            project: configuration.project,
+            workspace: configuration.workspace,
+            scheme: configuration.scheme,
+            configuration: nil,
+            destination: nil,
+            context: context
+        )
+        buildArguments.append("build")
+        let buildLogName = XcodebuildSupport.uniqueLogName("uiflow-build.log", context: context)
+        let (buildResult, buildLog) = try await XcodebuildSupport.run(
+            arguments: buildArguments,
+            logName: buildLogName,
+            context: context
+        )
+        guard buildResult.exitCode == 0 else {
+            return GradingResult(
+                grader: identifier,
+                passed: false,
+                duration: start.duration(to: .now),
+                summary: "App failed to build, so the flow could not run",
+                evidence: [buildLog]
+            )
+        }
+        guard let appURL = RuntimeGrader.findAppBundle(in: context.derivedDataURL) else {
+            throw BenchmarkFailure.graderFailure(
+                grader: identifier,
+                message: "Built products contain no .app bundle under \(context.derivedDataURL.path)"
+            )
+        }
+
+        let state = configuration.deviceState ?? SimulatorDeviceState()
+        let applier = SimulatorDeviceStateApplier(grader: identifier, context: context)
+
+        var evidence = [buildLog]
+        let outcome: Outcome
+        do {
+            outcome = try await applier.withState(state) {
+            // Installed after the language/appearance settings are in place:
+            // setting the system language reboots the device, which would drop
+            // an install done first.
+            try await installOrReject(udid: udid, appURL: appURL)
+            // Terminating a process that is not running is the expected case
+            // here, not a failure, so the result is discarded either way.
+            _ = await simulatorManager.terminate(
+                udid: udid,
+                bundleIdentifier: configuration.bundleIdentifier
+            )
+            // Both need the app on the device: one wipes its container, the
+            // other names it in a permission database.
+            if configuration.clearState {
+                try await require(
+                    UIFlowCommands.clearState(
+                        bundleIdentifier: configuration.bundleIdentifier, udid: udid
+                    ),
+                    context: context
+                )
+            }
+            for change in configuration.privacy {
+                try await require(
+                    UIFlowCommands.privacy(
+                        change, bundleIdentifier: configuration.bundleIdentifier, udid: udid
+                    ),
+                    context: context
+                )
+            }
+            _ = try await simulatorManager.launch(
+                udid: udid,
+                bundleIdentifier: configuration.bundleIdentifier
+            )
+            try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+
+            // A successful launch command only proves a process was created.
+            // SpringBoard can still be in front during ordinary simulator
+            // churn as well as after a reboot, so verify every launch before
+            // judging the screen.
+            try await ensureAppIsForeground(
+                udid: udid,
+                context: context,
+                afterReboot: state.reboots
+            )
+
+            if let openURL = configuration.openURL {
+                try await require(UIFlowCommands.openURL(openURL, udid: udid), context: context)
+                try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+            }
+
+            var stepFailure: String?
+            var snapshot: UIFlowSnapshot
+
+            if configuration.steps.isEmpty {
+                snapshot = try await readScreen(udid: udid, context: context)
+            } else {
+                var response = try await runBatch(configuration.steps, udid: udid, context: context)
+                // A step that failed because the app left the screen says
+                // nothing about the app. Bring it back and drive the flow once
+                // more before recording a verdict.
+                if response.stepFailure != nil, !Self.showsAppContent(response.snapshot) {
+                    _ = await simulatorManager.terminate(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                    _ = try await simulatorManager.launch(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                    try await ensureAppIsForeground(udid: udid, context: context, afterReboot: false)
+                    response = try await runBatch(configuration.steps, udid: udid, context: context)
+                }
+                stepFailure = response.stepFailure
+                if stepFailure == nil {
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                    snapshot = try await readScreen(udid: udid, context: context)
+                } else {
+                    snapshot = response.snapshot
+                }
+            }
+
+            guard stepFailure == nil else {
+                return Outcome(stepFailure: stepFailure, snapshot: snapshot)
+            }
+
+            // The second state turns the device under a running app. Nested so
+            // it is reset before the first state is, leaving the simulator the
+            // way the flow found it.
+            let after = configuration.afterState ?? SimulatorDeviceState()
+            return try await applier.withState(after) {
+                if !after.isEmpty {
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                    snapshot = try await readScreen(udid: udid, context: context)
+                }
+                if !configuration.afterSteps.isEmpty {
+                    let response = try await runBatch(
+                        configuration.afterSteps, udid: udid, context: context
+                    )
+                    if let failure = response.stepFailure {
+                        return Outcome(stepFailure: failure, snapshot: response.snapshot)
+                    }
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                    snapshot = try await readScreen(udid: udid, context: context)
+                }
+                for gesture in configuration.gestures {
+                    try await require(UIFlowCommands.swipe(gesture, udid: udid), context: context)
+                    try? await Task.sleep(for: .seconds(1))
+                }
+                if !configuration.postGestureSteps.isEmpty {
+                    let response = try await runBatch(
+                        configuration.postGestureSteps, udid: udid, context: context
+                    )
+                    if let failure = response.stepFailure {
+                        return Outcome(stepFailure: failure, snapshot: response.snapshot)
+                    }
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                    snapshot = try await readScreen(udid: udid, context: context)
+                }
+                for button in configuration.buttons {
+                    try await require(UIFlowCommands.button(button, udid: udid), context: context)
+                }
+                if let push = configuration.push {
+                    let payload = context.workspaceURL.appendingPathComponent(push).path
+                    try await require(
+                        UIFlowCommands.push(
+                            payload: payload,
+                            bundleIdentifier: configuration.bundleIdentifier,
+                            udid: udid
+                        ),
+                        context: context
+                    )
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                }
+                if configuration.memoryWarning {
+                    try await require(UIFlowCommands.memoryWarning(udid: udid), context: context)
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                }
+                if configuration.reinstall {
+                    await simulatorManager.terminate(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                    try await installOrReject(udid: udid, appURL: appURL)
+                    _ = try await simulatorManager.launch(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                }
+                if configuration.relaunch {
+                    await simulatorManager.terminate(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                    try? await Task.sleep(for: .seconds(1))
+                    _ = try await simulatorManager.launch(
+                        udid: udid,
+                        bundleIdentifier: configuration.bundleIdentifier
+                    )
+                }
+                if !configuration.buttons.isEmpty
+                    || (!configuration.gestures.isEmpty && configuration.postGestureSteps.isEmpty)
+                    || configuration.relaunch
+                    || configuration.reinstall || configuration.push != nil
+                    || configuration.memoryWarning {
+                    try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+                    snapshot = try await readScreen(udid: udid, context: context)
+                }
+                var appearance: String?
+                if configuration.appearanceMustDiffer {
+                    appearance = try await appearanceFailure(
+                        udid: udid, context: context, snapshot: snapshot
+                    )
+                }
+                return Outcome(
+                    stepFailure: nil, snapshot: snapshot, appearanceFailure: appearance
+                )
+            }
+            }
+        } catch let rejected as BundleRejected {
+            return GradingResult(
+                grader: identifier,
+                passed: false,
+                duration: start.duration(to: .now),
+                summary: "The app could not be installed on the simulator: \(rejected.message)",
+                evidence: evidence
+            )
+        }
+
+        if let treeArtifact = write(outcome.snapshot, in: context) {
+            evidence.append(treeArtifact)
+            await context.recorder.record(
+                .artifactCreated,
+                payload: .object(["path": .string(treeArtifact.path)])
+            )
+        }
+        await simulatorManager.terminate(udid: udid, bundleIdentifier: configuration.bundleIdentifier)
+
+        var described = state.summary
+        if let after = configuration.afterState, !after.isEmpty {
+            described += described == "default" ? "then \(after.summary)" : ", then \(after.summary)"
+        }
+        let context = "in \(described)"
+        if let stepFailure = outcome.stepFailure {
+            return GradingResult(
+                grader: identifier,
+                passed: false,
+                duration: start.duration(to: .now),
+                summary: "The flow could not be driven \(context): \(stepFailure)",
+                evidence: evidence
+            )
+        }
+
+        var failures = configuration.assertions.compactMap { $0.failure(against: outcome.snapshot) }
+        if let appearance = outcome.appearanceFailure { failures.append(appearance) }
+        return GradingResult(
+            grader: identifier,
+            passed: failures.isEmpty,
+            duration: start.duration(to: .now),
+            summary: failures.isEmpty
+                ? "\(configuration.assertions.count) UI assertion(s) hold \(context)"
+                : "\(failures.count) of \(configuration.assertions.count) UI assertion(s) failed "
+                    + "\(context): " + failures.joined(separator: "; "),
+            evidence: evidence
+        )
+    }
+
+    /// SpringBoard, rather than the app under test. Identified by the icons it
+    /// always carries — an app's own screen does not show Files next to Watch.
+    static func looksLikeHomeScreen(_ snapshot: UIFlowSnapshot) -> Bool {
+        let labels = Set(snapshot.elements.compactMap(\.label))
+        return labels.contains("Files") && labels.contains("Contacts")
+    }
+
+    /// Whether a screen read shows the app under test rather than SpringBoard
+    /// or a blank, still-starting screen.
+    ///
+    /// Not being the home screen is not enough. Right after a language or
+    /// text-size change reboots the device, the first read can hold nothing but
+    /// the application root, and judging that read failed correct work.
+    static func showsAppContent(_ snapshot: UIFlowSnapshot) -> Bool {
+        guard !looksLikeHomeScreen(snapshot) else { return false }
+        return snapshot.elements.contains { element in
+            let role = element.role.lowercased()
+            guard role != "application" && role != "window" else { return false }
+            return !(element.label ?? "").isEmpty || !(element.id ?? "").isEmpty
+        }
+    }
+
+    private func ensureAppIsForeground(
+        udid: String,
+        context: GradingContext,
+        afterReboot: Bool
+    ) async throws {
+        for attempt in 0..<3 {
+            let screen = try await readScreen(udid: udid, context: context)
+            if Self.showsAppContent(screen) { return }
+            guard attempt < 2 else {
+                throw BenchmarkFailure.graderFailure(
+                    grader: identifier,
+                    message: "The app never showed its content; the screen was still the home screen or blank after three launches."
+                )
+            }
+            _ = try await simulatorManager.launch(
+                udid: udid,
+                bundleIdentifier: configuration.bundleIdentifier
+            )
+            let rebootAllowance = afterReboot ? 3 : 0
+            try? await Task.sleep(
+                for: .seconds(configuration.settleSeconds + rebootAllowance)
+            )
+        }
+    }
+
+    /// Runs a command the flow depends on. A device instruction that did not
+    /// take is a broken grader, not a failing app: the task asked to be judged
+    /// with the permission revoked, and judging it granted answers a different
+    /// question.
+    private func require(_ command: ProcessCommand, context: GradingContext) async throws {
+        let result = try await context.runRecorded(command, timeout: .seconds(120))
+        guard result.exitCode == 0 else {
+            throw BenchmarkFailure.graderFailure(
+                grader: identifier,
+                message: "\(command.displayString) failed: \(result.standardError.trimmed())"
+            )
+        }
+    }
+
+    /// The installer looked at the bundle the agent built and refused it.
+    /// Carried out of the device-state block as an error so the block still
+    /// restores the device, then turned into a verdict rather than an outage.
+    private struct BundleRejected: Error { let message: String }
+
+    /// Installs, distinguishing a refused bundle from a device that is gone.
+    private func installOrReject(udid: String, appURL: URL) async throws {
+        do {
+            try await simulatorManager.install(udid: udid, appURL: appURL)
+        } catch where !SimulatorManager.isDeviceFault(error) {
+            throw BundleRejected(message: "\(error)")
+        }
+    }
+
+    private struct Outcome {
+        var stepFailure: String?
+        var snapshot: UIFlowSnapshot
+        var appearanceFailure: String?
+    }
+
+    /// Captures the screen in light and again in dark, and reports when the two
+    /// are the same picture.
+    private func appearanceFailure(
+        udid: String,
+        context: GradingContext,
+        snapshot: UIFlowSnapshot
+    ) async throws -> String? {
+        let applier = SimulatorDeviceStateApplier(grader: identifier, context: context)
+        let light = context.artifactsDirectoryURL.appendingPathComponent("appearance-light.png")
+        let dark = context.artifactsDirectoryURL.appendingPathComponent("appearance-dark.png")
+
+        try await applier.withState(SimulatorDeviceState(appearance: "light")) {
+            try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+            try await capture(to: light, udid: udid, context: context)
+        }
+        try await applier.withState(SimulatorDeviceState(appearance: "dark")) {
+            try? await Task.sleep(for: .seconds(configuration.settleSeconds))
+            try await capture(to: dark, udid: udid, context: context)
+        }
+
+        // Limited to the element under test when the task names one.
+        var crop: CGRect?
+        var screen: CGSize?
+        if let region = configuration.appearanceRegion {
+            guard let element = snapshot.element(id: region, label: region) else {
+                return "no element \"\(region)\" on screen to compare appearances of"
+            }
+            crop = CGRect(
+                x: CGFloat(element.frame.x), y: CGFloat(element.frame.y),
+                width: CGFloat(element.frame.width), height: CGFloat(element.frame.height)
+            )
+            if let root = snapshot.root {
+                screen = CGSize(width: CGFloat(root.width), height: CGFloat(root.height))
+            }
+        }
+        let difference = try ScreenshotComparison.difference(
+            light, dark, crop: crop, screenSize: screen
+        )
+        // Recorded whichever way it goes. A check that only speaks when it
+        // fails leaves no way to tell "the colours moved" from "the region was
+        // never measured", which is an afternoon of guessing.
+        await context.recorder.record(.warning, payload: .object([
+            "message": .string(String(
+                format: "appearance difference over %@: %.2f%%",
+                configuration.appearanceRegion ?? "the screen", difference * 100
+            ))
+        ]))
+        // A screen that adapts turns over most of its area. The floor is set
+        // well below that and well above the few percent a status bar clock or
+        // a caret can move on its own.
+        guard difference < 0.08 else { return nil }
+        return String(
+            format: "%@ renders the same in light and dark (%.1f%% different); "
+                + "its colours do not follow the appearance",
+            configuration.appearanceRegion.map { "\"\($0)\"" } ?? "the screen",
+            difference * 100
+        )
+    }
+
+    private func capture(to url: URL, udid: String, context: GradingContext) async throws {
+        try await require(
+            ProcessCommand(
+                executable: "flowdeck",
+                arguments: ["ui", "simulator", "screen", "-o", url.path, "-S", udid, "--json"]
+            ),
+            context: context
+        )
+    }
+
+    private func runBatch(
+        _ steps: [JSONValue],
+        udid: String,
+        context: GradingContext
+    ) async throws -> UIFlowBatchResponse {
+        let steps = try JSONEncoder().encode(steps)
+        let command = ProcessCommand(
+            executable: "flowdeck",
+            arguments: [
+                "ui", "simulator", "batch",
+                "--steps", String(decoding: steps, as: UTF8.self),
+                "-S", udid, "--json",
+            ]
+        )
+        let result = try await context.runRecorded(command, timeout: .seconds(300))
+        // A non-zero exit means a step did not complete, which is a grading
+        // outcome, not a broken grader — the response still carries the tree.
+        return try UIFlowBatchResponse(json: Data(result.standardOutput.utf8))
+    }
+
+    private func readScreen(udid: String, context: GradingContext) async throws -> UIFlowSnapshot {
+        let command = ProcessCommand(
+            executable: "flowdeck",
+            arguments: ["ui", "simulator", "screen", "-S", udid, "--json"]
+        )
+        let result = try await context.runRecorded(command, timeout: .seconds(180))
+        guard result.exitCode == 0 else {
+            throw BenchmarkFailure.graderFailure(
+                grader: identifier,
+                message: "Could not read the screen: \(result.standardError.trimmed())"
+            )
+        }
+        // `screen` returns the snapshot document directly; the batch parser
+        // expects it nested under `final`, so wrap it rather than writing a
+        // second parser for the same payload.
+        guard let document = try? JSONSerialization.jsonObject(with: Data(result.standardOutput.utf8)) else {
+            throw BenchmarkFailure.graderFailure(
+                grader: identifier,
+                message: "The screen read returned output that is not JSON"
+            )
+        }
+        let wrapped = try JSONSerialization.data(withJSONObject: ["final": document, "steps": []])
+        return try UIFlowBatchResponse(json: wrapped).snapshot
+    }
+
+    /// The tree the grade was made from, so a disputed result can be re-read.
+    private func write(_ snapshot: UIFlowSnapshot, in context: GradingContext) -> Artifact? {
+        let rows = snapshot.elements.map { element in
+            [
+                "role": element.role,
+                "id": element.id ?? "",
+                "label": element.label ?? "",
+                "value": element.value ?? "",
+                "frame": "\(element.frame.x),\(element.frame.y),\(element.frame.width),\(element.frame.height)",
+            ]
+        }
+        let document: [String: Any] = ["orientation": snapshot.orientation, "elements": rows]
+        guard let data = try? JSONSerialization.data(
+            withJSONObject: document,
+            options: [.prettyPrinted, .sortedKeys]
+        ) else { return nil }
+        // A task normally carries several uiflow graders — the default state
+        // and the state under test — and a fixed filename would leave only the
+        // last one's tree behind, which is the one nobody needs to inspect.
+        var name = "uiflow-tree.json"
+        var suffix = 2
+        while FileManager.default.fileExists(
+            atPath: context.artifactsDirectoryURL.appendingPathComponent(name).path
+        ) {
+            name = "uiflow-tree-\(suffix).json"
+            suffix += 1
+        }
+        let url = context.artifactsDirectoryURL.appendingPathComponent(name)
+        guard (try? data.write(to: url)) != nil else { return nil }
+        return Artifact(name: name, path: "logs/\(name)")
+    }
+}

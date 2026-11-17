@@ -1,0 +1,31 @@
+id: project-001
+title: A source file is not a member of the app target
+category: project
+difficulty: 1
+
+repository:
+  url: ./.applebench/fixtures/TargetMembershipFixture
+  commit: HEAD
+
+prompt: |
+  The app does not compile: it cannot find ReadingFormatter, even though
+  Sources/ReadingFormatter.swift is right there in the repository.
+  Fix it.
+
+environment:
+  platform: ios
+  simulator:
+    device: "iPhone 17"
+    runtime: "iOS 26.5"
+
+limits:
+  timeout_seconds: 900
+
+tags:
+  - xcode-project
+  - target-membership
+
+graders:
+  - type: build
+    project: TargetMembershipFixture.xcodeproj
+    scheme: TargetMembershipFixture

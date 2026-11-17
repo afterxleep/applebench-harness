@@ -1,0 +1,248 @@
+import Foundation
+import Testing
+@testable import AppleBenchCore
+
+@Suite("Results export")
+struct ResultsExportTests {
+    private func makeResult(
+        task: String,
+        category: BenchmarkCategory? = .build,
+        difficulty: Int? = 3,
+        passed: Bool = true,
+        model: String? = "vendor/model-1",
+        summary: String = "xcodebuild build succeeded",
+        tokens: Int? = 1500,
+        cost: Double? = 0.0125
+    ) -> BenchmarkRunResult {
+        var metrics = TrajectoryMetrics(events: [])
+        metrics.agentDurationSeconds = 42.5
+        return BenchmarkRunResult(
+            runID: "2026-01-01T000000-\(task)-opencode",
+            task: task,
+            category: category,
+            difficulty: difficulty,
+            tags: ["swiftui"],
+            agent: AgentMetadata(agent: "opencode", model: model),
+            environment: .init(macos: "27.0", architecture: "arm64", xcode: "27.0", xcodeBuild: "27A1"),
+            result: .init(passed: passed, durationSeconds: 42.5, agentTermination: .completed),
+            usage: AgentUsage(inputTokens: 1200, outputTokens: 300, totalTokens: tokens, estimatedCostUSD: cost),
+            metrics: metrics,
+            graders: [.init(name: "build", passed: passed, durationSeconds: 1, summary: summary, evidence: [])],
+            git: .init(baseCommit: "abc123", filesChanged: 2, insertions: 10, deletions: 4),
+            artifacts: .init(events: "events.jsonl")
+        )
+    }
+
+    @Test("CSV carries one header plus one row per run")
+    func csvShape() throws {
+        let csv = ResultsExport.csv(for: [makeResult(task: "build-002"), makeResult(task: "ops-004")])
+        let lines = csv.split(separator: "\n", omittingEmptySubsequences: false).filter { !$0.isEmpty }
+        #expect(lines.count == 3)
+        #expect(lines[0].hasPrefix("task,category,difficulty,agent,model,effort,passed"))
+        // The empty field is the effort: this run asked for none, and an
+        // absent setting exports blank rather than a stand-in value.
+        #expect(lines[1].hasPrefix("build-002,build,3,opencode,vendor/model-1,,true"))
+    }
+
+    @Test("CSV quotes fields containing commas, quotes, and newlines")
+    func csvQuoting() throws {
+        let hostile = #"build failed: "no such module", line 2"# + "\nsecond line"
+        let csv = ResultsExport.csv(for: [makeResult(task: "build-002", summary: hostile)])
+        // The embedded newline must live inside a quoted field, so the
+        // document still has exactly one header and one record.
+        #expect(csv.contains(#""build:build failed: ""no such module"", line 2"#))
+        let parsed = try #require(CSVProbe.parse(csv))
+        #expect(parsed.count == 2)
+        #expect(parsed[1].count == parsed[0].count)
+    }
+
+    @Test("Missing usage is empty, never zero")
+    func missingUsageIsBlank() {
+        let csv = ResultsExport.csv(for: [makeResult(task: "ops-004", tokens: nil, cost: nil)])
+        let row = csv.split(separator: "\n")[1]
+        let header = csv.split(separator: "\n")[0].split(separator: ",").map(String.init)
+        let columns = row.split(separator: ",", omittingEmptySubsequences: false).map(String.init)
+        let tokenIndex = try! #require(header.firstIndex(of: "total_tokens"))
+        #expect(columns[tokenIndex].isEmpty)
+    }
+
+    @Test("JSON export summarizes per-category and per-configuration totals")
+    func jsonSummary() throws {
+        let results = [
+            makeResult(task: "build-002", category: .build, passed: true, cost: 0.02),
+            makeResult(task: "build-002", category: .build, passed: false, cost: 0.03),
+            makeResult(task: "ops-004", category: .ops, passed: true, cost: 0.05),
+        ]
+        let data = try ResultsExport.json(for: results)
+        let root = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+
+        #expect(root["total"] as? Int == 3)
+        #expect(root["passed"] as? Int == 2)
+
+        let categories = try #require(root["categories"] as? [[String: Any]])
+        let build = try #require(categories.first { $0["category"] as? String == "build" })
+        #expect(build["total"] as? Int == 2)
+        #expect(build["passed"] as? Int == 1)
+
+        let configurations = try #require(root["configurations"] as? [[String: Any]])
+        #expect(configurations.count == 1)
+        let only = try #require(configurations.first)
+        #expect(only["label"] as? String == "opencode · vendor/model-1")
+        #expect(only["passed"] as? Int == 2)
+        let cost = try #require(only["total_cost_usd"] as? Double)
+        #expect(abs(cost - 0.10) < 0.0001)
+    }
+
+    @Test("Categories and configurations sort deterministically")
+    func deterministicOrder() throws {
+        let results = [
+            makeResult(task: "ops-004", category: .ops, model: "z/model"),
+            makeResult(task: "build-002", category: .build, model: "a/model"),
+        ]
+        let root = try #require(
+            try JSONSerialization.jsonObject(with: ResultsExport.json(for: results)) as? [String: Any]
+        )
+        let categories = try #require(root["categories"] as? [[String: Any]])
+        #expect(categories.map { $0["category"] as? String } == ["build", "ops"])
+        let configurations = try #require(root["configurations"] as? [[String: Any]])
+        #expect(configurations.map { $0["label"] as? String } == ["opencode · a/model", "opencode · z/model"])
+    }
+
+    @Test("CSV carries the points a row earned and the weight it was worth")
+    func csvCarriesPoints() throws {
+        let csv = ResultsExport.csv(
+            for: [makeResult(task: "build-002", difficulty: 3, tokens: 1500)],
+            weights: ["build-002": 500]
+        )
+        let rows = try #require(CSVProbe.parse(csv))
+        let header = rows[0]
+        let row = rows[1]
+        let faceValue = try #require(header.firstIndex(of: "face_value"))
+        let points = try #require(header.firstIndex(of: "points"))
+        #expect(header.contains("efficiency") == false)
+        #expect(row[faceValue] == "500")
+        #expect(row[points] == "500")
+    }
+
+    @Test("A failed row still states the weight it did not earn")
+    func csvFailedRowKeepsFaceValue() throws {
+        let csv = ResultsExport.csv(
+            for: [makeResult(task: "ops-004", difficulty: 6, passed: false)],
+            weights: ["ops-004": 125]
+        )
+        let rows = try #require(CSVProbe.parse(csv))
+        let faceValue = try #require(rows[0].firstIndex(of: "face_value"))
+        let points = try #require(rows[0].firstIndex(of: "points"))
+        #expect(rows[1][faceValue] == "125")
+        #expect(rows[1][points] == "0")
+    }
+
+    @Test("A task without a weight exports empty point cells, never zeros")
+    func csvUnweightedTaskStaysEmpty() throws {
+        let csv = ResultsExport.csv(for: [makeResult(task: "unweighted", passed: false)])
+        let rows = try #require(CSVProbe.parse(csv))
+        let faceValue = try #require(rows[0].firstIndex(of: "face_value"))
+        let points = try #require(rows[0].firstIndex(of: "points"))
+        #expect(rows[1][faceValue] == "")
+        #expect(rows[1][points] == "")
+    }
+
+    @Test("JSON export carries the score, the weights, per category and per configuration")
+    func jsonCarriesScore() throws {
+        let results = [
+            makeResult(task: "build-002", category: .build, difficulty: 4, passed: true, tokens: 10_000),
+            makeResult(task: "ops-004", category: .ops, difficulty: 6, passed: false, tokens: 10_000),
+        ]
+        let root = try #require(
+            try JSONSerialization.jsonObject(
+                with: ResultsExport.json(for: results, weights: ["build-002": 100, "ops-004": 500])
+            ) as? [String: Any]
+        )
+
+        let weights = try #require(root["task_weights"] as? [String: Int])
+        #expect(weights["ops-004"] == 500)
+
+        let score = try #require(root["score"] as? [String: Any])
+        #expect(score["specification"] as? String == AppleBenchScore.specification)
+        #expect(score["points"] as? Int == 100)
+        #expect(score["available"] as? Int == 600)
+        #expect(score["available"] as? Int == 600)
+        #expect(score["percentage"] as? Double == (100.0 / 600.0) * 100.0)
+
+        let categories = try #require(root["categories"] as? [[String: Any]])
+        let build = try #require(categories.first { $0["category"] as? String == "build" })
+        let buildScore = try #require(build["score"] as? [String: Any])
+        #expect(buildScore["points"] as? Int == 100)
+
+        let configurations = try #require(root["configurations"] as? [[String: Any]])
+        let configurationScore = try #require(configurations.first?["score"] as? [String: Any])
+        #expect(configurationScore["available"] as? Int == 600)
+    }
+
+    @Test("A solve with no reported cost still earns its weight")
+    func jsonDoesNotMixTelemetryIntoCapability() throws {
+        let root = try #require(
+            try JSONSerialization.jsonObject(
+                with: ResultsExport.json(
+                    for: [makeResult(task: "ops-010", difficulty: 5, tokens: nil, cost: nil)],
+                    weights: ["ops-010": 250]
+                )
+            ) as? [String: Any]
+        )
+        let score = try #require(root["score"] as? [String: Any])
+        #expect(score["points"] as? Int == 250)
+        #expect(score["available"] as? Int == 250)
+        #expect(score["percentage"] as? Double == 100)
+    }
+
+    @Test("Runs without a category are reported, not dropped")
+    func uncategorizedRunsSurvive() throws {
+        let results = [makeResult(task: "adhoc-001", category: nil)]
+        let root = try #require(
+            try JSONSerialization.jsonObject(with: ResultsExport.json(for: results)) as? [String: Any]
+        )
+        #expect(root["total"] as? Int == 1)
+        let categories = try #require(root["categories"] as? [[String: Any]])
+        #expect(categories.map { $0["category"] as? String } == ["uncategorized"])
+    }
+}
+
+/// A minimal RFC 4180 reader used only to prove the exporter's quoting
+/// survives a real parse. Not part of the shipped harness.
+enum CSVProbe {
+    static func parse(_ text: String) -> [[String]]? {
+        var rows: [[String]] = []
+        var row: [String] = []
+        var field = ""
+        var inQuotes = false
+        var iterator = text.makeIterator()
+        var pending: Character?
+
+        while let character = pending ?? iterator.next() {
+            pending = nil
+            if inQuotes {
+                if character == "\"" {
+                    if let next = iterator.next() {
+                        if next == "\"" { field.append("\"") } else { inQuotes = false; pending = next }
+                    } else {
+                        inQuotes = false
+                    }
+                } else {
+                    field.append(character)
+                }
+                continue
+            }
+            switch character {
+            case "\"": inQuotes = true
+            case ",": row.append(field); field = ""
+            case "\n": row.append(field); field = ""; rows.append(row); row = []
+            default: field.append(character)
+            }
+        }
+        if !field.isEmpty || !row.isEmpty {
+            row.append(field)
+            rows.append(row)
+        }
+        return inQuotes ? nil : rows
+    }
+}

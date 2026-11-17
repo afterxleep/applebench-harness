@@ -1,0 +1,141 @@
+---
+layout: default
+title: Results
+permalink: /benchmarks/
+description: Published AppleBench runs, with full per-task data and charts.
+---
+
+<div class="wrap">
+  <header class="article-header article-header--editorial">
+    {%- assign current_suite = site.data.suite_revisions | where: "current", true | first -%}
+    <p class="section__index">Measured results / {{ current_suite.name }}</p>
+    <div class="article-header__grid">
+      <h1>Results</h1>
+      <p class="article-header__lede">
+        AppleBench score, raw pass rate, list-price cost, and active time for {{ current_suite.name }}.
+        Every headline number opens into the full task-level record.
+      </p>
+    </div>
+  </header>
+</div>
+
+<div class="wrap">
+  {%- assign filter_runs = site.benchmarks | sort: "date" | reverse -%}
+  <details class="model-filter" id="model-filter">
+    <summary>Models shown <span class="model-filter__count" data-filter-count></span></summary>
+    <div class="model-filter__panel">
+      <div class="model-filter__actions">
+        <button type="button" data-filter-all>Select all</button>
+        <button type="button" data-filter-none>Deselect all</button>
+      </div>
+      <ul>
+        {%- for run in filter_runs -%}
+          {%- assign fname = site.data.model_names[run.model] -%}
+          {%- unless fname %}{% assign fname = run.model | split: "/" | last %}{% endunless -%}
+          <li><label><input type="checkbox" checked data-filter-run="{{ run.url | relative_url }}"> {{ fname }}</label></li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="wrap results-dashboard">
+  {%- assign ranked_runs = site.benchmarks | sort: "date" | reverse -%}
+  {%- capture composition_chart -%}{%- include chart-composition.html runs=ranked_runs -%}{%- endcapture -%}
+  {%- include chart-leaderboard.html runs=ranked_runs secondary_extra=composition_chart -%}
+</div>
+
+<div class="wrap results-notes">
+  <details class="note-details note-details--pass">
+    <summary>Scores default to each model's default or provider-suggested effort</summary>
+    <p>The headline results run every model at its default effort, or the effort its
+      provider suggests, because that is how most people actually use it. Each model's
+      effort is shown beside its score. Runs at other settings, such as higher effort or
+      different permission modes, will be added as separate, clearly labelled results,
+      never mixed into these.</p>
+  </details>
+  <details class="note-details">
+    <summary>The score is a living number</summary>
+    <p><strong>The score is a living number.</strong> Under the
+        <code>empirical-v1</code> specification each task is weighted by how
+        rarely the complete published models pass it — a task everyone solves
+        is worth 100 points, a task almost nobody solves is worth up to 2000.
+        Adding another complete model changes those weights, so every model —
+        including ones published earlier — is rescored without being rerun.
+        The raw pass rate is always shown beside the score, and the full
+        weight table is
+        <a href="{{ '/empirical_weights.json' | relative_url }}">published</a>.</p>
+  </details>
+</div>
+
+<div class="wrap results-archive">
+  <p class="section__index">Run archive</p>
+  <ul class="entry-list entry-list--archive">
+    {%- assign runs = site.benchmarks | sort: "date" | reverse -%}
+    {%- for run in runs -%}
+      {%- assign rows = site.data.benchmarks[run.data] -%}
+      {%- assign run_revision = site.data.suite_revisions | where: "id", run.suite_revision | first -%}
+      {%- assign hits = rows | where: "passed", "true" -%}
+      {%- assign rate = hits.size | times: 100.0 | divided_by: rows.size -%}
+      {%- assign report = site.data.reports[run.data] -%}
+      <li>
+        <a class="entry" href="{{ run.url | relative_url }}">
+          <p class="entry__meta">
+            <time datetime="{{ run.date | date_to_xmlschema }}">{{ run.date | date: "%B %-d, %Y" }}</time>
+            <span>{% if run_revision %}{{ run_revision.name }}{% else %}{{ run.suite }} suite{% endif %}</span>
+            {%- if rows -%}
+              <span class="entry__score">{{ report.score.percentage | round: 1 }} AppleBench score</span>
+              <span>{{ hits.size }}/{{ rows.size }} passed</span>
+            {%- endif -%}
+          </p>
+          <h2 class="entry__title">{{ run.title }}</h2>
+          <p class="entry__excerpt">{{ run.lede | default: run.excerpt | strip_html | truncate: 220 }}</p>
+        </a>
+      </li>
+    {%- else -%}
+      <li><p style="color:var(--ink-2)">No runs published yet.</p></li>
+    {%- endfor -%}
+  </ul>
+</div>
+
+<script>
+  (function () {
+    var root = document.querySelector(".results-dashboard");
+    var box = document.getElementById("model-filter");
+    if (!root || !box) return;
+    var slug = function (url) { return (url || "").replace(/\/+$/, "").split("/").pop(); };
+    var inputs = Array.prototype.slice.call(box.querySelectorAll("[data-filter-run]"));
+    var count = box.querySelector("[data-filter-count]");
+    function runOf(el) {
+      var tagged = el.getAttribute("data-run");
+      if (tagged) return slug(tagged);
+      var link = el.querySelector("a[href*='/benchmarks/']");
+      return link ? slug(link.getAttribute("href")) : null;
+    }
+    function apply() {
+      var on = {};
+      var n = 0;
+      inputs.forEach(function (i) { if (i.checked) { on[slug(i.getAttribute("data-filter-run"))] = true; n++; } });
+      count.textContent = "(" + n + " of " + inputs.length + ")";
+      root.querySelectorAll(".bar-row, tbody tr, .legend__model, .scatter__point, .scatter__label").forEach(function (el) {
+        var run = runOf(el);
+        if (run === null) return;
+        el.style.display = on[run] ? "" : "none";
+        if (el instanceof SVGElement) el.style.display = on[run] ? "" : "none";
+      });
+      var empty = root.querySelector("[data-filter-empty]");
+      if (!empty) {
+        empty = document.createElement("p");
+        empty.setAttribute("data-filter-empty", "");
+        empty.className = "figure__note";
+        empty.textContent = "No models selected.";
+        root.insertBefore(empty, root.firstChild);
+      }
+      empty.style.display = n === 0 ? "" : "none";
+    }
+    inputs.forEach(function (i) { i.addEventListener("change", apply); });
+    box.querySelector("[data-filter-all]").addEventListener("click", function () { inputs.forEach(function (i) { i.checked = true; }); apply(); });
+    box.querySelector("[data-filter-none]").addEventListener("click", function () { inputs.forEach(function (i) { i.checked = false; }); apply(); });
+    apply();
+  })();
+</script>
