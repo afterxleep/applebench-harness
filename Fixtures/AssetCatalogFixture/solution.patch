@@ -1,0 +1,54 @@
+diff --git a/AssetCatalogFixture.xcodeproj/project.pbxproj b/AssetCatalogFixture.xcodeproj/project.pbxproj
+index 5b41f92..a2baba2 100644
+--- a/AssetCatalogFixture.xcodeproj/project.pbxproj
++++ b/AssetCatalogFixture.xcodeproj/project.pbxproj
+@@ -8,6 +8,7 @@
+ 
+ /* Begin PBXBuildFile section */
+ 		418411B50D0E7C3A509A5D5C /* BadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E214601C08F2890DCFBF748 /* BadgeView.swift */; };
++		5AD34887A37ED9A9DE7AC4C8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 71EA2008CBF27A0FA6ED779F /* Assets.xcassets */; };
+ 		5DEDC65EB71B9A40362CE0A7 /* AssetCatalogFixtureApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DB59886B72CF5ECBCED1214 /* AssetCatalogFixtureApp.swift */; };
+ 		B433585FFAB1C25D27AA1899 /* BadgeAssetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868E5C2044EE9B3B64B4784E /* BadgeAssetTests.swift */; };
+ /* End PBXBuildFile section */
+@@ -25,6 +26,7 @@
+ /* Begin PBXFileReference section */
+ 		44FA1B708257D5923A210014 /* AssetCatalogFixtureUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AssetCatalogFixtureUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		4E214601C08F2890DCFBF748 /* BadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeView.swift; sourceTree = "<group>"; };
++		71EA2008CBF27A0FA6ED779F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+ 		7DB59886B72CF5ECBCED1214 /* AssetCatalogFixtureApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetCatalogFixtureApp.swift; sourceTree = "<group>"; };
+ 		868E5C2044EE9B3B64B4784E /* BadgeAssetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeAssetTests.swift; sourceTree = "<group>"; };
+ 		FC34176F1B7BB54503D6F654 /* AssetCatalogFixture.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AssetCatalogFixture.app; sourceTree = BUILT_PRODUCTS_DIR; };
+@@ -34,6 +36,7 @@
+ 		6955793EAB643E38E7E5E025 /* Resources */ = {
+ 			isa = PBXGroup;
+ 			children = (
++				71EA2008CBF27A0FA6ED779F /* Assets.xcassets */,
+ 			);
+ 			path = Resources;
+ 			sourceTree = "<group>";
+@@ -100,6 +103,7 @@
+ 			buildConfigurationList = E4DCC0CBF0004B8280E68DF9 /* Build configuration list for PBXNativeTarget "AssetCatalogFixture" */;
+ 			buildPhases = (
+ 				F8E9EACB8D264390FD168D0B /* Sources */,
++				DFBF8825EC6F966619CFD48D /* Resources */,
+ 			);
+ 			buildRules = (
+ 			);
+@@ -146,6 +150,17 @@
+ 		};
+ /* End PBXProject section */
+ 
++/* Begin PBXResourcesBuildPhase section */
++		DFBF8825EC6F966619CFD48D /* Resources */ = {
++			isa = PBXResourcesBuildPhase;
++			buildActionMask = 2147483647;
++			files = (
++				5AD34887A37ED9A9DE7AC4C8 /* Assets.xcassets in Resources */,
++			);
++			runOnlyForDeploymentPostprocessing = 0;
++		};
++/* End PBXResourcesBuildPhase section */
++
+ /* Begin PBXSourcesBuildPhase section */
+ 		C29868E5157F548486CD2944 /* Sources */ = {
+ 			isa = PBXSourcesBuildPhase;

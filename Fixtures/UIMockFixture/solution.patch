@@ -1,0 +1,30 @@
+diff --git a/Sources/UIMockFixtureApp.swift b/Sources/UIMockFixtureApp.swift
+index af1b7ae..d6ddba6 100644
+--- a/Sources/UIMockFixtureApp.swift
++++ b/Sources/UIMockFixtureApp.swift
+@@ -21,17 +21,21 @@ struct ProfileCardView: View {
+                 .foregroundStyle(.gray)
+                 .accessibilityIdentifier("avatar")
+ 
++            Text("Ada Lovelace")
++                .font(.title2)
++                .accessibilityIdentifier("name")
++
+             Text("Enjoys differential equations, looms, and long walks through the Analytical Engine.")
+                 .font(.subheadline)
+                 .foregroundStyle(.secondary)
+                 .multilineTextAlignment(.center)
+                 .accessibilityIdentifier("bio")
+ 
+-            Text("Ada Lovelace")
+-                .font(.footnote)
+-                .accessibilityIdentifier("name")
++            Button("Follow") {}
++                .buttonStyle(.borderedProminent)
++                .accessibilityIdentifier("follow")
+         }
+         .padding(24)
+-        .navigationTitle("profile card")
++        .navigationTitle("Profile")
+     }
+ }

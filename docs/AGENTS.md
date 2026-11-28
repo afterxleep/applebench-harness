@@ -1,0 +1,118 @@
+# Agent harnesses
+
+AppleBench drives an agent through the `AgentAdapter` seam. Three adapters
+ship in `AgentCatalog.defaultRegistry()`; all three implement the same
+protocol, so the runner treats them identically.
+
+### `opencode`, the real harness
+
+The default. Runs OpenCode non-interactively against the workspace as the
+working directory. Because OpenCode is multi-provider, a single fixed harness
+reaches every model, `--model <provider/model>` selects it and `--effort`
+(maps to OpenCode's `--variant <minimal|low|medium|high|max>`) sets
+provider-specific reasoning effort.
+
+**Command line the agent actually sees:**
+
+```text
+opencode run --format json --pure --auto [--model <model>] [--variant <effort>] [<extra-agent-args…>] <prompt>
+```
+
+- `--format json`, emit one JSON object per line, one per event. AppleBench
+  preserves every line verbatim as an `agent_event` in `events.jsonl`; the
+  `OpenCodeOutputParser` extracts tool/message/usage classification from each
+  line.
+- `--pure`, disable OpenCode's external plugins so nothing leaks in from the
+  user's environment.
+- `--auto`, auto-approve the permissions the benchmark has explicitly granted
+  (edit, bash) so runs never block on prompts.
+- `--model <provider/model>` and `--variant <effort>` are passed only when the
+  CLI flags are present.
+
+**Hermetic OpenCode configuration.** Before the agent launches, AppleBench
+writes a benchmark-owned `opencode.json` to the run directory and points
+`OPENCODE_CONFIG` at it (which replaces the user's global config). The file
+denies `webfetch` in both `tools` and `permission` so the agent's toolset has
+no internet access, and auto-allows the remaining permissions:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "edit": "allow",
+    "bash": "allow",
+    "webfetch": "deny"
+  },
+  "tools": {
+    "webfetch": false
+  }
+}
+```
+
+**Environment.** The agent gets a minimal environment, `PATH`, `HOME`,
+`USER`, `TMPDIR`, `SHELL`, `TERM`, `LANG`, `LC_ALL`, plus only the variables
+explicitly allowlisted via repeated `--allow-env NAME`. Nothing else from the
+host shell leaks in. The suite wrapper infers the credential variable from the
+model prefix (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `MINIMAX_API_KEY`, or
+`OPENROUTER_API_KEY`) when `--api-key` or `--api-key-file` is used. An explicit
+`--api-key-env` overrides that mapping for custom providers.
+
+Use this adapter for model comparisons so every provider is measured through
+the same agent loop.
+
+**Telemetry capability:** `structured`, tool events, messages, and per-step
+token usage are all parsed from the JSON stream.
+
+If OpenCode exits before emitting any output, the suite retries that task three
+times by default (four total attempts). Use `--agent-startup-retries` to change
+the retry count. Every retry is written to the run log and waits 1, 2, then 4
+seconds (capped at 8 seconds for additional retries), so a transient provider
+failure is not retried as one invisible burst. The suite stops only after all
+startup attempts fail, because an untouched fixture does not measure the model.
+
+### `fake`, pipeline smoke test
+
+A no-op agent: it records a synthetic `agent_output` event, runs an
+injectable actions closure (default: no-op), and exits 0. Used for two things:
+
+1. **Pipeline self-test.** A `swift run applebench run runtime-002 --agent fake`
+   exercises the full runner (environment validation → workspace clone →
+   agent phase → diff capture → independent grading) without spending any
+   tokens. A sound fixture must **FAIL** here, because the agent changed
+   nothing and the planted defect is still present.
+2. **Unit-test fixture.** `BenchmarkRunnerTests` uses a `ScriptedAdapter`
+   modeled on `FakeAgentAdapter` to drive the runner through every state
+   machine path (success, timeout, prepare failure, no-graders rejection,
+   metadata-deferred-until-after-agent, etc.) without touching Xcode.
+
+**Telemetry capability:** `plainText`, no structured events.
+
+### `solution`, fixture self-check
+
+Applies a fixture's reference solution patch and exits. **Not a benchmark
+result and never appears in a comparison.** Exists so the harness can prove
+the other half of a fixture's contract: a fixture is only meaningful if it
+FAILs with an agent that changes nothing and PASSes with the known fix.
+
+The patch lives outside the agent's checkout, under
+`.applebench/solutions/<Fixture>.patch`, so the solution is never visible to
+a real agent working in the workspace. The adapter derives the fixture name
+from the trailing path component of `task.repository.url` (matching
+`prepare-fixtures.sh`'s `./.applebench/fixtures/<Fixture>` layout), runs
+`git apply --verbose --whitespace=nowarn` with a 120s timeout, and throws
+`agentLaunchFailure` if the patch no longer applies, a drift between
+fixture and recorded solution is treated as an authoring defect, not a
+benchmark FAIL.
+
+**Telemetry capability:** `plainText`, no structured events.
+
+### Adding an agent harness
+
+The `AgentAdapter` seam remains the extension point (a future FlowDeck
+adapter, for instance):
+
+1. Implement `AgentAdapter` (four methods) in `Sources/AppleBenchAgents/`.
+2. Register it in `AgentCatalog.defaultRegistry()`.
+3. Optionally implement `AgentOutputParser` if the CLI has structured output.
+
+No core runner code changes.

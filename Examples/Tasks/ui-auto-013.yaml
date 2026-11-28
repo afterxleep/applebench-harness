@@ -1,0 +1,37 @@
+id: ui-auto-013
+title: Reset the app's data and relaunch it from a UI test
+category: interaction
+difficulty: 6
+repository:
+  url: ./.applebench/fixtures/StateFixture
+  commit: HEAD
+prompt: "Add a UI test target `StateFixtureUITests` and write a test\nthat:\n  1. launches the app\n  2. taps the increment\
+  \ button a few times\n  3. asserts the counter is non-zero\n  4. uninstalls the app via `XCUIApplication.terminate()` and\n\
+  \     `xcrun simctl uninstall` (invoked from a shell inside the\n     test if needed)\n  5. reinstalls by relaunching\n\
+  \  6. asserts the counter is back to zero (state was reset)\n\nConfigure the scheme so `xcodebuild test` runs the UI test\n\
+  target.\n"
+environment:
+  platform: ios
+  simulator:
+    device: iPhone 17
+    runtime: iOS 26.5
+limits:
+  timeout_seconds: 1500
+tags:
+- xcuitest
+- ui-automation
+- state-reset
+- uninstall
+- operational
+graders:
+- type: build
+  project: StateFixture.xcodeproj
+  scheme: StateFixture
+- type: xcuitest
+  project: StateFixture.xcodeproj
+  scheme: StateFixture
+  tests:
+  - StateFixtureUITests
+  skip_tests:
+  - StateFixtureUITests/StateUITests/testRapidTapsIncrementReliably
+  - StateFixtureUITests/StateUITests/testPlusFiveAdvancesByExactlyFive

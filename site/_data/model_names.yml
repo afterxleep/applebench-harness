@@ -1,0 +1,13 @@
+# Display names for the scores, charts and result pages, keyed by the model id
+# as the result page records it (`model:` in its front matter). A model that is missing here shows the last part of its id.
+"anthropic/claude-haiku-5-5": "Haiku 5.5"
+"z-ai/glm-5.3-flash": "GLM 5.3 Flash"
+"minimax/MiniMax-M2.7": "MiniMax M2.7"
+"minimax/MiniMax-M3": "MiniMax M3"
+"anthropic/claude-sonnet-5-5": "Sonnet 5.5"
+"anthropic/claude-opus-5-5": "Opus 5.5"
+"openai/gpt-6-luna": "GPT-6 Luna"
+"openai/gpt-6.2-sol": "GPT-6.2 Sol"
+"minimax/MiniMax-M2.7, minimax/minimax-m2.7": "MiniMax M2.7"
+"minimax/MiniMax-M3, minimax/minimax-m3": "MiniMax M3"
+"openai/gpt-6.1-terra": "GPT-6.1 Terra"
